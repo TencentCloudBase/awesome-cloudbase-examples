@@ -52,18 +52,12 @@ SoulChat 是一款基于 UniApp 和腾讯云开发（CloudBase）构建的匿名
 
 ### 安装步骤
 
-1. **克隆项目**
-   ```bash
-   git clone [repository-url]
-   cd soulChat
-   ```
-
-2. **安装依赖**
+1. **安装依赖**
    ```bash
    npm install
    ```
 
-3. **配置云开发环境**
+2. **配置云开发环境**
    
    编辑 `src/utils/cloudbase.ts` 文件：
    ```typescript
@@ -71,7 +65,7 @@ SoulChat 是一款基于 UniApp 和腾讯云开发（CloudBase）构建的匿名
    const ENV_ID: string = 'your-cloudbase-env-id';
    ```
 
-4. **云开发控制台配置**
+3. **云开发控制台配置**
    
    在 [云开发控制台](https://console.cloud.tencent.com/tcb) 完成以下配置：
    
@@ -79,7 +73,7 @@ SoulChat 是一款基于 UniApp 和腾讯云开发（CloudBase）构建的匿名
    - **数据库**：创建聊天相关的数据集合
    - **云函数**：部署匹配和消息处理相关的云函数
 
-5. **启动开发服务**
+4. **启动开发服务**
    ```bash
    # H5 开发
    npm run dev:h5
@@ -158,7 +152,6 @@ const appConfig = {
 - **TypeScript**：提供完整的类型支持和更好的开发体验
 - **Vite**：现代化的构建工具，支持热更新和快速编译
 - **uni-ui**：官方UI组件库，确保各平台体验一致
-- **Vue i18n**：国际化支持
 
 ### 后端服务（云开发）
 - **身份认证**：多种登录方式，安全的用户身份验证
