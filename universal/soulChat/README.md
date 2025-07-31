@@ -6,6 +6,9 @@ SoulChat 是一款基于 UniApp 和腾讯云开发（CloudBase）构建的匿名
 
 > 本项目基于 [**CloudBase AI ToolKit**](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit) 开发，通过AI提示词和 MCP 协议+云开发，让开发更智能、更高效，支持AI生成全栈代码、一键部署至腾讯云开发（免服务器）、智能日志修复。
 
+## 📦 在线体验
+- **H5 体验**：[点击访问](https://cloudbase-test-v1-8e8tzqa7290d87-1259218801.tcloudbaseapp.com/soulchat-h5/?t=20250731#/)
+
 ## 🎬 效果演示
 
 **多端实时匹配 + 聊天演示：**
