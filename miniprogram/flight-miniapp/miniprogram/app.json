@@ -1,0 +1,52 @@
+{
+	"pages": [
+		"pages/index/index",
+		"pages/flight-comparison/flight-comparison",
+		"pages/bookings/bookings",
+		"pages/profile/profile",
+		"pages/comparison/comparison",
+		"pages/booking/booking"
+	],
+	"window": {
+		"backgroundTextStyle": "light",
+		"navigationBarBackgroundColor": "#0d0402",
+		"navigationBarTitleText": "航班对比",
+		"navigationBarTextStyle": "white",
+		"backgroundColor": "#0d0402"
+	},
+	"tabBar": {
+		"color": "rgba(235,213,209,0.62)",
+		"selectedColor": "#ff5733",
+		"backgroundColor": "#0d0402",
+		"borderStyle": "white",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "首页",
+				"iconPath": "images/home.png",
+				"selectedIconPath": "images/home-active.png"
+			},
+			{
+				"pagePath": "pages/flight-comparison/flight-comparison",
+				"text": "对比",
+				"iconPath": "images/search.png",
+				"selectedIconPath": "images/search-active.png"
+			},
+			{
+				"pagePath": "pages/bookings/bookings",
+				"text": "预订",
+				"iconPath": "images/bookings.png",
+				"selectedIconPath": "images/bookings-active.png"
+			},
+			{
+				"pagePath": "pages/profile/profile",
+				"text": "我的",
+				"iconPath": "images/profile.png",
+				"selectedIconPath": "images/profile-active.png"
+			}
+		]
+	},
+	"style": "v2",
+	"sitemapLocation": "sitemap.json",
+	"lazyCodeLoading": "requiredComponents"
+}

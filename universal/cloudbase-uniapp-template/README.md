@@ -403,7 +403,7 @@ tcb framework deploy
 
 - [UniApp 官方文档](https://uniapp.dcloud.io/)
 - [云开发官方文档](https://cloud.tencent.com/document/product/876)
-- [云开发 JS SDK](https://docs.cloudbase.net/api-reference/web/initialization)
+- [云开发 JS SDK](https://docs.cloudbase.net/api-reference/webv3/initialization)
 - [CloudBase AI ToolKit](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 
 ## 贡献指南

@@ -1,35 +1,59 @@
 # Agent 名称
 name: 云开发 Agent
 # Agent 模型标识
-model: hunyuan-lite
+model: deepseek-v3-0324
 # 请求大模型根路径
-baseURL: https://{{envId}}.api.tcloudbasegateway.com/v1/ai/hunyuan-beta/openapi/v1
-# Agent 设定
-agentSetting: 你是一个专注于使用云开发 Agent 的专家
-# Agent 介绍
+baseURL: https://{{envId}}.api.tcloudbasegateway.com/v1/ai/deepseek
+# Agent 描述
 introduction: 你是一个专注于使用云开发 Agent 的专家
 # Agent 欢迎语
-welcomeMessage: 我是一个专注于使用云开发 Agent 的专家
-# Agent 头像
-avatar: ""
+welcomeMessage: 我是一个专注于使用云开发 Agent 的专家，可以帮助你快速了解云开发 Agent 的功能
+# Agent 设定
+agentSetting: 你是一个专注于使用 函数型云托管Agent项目 的专家, <readme> 标签中的内容是 函数型云开发 Agent 的相关文档内容, 回答问题时请充分参考文档中的内容。不可以自由发挥。 <readme> {{README.md}} </readme>
+# Agent 头像  
+avatar: ""  ## 公网链接，为空时使用内置的默认头像
 # Agent 初始化问题配置
 initQuestions:
-  - 你好，请介绍一下你自己。
-  - 如何使用云开发 Agent ?
+  - 如何使用云开发 Agent
+  - 云开发 Agent 支持哪些功能
 # Agent 开启推荐问题功能
-isNeedRecommend: false
+isNeedRecommend: true
 # Agent 绑定知识库
+# example: 
+# knowledgeBase
+#   - knowledge_4d97  ## 知识库ID
+#   - knowledge_xxxx
 knowledgeBase: []
 # Agent 绑定数据模型
+# example: 
+# databaseModel
+#   - lcap-data-4AR909phP-ai_bot_chat_history_xxxxx   ## 数据模型的数据表
 databaseModel: []
 # Agent 开启联网搜送功能
+# example: 
+# searchNetworkEnable: true
 searchNetworkEnable: true
 # Agent 开启文件对话功能
+# example: 
+# searchFileEnable: false
 searchFileEnable: false
 # Agent 绑定MCP服务
+# example: 
+# - tools:
+#      - name: search_web    ## MCP 工具名称
+#   url: https://{{envId}}.api.tcloudbasegateway.com/v1/cloudrun/cloudbase-ai-base-xxxxx/messages  ## MCP 服务地址
+#   name: cloudbase-ai-base-xxxxx  MCP 服务名称
 mcpServerList: []
 # Agent 语音输出输出设置
+# example:
+# enable: true
+# inputType: "16k_zh"  ## 输入语言 16k_zh:中文通用  16k_zh-PY:中英粤  16k_zh_medical:中文医疗  16k_en:英语  16k_yue:粤语
+# outputType: 501007   ## 输出声音类型 101004:通用男声  101005:通用女声  601004:咨询男声  501001:咨询女声  101010:通用男声（大模型） 101035:通用女声（大模型）
 voiceSettings:
   enable: true
   inputType: "16k_zh"
   outputType: 501007
+# Agent 开启多会话
+# example:
+# enable: true
+multiConversationEnable: true

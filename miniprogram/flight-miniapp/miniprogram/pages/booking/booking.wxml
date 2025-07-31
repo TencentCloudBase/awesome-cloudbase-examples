@@ -1,0 +1,165 @@
+<!--pages/booking/booking.wxml-->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-content">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <text class="page-title">航班预订</text>
+    </view>
+  </view>
+
+  <!-- 航班信息 -->
+  <view class="flight-info-section" wx:if="{{flight}}">
+    <view class="section-title">航班信息</view>
+    <view class="flight-card">
+      <view class="flight-header">
+        <text class="airline-name">{{flight.airline}}</text>
+        <text class="flight-number">{{flight.flightNumber}}</text>
+      </view>
+      <view class="flight-route">
+        <text class="route-text">{{flight.departure}} → {{flight.arrival}}</text>
+      </view>
+      <view class="flight-time">
+        <text class="time-text">{{flight.departureTime}} - {{flight.arrivalTime}}</text>
+        <text class="duration-text">{{flight.duration}}</text>
+      </view>
+      <view class="flight-details">
+        <text class="type-text">{{flight.type}}</text>
+        <text class="class-text">{{flight.class}}</text>
+        <text class="price-text">¥{{flight.price}}/人</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 乘客信息 -->
+  <view class="passengers-section">
+    <view class="section-header">
+      <text class="section-title">乘客信息</text>
+      <button class="add-passenger-btn" bindtap="addPassenger">
+        <text class="add-icon">+</text>
+        <text>添加乘客</text>
+      </button>
+    </view>
+
+    <view wx:for="{{passengers}}" wx:key="id" class="passenger-card">
+      <view class="passenger-header">
+        <text class="passenger-title">乘客 {{index + 1}}</text>
+        <view wx:if="{{passengers.length > 1}}" class="remove-btn" bindtap="removePassenger" data-index="{{index}}">
+          <text class="remove-icon">×</text>
+        </view>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">乘客类型</text>
+        <picker 
+          range="{{passengerTypes}}"
+          range-key="label"
+          value="{{item.type}}"
+          bindchange="onPassengerTypeChange"
+          data-index="{{index}}"
+        >
+          <view class="picker-view">
+            <text>{{item.type === 'adult' ? '成人' : item.type === 'child' ? '儿童' : '婴儿'}}</text>
+            <text class="picker-arrow">＞</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">姓名 *</text>
+        <input 
+          class="form-input"
+          placeholder="请输入乘客姓名"
+          value="{{item.name}}"
+          bindinput="onPassengerNameInput"
+          data-index="{{index}}"
+        />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">身份证号 *</text>
+        <input 
+          class="form-input"
+          placeholder="请输入身份证号"
+          value="{{item.idCard}}"
+          bindinput="onPassengerIdCardInput"
+          data-index="{{index}}"
+        />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">手机号 *</text>
+        <input 
+          class="form-input"
+          placeholder="请输入手机号"
+          type="number"
+          value="{{item.phone}}"
+          bindinput="onPassengerPhoneInput"
+          data-index="{{index}}"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系人信息 -->
+  <view class="contact-section">
+    <view class="section-title">联系人信息</view>
+    <view class="contact-card">
+      <view class="form-group">
+        <text class="form-label">联系人姓名 *</text>
+        <input 
+          class="form-input"
+          placeholder="请输入联系人姓名"
+          value="{{contactInfo.name}}"
+          bindinput="onContactNameInput"
+        />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">手机号 *</text>
+        <input 
+          class="form-input"
+          placeholder="请输入联系人手机号"
+          type="number"
+          value="{{contactInfo.phone}}"
+          bindinput="onContactPhoneInput"
+        />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">邮箱</text>
+        <input 
+          class="form-input"
+          placeholder="请输入邮箱地址（可选）"
+          value="{{contactInfo.email}}"
+          bindinput="onContactEmailInput"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 价格信息 -->
+  <view class="price-section">
+    <view class="price-detail">
+      <text class="price-label">总计：</text>
+      <text class="total-price">¥{{totalPrice}}</text>
+    </view>
+    <view class="price-note">
+      <text class="note-text">* 成人全价，儿童75%，婴儿10%</text>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <button 
+      class="submit-btn {{loading ? 'loading' : ''}}"
+      bindtap="submitBooking"
+      loading="{{loading}}"
+      disabled="{{loading}}"
+    >
+      {{loading ? '提交中...' : '确认预订'}}
+    </button>
+  </view>
+</view> 

@@ -40,6 +40,11 @@ export class ChatToolService {
       msg
     )
 
+    if (result?.code && result?.code?.length !== 0) {
+      throw new Error(`查询联网内容失败 ${result?.message}`)
+
+    }
+
     if (result) {
       const data = {
         type: 'search',
@@ -78,10 +83,6 @@ export class ChatToolService {
       }
     }
 
-    return {
-      prompt: '',
-      result: null
-    }
   }
 
   async handleSearchFile ({
@@ -97,6 +98,10 @@ export class ChatToolService {
       msg,
       files
     )
+
+    if (result?.code && result?.code?.length !== 0) {
+      throw new Error(`查询文件内容失败: ${result?.message}`)
+    }
 
     if (result && result.content.length > 0) {
       const data = {
@@ -128,11 +133,6 @@ export class ChatToolService {
         result: result
       }
     }
-
-    return {
-      prompt: '',
-      result: result
-    }
   }
 
   async handleSearchDB ({
@@ -146,6 +146,10 @@ export class ChatToolService {
       msg,
       this.botContext.info.databaseModel
     )
+
+    if (result?.code && result?.code?.length !== 0) {
+      throw new Error(`查询数据模型内容失败: ${result?.message}`)
+    }
 
     if (result) {
       const data = {
@@ -172,11 +176,6 @@ export class ChatToolService {
         result: result
       }
     }
-
-    return {
-      prompt: '',
-      result: result
-    }
   }
 
   async handleSearchKnowledgeBase ({
@@ -191,6 +190,10 @@ export class ChatToolService {
       msg,
       this.botContext.info.knowledgeBase
     )
+
+    if (result?.code && result?.code?.length !== 0) {
+      throw new Error(`查询知识库内容失败: ${result?.message}`)
+    }
 
     if (result?.documents?.length > 0) {
       const documentSetNameList = []
@@ -265,30 +268,43 @@ export class ChatToolService {
       input.voiceFormat,
       input.url
     )
+
+    if (result?.code && result?.code?.length !== 0) {
+      throw new Error(`语音转文字失败: ${result?.message}`)
+    }
+
     return result
   }
 
   async textToSpeech (
     input: TextToSpeechInput
   ): Promise<aitools.TextToSpeechResult> {
-    console.log(input)
 
     const result = await this.botContext.bot.tools.textToSpeech(
       this.botContext.info.botId,
       input.text,
       input.voiceType
     )
+
+    if (result?.code && result?.code?.length !== 0) {
+      throw new Error(`文字转语音失败: ${result?.message}`)
+    }
+
     return result
   }
 
   async getTextToSpeechResult (
     input: GetTextToSpeechResultInput
   ): Promise<aitools.GetTextToSpeechResult> {
-    console.log(input)
     const result = await this.botContext.bot.tools.getTextToSpeech(
       this.botContext.info.botId,
       input.taskId
     )
+
+    if (result?.code && result?.code?.length !== 0) {
+      throw new Error(`查询文字转语音状态失败: ${result?.message}`)
+    }
+
     return result
   }
 }

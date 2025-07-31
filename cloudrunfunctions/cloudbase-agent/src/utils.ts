@@ -1,4 +1,5 @@
 import * as crypto from 'crypto'
+import { customAlphabet } from 'nanoid'
 
 export function genRandomStr (length: number): string {
   return crypto
@@ -14,4 +15,11 @@ export function safeJsonParse (jsonString: string, defaultValue = null) {
     console.log('safeJsonParse error', error)
     return defaultValue
   }
+}
+
+/**
+ * 生成随机 id，默认16位
+ */
+export function randomId (len = 16) {
+  return customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', len)()
 }

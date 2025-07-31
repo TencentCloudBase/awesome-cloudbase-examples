@@ -1,0 +1,8 @@
+<view class="cloudbase-badge" bindtap="onTapBadge">
+  <image 
+    class="badge-image" 
+    src="/images/powered-by-cloudbase-badge.svg" 
+    mode="widthFix"
+  />
+  <text class="badge-text" wx:if="{{showText}}">Powered by CloudBase</text>
+</view> 

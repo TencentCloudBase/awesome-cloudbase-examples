@@ -14,3 +14,8 @@ export const HISTORY_PAGE_SIZE = 10
 
 // 对话数据模型
 export const CHAT_HISTORY_DATA_SOURCE = 'ai_bot_chat_history_5hobd2b'
+
+// 会话数据模型
+export const CONVERSATION_RELATION_DATA_SOURCE = 'conversation_relation_5hobd2b'
+
+export const DEFAULT_CONVERSATION_TITLE = '新会话'

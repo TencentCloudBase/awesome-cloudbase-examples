@@ -1,0 +1,147 @@
+<!--pages/flight-comparison/flight-comparison.wxml-->
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-input-wrapper">
+      <view class="search-input">
+        <image class="search-icon" src="/images/search.png"></image>
+        <input 
+          class="search-field" 
+          placeholder="搜索航班" 
+          value="{{searchText}}"
+          bindinput="onSearchInput"
+          bindconfirm="searchFlights"
+        />
+        <view wx:if="{{searchText}}" class="clear-icon" bindtap="clearSearch">
+          <text class="clear-text">×</text>
+        </view>
+        <image wx:else class="mic-icon" src="/images/mic.png"></image>
+      </view>
+      <view class="search-icon-btn" bindtap="searchFlights">
+        <image class="search-btn-icon" src="/images/search.png"></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- 出发地和目的地 -->
+  <view class="location-section">
+    <view class="location-inputs">
+      <view class="input-group">
+        <view class="input-wrapper">
+          <image class="input-icon" src="/images/departure.png"></image>
+          <input 
+            class="location-input" 
+            placeholder="出发地" 
+            value="{{departure}}"
+            bindinput="onDepartureInput"
+          />
+        </view>
+      </view>
+      <view class="input-group">
+        <view class="input-wrapper">
+          <image class="input-icon" src="/images/arrival.png"></image>
+          <input 
+            class="location-input" 
+            placeholder="目的地" 
+            value="{{arrival}}"
+            bindinput="onArrivalInput"
+          />
+        </view>
+      </view>
+    </view>
+    <view class="swap-button" bindtap="swapLocations">
+      <image class="swap-icon" src="/images/swap.png"></image>
+    </view>
+  </view>
+
+  <!-- 日期选择 -->
+  <view class="date-section">
+    <view class="date-input">
+      <image class="date-icon" src="/images/calendar.png"></image>
+      <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+        <view class="date-picker">{{startDate || '出发日期'}}</view>
+      </picker>
+    </view>
+    <view class="date-input">
+      <image class="date-icon" src="/images/calendar.png"></image>
+      <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+        <view class="date-picker">{{endDate || '返回日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 旅行偏好 -->
+  <view class="preferences-section">
+    <view class="section-title">旅行偏好</view>
+    
+    <view class="preference-item">
+      <view class="preference-info">
+        <image class="preference-icon" src="/images/person.png"></image>
+        <text class="preference-text">{{adults}} 位成人</text>
+      </view>
+    </view>
+
+    <view class="preference-item">
+      <text class="preference-text">包含基础票价</text>
+      <switch 
+        class="preference-switch" 
+        checked="{{includeBasicFares}}" 
+        bindchange="onBasicFaresToggle"
+        color="#ff5733"
+      />
+    </view>
+
+    <view class="preference-item">
+      <text class="preference-text">仅显示直飞航班</text>
+      <switch 
+        class="preference-switch" 
+        checked="{{nonstopFlights}}" 
+        bindchange="onNonstopToggle"
+        color="#ff5733"
+      />
+    </view>
+  </view>
+
+  <!-- 航班列表 -->
+  <view class="flights-section">
+    <loading wx:if="{{loading}}">加载中...</loading>
+    <view wx:else>
+      <view 
+        wx:for="{{flights}}" 
+        wx:key="id" 
+        class="flight-item {{item.selected ? 'selected' : ''}}"
+        bindtap="toggleFlightSelection"
+        data-flight-id="{{item.id}}"
+      >
+        <view class="flight-info">
+          <!-- 航线信息 -->
+          <view class="flight-route">
+            <text class="route-text">{{item.departure}} → {{item.arrival}}</text>
+          </view>
+          <view class="flight-time">
+            <text class="time-text">{{item.departureTime}} - {{item.arrivalTime}}</text>
+            <text class="price-text">¥{{item.price}}</text>
+          </view>
+          <view class="flight-details">
+            <text class="duration-text">{{item.duration}}</text>
+            <text class="type-text">{{item.type}}</text>
+          </view>
+          <view class="flight-airline">
+            <text class="airline-text">{{item.airline}}</text>
+            <text class="class-text">{{item.class}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 比较按钮 -->
+  <view class="compare-section">
+    <button class="compare-button" bindtap="compareFlights">
+      比较航班 ({{selectedFlights.length}})
+    </button>
+    <button class="reset-button" bindtap="resetSelection">
+      重置选择
+    </button>
+  </view>
+</view> 

@@ -26,6 +26,7 @@ export interface IBotConfig {
     inputType?: string;
     outputType?: number;
   };
+  multiConversationEnable: boolean;
 }
 
 export class BotConfig {

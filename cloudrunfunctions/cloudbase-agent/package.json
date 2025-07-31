@@ -24,7 +24,7 @@
   "dependencies": {
     "@ai-sdk/deepseek": "^0.2.14",
     "@ai-sdk/openai": "^1.2.5",
-    "@cloudbase/aiagent-framework": "^1.0.0-beta.17",
+    "@cloudbase/aiagent-framework": "^1.0.0-beta.22",
     "@cloudbase/cli": "^2.7.6",
     "@cloudbase/functions-typings": "^1.0.0",
     "@cloudbase/mcp": "^1.0.0-beta.24",
@@ -39,6 +39,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "js-yaml": "^4.1.0",
     "lint-staged": "^16.1.2",
+    "nanoid": "^3.1.10",
     "openai": "4.104.0",
     "zod": "^3.24.2"
   },

@@ -1,0 +1,75 @@
+<view class="container">
+	<!-- 头部 -->
+	<view class="header">
+		<view class="back-button" bindtap="goBack">
+			<text class="back-icon">‹</text>
+		</view>
+		<text class="page-title">航班对比</text>
+		<view class="header-spacer"></view>
+	</view>
+
+	<!-- 航班基本信息 -->
+	<view class="flights-header">
+		<view 
+			wx:for="{{flights}}" 
+			wx:key="id" 
+			class="flight-header-item"
+		>
+			<view class="flight-basic-info">
+				<text class="airline-name">{{item.airline}}</text>
+				<text class="flight-number">{{item.flightNumber}}</text>
+				<view class="flight-time-info">
+					<text class="time-text">{{item.departureTime}} - {{item.arrivalTime}}</text>
+					<text class="price-highlight">¥{{item.price}}</text>
+				</view>
+				<button 
+					class="select-button" 
+					bindtap="selectFlight"
+					data-flight-id="{{item.id}}"
+				>
+					选择此航班
+				</button>
+			</view>
+		</view>
+	</view>
+
+	<!-- 对比表格 -->
+	<view class="comparison-table">
+		<view class="table-header">
+			<text class="comparison-title">详细对比</text>
+		</view>
+		
+		<view 
+			wx:for="{{comparisonData}}" 
+			wx:key="key"
+			class="comparison-row"
+		>
+			<view class="row-label">
+				<text class="label-text">{{item.label}}</text>
+			</view>
+			<view class="row-values">
+				<view 
+					wx:for="{{item.values}}" 
+					wx:for-item="valueItem"
+					wx:for-index="valueIndex"
+					wx:key="{{valueIndex}}"
+					class="value-cell {{valueItem.class}}"
+				>
+					<text class="value-text">{{valueItem.value}}</text>
+				</view>
+			</view>
+		</view>
+	</view>
+
+	<!-- 推荐说明 -->
+	<view class="recommendation">
+		<view class="recommendation-header">
+			<text class="recommendation-title">💡 选择建议</text>
+		</view>
+		<view class="recommendation-content">
+			<text class="recommendation-text">• 绿色标记表示该项目的最优选择</text>
+			<text class="recommendation-text">• 价格最低、准点率最高、直飞航班会被标记为最优</text>
+			<text class="recommendation-text">• 请根据您的需求综合考虑选择</text>
+		</view>
+	</view>
+</view> 

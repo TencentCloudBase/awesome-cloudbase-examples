@@ -1,31 +1,30 @@
 {
 	"name": "langchain-agent",
 	"description": "langchain 函数型智能体模板",
-	"main": "src/index.ts",
+	"main": "dist/index.js",
 	"scripts": {
 		"login": "tcb login",
 		"logout": "tcb logout",
 		"build": "tsc",
 		"build:w": "tsc -w",
-		"dev": "dotenvx run -f .env.development -- tcb cloudrunfunction run -w",
+		"dev": "tcb cloudrun run -w --dotEnvFilePath=.env --enableCors=true --runMode agent -e {your-envId} --agentId {your-botId}",
 		"deploy": "tcb cloudrunfunction deploy"
 	},
 	"exports": {
 		"./src": "./src/index.ts"
 	},
 	"dependencies": {
-		"@cloudbase/aiagent-framework": "^1.0.0-beta.13",
+		"@cloudbase/aiagent-framework": "^1.0.0-beta.17",
 		"@langchain/community": "^0.3.45",
 		"@langchain/core": "^0.3.57",
 		"@langchain/deepseek": "^0.0.1",
-		"@langchain/tavily": "^0.1.2",
 		"@langchain/textsplitters": "^0.1.0",
 		"js-yaml": "^4.1.0",
 		"langchain": "^0.3.27",
 		"zod": "^3.25.56"
 	},
 	"devDependencies": {
-		"@cloudbase/cli": "^2.6.16",
+		"@cloudbase/cli": "^2.7.6",
 		"@cloudbase/functions-typings": "^1.0.0",
 		"@dotenvx/dotenvx": "^1.38.4",
 		"@types/js-yaml": "^4.0.9",

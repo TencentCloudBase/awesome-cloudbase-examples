@@ -18,6 +18,7 @@ export interface ChatOptions {
   history: ChatHistoryItem[];
   files: string[];
   searchEnable: boolean;
+  conversationId?: string;
 }
 
 export class MainChatService {
@@ -33,15 +34,18 @@ export class MainChatService {
 
   async beforeStream ({
     msg,
-    files
+    files,
+    conversationId
   }: {
     msg: string;
     files: string[];
+    conversationId: string;
   }): Promise<{ replyRecordId: string }> {
     try {
       const userId =
         this.botContext.context?.extendedContext?.userId ||
         getEnvId(this.botContext.context)
+      const conversation: string = conversationId || userId
       const baseMsgData = {
         sender: userId,
         type: this.botContext.info?.type ?? BOT_TYPE_TEXT,
@@ -49,7 +53,8 @@ export class MainChatService {
         botId: this.botContext.info.botId,
         recommendQuestions: [],
         asyncReply: '',
-        image: ''
+        image: '',
+        conversation
       }
       const replyRecordId = await this.chatHistoryService.genRecordId()
 
@@ -111,6 +116,7 @@ export class MainChatService {
 
   async chat (options: ChatOptions) {
     // 根据系统配置及请求参数构造对话上下文
+
     const { messages } = await this.chatContextService.prepareMessages({
       msg: options.msg,
       files: options.files,
@@ -121,7 +127,8 @@ export class MainChatService {
     })
     const { replyRecordId } = await this.beforeStream({
       msg: options.msg,
-      files: options.files
+      files: options.files,
+      conversationId: options.conversationId
     })
 
     const llmCommunicator = new LLMCommunicator(this.botContext, {

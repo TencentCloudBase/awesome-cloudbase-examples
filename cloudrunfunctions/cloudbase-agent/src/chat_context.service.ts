@@ -91,7 +91,6 @@ export class ChatContextService {
 }`
     }
 
-    console.log('生成的系统提示消息:', message.content)
     return [message]
   }
 
@@ -183,43 +182,43 @@ ${handleSearchDBResult.prompt}
     searchEnable = false,
     triggerSrc = ''
   }) {
-    try {
-      // 整理历史信息，确保顺序正常
-      let fixHistoryList = this.fixHistory(history)
+    // try {
+    // 整理历史信息，确保顺序正常
+    let fixHistoryList = this.fixHistory(history)
 
-      // 如果没有传入历史信息，则从数据库中查询
-      if (fixHistoryList?.length > 0) {
-        fixHistoryList = await this.chatHistoryService.queryForLLM(
-          this.botContext.info.botId,
-          undefined,
-          triggerSrc
-        )
-      }
-
-      // 减少历史信息条数，保证在20条以内
-      if (fixHistoryList?.length > 20) {
-        fixHistoryList = fixHistoryList.slice(-20)
-      }
-
-      const messages = []
-      if (
-        !this.botContext.info?.type ||
-        this.botContext.info.type === BOT_TYPE_TEXT
-      ) {
-        if (fixHistoryList?.length > 0) {
-          messages.push(...fixHistoryList)
-        }
-
-        messages.push(...(await this.callTools({ msg, searchEnable, files })))
-        messages.push({ role: 'assistant', content: '好的' })
-
-        // 添加当前问题
-        messages.push({ role: BOT_ROLE_USER, content: msg })
-      }
-
-      return { messages }
-    } catch (error) {
-      console.error('准备消息上下文失败:', error)
+    // 如果没有传入历史信息，则从数据库中查询
+    if (fixHistoryList?.length > 0) {
+      fixHistoryList = await this.chatHistoryService.queryForLLM(
+        this.botContext.info.botId,
+        undefined,
+        triggerSrc
+      )
     }
+
+    // 减少历史信息条数，保证在20条以内
+    if (fixHistoryList?.length > 20) {
+      fixHistoryList = fixHistoryList.slice(-20)
+    }
+
+    const messages = []
+    if (
+      !this.botContext.info?.type ||
+        this.botContext.info.type === BOT_TYPE_TEXT
+    ) {
+      if (fixHistoryList?.length > 0) {
+        messages.push(...fixHistoryList)
+      }
+
+      messages.push(...(await this.callTools({ msg, searchEnable, files })))
+      messages.push({ role: 'assistant', content: '好的' })
+
+      // 添加当前问题
+      messages.push({ role: BOT_ROLE_USER, content: msg })
+    }
+
+    return { messages }
+    // } catch (error) {
+    //   console.error('准备消息上下文失败:', error)
+    // }
   }
 }

@@ -1,0 +1,367 @@
+/* pages/flight-comparison/flight-comparison.wxss */
+.container {
+  background-color: #0d0402;
+  color: #e4dad7;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* 搜索栏样式 */
+.search-section {
+  padding: 16rpx;
+  background-color: #0d0402;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: rgba(224, 191, 184, 0.12);
+  border-radius: 720rpx;
+  padding: 26rpx;
+  gap: 16rpx;
+}
+
+.search-icon, .mic-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.clear-icon {
+  width: 36rpx;
+  height: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 87, 51, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.clear-text {
+  color: #ff5733;
+  font-size: 32rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.search-field {
+  flex: 1;
+  color: rgba(235, 213, 209, 0.62);
+  font-size: 34rpx;
+  background: transparent;
+}
+
+.search-button {
+  background-color: #ff5733;
+  color: #000000;
+  border: none;
+  border-radius: 48rpx;
+  padding: 24rpx 32rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  min-width: 120rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-button::after {
+  border: none;
+}
+
+.search-button-text {
+  color: #000000;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.search-icon-btn {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+/* 出发地和目的地样式 */
+.location-section {
+  padding: 32rpx 16rpx;
+  background-color: #0d0402;
+  display: flex;
+  align-items: center;
+  gap: 32rpx;
+}
+
+.location-inputs {
+  flex: 1;
+}
+
+.input-group {
+  margin-bottom: 16rpx;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: rgba(224, 191, 184, 0.12);
+  border-radius: 32rpx;
+  padding: 26rpx;
+  gap: 16rpx;
+}
+
+.input-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.location-input {
+  flex: 1;
+  color: #e4dad7;
+  font-size: 34rpx;
+  background: transparent;
+}
+
+.swap-button {
+  width: 88rpx;
+  height: 88rpx;
+  background-color: rgba(224, 191, 184, 0.12);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swap-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+/* 日期选择样式 */
+.date-section {
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx;
+  background-color: #0d0402;
+}
+
+.date-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: rgba(224, 191, 184, 0.12);
+  border-radius: 32rpx;
+  padding: 26rpx;
+  gap: 16rpx;
+}
+
+.date-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.date-picker {
+  flex: 1;
+  color: #e4dad7;
+  font-size: 34rpx;
+}
+
+/* 旅行偏好样式 */
+.preferences-section {
+  padding: 32rpx 0 16rpx 0;
+  background-color: #0d0402;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #e4dad7;
+  padding: 0 32rpx 32rpx 32rpx;
+}
+
+.preference-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  border-bottom: 1rpx solid rgba(182, 152, 145, 0.2);
+}
+
+.preference-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.preference-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.preference-text {
+  color: #e4dad7;
+  font-size: 34rpx;
+}
+
+.preference-switch {
+  transform: scale(0.8);
+}
+
+/* 航班列表样式 */
+.flights-section {
+  padding: 16rpx;
+  background-color: #0d0402;
+}
+
+.flight-item {
+  background-color: rgba(224, 191, 184, 0.12);
+  border-radius: 24rpx;
+  margin-bottom: 16rpx;
+  padding: 32rpx;
+  transition: all 0.3s ease;
+}
+
+.flight-item.selected {
+  background-color: rgba(255, 87, 51, 0.3) !important;
+  border: 4rpx solid #ff5733 !important;
+  box-shadow: 0 0 20rpx rgba(255, 87, 51, 0.5);
+  transform: scale(1.02);
+}
+
+.flight-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.flight-route {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid rgba(182, 152, 145, 0.1);
+}
+
+.route-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ff5733;
+  text-align: center;
+  letter-spacing: 2rpx;
+}
+
+.flight-time {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time-text {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #e4dad7;
+}
+
+.price-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff5733;
+}
+
+.flight-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.duration-text, .type-text {
+  font-size: 26rpx;
+  color: rgba(235, 213, 209, 0.62);
+}
+
+.flight-airline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.airline-text, .class-text {
+  font-size: 26rpx;
+  color: rgba(235, 213, 209, 0.62);
+}
+
+/* 比较按钮样式 */
+.compare-section {
+  padding: 32rpx;
+  background-color: #0d0402;
+  display: flex;
+  gap: 16rpx;
+}
+
+.compare-button {
+  flex: 1;
+  height: 100rpx;
+  background-color: #ff5733;
+  color: #000000;
+  font-size: 34rpx;
+  font-weight: 500;
+  border-radius: 96rpx;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reset-button {
+  width: 200rpx;
+  height: 100rpx;
+  background-color: rgba(224, 191, 184, 0.2);
+  color: #e4dad7;
+  font-size: 28rpx;
+  font-weight: 500;
+  border-radius: 96rpx;
+  border: 1rpx solid #e4dad7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compare-button::after,
+.reset-button::after {
+  border: none;
+}
+
+/* 加载状态 */
+loading {
+  color: rgba(235, 213, 209, 0.62);
+  text-align: center;
+  padding: 40rpx;
+}
+
+.search-button-icon {
+  width: 88rpx;
+  height: 88rpx;
+  background-color: #ff5733;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(255, 87, 51, 0.3);
+  transition: all 0.3s ease;
+}
+
+.search-button-icon:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(255, 87, 51, 0.4);
+}
+
+.search-btn-icon {
+  width: 40rpx;
+  height: 40rpx;
+  filter: brightness(0) invert(1);
+} 

@@ -1,0 +1,243 @@
+.container {
+  background-color: #0d0402;
+  color: #e4dad7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* 搜索栏样式 */
+.search-section {
+  padding: 32rpx;
+  background-color: #0d0402;
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  background-color: rgba(224, 191, 184, 0.12);
+  border-radius: 32rpx;
+  padding: 20rpx;
+  gap: 16rpx;
+}
+
+.search-input input {
+  flex: 1;
+  color: #e4dad7;
+  font-size: 32rpx;
+}
+
+.clear-btn {
+  width: 48rpx;
+  height: 48rpx;
+  background-color: rgba(182, 152, 145, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e4dad7;
+  font-size: 24rpx;
+  margin-right: 8rpx;
+  transition: all 0.3s ease;
+}
+
+.clear-btn:active {
+  background-color: rgba(182, 152, 145, 0.5);
+  transform: scale(0.9);
+}
+
+.search-icon-btn {
+  width: 68rpx;
+  height: 68rpx;
+  background-color: #ff5733;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.search-icon-btn:active {
+  transform: scale(0.95);
+  background-color: rgba(255, 87, 51, 0.8);
+}
+
+.search-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+/* 欢迎区域 */
+.welcome-section {
+  text-align: center;
+  padding: 80rpx 32rpx 60rpx;
+  background: linear-gradient(135deg, rgba(255, 87, 51, 0.1), rgba(255, 87, 51, 0.05));
+}
+
+.logo-area {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.app-title {
+  font-size: 64rpx;
+  font-weight: bold;
+  color: #e4dad7;
+  margin-bottom: 16rpx;
+}
+
+.app-subtitle {
+  font-size: 32rpx;
+  color: rgba(235, 213, 209, 0.8);
+  line-height: 1.5;
+}
+
+/* 快速操作 */
+.quick-actions {
+  flex: 1;
+  padding: 48rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.action-card {
+  background-color: rgba(224, 191, 184, 0.12);
+  border-radius: 24rpx;
+  padding: 48rpx 32rpx;
+  display: flex;
+  align-items: center;
+  gap: 32rpx;
+  transition: all 0.3s ease;
+}
+
+.action-card:active {
+  background-color: rgba(255, 87, 51, 0.1);
+  transform: scale(0.98);
+}
+
+.action-icon {
+  font-size: 64rpx;
+  width: 80rpx;
+  text-align: center;
+}
+
+.action-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.action-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #e4dad7;
+}
+
+.action-desc {
+  font-size: 28rpx;
+  color: rgba(235, 213, 209, 0.62);
+  line-height: 1.4;
+}
+
+/* 底部信息 */
+.footer-info {
+  text-align: center;
+  padding: 48rpx 32rpx;
+  border-top: 1rpx solid rgba(182, 152, 145, 0.2);
+}
+
+.version-text {
+  font-size: 26rpx;
+  color: rgba(235, 213, 209, 0.4);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 80rpx;
+}
+
+.title {
+  display: block;
+  font-size: 56rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 20rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.3);
+}
+
+.subtitle {
+  display: block;
+  font-size: 32rpx;
+  color: rgba(255,255,255,0.8);
+  font-weight: 300;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 60rpx;
+}
+
+.info-card {
+  background: rgba(255,255,255,0.95);
+  padding: 40rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.1);
+  backdrop-filter: blur(10rpx);
+}
+
+.label {
+  display: block;
+  font-size: 32rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.value {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  background: #f8f9fa;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  word-break: break-all;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.features {
+  background: rgba(255,255,255,0.95);
+  padding: 40rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.1);
+  backdrop-filter: blur(10rpx);
+}
+
+.features-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+}
+
+.feature-item {
+  font-size: 30rpx;
+  color: #555;
+  margin-bottom: 20rpx;
+  padding-left: 20rpx;
+  line-height: 1.6;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 60rpx;
+  padding-top: 40rpx;
+}
+
+/* badge样式已移到组件中 */

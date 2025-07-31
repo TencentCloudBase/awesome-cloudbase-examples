@@ -113,6 +113,7 @@
 ### 🔧 低代码应用
 
 - [客户关系管理系统](./lowcode/scrm-demo) - 基于低代码平台的客户关系管理系统示例
+- [子表单场景云函数](./cloudrunfunctions/subtable-management) - 子表单场景云函数示例
 
 ## 🤝 贡献指南
 

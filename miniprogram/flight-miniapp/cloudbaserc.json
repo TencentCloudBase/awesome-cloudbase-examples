@@ -1,0 +1,54 @@
+{
+	"envId": "luke-agent-dev-7g1nc8tqc2ab76af",
+	"framework": {
+		"name": "miniprogram",
+		"plugins": {
+			"client": {
+				"use": "@cloudbase/framework-plugin-mp",
+				"inputs": {
+					"appid": "",
+					"buildCommand": "",
+					"localPath": "./miniprogram",
+					"remoteObjectPrefix": "/"
+				}
+			}
+		}
+	},
+	"functions": [
+		{
+			"name": "getFlights",
+			"timeout": 60,
+			"envVariables": {},
+			"runtime": "Nodejs18.15",
+			"memorySize": 256,
+			"handler": "index.main"
+		},
+		{
+			"name": "getBookings",
+			"timeout": 60,
+			"envVariables": {},
+			"runtime": "Nodejs18.15",
+			"memorySize": 256,
+			"handler": "index.main"
+		},
+		{
+			"name": "saveUserInfo",
+			"timeout": 60,
+			"envVariables": {},
+			"runtime": "Nodejs18.15",
+			"memorySize": 256,
+			"handler": "index.main"
+		}
+	],
+	"databases": [
+		{
+			"collectionName": "flights"
+		},
+		{
+			"collectionName": "bookings"
+		},
+		{
+			"collectionName": "users"
+		}
+	]
+}

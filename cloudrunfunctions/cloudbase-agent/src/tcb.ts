@@ -4,6 +4,8 @@ import {
 } from '@cloudbase/functions-typings'
 import tcb, { CloudBase } from '@cloudbase/node-sdk'
 export type TcbContext = ContextInjected<TcbExtendedContext>;
+import fs from 'fs'
+import * as path from 'path'
 
 import { McpServer, McpTransportConfig } from './mcp'
 
@@ -50,6 +52,14 @@ export function getAccessToken (context: TcbContext) {
 
 export function replaceEnvId (context: TcbContext, urlTemplate: string) {
   return urlTemplate.replace('{{envId}}', getEnvId(context))
+}
+
+export function replaceReadMe (agentSetting: string) {
+  const readmeData = fs.readFileSync(
+    path.join(__dirname, '..', 'README.md'),
+    'utf8'
+  )
+  return agentSetting.replace('{{README.md}}', readmeData)
 }
 
 export function checkIsInCBR () {

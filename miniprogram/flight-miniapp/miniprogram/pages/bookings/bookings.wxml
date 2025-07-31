@@ -1,0 +1,80 @@
+<view class="container">
+  <view class="header">
+    <text class="title">我的预订</text>
+    <view wx:if="{{loading}}" class="loading-indicator">
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+
+  <view wx:if="{{bookings.length === 0 && !loading}}" class="empty-state">
+    <text class="empty-icon">✈️</text>
+    <text class="empty-text">暂无预订记录</text>
+    <text class="empty-desc">预订航班后，您的预订信息将显示在这里</text>
+    <button class="search-btn" bindtap="goToSearch">搜索航班</button>
+  </view>
+
+  <view wx:else class="bookings-list">
+    <view 
+      wx:for="{{bookings}}" 
+      wx:key="_id" 
+      class="booking-item"
+    >
+      <view class="booking-header">
+        <view class="booking-number">
+          <text class="number-label">预订号</text>
+          <text class="number-value">{{item.bookingNumber || '暂无'}}</text>
+        </view>
+        <text class="status {{item.status}}">
+          {{item.statusText}}
+        </text>
+      </view>
+      
+      <view class="flight-info">
+        <view class="flight-header">
+          <text class="airline">{{item.flight.airline}}</text>
+          <text class="flight-number">{{item.flight.flightNumber}}</text>
+        </view>
+        <text class="route">{{item.route}}</text>
+        <view class="time-info">
+          <text class="time">{{item.flight.departureTime}} - {{item.flight.arrivalTime}}</text>
+          <text class="class">{{item.flight.class}}</text>
+        </view>
+      </view>
+      
+      <view class="passenger-info" wx:if="{{item.passengers}}">
+        <text class="passenger-label">乘客：</text>
+        <text class="passenger-list">
+          <text wx:for="{{item.passengers}}" wx:key="name" wx:for-item="passenger">
+            {{passenger.name}}{{passenger.type === 'child' ? '(儿童)' : passenger.type === 'infant' ? '(婴儿)' : ''}}{{index < item.passengers.length - 1 ? '、' : ''}}
+          </text>
+        </text>
+      </view>
+      
+      <view class="booking-footer">
+        <view class="booking-date">
+          <text class="date-label">预订时间：</text>
+          <text class="date-value">{{item.bookingDate}}</text>
+        </view>
+        <text class="price">{{item.displayPrice}}</text>
+      </view>
+
+      <view class="booking-actions">
+        <button 
+          class="action-btn detail-btn" 
+          bindtap="viewBookingDetails"
+          data-booking-id="{{item._id}}"
+        >
+          查看详情
+        </button>
+        <button 
+          wx:if="{{item.status === 'confirmed'}}"
+          class="action-btn cancel-btn" 
+          bindtap="cancelBooking"
+          data-booking-id="{{item._id}}"
+        >
+          取消预订
+        </button>
+      </view>
+    </view>
+  </view>
+</view> 
