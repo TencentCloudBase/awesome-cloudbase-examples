@@ -1,0 +1,9 @@
+{
+  "name": "messageManager",
+  "version": "1.0.0",
+  "description": "消息管理云函数",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "latest"
+  }
+} 

@@ -1,0 +1,21 @@
+{
+  "envId": "your-env-id",
+  "framework": {
+    "name": "uniapp",
+    "plugins": {
+      "client": {
+        "use": "@cloudbase/framework-plugin-website",
+        "inputs": {
+          "buildCommand": "npm run build:h5",
+          "outputPath": "dist/build/h5"
+        }
+      },
+      "functions": {
+        "use": "@cloudbase/framework-plugin-function",
+        "inputs": {
+          "functionRootPath": "./cloudfunctions"
+        }
+      }
+    }
+  }
+} 

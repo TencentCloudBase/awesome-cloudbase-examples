@@ -1,0 +1,9 @@
+{
+  "name": "userProfile",
+  "version": "1.0.0",
+  "description": "用户信息管理云函数",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "latest"
+  }
+} 
