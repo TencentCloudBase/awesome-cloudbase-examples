@@ -15,6 +15,25 @@
 - 🔧 自定义 UniApp 适配器，完美适配云开发能力
 - 📱 完整的 TypeScript 支持，提供更好的开发体验
 
+## 各平台展示效果
+
+各平台展示如下：
+
+ 
+ H5 端 | 微信小程序 |
+|:---:|:---:|
+| ![H5 端](https://636c-cloudbase-test-v1-8e8tzqa7290d87-1259218801.tcb.qcloud.la/UniApp%E6%A8%A1%E7%89%88%E9%A2%84%E8%A7%88%E5%9B%BE%E7%89%87/H5.png) | ![微信小程序](https://636c-cloudbase-test-v1-8e8tzqa7290d87-1259218801.tcb.qcloud.la/UniApp%E6%A8%A1%E7%89%88%E9%A2%84%E8%A7%88%E5%9B%BE%E7%89%87/mp-weixin.png) |
+
+ 支付宝小程序 | 抖音小程序 |
+|:---:|:---:|
+| ![支付宝小程序](https://636c-cloudbase-test-v1-8e8tzqa7290d87-1259218801.tcb.qcloud.la/UniApp%E6%A8%A1%E7%89%88%E9%A2%84%E8%A7%88%E5%9B%BE%E7%89%87/mp-alipay.png) | ![抖音小程序](https://636c-cloudbase-test-v1-8e8tzqa7290d87-1259218801.tcb.qcloud.la/UniApp%E6%A8%A1%E7%89%88%E9%A2%84%E8%A7%88%E5%9B%BE%E7%89%87/mp-toutiao.png) |
+
+ Android 和 iOS |
+|:---:|
+| <img src="https://636c-cloudbase-test-v1-8e8tzqa7290d87-1259218801.tcb.qcloud.la/UniApp%E6%A8%A1%E7%89%88%E9%A2%84%E8%A7%88%E5%9B%BE%E7%89%87/iOS-%20android.jpg" width="50%"/> |
+
+
+
 ## 项目架构
 
 ### 前端架构
@@ -369,7 +388,7 @@ const config = {
 - **数据库监听**: 实时监听数据变化
 - **文件存储**: 上传和下载文件
 
-访问演示页面体验完整功能。
+
 
 ## 使用 CloudBase CLI 部署
 
