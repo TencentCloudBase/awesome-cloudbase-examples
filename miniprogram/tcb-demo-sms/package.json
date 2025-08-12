@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/TencentCloudBase/tcb-demo-sms#readme",
   "devDependencies": {
-    "eslint": "^5.9.0",
+    "eslint": "^9.33.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^8.0.0",
