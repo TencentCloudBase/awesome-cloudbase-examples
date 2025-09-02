@@ -16,6 +16,7 @@
     - [📱 小程序](#-小程序)
     - [🔄 跨端应用](#-跨端应用)
     - [⚡ 函数型托管](#-函数型托管)
+    - [⚡ 云托管](#-云托管)
     - [🤖 AI Agent 服务](#-ai-agent-服务)
     - [🔗 MCP Server](#-mcp-server)
     - [🔧 低代码应用](#-低代码应用)
@@ -93,6 +94,13 @@
 - [TypeScript 多函数](./cloudrunfunctions/ts-multiple-functions) - 基于 TypeScript 的多函数示例
 - [全栈项目](./cloudrunfunctions/fullstack-project) - 云函数全栈项目示例
 - [消息中心](./cloudrunfunctions/message-center) - 基于云函数的消息中心示例
+
+### ⚡ 云托管
+
+- [SSE 示例](./cloudbaserun/sse-demo) - 云托管使用 SSE 协议返回内容的示例
+- [Spring Cloud 示例](./cloudbaserun/spring-cloud-docker-demo) - SpringCloud 构建微服务示例
+- [云端开发环境](./cloudbaserun/deploy-code-server) - 云托管部署并运行云端开发环境示例
+
 
 ### 🤖 AI Agent 服务
 
