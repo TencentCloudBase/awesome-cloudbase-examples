@@ -1,29 +1,33 @@
-# LKE 函数型智能体模板
+# ADP 函数型 Agent 模板
 
-本模板提供了 LKE 腾讯云大模型知识引擎函数型智能体的实现，部署后提供以下 Agent 相关接口：
+本模板提供了 ADP (原: LKE) 腾讯云智能体开发平台函数型 Agent 的实现，部署后提供以下 Agent 相关接口：
 
 ```shell
 POST   /v1/aibot/bots/:botId/send-message        发送消息
 GET    /v1/aibot/bots/:botId/records             获取聊天记录
 ```
 
-本模板使用了 `@cloudbase/aiagent-framework`，只需要实现该库定义的 [IBot 接口](https://docs.cloudbase.net/ai/cbrf-agent/IBot) 即可完成接入，详见 `src/bot.ts`。
+本模板使用了 `@cloudbase/aiagent-framework`，只需要实现该库定义的 [IBot 接口](https://docs.cloudbase.net/ai/cbrf-agent/IBot) 即可完成接入，详见 `src/index.ts`。
 
-## 获取 LKE APP KEY
+调用链路:
 
-前往 [LKE 腾讯云大模型知识引擎](https://lke.cloud.tencent.com/lke/#/app/home)，选择想要接入的应用，在右侧点击调用，即可在弹窗中获取 APP KEY。
+![调用链路](https://qcloudimg.tencent-cloud.cn/raw/d7f08100955c16e097495041a2abeb18.png)
+
+## 获取 APP KEY
+
+前往 [ADP 腾讯云智能体开发平台](https://adp.cloud.tencent.com/adp/#/app/home)，选择想要接入的应用，在右侧点击调用，即可在弹窗中获取 APP KEY。
 
 ## 环境变量
 
 本仓库提供了环境变量模板 `.env.template`，可将其重命名为 `.env` 后再进行编辑。
 
-- 需要将**LKE 的 APP KEY** 配置到 `LKE_APP_KEY` 环境变量
+- 需要将**APP KEY** 配置到 `LKE_APP_KEY` 环境变量
 
 ## 本地调试指引
 
 首先，请编辑 `.env` 文件配置好环境变量：
 
-1. LKE_APP_KEY: 填入元器的智能体 ID
+1. LKE_APP_KEY: 填入腾讯云智能体开发平台应用的 APP KEY
 
 配置完环境变量后，安装依赖：
 

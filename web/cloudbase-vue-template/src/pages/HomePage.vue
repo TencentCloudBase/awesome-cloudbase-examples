@@ -27,9 +27,9 @@
               <p v-else class="text-orange-500">请配置环境ID</p>
             </div>
             
-            <div v-if="loginState.isLoggedIn" class="mt-4 p-3 bg-green-50 rounded-lg">
+            <div v-if="loginState?.user" class="mt-4 p-3 bg-green-50 rounded-lg">
               <p class="text-sm text-green-700">
-                ✅ 用户已登录 ({{ loginState.user?.isAnonymous ? '匿名' : '已认证' }})
+                ✅ 用户已登录 ({{ loginState?.user?.name }})
               </p>
             </div>
           </div>
@@ -97,7 +97,6 @@ const cloudbaseStatus = ref({
   envId: isValidEnvId ? ENV_ID : null
 })
 const loginState = ref({
-  isLoggedIn: false,
   user: null
 })
 

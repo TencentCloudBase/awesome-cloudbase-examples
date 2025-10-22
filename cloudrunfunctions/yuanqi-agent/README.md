@@ -1,14 +1,24 @@
-# 元器函数型智能体模板
+# 元器智能体模板
 
-本模板提供了元器函数型智能体的实现，部署后提供以下 Agent 相关接口：
+本模板提供了元器智能体的实现，部署后提供以下 云开发Agent 相关接口：
 
 ```shell
 POST   /v1/aibot/bots/:botId/send-message        发送消息
-GET    /v1/aibot/bots/:botId/records             获取聊天记录
 GET    /v1/aibot/bots/:botId/recommend-questions 获取推荐问题
 ```
 
-本模板使用了 `@cloudbase/aiagent-framework`，只需要实现该库定义的 [IBot 接口](https://docs.cloudbase.net/ai/cbrf-agent/IBot) 即可完成接入，详见 `src/bot.ts`。
+本模板使用了 `@cloudbase/aiagent-framework`，只需要实现该库定义的 [IBot 接口](https://docs.cloudbase.net/ai/cbrf-agent/IBot) 即可完成接入，详见 `src/index.ts`。
+
+调用链路:
+
+![调用链路](https://qcloudimg.tencent-cloud.cn/raw/75c895ececd994f9b171f751960893e4.png)
+
+## 获取元器 APPID 和 APP KEY
+
+前往 [腾讯元器 平台](https://yuanqi.tencent.com/v2#/agent-shop/home)，选择想要接入的元器智能体，点击 应用发布 -> 服务状态 获取 APPID 和 APP KEY。
+
+![获取元器信息](https://qcloudimg.tencent-cloud.cn/raw/c0cb2b6b5949b081431e0840c6d007e4.png)
+
 
 ## 环境变量
 

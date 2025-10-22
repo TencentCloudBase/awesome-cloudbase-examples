@@ -1,13 +1,13 @@
 import { safeJsonParse } from './utils';
 import { getAccessToken, getOpenAPIBaseURL } from './tcb';
-import { BotContext } from './bot_context';
+import { AgentContext } from './agent_context';
 import { DynamicTool } from "langchain/tools";
 
 export class ChatToolService {
-  botContext: BotContext<any>;
+  agentContext: AgentContext<any>;
 
-  constructor(botContext: BotContext<any>) {
-    this.botContext = botContext;
+  constructor(agentContext: AgentContext<any>) {
+    this.agentContext = agentContext;
   }
 
   // 获取消息相关的联网信息
@@ -19,8 +19,8 @@ export class ChatToolService {
       };
     }
 
-    const token = getAccessToken(this.botContext.context);
-    const url = `${getOpenAPIBaseURL(this.botContext.context)}/v1/aibot/tool/search-network`;
+    const token = getAccessToken(this.agentContext.context);
+    const url = `${getOpenAPIBaseURL(this.agentContext.context)}/v1/aibot/tool/search-network`;
 
     // 获取联网知识
     try {
@@ -32,7 +32,7 @@ export class ChatToolService {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          botId: this.botContext.info.botId,
+          botId: this.agentContext.info.agentId,
           msg: msg,
         }),
       });
@@ -87,12 +87,12 @@ export class ChatToolService {
 
   // 获取消息相关的文件信息
   async getSearchFileContent({ msg, files }: { msg: string, files: any[] }): Promise<string> {
-    if (!this.botContext.info.searchFileEnable || !files || files.length === 0) {
+    if (!this.agentContext.info.searchFileEnable || !files || files.length === 0) {
       return '';
     }
 
-    const token = getAccessToken(this.botContext.context);
-    const url = `${getOpenAPIBaseURL(this.botContext.context)}/v1/aibot/tool/chat-file`;
+    const token = getAccessToken(this.agentContext.context);
+    const url = `${getOpenAPIBaseURL(this.agentContext.context)}/v1/aibot/tool/chat-file`;
     console.log("files", files)
 
     // 获取文件信息知识
@@ -105,7 +105,7 @@ export class ChatToolService {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          botId: this.botContext.info.botId,
+          botId: this.agentContext.info.agentId,
           msg: msg,
           fileList: files,
         }),
@@ -151,14 +151,14 @@ export class ChatToolService {
   // 获取消息相关的数据库信息
   async getSearchDatabaseContent({ msg }: { msg: string }): Promise<any> {
     if (
-      !this.botContext.info.databaseModel ||
-      this.botContext.info.databaseModel.length === 0
+      !this.agentContext.info.databaseModel ||
+      this.agentContext.info.databaseModel.length === 0
     ) {
       return null;
     }
 
-    const token = getAccessToken(this.botContext.context);
-    const url = `${getOpenAPIBaseURL(this.botContext.context)}/v1/aibot/tool/chat-db`;
+    const token = getAccessToken(this.agentContext.context);
+    const url = `${getOpenAPIBaseURL(this.agentContext.context)}/v1/aibot/tool/chat-db`;
 
     // 获取数据库知识
     try {
@@ -170,9 +170,9 @@ export class ChatToolService {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          botId: this.botContext.info.botId,
+          botId: this.agentContext.info.agentId,
           msg: msg,
-          databaseModel: this.botContext.info.databaseModel,
+          databaseModel: this.agentContext.info.databaseModel,
         }),
       });
       const reader = fetchRes?.body?.getReader();
@@ -213,14 +213,14 @@ export class ChatToolService {
   // 获取消息相关的知识库信息
   async getSearchKnowledgeContent({ msg }: { msg: string }): Promise<any[]> {
     if (
-      !this.botContext.info.knowledgeBase ||
-      this.botContext.info.knowledgeBase.length === 0
+      !this.agentContext.info.knowledgeBase ||
+      this.agentContext.info.knowledgeBase.length === 0
     ) {
       return [];
     }
 
-    const token = getAccessToken(this.botContext.context);
-    const url = `${getOpenAPIBaseURL(this.botContext.context)}/v1/aibot/tool/chat-knowledge`;
+    const token = getAccessToken(this.agentContext.context);
+    const url = `${getOpenAPIBaseURL(this.agentContext.context)}/v1/aibot/tool/chat-knowledge`;
 
     // 获取数据库知识
     try {
@@ -232,9 +232,9 @@ export class ChatToolService {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          botId: this.botContext.info.botId,
+          botId: this.agentContext.info.agentId,
           msg: msg,
-          knowledgeBase: this.botContext.info.knowledgeBase,
+          knowledgeBase: this.agentContext.info.knowledgeBase,
         }),
       });
       const reader = fetchRes?.body?.getReader();
@@ -276,7 +276,7 @@ export class ChatToolService {
   }
 
   // 联网 tool 定义
-  async getSearchNetworkTool() {
+  getSearchNetworkTool() {
     const searchNetworkTool = new DynamicTool({
       name: "search_network",
       description: "Search the web for the latest information",
@@ -292,7 +292,7 @@ export class ChatToolService {
   }
 
   // 文件 tool 定义
-  async getSearchFileTool(files: any[]) {
+  getSearchFileTool(files: any[]) {
     const searchFileTool = new DynamicTool({
       name: "search_file",
       description: "解析图片或文件链接对应的内容，并返回解析结果",
@@ -306,7 +306,7 @@ export class ChatToolService {
   }
 
   // 数据库 tool 定义
-  async getSearchDatabaseTool() {
+  getSearchDatabaseTool() {
     const searchDatabaseTool = new DynamicTool({
       name: "search_database",
       description: "Search the database for the latest information",
@@ -319,7 +319,7 @@ export class ChatToolService {
   }
 
   // 知识库 tool 定义
-  async getSearchKnowledgeTool() {
+  getSearchKnowledgeTool() {
     const searchKnowledgeTool = new DynamicTool({
       name: "search_knowledge",
       description: "Search the knowledge base for the latest information",

@@ -5,7 +5,12 @@ import { StructuredTool } from "langchain/tools";
 import { z, ZodTypeAny } from "zod";
 import * as crypto from 'crypto'
 
-// 简易实现 jsonSchema 转 zod schema
+/**
+ * 将JSON Schema转换为Zod Schema
+ * 用于MCP工具的参数验证
+ * @param schema - JSON Schema对象
+ * @returns ZodTypeAny - 对应的Zod Schema
+ */
 function jsonSchemaToZodSchema(schema: any): ZodTypeAny {
   switch (schema.type) {
     case "string":
@@ -39,7 +44,12 @@ function jsonSchemaToZodSchema(schema: any): ZodTypeAny {
   }
 }
 
-// 适配 MCP 工具为 StructuredTool
+/**
+ * 将MCP工具适配为LangChain StructuredTool
+ * @param mcpTool - MCP工具对象
+ * @param mcpClient - MCP客户端实例
+ * @returns StructuredTool - LangChain结构化工具
+ */
 export function mcpToolToStructuredTool(mcpTool: Tool, mcpClient: Client) {
   const zodSchema = jsonSchemaToZodSchema(mcpTool.inputSchema);
   return new (class extends StructuredTool {
@@ -58,6 +68,10 @@ export function mcpToolToStructuredTool(mcpTool: Tool, mcpClient: Client) {
   })();
 }
 
+/**
+ * 过滤控制台警告信息
+ * 减少不必要的日志输出，提升调试体验
+ */
 export function filterLog() {
   const FILTER_MESSAGES = [
     "already exists in this message chunk",
@@ -78,11 +92,19 @@ export function filterLog() {
   };
 }
 
-// 自定义 Callback Handler 用于拦截 LLM 请求
+/**
+ * LLM拦截器回调类
+ * 用于拦截和记录LLM请求信息
+ */
 class LLMInterceptorCallback extends BaseCallbackHandler {
   name = "LLMInterceptorCallback";
   logSeparator = () => console.log("==========");
 
+  /**
+   * 处理LLM开始事件
+   * @param llm - LLM实例
+   * @param prompts - 提示词数组
+   */
   async handleLLMStart(llm: any, prompts: string[]) {
     this.logSeparator();
     console.log("🚀 LLM 请求开始:", llm);
@@ -91,10 +113,21 @@ class LLMInterceptorCallback extends BaseCallbackHandler {
   }
 }
 
+/**
+ * 生成随机字符串
+ * @param length - 字符串长度
+ * @returns string - 随机字符串
+ */
 export function genRandomStr(length: number): string {
   return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
 }
 
+/**
+ * 安全的JSON解析函数
+ * @param jsonString - JSON字符串
+ * @param defaultValue - 解析失败时的默认值
+ * @returns any - 解析结果或默认值
+ */
 export function safeJsonParse(jsonString: string, defaultValue = null) {
   try {
     return JSON.parse(jsonString);
@@ -103,4 +136,21 @@ export function safeJsonParse(jsonString: string, defaultValue = null) {
   }
 }
 
+/** LLM回调处理器实例 */
 export const llmCallback = new LLMInterceptorCallback();
+
+/**
+ * 获取API密钥
+ * @param context - 云函数上下文
+ * @returns string - 格式化后的API密钥
+ */
+export function getApiKey(context: any) {
+  const accessToken =
+    context?.extendedContext?.accessToken ||
+    process.env.CLOUDBASE_API_KEY;
+  if (typeof accessToken !== "string") {
+    throw new Error("Invalid accessToken");
+  }
+
+  return accessToken.replace("Bearer", "").trim();
+}

@@ -1,8 +1,8 @@
-# 基于函数型云托管的Agent项目
+# 基于云托管的 Agent 项目
 
-本示例项目为函数型云托管的Agent项目示例，包括云函数部分。是文档 [函数型 Agent](https://docs.cloudbase.net/ai/cbrf-agent/intro) 的一个示例项目。
+本示例项目为云开发Agent项目示例，包括云函数部分。是文档 [云开发 Agent](https://docs.cloudbase.net/ai/cbrf-agent/intro) 的一个示例项目。
 
-本示例项目主要演示如何在本地开发环境中开发调试函数型 Agent，以及如何实现Agent 中的基础对话、联网搜索、知识库查询、文件查询等功能。
+本示例项目主要演示如何在本地开发环境中开发调试云开发 Agent，以及如何实现Agent 中的基础对话、联网搜索、知识库查询、文件查询等功能。
 
 ## 目录说明
 
@@ -51,11 +51,11 @@ $ tree -L 3
 在 `bot-config.yaml` 文件中设置 `agent` 能力，其中 `baseURL` 字段可以参考一下内容
 
 ```sh
-# 混元-beta
-baseURL: https://{envId}.api.tcloudbasegateway.com/v1/ai/hunyuan-beta/openapi/v1
+# 混元-exp
+baseURL: https://{{envId}}.api.tcloudbasegateway.com/v1/ai/hunyuan-exp
 
 # DeepSeek 模型
-baseURL: https://{envId}.api.tcloudbasegateway.com/v1/ai/deepseek/v1
+baseURL: https://{{envId}}.api.tcloudbasegateway.com/v1/ai/deepseek
 ```
 
 ## 项目启动
@@ -121,14 +121,14 @@ curl 'http://127.0.0.1:3000/v1/aibot/bots/{your-botId}/send-message' \
 curl 'http://127.0.0.1:3000/v1/aibot/bots/{your-botId}/send-message' \
   -H 'Accept: text/event-stream' \
   -H 'Content-Type: application/json' \
-  --data-raw '{"msg":"介绍一下函数型云托管？","searchEnable":true,"files":["cloud://xxxx.4321-xxxx-0000000000/path-to-file"]}'
+  --data-raw '{"msg":"介绍一下云托管？","searchEnable":true,"files":["cloud://xxxx.4321-xxxx-0000000000/path-to-file"]}'
 ```
 
 ```sh
 curl 'http://127.0.0.1:3000/v1/aibot/bots/{your-botId}/send-message' \
   -H 'Accept: text/event-stream' \
   -H 'Content-Type: application/json' \
-  --data-raw '{"msg":"介绍一下函数型云托管？","searchEnable":false}'
+  --data-raw '{"msg":"介绍一下云托管？","searchEnable":false}'
 ```
 
 ```sh

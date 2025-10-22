@@ -55,7 +55,7 @@ export const ensureLogin = async () => {
     // 检查当前登录状态
     let loginState = await auth.getLoginState();
 
-    if (loginState && loginState.isLoggedIn) {
+    if (loginState && loginState.user) {
       // 已登录，返回当前状态
       console.log('用户已登录');
       return loginState;

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import cloudbase from './utils/cloudbase'
-import HomePage from './pages/HomePage'
 import GamePage from './pages/GamePage'
 import GameModePage from './pages/GameModePage'
 import LeaderboardPage from './pages/LeaderboardPage'
@@ -45,10 +44,9 @@ function App() {
   
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            {/* 首页直接跳转到游戏模式选择页面 */}
+            <Route path="/" element={<Navigate to="/overcooked-game" replace />} />
             
             {/* 游戏入口 - 模式选择页面 */}
             <Route path="/overcooked-game" element={<GameModePage />} />
@@ -66,9 +64,7 @@ function App() {
             {/* 可以在这里添加新的路由 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </main>
         <Footer />
-      </div>
     </Router>
   )
 }

@@ -1,10 +1,10 @@
 {
-	"functionsRoot": "./dist",
-	"functions": [
-		{
-			"name": "default",
-			"directory": "./",
-			"triggerPath": "/"
-		}
-	]
+  "functionsRoot": "./dist",
+  "functions": [
+    {
+      "name": "default",
+      "directory": "./",
+      "triggerPath": "/"
+    }
+  ]
 }
