@@ -19,7 +19,7 @@ def stream():
                 "time": current_time,
                 "message": f"这是第 {count} 条 SSE 消息"
             }
-            print(f"Sending event: {data}")  # 打印发送的事件数据
+            
             # 按照 SSE 协议格式发送数据
             yield f"id: {count}\n"
             yield f"event: message\n"
@@ -75,4 +75,4 @@ def index():
     """
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
