@@ -5,7 +5,8 @@
   "scripts": {
     "login": "tcb login",
     "logout": "tcb logout",
-    "build": "tsc",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
     "build:w": "tsc -w",
     "dev": "dotenvx run -- tcb cloudrunfunction run -w",
     "deploy": "tcb cloudrunfunction deploy"
@@ -21,6 +22,7 @@
     "@dotenvx/dotenvx": "^1.38.4",
     "@types/node": "^22.10.5",
     "prettier": "3.5.3",
+    "rimraf": "^6.0.1",
     "typescript": "^5.7.2"
   },
   "tcbRepo": {

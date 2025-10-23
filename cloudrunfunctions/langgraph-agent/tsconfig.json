@@ -1,12 +1,12 @@
 {
-	"compilerOptions": {
-		"module": "Node16",
-		"rootDir": "src",
-		"outDir": "dist",
-		"target": "ES2015",
-		"strict": true,
-		"skipLibCheck": true,
-		"moduleResolution": "node16"
-	},
-	"include": ["**/*.ts"]
+  "compilerOptions": {
+    "module": "Node16",
+    "rootDir": "src",
+    "outDir": "dist",
+    "target": "ES2015",
+    "strict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node16"
+  },
+  "include": ["**/*.ts"]
 }

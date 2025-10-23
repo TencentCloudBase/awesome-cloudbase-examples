@@ -9,7 +9,7 @@ export default defineConfig({
   //   exclude: ['@cloudbase/adapter-uni-app'],  // 排除 @cloudbase/adapter-uni-app 依赖
   // },
   server: {
-    host: '127.0.0.1',  // 使用IP地址代替localhost
+    host: '0.0.0.0',  // 使用IP地址代替localhost
     proxy: {
       '/__auth': {
         target: 'https://envId-appid.tcloudbaseapp.com/',

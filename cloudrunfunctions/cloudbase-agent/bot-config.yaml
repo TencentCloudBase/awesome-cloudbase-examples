@@ -25,7 +25,7 @@ initQuestions:
   - 云开发 Agent 支持哪些功能
 
 # 开启推荐问题功能, 对应腾讯云控制台中问题建议功能
-isNeedRecommend: true
+isNeedRecommend: false
 
 # 绑定知识库, 对应腾讯云控制台中知识库功能
 # example: 
@@ -64,7 +64,7 @@ mcpServerList: []
 # inputType: "16k_zh"  ## 输入语言 16k_zh:中文通用  16k_zh-PY:中英粤  16k_zh_medical:中文医疗  16k_en:英语  16k_yue:粤语
 # outputType: 501007   ## 输出声音类型 101004:通用男声  101005:通用女声  601004:咨询男声  501001:咨询女声  101010:通用男声（大模型） 101035:通用女声（大模型）
 voiceSettings:
-  enable: true
+  enable: false
   inputType: "16k_zh"
   outputType: 501007
 

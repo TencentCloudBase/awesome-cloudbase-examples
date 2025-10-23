@@ -7,7 +7,7 @@ export default defineConfig({
   base: './', // 使用相对路径，解决静态托管部署时的资源加载问题
   // Vite 会自动加载 .env 文件中以 VITE_ 开头的环境变量
   server: {
-    host: '127.0.0.1',  // 使用IP地址代替localhost
+    host: '0.0.0.0',  // 使用IP地址代替localhost
     proxy: {
       '/__auth': {
         target: 'https://tcb-advanced-a656fc-1257967285.tcloudbaseapp.com/',

@@ -51,6 +51,8 @@ const login = async () => {
     await auth.signInAnonymously();
     // 也可以换成跳转SDK 内置的登录页面，支持账号密码登录/手机号登录/微信登录
     // await auth.toDefaultLoginPage()
+
+    return auth.getLoginState();
   } catch (error) {
     console.error('登录失败:', error);
     throw error;
@@ -73,7 +75,7 @@ export const ensureLogin = async () => {
     // 检查当前登录状态
     let loginState = await auth.getLoginState();
     
-    if (loginState && loginState.isLoggedIn) {
+    if (loginState && loginState.user) {
       // 已登录，返回当前状态
       console.log('用户已登录');
       return loginState;

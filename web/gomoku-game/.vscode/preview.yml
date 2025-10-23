@@ -1,10 +1,10 @@
 # .vscode/preview.yml
-autoOpen: true # 打开工作空间时是否自动开启所有应用的预览
+autoOpen: false # 打开工作空间时是否自动开启所有应用的预览
 apps:
   - port: 5173 # 应用的端口
     run: npm install && npm run dev # 安装的构建命令和应用的启动命令
     root: ./ # 应用的启动目录
     name: gomoku-game # 应用名称
     description: 五子棋游戏 Vue 应用 # 应用描述
-    autoOpen: true # 打开工作空间时是否自动开启预览（优先级高于根级 autoOpen）
+    autoOpen: false # 打开工作空间时是否自动开启预览（优先级高于根级 autoOpen）
     autoPreview: true # 是否自动打开预览, 若无则默认为true

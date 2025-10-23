@@ -4,29 +4,54 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { getAccessToken } from './tcb';
 
-import { BotContext } from './bot_context';
+import { AgentContext } from './agent_context';
 
+/**
+ * MCP工具接口
+ */
 export interface McpTools {
+  /** 工具名称 */
   name: string;
 }
 
+/**
+ * MCP服务器接口
+ */
 export interface McpServer {
+  /** 服务器名称 */
   name: string;
+  /** 服务器URL */
   url: string;
+  /** 传输协议类型 */
   transport: string;
+  /** 工具列表 */
   tools: McpTools[];
 }
 
+/**
+ * MCP管理器类
+ * 负责管理MCP客户端连接和工具调用
+ */
 export class McpManager {
-  private botContext: BotContext<any>;
+  /** Agent上下文 */
+  private agentContext: AgentContext<any>;
+  /** MCP客户端映射 */
   private mcpClientMap: Record<string, Client | null> = {};
+  /** MCP服务器列表 */
   public mcpServers: McpServer[];
 
-  constructor(botContext: BotContext<any>) {
-    this.botContext = botContext;
-    this.mcpServers = this.botContext.info?.mcpServerList || [];
+  /**
+   * 构造函数
+   * @param agentContext - Agent上下文
+   */
+  constructor(agentContext: AgentContext<any>) {
+    this.agentContext = agentContext;
+    this.mcpServers = this.agentContext.info?.mcpServerList || [];
   }
 
+  /**
+   * 关闭所有MCP客户端连接
+   */
   async close() {
     try {
       const clients = Object.values(this.mcpClientMap);
@@ -36,10 +61,14 @@ export class McpManager {
     }
   }
 
-  // MCP 客户端
+  /**
+   * 获取MCP客户端
+   * @param mcpServer - MCP服务器配置
+   * @returns Promise<Client | null> - MCP客户端实例
+   */
   async getMCPClient(mcpServer: McpServer) {
     const { url, transport: transportType } = mcpServer
-    const apiKey = getAccessToken(this.botContext.context);
+    const apiKey = getAccessToken(this.agentContext.context);
     let transport = null
     if (transportType === 'post') {
       transport = new PostClientTransport(
@@ -128,6 +157,10 @@ export class McpManager {
     return null
   }
 
+  /**
+   * 初始化MCP客户端映射
+   * @returns Promise<Record<string, Client | null>> - 客户端映射
+   */
   async initMCPClientMap() {
     await Promise.all(this.mcpServers.map(async (mcpServer) => {
       this.mcpClientMap[mcpServer.name] = await this.getMCPClient(mcpServer);

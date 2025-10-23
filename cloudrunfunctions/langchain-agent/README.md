@@ -1,24 +1,19 @@
 # LangChain Agent 云开发智能体模板
 
-本项目基于腾讯云开发函数型 Agent 模板，采用 [LangChain.js](https://js.langchain.com/) 框架，基于云开发 AI 能力接口，完成了一个支持四大核心工具能力的多模态智能体（Agent）实现。
+本项目基于腾讯云开发函数型 Agent 模板，采用 [LangChain.js](https://js.langchain.com/) 框架，基于云开发 AI 能力接口，完成了一个支持三大核心工具能力的多模态智能体（Agent）实现。
 
 ## 🚀 主要特性
 
-### 四大核心工具能力
+### 三大核心工具能力
 
 1. **🌐 联网搜索工具 (search_network)**
    - 实时信息检索，获取最新新闻、股价、天气等
    - 基于云开发 AI 联网检索能力
 
-2. **📁 文件解析识别工具 (search_file)**
-   - **图片识别**：文字识别、图片内容描述生成
-   - **文档解析**：PDF、Word、Markdown、TXT内容解析
-   - 支持云开发文件链接格式 (cloud://xxx/xxx.xxx)
-
-3. **🗄️ 数据库检索工具 (search_database)**
+2. **🗄️ 数据库检索工具 (search_database)**
    - 基于云开发数据模型，实现业务数据查询
 
-4. **📚 知识库检索工具 (search_knowledge)**
+3. **📚 知识库检索工具 (search_knowledge)**
    - 基于云开发 AI 知识库进行检索
    - 业务文档、产品手册、政策流程查询
    - 专业领域知识和最佳实践检索
@@ -38,12 +33,6 @@
 ```
 用户："今天深圳的天气怎么样？"
 AI：自动调用 search_network 工具获取实时天气信息
-```
-
-### 文件解析示例  
-```
-用户：提供PDF文档链接 + "帮我总结这个文档的内容"
-AI：自动调用 search_file 工具解析PDF并生成摘要
 ```
 
 ### 数据库查询示例
@@ -69,6 +58,65 @@ AI：自动调用 search_knowledge 工具查询内部政策文档
 ### 可选配置
 - 数据库配置：根据具体数据库类型配置相应环境变量
 - 知识库配置：根据知识库服务配置相应参数
+
+## 📋 项目架构
+
+```
+├── src/
+│   ├── index.ts                    # 云函数入口文件，初始化 Agent 和工具
+│   ├── agent.ts                    # Agent 包装器，处理消息和流式输出
+│   └── lib/                        # 核心库文件
+│       ├── agent_config.ts         # Agent 配置管理，读取 YAML 配置
+│       ├── agent_context.ts        # Agent 上下文管理
+│       ├── agent_info.ts           # Agent 信息定义
+│       ├── agent_tools.ts          # 工具生成和管理
+│       ├── chat_tool.service.ts    # 工具服务实现（四大核心工具）
+│       ├── tcb.ts                  # 腾讯云开发相关工具函数
+│       └── utils.ts                # 通用工具函数
+├── agent-config.yaml               # Agent 配置文件
+├── cloudbase-functions.json        # 云函数配置
+├── package.json                    # 项目依赖配置
+├── tsconfig.json                   # TypeScript 配置
+└── README.md                       # 项目说明文档
+```
+
+### 核心模块说明
+
+#### 🔧 入口模块 (`index.ts`)
+- **功能**：云函数入口点，负责初始化整个 Agent 系统
+- **职责**：
+  - 创建 Agent 包装器实例
+  - 初始化 DeepSeek LLM 模型
+  - 生成并绑定工具到 Agent
+  - 启动 BotRunner 处理请求
+
+#### 🤖 Agent 核心 (`agent.ts`)
+- **功能**：Agent 包装器，实现 IBot 接口
+- **职责**：
+  - 处理用户消息（支持文本和文件）
+  - 管理对话流程和工具调用
+  - 实现流式输出 (SSE)
+  - 多模态内容处理（图片、文档等）
+
+#### 🛠️ 工具系统 (`lib/agent_tools.ts` + `lib/chat_tool.service.ts`)
+- **功能**：四大核心工具的实现和管理
+- **工具类型**：
+  - `search_network`：联网搜索工具
+  - `search_file`：文件/图片解析工具  
+  - `search_database`：数据库检索工具
+  - `search_knowledge`：知识库检索工具
+
+#### ⚙️ 配置管理 (`lib/agent_config.ts`)
+- **功能**：读取和管理 `agent-config.yaml` 配置
+- **配置项**：模型设置、工具开关、知识库绑定等
+
+#### 🔗 云开发集成 (`lib/tcb.ts`)
+- **功能**：腾讯云开发平台集成工具
+- **职责**：环境 ID 获取、API 基础 URL 构建、访问令牌管理
+
+#### 🔄 上下文管理 (`lib/agent_context.ts` + `lib/agent_info.ts`)
+- **功能**：Agent 运行时状态和信息管理
+- **包含**：配置信息、Agent 实例、运行状态等
 
 ## 🔧 快速开始
 
@@ -219,19 +267,6 @@ npm run deploy
 ```
 
 根据输出提示填入云开发环境 ID、服务名即可完成部署。
-
-## 📋 项目架构
-
-```
-├── src/
-│   ├── bot.ts              # 主要的 Bot 实现
-│   ├── bot_config.ts       # 配置文件
-│   ├── bot_context.ts      # 上下文管理
-│   ├── bot_info.ts         # Bot 信息定义
-│   └── chat_tool.service.ts # 工具服务实现
-├── package.json
-└── README.md
-```
 
 ## 🔗 相关资源
 

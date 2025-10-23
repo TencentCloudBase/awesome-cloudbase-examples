@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 
-export interface BotConfig {
+export interface AgentConfig {
   name: string;
   model: string;
   baseURL: string;
@@ -20,20 +20,20 @@ export interface BotConfig {
   initQuestions: string[];
 }
 
-export class BotConfig {
+export class AgentConfig {
   static instance: any;
-  data!: BotConfig;
+  data!: AgentConfig;
 
   constructor() {
-    if (BotConfig.instance) {
-      return BotConfig.instance;
+    if (AgentConfig.instance) {
+      return AgentConfig.instance;
     }
-    BotConfig.instance = this;
+    AgentConfig.instance = this;
 
     // 读取配置文件，并解析到data中
     try {
-      const yamlData = fs.readFileSync(path.join(__dirname, '..', 'agent-config.yaml'), 'utf8');
-      const yData: BotConfig = yaml.load(yamlData) as BotConfig;
+      const yamlData = fs.readFileSync(path.join(__dirname, '../..', 'agent-config.yaml'), 'utf8');
+      const yData: AgentConfig = yaml.load(yamlData) as AgentConfig;
       console.log('yaml:', yData);
       // 初始化其他属性
       this.data = yData;
@@ -42,7 +42,7 @@ export class BotConfig {
     }
   }
 
-  getData(): BotConfig {
+  getData(): AgentConfig {
     return this.data;
   }
 
@@ -51,4 +51,4 @@ export class BotConfig {
   }
 }
 
-export const botConfig: BotConfig = (new BotConfig()).getData();
+export const agentConfig: AgentConfig = (new AgentConfig()).getData();
