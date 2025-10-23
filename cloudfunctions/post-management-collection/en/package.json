@@ -1,0 +1,13 @@
+{
+  "name": "post-management",
+  "description": "Post management Cloudbase function, includes collection operation examples",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7"
+  }
+}

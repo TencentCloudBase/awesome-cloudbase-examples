@@ -1,0 +1,13 @@
+{
+  "name": "book-management",
+  "description": "图书管理云函数，包含 models 操作示例。 Cloud function for library management, including examples of model operations.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7"
+  }
+}

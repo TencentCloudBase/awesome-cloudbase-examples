@@ -1,0 +1,14 @@
+{
+  "name": "custom-auth",
+  "description": "自定义鉴权登录云函数示例",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7",
+    "jsonwebtoken": "^9.0.1"
+  }
+}

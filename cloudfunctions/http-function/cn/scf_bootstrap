@@ -1,0 +1,3 @@
+#!/bin/bash
+
+node node_modules/@cloudbase/functions-framework/bin/tcb-ff.js --port=9000 --logDirname=/tmp/logs --interceptOutput=true --extendedContextKey=X-Cloudbase-Context

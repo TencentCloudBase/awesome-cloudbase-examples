@@ -1,0 +1,13 @@
+{
+  "name": "user-management",
+  "description": "User management Cloudbase function, includes SQL operation examples (currently only supports SELECT statements)",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7"
+  }
+}
