@@ -193,7 +193,7 @@ ${handleSearchDBResult.prompt}
     let fixHistoryList = this.fixHistory(history)
 
     // 如果没有传入历史信息，则从数据库中查询
-    if (fixHistoryList?.length > 0) {
+    if (!fixHistoryList || fixHistoryList?.length === 0) {
       fixHistoryList = await this.chatHistoryService.queryForLLM(
         this.botContext.info.botId,
         undefined,
