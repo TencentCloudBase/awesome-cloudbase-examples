@@ -43,19 +43,12 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-# from langgraph.config import get_stream_writer
-from langgraph.types import StreamWriter
-
 
 class State(MessagesState):
     tools: List[Any]
 
 
-def chat_node(state: State, config: Optional[RunnableConfig] = None, writer: StreamWriter = None) -> dict:
-    if writer is None:
-        def writer(x):
-            pass
-    
+def chat_node(state: State, config: Optional[RunnableConfig] = None) -> dict:
     try:
         # Create LangChain ChatOpenAI model from environment variables
         chat_model = ChatOpenAI(
@@ -81,9 +74,10 @@ def chat_node(state: State, config: Optional[RunnableConfig] = None, writer: Str
         system_message = SystemMessage(content="You are a helpful assistant.")
         messages = [system_message, *convert_to_openai_messages(state["messages"])]
 
+        # Stream through LangChain's standard streaming mechanism
+        # The streaming will be automatically captured by LangGraph and AG-Kit
         chunks = []
         for chunk in chat_model_with_tools.stream(messages, config):
-            writer({"messages": [chunk]})  # Stream chunk to client
             chunks.append(chunk)  # Collect for final message
 
         # Merge all chunks into complete AIMessage

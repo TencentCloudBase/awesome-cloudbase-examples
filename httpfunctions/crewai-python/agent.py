@@ -7,7 +7,7 @@ supports streaming responses.
 
 import os
 import sys
-import pysqlite3  # 安装：pip install pysqlite3-binary
+import pysqlite3
 from pathlib import Path
 
 os.environ.setdefault("HOME", "/tmp")
@@ -17,22 +17,8 @@ try:
 except Exception:  
     pass  
 
-# crewai_home = Path("/tmp/crewai")
-# crewai_home.mkdir(parents=True, exist_ok=True)
-
-sys.modules['sqlite3'] = pysqlite3  # 强制替换默认模块
-
-# # 强制重定向存储路径到 /tmp
-# sys.modules['crewai.utilities.paths'] = type(sys)('patch_module')
-# sys.modules['crewai.utilities.paths'].db_storage_path = lambda: crewai_home
-
-# # 确保环境变量设置
-# os.environ["CREWAI_HOME"] = str(crewai_home)
-# os.environ["CREWAI_DISABLE_MEMORY"] = "true"
-# os.environ["CREWAI_DISABLE_RAG"] = "true"
-
-# 兼容 cloudbase_agent_crewai 旧版内部 import cloudbase_agent.agents
-# 在 import crewai 之前设置存储路径  
+sys.modules['sqlite3'] = pysqlite3
+ 
 os.environ["HOME"] = "/tmp"
 os.environ["CREWAI_STORAGE_DIR"] = "/tmp"
 credentials_dir = Path("/tmp/.local/share/crewai/credentials")  
@@ -42,7 +28,7 @@ from crewai import Crew, Agent, Task
 
 try:
     from crewai.flow import Flow, start, persist
-except ModuleNotFoundError as exc:  # CrewAI Flow not installed
+except ModuleNotFoundError as exc:
     raise ImportError(
         "crewai.flow is required. Please install a CrewAI version that includes Flow (e.g., crewai>=1.7.2)."
     ) from exc
@@ -105,19 +91,17 @@ class AgenticChatFlow(Flow[CopilotKitState]):
             tools_arg = tools if tools else None  # qwen 兼容接口不接受空数组
 
             # Run the model and stream the response
-            # Note: copilotkit_stream wrapper enables proper streaming format
             stream = await acompletion(
                 model=model_name,
                 messages=[{"role": "system", "content": system_prompt}, *self.state.messages],
                 tools=tools_arg,
                 parallel_tool_calls=False,
-                stream=False,  # 同步拿结果，避免 __aiter__ 错误
+                stream=False, 
                 base_url=base_url,
                 api_key=api_key,
                 custom_llm_provider="openai",
             )
 
-            # 直接取完整结果（非流式），再手动向 event bus 推送文本 chunk，供 SSE 返回
             message = stream.choices[0].message
             content = message.content if hasattr(message, "content") else None
 
@@ -134,7 +118,6 @@ class AgenticChatFlow(Flow[CopilotKitState]):
                         ),
                     )
 
-            # Append the assistant's response to conversation history
             self.state.messages.append(message)
         except Exception as e:
             print(f"[CrewAI Flow Chat] {e}")
