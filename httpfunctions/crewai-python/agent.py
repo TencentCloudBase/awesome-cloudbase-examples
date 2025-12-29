@@ -1,0 +1,152 @@
+"""Agentic Chat Agent Implementation.
+
+This module implements a conversational chat agent using CrewAI Flow framework
+integrated with Cloudbase Agent. The agent uses LiteLLM for model interactions and
+supports streaming responses.
+"""
+
+import os
+import sys
+import pysqlite3  # 安装：pip install pysqlite3-binary
+from pathlib import Path
+
+os.environ.setdefault("HOME", "/tmp")
+_home = Path(os.environ["HOME"])  
+try:  
+    (_home / ".local" / "share" / "crewai").mkdir(parents=True, exist_ok=True)  
+except Exception:  
+    pass  
+
+# crewai_home = Path("/tmp/crewai")
+# crewai_home.mkdir(parents=True, exist_ok=True)
+
+sys.modules['sqlite3'] = pysqlite3  # 强制替换默认模块
+
+# # 强制重定向存储路径到 /tmp
+# sys.modules['crewai.utilities.paths'] = type(sys)('patch_module')
+# sys.modules['crewai.utilities.paths'].db_storage_path = lambda: crewai_home
+
+# # 确保环境变量设置
+# os.environ["CREWAI_HOME"] = str(crewai_home)
+# os.environ["CREWAI_DISABLE_MEMORY"] = "true"
+# os.environ["CREWAI_DISABLE_RAG"] = "true"
+
+# 兼容 cloudbase_agent_crewai 旧版内部 import cloudbase_agent.agents
+# 在 import crewai 之前设置存储路径  
+os.environ["HOME"] = "/tmp"
+os.environ["CREWAI_STORAGE_DIR"] = "/tmp"
+credentials_dir = Path("/tmp/.local/share/crewai/credentials")  
+credentials_dir.mkdir(parents=True, exist_ok=True) 
+  
+from crewai import Crew, Agent, Task
+
+try:
+    from crewai.flow import Flow, start, persist
+except ModuleNotFoundError as exc:  # CrewAI Flow not installed
+    raise ImportError(
+        "crewai.flow is required. Please install a CrewAI version that includes Flow (e.g., crewai>=1.7.2)."
+    ) from exc
+from litellm import acompletion
+from crewai.events.event_bus import crewai_event_bus
+from ag_ui.core import EventType
+from cloudbase_agent.crewai import CrewAIAgent
+from cloudbase_agent.crewai.converters import CopilotKitState
+from cloudbase_agent.crewai.context import flow_context
+from cloudbase_agent.crewai.events import BridgedTextMessageChunkEvent
+
+from dotenv import load_dotenv
+load_dotenv()
+
+class PatchedCrewAIAgent(CrewAIAgent):
+    """Override run to avoid BaseAgent.as_current cross-context reset."""
+
+    async def run(self, run_input):
+        if getattr(self, "_should_fix_event_ids", True):
+            async for event in self._run_internal(run_input):
+                yield super()._fix_event_ids(event, run_input.thread_id, run_input.run_id)
+        else:
+            async for event in self._run_internal(run_input):
+                yield event
+
+
+@persist()
+class AgenticChatFlow(Flow[CopilotKitState]):
+    """Conversational chat flow using CrewAI framework.
+
+    This flow implements a basic chat agent that processes user messages
+    and generates streaming responses using LiteLLM completion API.
+
+    :ivar state: Flow state containing conversation messages and CopilotKit context
+    :type state: CopilotKitState
+    """
+
+    @start()
+    async def chat(self) -> None:
+        """Process chat messages and generate streaming responses.
+
+        This method is the entry point of the flow. It sends messages to the LLM,
+        streams the response back, and updates the conversation state.
+
+        The method:
+        1. Constructs messages with system prompt and conversation history
+        2. Calls LiteLLM completion API with streaming enabled
+        3. Wraps the response in copilotkit_stream for proper formatting
+        4. Appends the assistant's response to conversation state
+
+        :raises Exception: If LLM completion fails or streaming encounters errors
+        """
+        system_prompt = "You are a helpful assistant."
+
+        try:
+            model_name = os.getenv("OPENAI_MODEL", "qwen-plus")
+            base_url = os.getenv("OPENAI_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+            api_key = os.getenv("OPENAI_API_KEY")
+            tools = getattr(self.state.copilotkit, "actions", [])
+            tools_arg = tools if tools else None  # qwen 兼容接口不接受空数组
+
+            # Run the model and stream the response
+            # Note: copilotkit_stream wrapper enables proper streaming format
+            stream = await acompletion(
+                model=model_name,
+                messages=[{"role": "system", "content": system_prompt}, *self.state.messages],
+                tools=tools_arg,
+                parallel_tool_calls=False,
+                stream=False,  # 同步拿结果，避免 __aiter__ 错误
+                base_url=base_url,
+                api_key=api_key,
+                custom_llm_provider="openai",
+            )
+
+            # 直接取完整结果（非流式），再手动向 event bus 推送文本 chunk，供 SSE 返回
+            message = stream.choices[0].message
+            content = message.content if hasattr(message, "content") else None
+
+            if content:
+                flow = flow_context.get(None)
+                if flow is not None:
+                    crewai_event_bus.emit(
+                        flow,
+                        BridgedTextMessageChunkEvent(
+                            type=EventType.TEXT_MESSAGE_CHUNK,
+                            message_id=getattr(message, "id", None) or stream.id,
+                            role="assistant",
+                            delta=content,
+                        ),
+                    )
+
+            # Append the assistant's response to conversation history
+            self.state.messages.append(message)
+        except Exception as e:
+            print(f"[CrewAI Flow Chat] {e}")
+
+
+def build_chat_workflow() -> AgenticChatFlow:
+    """Build and return a new chat workflow instance.
+
+    This factory function creates a fresh instance of AgenticChatFlow
+    for each conversation to ensure proper isolation.
+
+    :return: New instance of the chat workflow
+    :rtype: AgenticChatFlow
+    """
+    return AgenticChatFlow()
