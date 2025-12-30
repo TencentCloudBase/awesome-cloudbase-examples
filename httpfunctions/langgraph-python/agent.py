@@ -50,11 +50,23 @@ class State(MessagesState):
 
 def chat_node(state: State, config: Optional[RunnableConfig] = None) -> dict:
     try:
+        # Validate required environment variables
+        model_name = os.getenv("OPENAI_MODEL")
+        api_key = os.getenv("OPENAI_API_KEY")
+        base_url = os.getenv("OPENAI_BASE_URL")
+        
+        if not model_name:
+            raise ValueError("OPENAI_MODEL environment variable is not set")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        if not base_url:
+            raise ValueError("OPENAI_BASE_URL environment variable is not set")
+        
         # Create LangChain ChatOpenAI model from environment variables
         chat_model = ChatOpenAI(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            api_key=os.getenv("OPENAI_API_KEY"),
-            base_url=os.getenv("OPENAI_BASE_URL"),
+            model=model_name,
+            api_key=api_key,
+            base_url=base_url,
         )
 
         # Set default config if none provided
