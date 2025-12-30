@@ -1,0 +1,34 @@
+{
+  "name": "yuanqi-agent",
+  "description": "元器函数型智能体模板",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
+    "build:w": "tsc -w",
+    "dev:f": "dotenvx run -f .env.development -- tcb-ff --enableCors=true -w",
+    "preDeploy": "npm i && npm run build && rimraf ./node_modules",
+    "dev": "concurrently \"npm run build:w\" \"npm run dev:f\"",
+    "login": "tcb login",
+    "logout": "tcb logout",
+    "deploy": "tcb cloudrunfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/aiagent-framework": "1.0.0-beta.10",
+    "@cloudbase/functions-typings": "^1.0.0",
+    "@cloudbase/node-sdk": "^3.7.0",
+    "openai": "^4.77.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@cloudbase/cli": "^2.6.7",
+    "@cloudbase/functions-framework": "^1.6.0",
+    "@dotenvx/dotenvx": "^1.38.4",
+    "@types/node": "^22.10.5",
+    "concurrently": "^9.1.2",
+    "prettier": "3.5.3",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
