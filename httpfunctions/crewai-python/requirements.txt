@@ -1,0 +1,9 @@
+fastapi==0.125.0
+cloudbase-agent-server==0.1.11
+cloudbase-agent-core==0.1.11
+cloudbase-agent-crewai==0.1.11
+crewai==1.7.2
+pysqlite3-binary==0.5.4
+litellm==1.50.0
+openai==1.83.0
+python-dotenv==1.1.1
