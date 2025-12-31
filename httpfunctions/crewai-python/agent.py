@@ -81,11 +81,11 @@ class AgenticChatFlow(Flow[CopilotKitState]):
         system_prompt = "You are a helpful assistant."
 
         try:
-            model_name = os.getenv("OPENAI_MODEL", "qwen-plus")
-            base_url = os.getenv("OPENAI_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+            model_name = os.getenv("OPENAI_MODEL")
+            base_url = os.getenv("OPENAI_BASE_URL")
             api_key = os.getenv("OPENAI_API_KEY")
             tools = getattr(self.state.copilotkit, "actions", [])
-            tools_arg = tools if tools else None  # qwen 兼容接口不接受空数组
+            tools_arg = tools if tools else None
 
             # Run the model and stream the response
             stream = await acompletion(
