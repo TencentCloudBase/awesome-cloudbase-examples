@@ -10,19 +10,16 @@ import sys
 import pysqlite3
 from pathlib import Path
 
-os.environ.setdefault("HOME", "/tmp")
-_home = Path(os.environ["HOME"])  
-try:  
-    (_home / ".local" / "share" / "crewai").mkdir(parents=True, exist_ok=True)  
-except Exception:  
-    pass  
-
-sys.modules['sqlite3'] = pysqlite3
- 
+# Configure HOME and CrewAI storage directories for SCF environment
 os.environ["HOME"] = "/tmp"
 os.environ["CREWAI_STORAGE_DIR"] = "/tmp"
-credentials_dir = Path("/tmp/.local/share/crewai/credentials")  
-credentials_dir.mkdir(parents=True, exist_ok=True) 
+
+# Create required directories
+credentials_dir = Path("/tmp/.local/share/crewai/credentials")
+credentials_dir.mkdir(parents=True, exist_ok=True)
+
+# Replace sqlite3 with pysqlite3 for SCF compatibility
+sys.modules['sqlite3'] = pysqlite3 
   
 from crewai import Crew, Agent, Task
 
@@ -35,7 +32,7 @@ except ModuleNotFoundError as exc:
 from litellm import acompletion
 from crewai.events.event_bus import crewai_event_bus
 from ag_ui.core import EventType
-from cloudbase_agent.crewai import CrewAIAgent
+from cloudbase_agent.crewai import CrewAIAgent as _BaseCrewAIAgent
 from cloudbase_agent.crewai.converters import CopilotKitState
 from cloudbase_agent.crewai.context import flow_context
 from cloudbase_agent.crewai.events import BridgedTextMessageChunkEvent
@@ -43,7 +40,7 @@ from cloudbase_agent.crewai.events import BridgedTextMessageChunkEvent
 from dotenv import load_dotenv
 load_dotenv()
 
-class PatchedCrewAIAgent(CrewAIAgent):
+class CrewAIAgent(_BaseCrewAIAgent):
     """Override run to avoid BaseAgent.as_current cross-context reset."""
 
     async def run(self, run_input):
