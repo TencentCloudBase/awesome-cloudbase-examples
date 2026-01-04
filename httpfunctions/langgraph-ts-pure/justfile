@@ -1,0 +1,7 @@
+build-zip:
+  @source $HOME/.nvm/nvm.sh && nvm use 20 && node -v
+  npm i
+  npm run build
+  rm -fr node_modules
+  npm i --production
+  zip -r langgraph.zip src/ node_modules/ .env.example Dockerfile package.json README.md scf_bootstrap
