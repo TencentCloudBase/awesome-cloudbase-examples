@@ -1,12 +1,9 @@
 {
-  "name": "langchain-ts",
+  "name": "langchain-js",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.js",
   "type": "module",
-  "scripts": {
-    "build": "tsc"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
