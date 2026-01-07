@@ -2,7 +2,6 @@
   "name": "langchain-ts",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "type": "module",
@@ -11,17 +10,11 @@
       "import": {
         "types": "./dist/esm/index.d.ts",
         "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/cjs/index.d.ts",
-        "default": "./dist/cjs/index.js"
       }
     }
   },
   "scripts": {
-    "build": "npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json"
+    "build": "tsc -p tsconfig.esm.json"
   },
   "keywords": [],
   "author": "",
@@ -41,8 +34,8 @@
     "rxjs": "7.8.1"
   },
   "dependencies": {
-    "@cloudbase/agent-adapter-langchain": "0.0.8",
-    "@cloudbase/agent-server": "0.0.8",
+    "@cloudbase/agent-adapter-langchain": "0.0.9",
+    "@cloudbase/agent-server": "0.0.9",
     "@dotenvx/dotenvx": "^1.51.1",
     "@langchain/core": "^1.1.8",
     "@langchain/langgraph": "^1.0.4",
