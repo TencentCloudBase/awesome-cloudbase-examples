@@ -21,6 +21,5 @@ npm run build
 ## 启动服务
 
 ```bash
-node dist/cjs/index.js
+node dist/esm/index.js
 ```
-
