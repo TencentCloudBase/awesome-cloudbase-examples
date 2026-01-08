@@ -57,14 +57,8 @@
         <text @click="goBack" class="link-text">返回</text>
       </view>
     </view>
-    
-    <!-- 加载提示 -->
-    <view v-if="loading" class="loading-mask">
-      <view class="loading-content">
-        <text>{{ loadingText }}</text>
-      </view>
-    </view>
   </view>
+  <show-captcha />
 </template>
 
 <script setup lang="ts">
@@ -76,7 +70,6 @@ const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const loading = ref(false)
-const loadingText = ref('')
 const usernameType = ref('')
 
 // 计算属性
@@ -145,7 +138,9 @@ const handleLogin = async () => {
   
   try {
     loading.value = true
-    loadingText.value = '登录中...'
+    uni.showLoading({
+      title: '登录中...'
+    })
     
     const loginResult = await signInWithPassword(username.value.trim(), password.value)
     
@@ -177,6 +172,7 @@ const handleLogin = async () => {
     })
   } finally {
     loading.value = false
+    uni.hideLoading()
   }
 }
 
@@ -315,6 +311,7 @@ const goBack = () => {
 .login-btn {
   width: 100%;
   height: 88rpx;
+  line-height: 88rpx;
   background: #667eea;
   color: white;
   border: none;

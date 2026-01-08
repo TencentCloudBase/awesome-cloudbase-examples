@@ -70,7 +70,7 @@
       <button class="btn btn-secondary" @click="queryRecords" :disabled="loading">
         查询数据
       </button>
-      <view v-if="records.length > 0" class="records-list">
+      <view v-if="records && records.length > 0" class="records-list">
         <text class="result-title">数据库记录:</text>
         <view v-for="(record, index) in records" :key="index" class="record-item">
           <text class="record-text">{{ record.content }} ({{ record.createTime }})</text>
@@ -137,7 +137,7 @@ import { ref, onMounted } from 'vue'
 import {
   app,
   initCloudBase,
-  ensureLogin,
+  checkLogin,
   logout,
   checkEnvironment,
   isValidEnvId
@@ -209,13 +209,17 @@ const handleLogin = async () => {
   }
   loading.value = true
   try {
-    await ensureLogin()
+    const status = await checkLogin()
+    if (!status) {
+      throw new Error('未登录')
+    }
+
     loginStatus.value = '已登录'
     uni.showToast({ title: '登录成功', icon: 'success' })
   } catch (error) {
     console.error('登录失败:', error)
-    loginStatus.value = '登录失败'
-    uni.showToast({ title: '登录失败', icon: 'error' })
+    loginStatus.value = '未登录'
+    uni.showToast({ title: '未登录', icon: 'error' })
   } finally {
     loading.value = false
   }
@@ -302,10 +306,14 @@ const addRecord = async () => {
   loading.value = true
   try {
     const db = app.database()
-    await db.collection('test').add({
+    const res = await db.collection('test').add({
       content: newRecord.value,
       createTime: new Date().toLocaleString()
     })
+    
+    if (res.code) {
+      throw new Error(res.message)
+    }
     newRecord.value = ''
     uni.showToast({ title: '添加成功', icon: 'success' })
     await queryRecords() // 自动刷新列表

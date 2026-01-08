@@ -12,11 +12,11 @@ function App() {
     // 初始化登录
     const initAuth = async () => {
       try {
-        console.log("开始登录...");
-        await cloudbase.ensureLogin();
-        console.log("登录成功");
+        console.log("开始检查登录态...");
+        await cloudbase.checkLogin();
+        console.log("检查登录态成功");
       } catch (error) {
-        console.error("登录失败", error);
+        console.error("检查登录态失败", error);
       } finally {
         setLoading(false);
       }

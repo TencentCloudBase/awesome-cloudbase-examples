@@ -59,12 +59,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onUnmounted, onMounted } from 'vue'
-import { getPhoneVerification, signInWithPhoneCode, ensureLogin } from '../../utils/cloudbase'
+import { signInWithOtp } from '../../utils/cloudbase'
 
 // 响应式数据
 const phoneNumber = ref('')
 const verificationCode = ref('')
-const verificationInfo = ref<any>(null)
+const verifyOtp = ref<any>(null)
 const countdown = ref(0)
 const loading = ref(false)
 const loadingText = ref('')
@@ -78,7 +78,7 @@ const isPhoneValid = computed(() => {
 })
 
 const canLogin = computed(() => {
-  return isPhoneValid.value && verificationCode.value.length === 6 && verificationInfo.value
+  return isPhoneValid.value && verificationCode.value.length === 6 && verifyOtp.value
 })
 
 // 获取验证码
@@ -95,8 +95,8 @@ const getVerificationCode = async () => {
     loading.value = true
     loadingText.value = '发送验证码中...'
     
-    const result = await getPhoneVerification(phoneNumber.value)
-    verificationInfo.value = result
+    const result = await signInWithOtp({ phone: phoneNumber.value })
+    verifyOtp.value = result
     
     uni.showToast({
       title: '验证码发送成功',
@@ -142,12 +142,13 @@ const handleLogin = async () => {
   try {
     loading.value = true
     loadingText.value = '登录中...'
-    await signInWithPhoneCode({
-      verificationInfo: verificationInfo.value,
-      verificationCode: verificationCode.value,
-      phoneNum: phoneNumber.value
-    })
+
+    const { error } = await verifyOtp.value({ token: verificationCode.value })
     
+    if (error) {
+      throw error
+    }
+
     uni.showToast({
       title: '登录成功',
       icon: 'success'
@@ -258,6 +259,7 @@ onUnmounted(() => {
 .get-code-btn {
   width: 200rpx;
   height: 88rpx;
+  line-height: 88rpx;
   background: #667eea;
   color: white;
   border: none;
@@ -274,6 +276,7 @@ onUnmounted(() => {
 .login-btn {
   width: 100%;
   height: 88rpx;
+  line-height: 88rpx;
   background: #667eea;
   color: white;
   border: none;
