@@ -58,6 +58,25 @@ exports.main = async (event, context) => {
 };
 ```
 
+### Cloud Function Configuration for AI Models
+
+⚠️ **Important:** When creating cloud functions that use AI models (especially `generateImage()` and large language model generation), set a longer timeout as these operations can be slow.
+
+**Using MCP Tool `createFunction`:**
+
+Set the `timeout` parameter in the `func` object:
+
+- **Parameter**: `func.timeout` (number)
+- **Unit**: seconds
+- **Range**: 1 - 900
+- **Default**: 20 seconds (usually too short for AI operations)
+
+**Recommended timeout values:**
+- **Text generation (`generateText`)**: 60-120 seconds
+- **Streaming (`streamText`)**: 60-120 seconds  
+- **Image generation (`generateImage`)**: 300-900 seconds (recommended: 900s)
+- **Combined operations**: 900 seconds (maximum allowed)
+
 ### In Regular Node.js Server
 
 ```js
