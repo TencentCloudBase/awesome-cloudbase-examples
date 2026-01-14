@@ -1,5 +1,5 @@
 fastapi==0.115.0
-cloudbase-agent-server==0.1.11
+cloudbase-agent-server==0.1.12
 cloudbase-agent-langgraph==0.1.11
 cloudbase-agent-core==0.1.11
 langgraph==1.0.5
@@ -7,3 +7,4 @@ langchain-openai==1.1.6
 ag-ui-protocol==0.1.10
 ag-ui-langgraph==0.0.22
 python-dotenv==1.0.1
+zstandard>=0.22.0
