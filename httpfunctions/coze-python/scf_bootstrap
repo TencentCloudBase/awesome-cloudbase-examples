@@ -1,0 +1,3 @@
+#!/bin/bash
+export PYTHONPATH="./env:$PYTHONPATH"
+/var/lang/python310/bin/python3 -u app.py
