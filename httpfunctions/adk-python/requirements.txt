@@ -1,0 +1,19 @@
+# 核心工具
+python-dotenv==1.0.1
+
+# CloudBase Agent 框架（包含 FastAPI 依赖）
+cloudbase-agent-server==0.1.12
+cloudbase-agent-core==0.1.11
+cloudbase-agent-adk==0.1.0
+
+# Google ADK 支持（包含 C 扩展，需要本地编译）
+google-adk>=1.22.0
+
+# LiteLLM - 多模型支持（必需）
+litellm>=1.50.0
+
+# AG-UI 协议支持
+ag-ui-adk>=0.4.1
+
+# 其他依赖
+zstandard>=0.22.0

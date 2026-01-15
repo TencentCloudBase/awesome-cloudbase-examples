@@ -1,0 +1,4 @@
+cloudbase-agent-core==0.1.11
+cloudbase-agent-server==0.1.14
+cloudbase-agent-coze==0.1.14
+cozepy>=0.20.0

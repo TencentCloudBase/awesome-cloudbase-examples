@@ -7,38 +7,23 @@ supports streaming responses.
 
 import os
 import sys
-import pysqlite3
 from pathlib import Path
-
-# Configure HOME and CrewAI storage directories for SCF environment
-os.environ["HOME"] = "/tmp"
-os.environ["CREWAI_STORAGE_DIR"] = "/tmp"
-
-# Create required directories
-credentials_dir = Path("/tmp/.local/share/crewai/credentials")
-credentials_dir.mkdir(parents=True, exist_ok=True)
-
-# Replace sqlite3 with pysqlite3 for SCF compatibility
-sys.modules['sqlite3'] = pysqlite3 
-  
-from crewai import Crew, Agent, Task
-
-try:
-    from crewai.flow import Flow, start, persist
-except ModuleNotFoundError as exc:
-    raise ImportError(
-        "crewai.flow is required. Please install a CrewAI version that includes Flow (e.g., crewai>=1.7.2)."
-    ) from exc
-from litellm import acompletion
-from crewai.events.event_bus import crewai_event_bus
-from ag_ui.core import EventType
-from cloudbase_agent.crewai import CrewAIAgent as _BaseCrewAIAgent
-from cloudbase_agent.crewai.converters import CopilotKitState
-from cloudbase_agent.crewai.context import flow_context
-from cloudbase_agent.crewai.events import BridgedTextMessageChunkEvent
-
 from dotenv import load_dotenv
-load_dotenv()
+
+# Configure environment for SCF compatibility
+os.environ["HOME"] = "/tmp"
+
+import pysqlite3
+sys.modules['sqlite3'] = pysqlite3
+
+# Force override environment variables with .env file values
+load_dotenv(override=True)
+
+from crewai.flow import Flow, start, persist
+from litellm import acompletion
+from cloudbase_agent.crewai import CrewAIAgent as _BaseCrewAIAgent
+from cloudbase_agent.crewai.converters import CopilotKitState, copilotkit_stream
+
 
 class CrewAIAgent(_BaseCrewAIAgent):
     """Override run to avoid BaseAgent.as_current cross-context reset."""
@@ -58,25 +43,17 @@ class AgenticChatFlow(Flow[CopilotKitState]):
 
     This flow implements a basic chat agent that processes user messages
     and generates streaming responses using LiteLLM completion API.
-
-    :ivar state: Flow state containing conversation messages and CopilotKit context
-    :type state: CopilotKitState
     """
 
     @start()
     async def chat(self) -> None:
         """Process chat messages and generate streaming responses.
 
-        This method is the entry point of the flow. It sends messages to the LLM,
-        streams the response back, and updates the conversation state.
-
-        The method:
+        This method:
         1. Constructs messages with system prompt and conversation history
         2. Calls LiteLLM completion API with streaming enabled
-        3. Wraps the response in copilotkit_stream for proper formatting
+        3. Uses copilotkit_stream to automatically emit all required events
         4. Appends the assistant's response to conversation state
-
-        :raises Exception: If LLM completion fails or streaming encounters errors
         """
         system_prompt = "You are a helpful assistant."
 
@@ -84,6 +61,7 @@ class AgenticChatFlow(Flow[CopilotKitState]):
             model_name = os.getenv("OPENAI_MODEL")
             base_url = os.getenv("OPENAI_BASE_URL")
             api_key = os.getenv("OPENAI_API_KEY")
+            
             tools = getattr(self.state.copilotkit, "actions", [])
             tools_arg = tools if tools else None
 
@@ -93,31 +71,33 @@ class AgenticChatFlow(Flow[CopilotKitState]):
                 messages=[{"role": "system", "content": system_prompt}, *self.state.messages],
                 tools=tools_arg,
                 parallel_tool_calls=False,
-                stream=False, 
+                stream=True,
                 base_url=base_url,
                 api_key=api_key,
                 custom_llm_provider="openai",
             )
 
-            message = stream.choices[0].message
-            content = message.content if hasattr(message, "content") else None
+            # Use copilotkit_stream to handle all events automatically
+            response = await copilotkit_stream(stream)
 
-            if content:
-                flow = flow_context.get(None)
-                if flow is not None:
-                    crewai_event_bus.emit(
-                        flow,
-                        BridgedTextMessageChunkEvent(
-                            type=EventType.TEXT_MESSAGE_CHUNK,
-                            message_id=getattr(message, "id", None) or stream.id,
-                            role="assistant",
-                            delta=content,
-                        ),
-                    )
+            # Extract message from response
+            message = response.choices[0].message
 
-            self.state.messages.append(message)
+            message_dict = {
+                "role": message.role,
+                "content": message.content,
+            }
+            # Add optional fields if present
+            if hasattr(message, "tool_calls") and message.tool_calls:
+                message_dict["tool_calls"] = message.tool_calls
+            if hasattr(message, "name") and message.name:
+                message_dict["name"] = message.name
+
+            self.state.messages.append(message_dict)
         except Exception as e:
             print(f"[CrewAI Flow Chat] {e}")
+            import traceback
+            traceback.print_exc()
 
 
 def build_chat_workflow() -> AgenticChatFlow:
@@ -125,8 +105,5 @@ def build_chat_workflow() -> AgenticChatFlow:
 
     This factory function creates a fresh instance of AgenticChatFlow
     for each conversation to ensure proper isolation.
-
-    :return: New instance of the chat workflow
-    :rtype: AgenticChatFlow
     """
     return AgenticChatFlow()

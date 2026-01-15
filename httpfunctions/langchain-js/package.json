@@ -22,8 +22,8 @@
     "rxjs": "7.8.1"
   },
   "dependencies": {
-    "@cloudbase/agent-adapter-langchain": "0.0.9",
-    "@cloudbase/agent-server": "0.0.9",
+    "@cloudbase/agent-adapter-langchain": "0.0.11",
+    "@cloudbase/agent-server": "0.0.11",
     "@dotenvx/dotenvx": "^1.51.1",
     "@langchain/core": "^1.1.8",
     "@langchain/langgraph": "^1.0.4",
