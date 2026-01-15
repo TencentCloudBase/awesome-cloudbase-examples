@@ -1,0 +1,21 @@
+---
+description: To use the AnyDev 云研发 integration, you must first read this rule to fully implement the integration.
+alwaysApply: false
+---
+
+Connect the current project to Anydev
+
+<workflow>
+Project deployment requires the following steps:
+0. 最重要的,部署执行命令需要使用root身份 sudo命令, 并且部署 web server服务的时候必须使用nohup
+例如:
+- 执行命令: {"command": "sudo ls -la", "timeout": 5000}
+
+- 执行命令进行部署示例(python版): {"command": "sudo nohup python3 -m http.server 8080 > /dev/null 2>&1 &", "timeout": 5000}
+
+
+1. First, use select_environment to interactively select the environment.
+2. After selecting the environment, compile and package the environment (if the packaged product is a folder, compress it into a single file) and upload it using file_upload.
+3. Then, use the webshell tool to execute commands,The default configuration commands require the use of [nohup] and redirect output unless nohup is specified,You need to check whether the original service exists and whether the port is occupied. If it exists or is occupied, you need to shut down the original service first., decompress, and deploy(After the command is executed, the session will be closed. You need to use nohup and redirect the output to a file for deployment).
+4. Finally, provide access information to the user.
+</workflow>
