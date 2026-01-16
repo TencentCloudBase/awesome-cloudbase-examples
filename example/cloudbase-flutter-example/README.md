@@ -1,11 +1,11 @@
-# CloudBase Flutter 模板
+# CloudBase Flutter Demo
 
 基于 Flutter 和腾讯云开发（CloudBase）的跨平台移动应用模板，为开发者提供了快速构建全栈移动应用的能力。
 
 
 [![Powered by CloudBase](https://7463-tcb-advanced-a656fc-1257967285.tcb.qcloud.la/mcp/powered-by-cloudbase-badge.svg)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)  
 
-> 本项目基于 [**CloudBase AI ToolKit**](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit) 开发，通过AI提示词和 MCP 协议+云开发，让开发更智能、更高效，支持AI生成全栈代码、一键部署至腾讯云开发（免服务器）、智能日志修复。
+> 本项目基于 [**cloudbase_flutter**](https://pub.dev/packages/cloudbase_flutter) 开发。
 
 ## 项目特点
 
@@ -118,6 +118,14 @@ flutter build web --release
 ├── pubspec.yaml          # 项目依赖配置
 └── analysis_options.yaml # 代码分析配置
 ```
+
+## 效果展示
+
+<p>
+<img src="https://qcloudimg.tencent-cloud.cn/raw/f7bbc1fb7fc9250ddf81dd1d9765c9f1.jpg" width="32%" />
+<img src="https://qcloudimg.tencent-cloud.cn/raw/7fb7566335cfcf1559b81a79d7193752.jpg" width="32%" />
+<img src="https://qcloudimg.tencent-cloud.cn/raw/fdc7aee3731dc1d321d12e18adade045.jpg" width="32%" />
+</p>
 
 ## 云开发功能说明
 
