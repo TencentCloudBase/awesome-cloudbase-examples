@@ -1,22 +1,32 @@
 import cloudbase from "@cloudbase/js-sdk";
 
 // 云开发环境ID，使用时请替换为您的环境ID
-const ENV_ID = import.meta.env.VITE_ENV_ID || "your-env-id";
+export const ENV_ID = import.meta.env.VITE_ENV_ID || "your-env-id";
 
 // 检查环境ID是否已配置
-const isValidEnvId = ENV_ID && ENV_ID !== "your-env-id";
+export const isValidEnvId = ENV_ID && ENV_ID !== "your-env-id";
+
+// 客户端Publishable Key, 可前往https://tcb.cloud.tencent.com/dev?envId={env}#/env/apikey获取
+const PUBLISHABLE_KEY =  import.meta.env.VITE_PUBLISHABLE_KEY || "";
 
 /**
  * 初始化云开发实例
  * @param {Object} config - 初始化配置
  * @param {string} config.env - 环境ID，默认使用ENV_ID
  * @param {number} config.timeout - 超时时间，默认15000ms
+ * @param {number} config.accessKey - 客户端Publishable Key，默认使用PUBLISHABLE_KEY
  */
-export const init = (config: { env?: string; timeout?: number } = {}) => {
+export const init = (config: { env?: string; timeout?: number; accessKey?: string; } = {}) => {
   const appConfig = {
     env: config.env || ENV_ID,
     timeout: config.timeout || 15000,
+    accessKey: config.accessKey || PUBLISHABLE_KEY,
+    auth: { detectSessionInUrl: true },
   };
+
+  if (!appConfig.accessKey) {
+    console.warn("客户端 Publishable Key 未配置");
+  }
 
   return cloudbase.init(appConfig);
 };
@@ -39,67 +49,68 @@ export const checkEnvironment = () => {
   return true;
 };
 
+type AuthInstance = ReturnType<typeof app.auth>;
+type SignInRes = Awaited<ReturnType<AuthInstance["getSession"]>>;
+
+interface OfflineLoginState {
+  isLoggedIn: boolean;
+  user: {
+    uid: string;
+    isAnonymous: boolean;
+  };
+}
+
 /**
- * 确保用户已登录（如未登录会执行匿名登录）
+ * 检查用户登录态
+ * @returns {Promise} 登录状态
  */
-export const ensureLogin = async () => {
+export const checkLogin = async (): Promise<
+  SignInRes['data']['session'] | OfflineLoginState
+> => {
   // 检查环境配置
   if (!checkEnvironment()) {
     throw new Error("环境ID未配置");
   }
 
-  const auth = app.auth();
+  const auth = app.auth;
 
   try {
     // 检查当前登录状态
-    const loginState = await auth.getLoginState();
+    let { data } = await auth.getSession();
 
-    if (loginState) {
-      // 已登录，返回当前状态
+    if (data.session) {
       console.log("用户已登录");
-      return loginState;
+
+      return data.session;
     } else {
-      // 未登录，执行登录
-      console.log("用户未登录，执行登录...");
-
-      // 默认采用匿名登录,
-      await auth.signInAnonymously();
-      // 也可以换成跳转SDK 内置的登录页面，支持账号密码登录/手机号登录/微信登录
-      // await auth.toDefaultLoginPage()
-
-      const loginState = await auth.getLoginState();
-      return loginState;
+      throw new Error("用户未登录");
     }
   } catch (error) {
-    console.error("确保登录失败:", error);
+    console.warn(error);
+    
+    let { data } = await auth.getClaims();
 
-    // 即使登录失败，也返回一个降级的登录状态，确保应用可以继续运行
-    console.warn("使用降级登录状态，应用将以离线模式运行");
+    if (data.claims?.sub === "anon") {
+      console.log("将使用 Publishable Key 进行访问");
+    }
+
     return {
-      isLoggedIn: true,
+      isLoggedIn: false,
       user: {
-        uid: "offline_" + Date.now(),
+        uid: data.claims?.sub || '',
         isAnonymous: true,
-        isOffline: true,
       },
     };
   }
 };
 
 /**
- * 退出登录（注意：匿名登录无法退出）
+ * 退出登录
  */
-export const logout = async () => {
-  const auth = app.auth();
+export const logout = async (): Promise<{ success: boolean; message: string }> => {
+  const auth = app.auth;
 
   try {
-    const loginScope = await auth.loginScope();
-
-    if (loginScope === "anonymous") {
-      console.warn("匿名登录状态无法退出");
-      return { success: false, message: "匿名登录状态无法退出" };
-    }
-
     await auth.signOut();
     return { success: true, message: "已成功退出登录" };
   } catch (error) {
@@ -108,10 +119,11 @@ export const logout = async () => {
   }
 };
 
+// 默认导出
 export default {
   init,
   app,
-  ensureLogin,
+  checkLogin,
   logout,
   checkEnvironment,
   isValidEnvId,

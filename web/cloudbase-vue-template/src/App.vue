@@ -22,17 +22,17 @@ import { onMounted, ref } from "vue";
 import { RouterView } from "vue-router";
 import AppNavbar from "./components/AppNavbar.vue";
 import AppFooter from "./components/HomeFooter.vue";
-import { ensureLogin } from "./utils/cloudbase.js";
+import { checkLogin } from "./utils/cloudbase.js";
 
 const isLoading = ref(true);
 
 onMounted(async () => {
   try {
-    console.log("开始登录...");
-    await ensureLogin();
-    console.log("登录成功");
+    console.log("开始检查登录态...");
+    await checkLogin();
+    console.log("检查登录态成功");
   } catch (error) {
-    console.error("登录失败", error);
+    console.error("检查登录态失败", error);
   } finally {
     isLoading.value = false;
   }

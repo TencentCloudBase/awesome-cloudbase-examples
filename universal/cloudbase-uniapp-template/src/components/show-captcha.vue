@@ -117,6 +117,7 @@ const handleRefresh = async () => {
 // 打开验证码弹窗
 const openCaptcha = (data: any) => {
   console.log('打开验证码弹窗:', data)
+  uni.hideLoading()
   captchaData.value = data
   state.value = data.state
   captchaCode.value = ''
