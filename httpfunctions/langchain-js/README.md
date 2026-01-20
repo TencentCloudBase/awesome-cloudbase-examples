@@ -36,6 +36,7 @@
 | `OPENAI_API_KEY` | ✅ | OpenAI API 密钥或兼容服务的 API 密钥 |
 | `OPENAI_BASE_URL` | ✅ | API 基础地址，如 `https://api.openai.com/v1` |
 | `OPENAI_MODEL` | ✅ | 模型名称，如 `gpt-4o` 或 `gpt-3.5-turbo` |
+| `LOG_LEVEL` | ❌ | 日志级别，可选值：`trace`/`debug`/`info`/`warn`/`error`/`fatal`，默认 `info` |
 
 复制 `.env.example` 并重命名为 `.env`，填入实际值：
 
@@ -100,17 +101,6 @@ curl 'https://{envId}.api.tcloudbasegateway.com/v1/aibot/bots/{agentId}/send-mes
   }'
 ```
 
-### 请求参数
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `threadId` | string | 否 | 会话 ID，用于多轮对话 |
-| `runId` | string | 否 | 运行 ID |
-| `messages` | array | 是 | 消息列表，包含 id、role、content |
-| `tools` | array | 否 | 客户端工具列表 |
-| `context` | array | 否 | 上下文信息 |
-| `state` | object | 否 | 自定义状态数据 |
-
 更多调用方式请参考官方文档：[cURL 调用](https://docs.cloudbase.net/ai/agent-development/integration/curl)
 
 ## 项目结构
@@ -123,8 +113,7 @@ curl 'https://{envId}.api.tcloudbasegateway.com/v1/aibot/bots/{agentId}/send-mes
 ├── .env.example       # 环境变量示例
 ├── Dockerfile         # 云托管部署配置
 ├── scf_bootstrap      # 云函数启动脚本
-├── package.json       # 依赖配置
-└── package-lock.json  # 依赖锁定文件
+└── package.json       # 依赖配置
 ```
  
 ## 部署到 CloudBase

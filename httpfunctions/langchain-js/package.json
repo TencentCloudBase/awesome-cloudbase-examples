@@ -24,8 +24,8 @@
     "memfs": "4.55.0"
   },
   "dependencies": {
-    "@cloudbase/agent-adapter-langchain": "0.0.12",
-    "@cloudbase/agent-server": "0.0.12",
+    "@cloudbase/agent-adapter-langchain": "0.0.13",
+    "@cloudbase/agent-server": "0.0.13",
     "@dotenvx/dotenvx": "^1.51.1",
     "@langchain/core": "^1.1.8",
     "@langchain/langgraph": "^1.0.4",
@@ -33,6 +33,7 @@
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "langchain": "^1.1.5",
+    "pino": "^10.2.1",
     "zod": "^3.25.76"
   }
 }
