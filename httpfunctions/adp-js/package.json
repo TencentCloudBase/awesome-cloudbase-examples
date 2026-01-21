@@ -1,0 +1,29 @@
+{
+  "name": "adp-js",
+  "version": "1.0.0",
+  "description": "ADP JavaScript Agent 模板",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@cloudbase/agent-adapter-adp": "1.0.1-alpha.8",
+    "@cloudbase/agent-server": "0.0.11",
+    "@dotenvx/dotenvx": "^1.51.1",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "jwt-decode": "^4.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "rxjs": "7.8.1"
+    }
+  },
+  "overrides": {
+    "rxjs": "7.8.1"
+  }
+}
