@@ -51,7 +51,7 @@ app.use(express.json());
 app.use(detectCloudbaseUserMiddleware); // 提取用户信息
 ```
 
-`detectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并将其注入到 `forwardedProps.userId` 中。这样 Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。
+`detectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并将其注入到 `forwardedProps.visitorBizId` 中。这样 Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。
 
 ### 历史消息处理机制
 
