@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@cloudbase/agent-adapter-adp": "^1.0.1-alpha.7",
+    "@cloudbase/agent-adapter-adp": "1.0.1-alpha.8",
     "@cloudbase/agent-server": "0.0.11",
     "@dotenvx/dotenvx": "^1.51.1",
     "cors": "^2.8.5",
