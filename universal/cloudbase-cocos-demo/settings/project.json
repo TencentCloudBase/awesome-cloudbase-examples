@@ -1,0 +1,10 @@
+{
+  "engine": "cocos-creator",
+  "packages": "https://packages.cocos.com/simple/",
+  "version": "3.8.0",
+  "id": "cloudbase-cocos-demo",
+  "name": "cloudbase-cocos-demo",
+  "creator": {
+    "version": "3.8.0"
+  }
+}
