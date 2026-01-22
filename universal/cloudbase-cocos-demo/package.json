@@ -8,7 +8,7 @@
     "lint": "eslint assets/scripts/**/*.ts"
   },
   "dependencies": {
-    "@cloudbase/adapter-cocos_native": "^0.1.2",
+    "@cloudbase/adapter-cocos_native": "^1.0.0",
     "@cloudbase/js-sdk": "^2.25.1"
   },
   "devDependencies": {

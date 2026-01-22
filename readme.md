@@ -91,6 +91,8 @@
 
 - [Flutter 应用示例](./universal/cloudbase-flutter-demo) - 基于 Flutter 的云开发跨端应用示例，支持 iOS、Android 和 Web 平台
 
+- [Cocos 应用示例](./universal/cloudbase-cocos-demo) - 基于 Cocos Creator 的云开发跨端应用示例，支持 iOS、Android 和 Web 平台
+
 
 ### ⚡ 函数型托管
 
