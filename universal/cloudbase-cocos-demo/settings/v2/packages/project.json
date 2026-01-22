@@ -1,0 +1,12 @@
+{
+  "current_scene": "db://assets/scenes/main.scene",
+  "start_scene": "db://assets/scenes/main.scene",
+  "__version__": "1.0.6",
+  "general": {
+    "designResolution": {
+      "fitHeight": false,
+      "width": 720,
+      "height": 1280
+    }
+  }
+}
