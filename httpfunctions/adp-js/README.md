@@ -79,17 +79,13 @@ ADP 会自动管理对话历史的保存与恢复，开发者**无需**在客户
 
 ### Agent 实例创建
 
-在 `createAgent` 函数的参数中，管理 Agent 实例的配置，可以调整 ADP 应用密钥与优先模型配置等：
+在 `createAgent` 函数的参数中，管理 Agent 实例的配置，可以调整 ADP 应用密钥等配置，详细请查看 `@cloudbase/agent-adapter-adp` 包文档：
 
 ```javascript
 function createAgent() {
-  const agent = new MyAgent({
+  const agent = new AdpAgent({
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
-      credential: {
-        secretId: process.env.TENCENTCLOUD_SECRETID || "",
-        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
-      },
     },
   });
   return { agent };
@@ -132,10 +128,6 @@ npm install
 ```env
 # ADP 应用密钥（必填）
 ADP_APP_KEY=your_adp_app_key_here
-
-# 腾讯云 API 密钥（选填）
-TENCENTCLOUD_SECRETID=your_secret_id_here
-TENCENTCLOUD_SECRETKEY=your_secret_key_here
 ```
 
 ### 第 3 步：启动服务
@@ -172,6 +164,72 @@ curl -X POST http://localhost:9000/send-message \
   }'
 ```
 
+### 带用户认证的请求
+
+```bash
+curl -X POST http://localhost:9000/send-message \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "threadId": "test-thread-123",
+    "runId": "test-run-002",
+    "messages": [
+      {
+        "id": "msg-1",
+        "role": "user",
+        "content": "你好"
+      }
+    ],
+    "tools": [],
+    "context": [],
+    "state": {},
+    "forwardedProps": {}
+  }'
+```
+
+### 传递自定义参数
+
+```bash
+curl -X POST http://localhost:9000/send-message \
+  -H "Content-Type: application/json" \
+  -d '{
+    "threadId": "test-thread-123",
+    "runId": "test-run-005",
+    "messages": [
+      {
+        "id": "msg-1",
+        "role": "user",
+        "content": "你好"
+      }
+    ],
+    "tools": [],
+    "context": [],
+    "state": {},
+    "forwardedProps": {
+      "modelName": "gpt-4",
+      "customKey": "customValue"
+    }
+  }'
+```
+
+### 使用 OpenAI 兼容接口
+
+```bash
+curl -X POST http://localhost:9000/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "你好"
+      }
+    ],
+    "stream": true
+  }'
+```
+
 ## 📁 项目结构
 
 ```
@@ -184,3 +242,21 @@ adp-js/
 ├── Dockerfile                # Docker 镜像配置
 └── README.md                 # 本文件
 ```
+
+## 📚 相关资源
+
+### 官方文档
+
+- [腾讯云智能体开发平台（ADP）](https://cloud.tencent.com/document/product/1759)
+- [CloudBase 云开发文档](https://docs.cloudbase.net/)
+- [AG-UI 协议规范](https://github.com/ag-ui-protocol/ag-ui)
+- [AG-Kit 文档](https://docs.agkit.dev)
+
+### SDK 和工具
+
+- [@cloudbase/agent-adapter-adp](https://www.npmjs.com/package/@cloudbase/agent-adapter-adp) - ADP 适配器
+- [@cloudbase/agent-server](https://www.npmjs.com/package/@cloudbase/agent-server) - Agent 服务器
+
+---
+
+如有问题，请访问 [GitHub Issues](https://github.com/TencentCloudBase/awesome-cloudbase-examples/issues) 或查看 [官方文档](https://cloud.tencent.com/document/product/1759)。
