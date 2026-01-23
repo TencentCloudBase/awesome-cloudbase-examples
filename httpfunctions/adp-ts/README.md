@@ -108,19 +108,13 @@ ADP 会自动管理对话历史的保存与恢复，开发者**无需**在客户
 
 ### Agent 实例创建
 
-在 `createAgent` 函数的参数中，管理 Agent 实例的配置，可以调整 ADP 应用密钥与优先模型配置等：
-
-在云函数环境下，secretId、secretKey、sessionToken 这些用户认证信息的环境变量会自动注入：
+在 `createAgent` 函数的参数中，管理 Agent 实例的配置，可以调整 ADP 应用密钥等配置，详细请查看 `@cloudbase/agent-adapter-adp` 包文档：
 
 ```typescript
 function createAgent() {
-  const agent = new MyAgent({
+  const agent = new AdpAgent({
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
-      credential: {
-        secretId: process.env.TENCENTCLOUD_SECRETID || "",
-        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
-      },
     },
   });
   return { agent };
@@ -169,21 +163,7 @@ cp .env.example .env
 ```env
 # ADP 应用密钥（必填）
 ADP_APP_KEY=your_adp_app_key_here
-
-# 腾讯云 API 密钥（选填，对话记录、文档解析等功能需要使用）
-TENCENTCLOUD_SECRETID=your_secret_id_here
-TENCENTCLOUD_SECRETKEY=your_secret_key_here
-TENCENTCLOUD_SESSIONTOKEN=your_session_token_here  # 可选，临时凭证
 ```
-
-**环境变量说明**：
-
-| 变量名                      | 说明                | 是否必填 |
-| --------------------------- | ------------------- | -------- |
-| `ADP_APP_KEY`               | ADP 应用密钥        | ✅ 必填  |
-| `TENCENTCLOUD_SECRETID`     | 腾讯云 API 密钥 ID  | ⭕ 选填  |
-| `TENCENTCLOUD_SECRETKEY`    | 腾讯云 API 密钥 Key | ⭕ 选填  |
-| `TENCENTCLOUD_SESSIONTOKEN` | 临时凭证 Token      | ⭕ 选填  |
 
 ### 第 3 步：构建项目
 
