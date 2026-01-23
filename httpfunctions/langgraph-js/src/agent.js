@@ -11,6 +11,7 @@ import {
   ClientStateAnnotation,
   LanggraphAgent,
 } from "@cloudbase/agent-adapter-langgraph";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * 聊天节点 - LangGraph 工作流的核心节点
@@ -107,6 +108,17 @@ export const createAgent = ({ request, logger, requestId }) => {
   // - 使用 requestId 追踪请求链路
 
   return {
-    agent: new LanggraphAgent({ compiledWorkflow: agenticChatGraph }),
+    agent: new LanggraphAgent({ compiledWorkflow: agenticChatGraph }).use(
+      (input, next) => {
+        // 使用 AG-UI TypeScript SDK 的 middleware 机制
+        // 确保每个请求都有 threadId，用于会话追踪
+        // 如果客户端未提供 threadId，则自动生成一个 UUID
+        return next.run(
+          typeof input.threadId === "string"
+            ? input
+            : { ...input, threadId: uuidv4() },
+        );
+      },
+    ),
   };
 };

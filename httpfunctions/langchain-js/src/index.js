@@ -5,6 +5,7 @@ import express from "express";
 import cors from "cors";
 import dotenvx from "@dotenvx/dotenvx";
 import pino from "pino";
+import { v4 as uuidv4 } from "uuid";
 import { checkOpenAIEnvMiddleware } from "./utils.js";
 
 // 加载 .env 文件中的环境变量
@@ -52,6 +53,15 @@ const createAgent = ({ request, logger, requestId }) => {
   return {
     agent: new LangchainAgent({
       agent: lcAgent,
+    }).use((input, next) => {
+      // 使用 AG-UI TypeScript SDK 的 middleware 机制
+      // 确保每个请求都有 threadId，用于会话追踪
+      // 如果客户端未提供 threadId，则自动生成一个 UUID
+      return next.run(
+        typeof input.threadId === "string"
+          ? input
+          : { ...input, threadId: uuidv4() },
+      );
     }),
   };
 };
