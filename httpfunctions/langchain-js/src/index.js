@@ -20,10 +20,14 @@ dotenvx.config();
  * - console: 直接传入 console
  * - 自定义: 只需实现 info/warn/error 等方法
  *
- * Logger 接口定义见: import("@cloudbase/agent-server").Logger
+ * Logger 接口定义见: import("@cloudbase/agent-shared").Logger
  */
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error({ err: reason, promise }, "Unhandled promise rejection caught");
 });
 
 /**

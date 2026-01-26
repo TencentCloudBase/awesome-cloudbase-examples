@@ -7,11 +7,11 @@ import {
   START,
   MemorySaver,
 } from "@langchain/langgraph";
-import {
-  ClientStateAnnotation,
-  LanggraphAgent,
-} from "@cloudbase/agent-adapter-langgraph";
-import { v4 as uuidv4 } from "uuid";
+import { ClientStateAnnotation } from "@cloudbase/agent-adapter-langgraph";
+
+// MemorySaver: 内存级对话历史存储，支持多轮对话上下文
+// 生产环境可替换为持久化存储（如数据库）
+const checkpointer = new MemorySaver();
 
 /**
  * 聊天节点 - LangGraph 工作流的核心节点
@@ -78,47 +78,14 @@ const workflow = new StateGraph(ClientStateAnnotation)
   .addEdge("chat_node", END);
 
 /**
- * 编译工作流
- *
- * MemorySaver: 内存级对话历史存储，支持多轮对话上下文
- * 生产环境可替换为持久化存储（如数据库）
+ * 创建 LangGraph 工作流实例
+ * 这是底层的 Agent 逻辑，负责：
+ * - 与大模型交互
+ * - 管理对话历史
+ * - 处理工具调用
  */
-const agenticChatGraph = workflow.compile({
-  checkpointer: new MemorySaver(),
-});
-
-/**
- * 创建 Agent 实例
- *
- * 将编译后的 LangGraph 工作流包装为 AG-UI 兼容的 Agent
- * LanggraphAgent 适配器负责协议转换
- *
- * context 包含以下属性：
- * - request: 当前 HTTP 请求（Web Standard Request）
- * - logger: 日志实例（带 requestId 上下文）
- * - requestId: 请求追踪 ID
- *
- * @type {import("@cloudbase/agent-server").AgentCreator}
- */
-export const createAgent = ({ request, logger, requestId }) => {
-  // 可以根据 context 实现按请求动态配置，例如：
-  // - 从 request 获取用户信息
-  // - 根据不同用户使用不同的模型配置
-  // - 使用 logger 记录请求日志
-  // - 使用 requestId 追踪请求链路
-
-  return {
-    agent: new LanggraphAgent({ compiledWorkflow: agenticChatGraph }).use(
-      (input, next) => {
-        // 使用 AG-UI TypeScript SDK 的 middleware 机制
-        // 确保每个请求都有 threadId，用于会话追踪
-        // 如果客户端未提供 threadId，则自动生成一个 UUID
-        return next.run(
-          typeof input.threadId === "string"
-            ? input
-            : { ...input, threadId: uuidv4() },
-        );
-      },
-    ),
-  };
-};
+export function createAgenticChatGraph() {
+  return workflow.compile({
+    checkpointer,
+  });
+}
