@@ -71,7 +71,12 @@ const createAgent = ({ request, logger, requestId }) => {
 };
 
 const app = express();
-app.use(cors());
+
+// 仅在 ENABLE_CORS=true 时启用 CORS
+if (process.env.ENABLE_CORS === "true") {
+  app.use(cors());
+}
+
 app.use(checkOpenAIEnvMiddleware);
 
 // 注册 AG-UI 协议路由，自动处理 SSE 流式响应、工具调用等
