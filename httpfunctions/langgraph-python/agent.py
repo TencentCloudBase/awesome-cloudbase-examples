@@ -76,7 +76,15 @@ def chat_node(state: State, config: Optional[RunnableConfig] = None) -> dict:
         # Process and bind tools if available
         tools = state.get("tools", [])
         if tools:
-            tool_list = [{**tool, "parameters": json.loads(tool["parameters"])} for tool in tools]
+            # Convert tools to OpenAI format, supporting both string and dict parameters
+            tool_list = []
+            for tool in tools:
+                params = tool["parameters"]
+                # Support both JSON string and dict format for flexibility
+                if isinstance(params, str):
+                    params = json.loads(params)
+                tool_list.append({**tool, "parameters": params})
+            
             tools_list = [convert_to_openai_function(item) for item in tool_list]
             chat_model_with_tools = chat_model.bind_tools(tools_list)
         else:
