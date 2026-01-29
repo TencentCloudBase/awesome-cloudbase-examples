@@ -48,24 +48,22 @@ OPENAI_MODEL=gpt-4o-mini
 ### `agent.py` - Agent 实现
 
 ```python
-from langgraph.graph import StateGraph, MessagesState
-from langchain_openai import ChatOpenAI
-import os
-
-def chat_node(state, config=None):
-    api_key = os.getenv("OPENAI_API_KEY")
-    base_url = os.getenv("OPENAI_BASE_URL")
+def chat_node(state, config: Optional[RunnableConfig] = None, writer=None):
+    """Chat node with access to forwardedProps."""
     
-    if not api_key or not base_url:
-        raise ValueError("Environment variables not set")
+    # 获取 forwardedProps 中的参数
+    user_id = None
     
-    chat_model = ChatOpenAI(
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        api_key=api_key,
-        base_url=base_url,
-    )
-    # ... 实现 chat 逻辑
+    if config and "configurable" in config:
+        configurable = config["configurable"]
+        user_id = configurable.get("user_id")
+        
+        print(f"🔑 User ID: {user_id}")
+    
+    # ... 其余 chat 逻辑
 ```
+
+**说明**：`forwardedProps` 中的参数（如 `user_id`）会被注入到 LangGraph 的 `config["configurable"]` 中，可以在 chat_node 中直接访问。
 
 ### `app.py` - 应用入口
 
@@ -93,7 +91,67 @@ export PYTHONPATH="./env:$PYTHONPATH"
 - 设置 `PYTHONPATH` 指向 `./env` 目录，让 Python 能找到依赖包
 - 所有通过 pip 安装的依赖包都存放在 `env/` 目录中
 
-## 第4步：管理项目依赖
+## 第4步：测试和使用
+
+服务启动后会自动注册两种 endpoint 格式，方便不同场景使用：
+
+### 短 URL（本地开发推荐）
+```
+POST http://localhost:9000/send-message
+```
+
+### 长 URL（云函数部署格式）
+```
+POST http://localhost:9000/v1/aibot/bots/{agent_id}/send-message
+```
+
+**说明**：
+- 本地开发时推荐使用短 URL，更简洁方便
+- `{agent_id}` 参数当前为保留字段，可以传任意值
+- 两种格式功能完全相同，只是路径不同
+
+### 自定义 Base Path（仅本地开发）
+
+如果需要自定义 API 路径前缀，可以在启动时指定：
+
+```python
+# 自定义 base_path
+AgentServiceApp().run(
+    lambda: {"agent": agent},
+    base_path="/api/v2"
+)
+```
+
+自定义后的 URL 格式：
+```
+POST http://localhost:9000/api/v2/send-message
+```
+
+**注意**：使用自定义 `base_path` 时，只会注册单一路径，不再提供长短两种格式。
+
+### 请求示例
+
+```bash
+curl -X POST http://localhost:9000/send-message \
+  -H "Content-Type: application/json" \
+  -d '{
+    "threadId": "test-thread-123",
+    "runId": "run-456", 
+    "messages": [
+      {"role": "user", "content": "你好"}
+    ],
+    "forwardedProps": {
+      "user_id": "user_12345",
+      "custom_field": "custom_value"
+    }
+  }'
+```
+
+**重要提示**：
+- 每次新的用户消息应使用不同的 `message.id`，或者不传 `id` 让服务器自动生成
+- 相同 `threadId` 内的消息会保持对话连续性
+
+## 第5步：管理项目依赖
 
 ### 打包部署
 
@@ -111,5 +169,5 @@ zip -r langgraph-python.zip .
 4. 在控制台配置环境变量：
    - `OPENAI_API_KEY`
    - `OPENAI_BASE_URL`
-   - `OPENAI_MODEL`（可选）
+   - `OPENAI_MODEL`
 5. 点击部署
