@@ -1,42 +1,63 @@
-import { NextFunction, Request, Response } from "express";
-import { jwtDecode } from "jwt-decode";
+import {
+  Middleware,
+  RunAgentInput,
+  BaseEvent,
+  AbstractAgent,
+} from "@ag-ui/client";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import { Observable } from "rxjs";
 
 /**
  * 用户认证中间件
  * 从 Authorization header 中提取 JWT token，解析用户 ID 并注入到 forwardedProps
  */
-export function detectCloudbaseUserMiddleware(
-  _req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    // 如果已经有 visitorBizId，跳过处理
-    if (_req.body?.forwardedProps?.visitorBizId) {
-      throw new Error("already has visitorBizId");
-    }
-    // 获取 Authorization header（Express 会将 header 名称转为小写）
-    const user = _req.headers["authorization"] as string | undefined;
-    if (user) {
-      // 提取 Bearer token 中的 JWT 部分
-      const jwt = user.split(" ")[1];
-      if (!jwt) {
-        throw new Error("invalid jwt");
+/**
+ * 用户认证中间件
+ * 从 Authorization header 中提取 JWT token，解析用户 ID 并注入到 input.state
+ */
+export class DetectCloudbaseUserMiddleware extends Middleware {
+  _req: Request;
+  constructor(req: Request) {
+    super();
+    this._req = req;
+  }
+  run(input: RunAgentInput, next: AbstractAgent): Observable<BaseEvent> {
+    let jwtString: string = "";
+    let jwtToken: JwtPayload = {};
+    try {
+      // 获取 Authorization header
+      const user = this._req.headers.get("Authorization");
+      if (user) {
+        // 提取 Bearer token 中的 JWT 部分
+        const jwt = user.split(" ")[1];
+        if (!jwt) {
+          throw new Error("invalid jwt");
+        }
+        jwtString = jwt;
+        // 解码 JWT 获取用户信息
+        const decoded = jwtDecode(jwt);
+        if (!decoded || !decoded.sub) {
+          throw new Error("invalid jwt");
+        }
+        jwtToken = decoded;
       }
-      // 解码 JWT 获取用户信息
-      const decoded = jwtDecode(jwt);
-      if (!decoded || !decoded.sub) {
-        throw new Error("invalid jwt");
-      }
-      // 将用户 ID 注入到 forwardedProps.visitorBizId
-      _req.body.forwardedProps = {
-        ...(_req.body?.forwardedProps || {}),
-        visitorBizId: decoded.sub,
-      };
+    } catch (e) {
+      // 忽略错误，继续处理请求
     }
-  } catch (e) {
-    // 忽略错误，继续处理请求
-  } finally {
-    next();
+    if (jwtToken?.sub) {
+      // 将用户 ID 注入到 input.state.__request_context__
+      return next.run({
+        ...input,
+        state: {
+          ...input.state,
+          __request_context__: {
+            id: jwtToken.sub,
+            jwt: jwtString,
+          },
+        },
+      });
+    } else {
+      return next.run(input);
+    }
   }
 }
