@@ -1,39 +1,46 @@
 import express from "express";
 import { createExpressRoutes } from "@cloudbase/agent-server";
-import { AdpAgent } from "@cloudbase/agent-adapter-adp";
+import { YuanqiAgent } from "@cloudbase/agent-adapter-yuanqi";
 import dotenvx from "@dotenvx/dotenvx";
 // import cors from "cors";
 import { DetectCloudbaseUserMiddleware } from "./utils.js";
 
 dotenvx.config();
 
-// 自定义 Agent 类，支持从客户端的 forwardedProps 中提取额外参数到 ADP
-class MyAgent extends AdpAgent {
-  generateRequestBody({ message, fileInfos, input }) {
+// 自定义 Agent 类，支持从客户端的 forwardedProps 中提取额外参数
+class MyAgent extends YuanqiAgent {
+  generateRequestBody({ messages, input }) {
     const { forwardedProps } = input;
     // 调用父类方法生成基础请求体
     const req = super.generateRequestBody({
-      message,
-      fileInfos,
+      messages,
       input,
     });
-    // 从客户端传递的参数中提取 modelName
-    req.modelName = forwardedProps.modelName || "";
+    // 可以在这里对 messages 进行处理
+    req.messages = messages || [];
+    // 或者从 forwardedProps 中提取额外参数
+    req.customVariables = forwardedProps?.myVariable || {};
     return req;
   }
 }
 
 function createAgent({ request }) {
+  // 元器 Token 体验活动 - 云开发身份认证
+  const accessToken = request.headers.get("Authorization")?.split(" ")[1] || "";
+  const headers = {};
+  if (accessToken) {
+    headers["X-Source"] = "cloudbase";
+    headers["X-Token"] = accessToken;
+  }
+  // 创建元器 Agent 实例
   const agent = new MyAgent({
-    adpConfig: {
-      appKey: process.env.ADP_APP_KEY || "",
-      credential: {
-        // 方法 1/2 二选一，云函数环境下已自动注入，无需手动配置
-        // 1. 从环境变量中获取腾讯云用户认证信息
-        secretId: process.env.TENCENTCLOUD_SECRETID || "",
-        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
-        // 2. 获取临时密钥 sessionToken（https://cloud.tencent.com/document/product/1312/48197）
-        token: process.env.TENCENTCLOUD_SESSIONTOKEN || "",
+    yuanqiConfig: {
+      appId: process.env.YUANQI_APP_ID || "",
+      appKey: process.env.YUANQI_APP_KEY || "",
+      request: {
+        headers: {
+          ...headers,
+        },
       },
     },
   });

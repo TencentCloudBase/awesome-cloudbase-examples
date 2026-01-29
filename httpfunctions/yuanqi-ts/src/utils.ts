@@ -1,26 +1,24 @@
-import { Middleware } from "@ag-ui/client";
-import { jwtDecode } from "jwt-decode";
+import {
+  Middleware,
+  RunAgentInput,
+  BaseEvent,
+  AbstractAgent,
+} from "@ag-ui/client";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import { Observable } from "rxjs";
 
 /**
  * 用户认证中间件
  * 从 Authorization header 中提取 JWT token，解析用户 ID 并注入到 input.state
  */
 export class DetectCloudbaseUserMiddleware extends Middleware {
-  /**
-   * @param {Request} req
-   */
-  constructor(req) {
+  _req: Request;
+  constructor(req: Request) {
     super();
     this._req = req;
   }
-
-  /**
-   * @param {import('@ag-ui/client').RunAgentInput} input
-   * @param {import('@ag-ui/client').AbstractAgent} next
-   * @returns {import('rxjs').Observable<import('@ag-ui/client').BaseEvent>}
-   */
-  run(input, next) {
-    let jwtToken = {};
+  run(input: RunAgentInput, next: AbstractAgent): Observable<BaseEvent> {
+    let jwtToken: JwtPayload = {};
     try {
       // 获取 Authorization header
       const user = this._req.headers.get("Authorization");

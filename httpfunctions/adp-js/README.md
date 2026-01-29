@@ -11,7 +11,6 @@
 - ✅ **ADP 智能体集成** - 快速接入腾讯云智能体开发平台
 - ✅ **自定义参数支持** - 支持传递自定义变量到工作流和知识库
 - ✅ **工作流集成** - 支持 ADP 工作流和工具调用事件
-- ✅ **无需构建** - 纯 JavaScript，直接运行
 
 ### 调用链路
 
@@ -44,12 +43,18 @@ class MyAgent extends AdpAgent {
 
 ### 用户参数注入
 
+通过 AG-UI 的 `Middleware` 机制，可以在 Agent 处理请求前注入用户信息：
+
 ```javascript
-app.use(express.json());
-app.use(detectCloudbaseUserMiddleware); // 提取用户信息
+function createAgent({ request }) {
+  const agent = new MyAgent({ ... });
+  // 使用中间件从 JWT 提取用户信息
+  agent.use(new DetectCloudbaseUserMiddleware(request));
+  return { agent };
+}
 ```
 
-`detectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并将其注入到 `forwardedProps.visitorBizId` 中。这样 Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。
+`DetectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并在默认情况下将其注入到 `input.state.__request_context__` 中。Agent 中会以 `input.state.__request_context__.id` > `forwardedProps.visitorBizId` > `randomUUID()` 的顺序来确定用户 ID，Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。你也可以参照 `Agent 适配与自定义` 中的示例，通过重写 `generateRequestBody` 方法将用户 ID 注入到请求体的 `visitorBizId` 中来实现同样的功能。
 
 ### 历史消息处理机制
 
@@ -79,11 +84,11 @@ ADP 会自动管理对话历史的保存与恢复，开发者**无需**在客户
 
 ### Agent 实例创建
 
-在 `createAgent` 函数的参数中，管理 Agent 实例的配置，可以调整 ADP 应用密钥与优先模型配置等：
+在 `createAgent` 函数的参数中，管理 Agent 实例的配置，可以调整 ADP 应用密钥等配置，详细请查看 `@cloudbase/agent-adapter-adp` 包文档：
 
 ```javascript
 function createAgent() {
-  const agent = new MyAgent({
+  const agent = new AdpAgent({
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
       credential: {
@@ -127,13 +132,19 @@ npm install
 
 ### 第 2 步：配置环境变量
 
-创建 `.env` 文件：
+创建 `.env` 文件（参考 `.env.example`）：
+
+```bash
+cp .env.example .env
+```
+
+编辑 `.env` 文件，配置以下必填的环境变量：
 
 ```env
-# ADP 应用密钥（必填）
+# ADP 应用密钥
 ADP_APP_KEY=your_adp_app_key_here
 
-# 腾讯云 API 密钥（选填）
+# 腾讯云 API 密钥
 TENCENTCLOUD_SECRETID=your_secret_id_here
 TENCENTCLOUD_SECRETKEY=your_secret_key_here
 ```
@@ -172,6 +183,72 @@ curl -X POST http://localhost:9000/send-message \
   }'
 ```
 
+### 带用户认证的请求
+
+```bash
+curl -X POST http://localhost:9000/send-message \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "threadId": "test-thread-123",
+    "runId": "test-run-002",
+    "messages": [
+      {
+        "id": "msg-1",
+        "role": "user",
+        "content": "你好"
+      }
+    ],
+    "tools": [],
+    "context": [],
+    "state": {},
+    "forwardedProps": {}
+  }'
+```
+
+### 传递自定义参数
+
+```bash
+curl -X POST http://localhost:9000/send-message \
+  -H "Content-Type: application/json" \
+  -d '{
+    "threadId": "test-thread-123",
+    "runId": "test-run-005",
+    "messages": [
+      {
+        "id": "msg-1",
+        "role": "user",
+        "content": "你好"
+      }
+    ],
+    "tools": [],
+    "context": [],
+    "state": {},
+    "forwardedProps": {
+      "modelName": "gpt-4",
+      "customKey": "customValue"
+    }
+  }'
+```
+
+### 使用 OpenAI 兼容接口
+
+```bash
+curl -X POST http://localhost:9000/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "你好"
+      }
+    ],
+    "stream": true
+  }'
+```
+
 ## 📁 项目结构
 
 ```
@@ -184,3 +261,21 @@ adp-js/
 ├── Dockerfile                # Docker 镜像配置
 └── README.md                 # 本文件
 ```
+
+## 📚 相关资源
+
+### 官方文档
+
+- [腾讯云智能体开发平台（ADP）](https://cloud.tencent.com/document/product/1759)
+- [CloudBase 云开发文档](https://docs.cloudbase.net/)
+- [AG-UI 协议规范](https://github.com/ag-ui-protocol/ag-ui)
+- [AG-Kit 文档](https://docs.agkit.dev)
+
+### SDK 和工具
+
+- [@cloudbase/agent-adapter-adp](https://www.npmjs.com/package/@cloudbase/agent-adapter-adp) - ADP 适配器
+- [@cloudbase/agent-server](https://www.npmjs.com/package/@cloudbase/agent-server) - Agent 服务器
+
+---
+
+如有问题，请访问 [GitHub Issues](https://github.com/TencentCloudBase/awesome-cloudbase-examples/issues) 或查看 [官方文档](https://cloud.tencent.com/document/product/1759)。

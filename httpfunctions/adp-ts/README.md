@@ -46,12 +46,18 @@ class MyAgent extends AdpAgent {
 
 ### 用户参数注入
 
+通过 AG-UI 的 [`Middleware` 机制](https://docs.ag-ui.com/concepts/middleware)，可以在 Agent 处理请求前注入用户信息：
+
 ```typescript
-app.use(express.json());
-app.use(detectCloudbaseUserMiddleware); // 提取用户信息
+function createAgent({ request }: { request: Request }) {
+  const agent = new MyAgent({ ... });
+  // 使用中间件从 JWT 提取用户信息
+  agent.use(new DetectCloudbaseUserMiddleware(request));
+  return { agent };
+}
 ```
 
-`detectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并将其注入到 `forwardedProps.visitorBizId` 中。这样 Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。
+`DetectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并在默认情况下将其注入到 `input.state.__request_context__` 中。Agent 中会以 `input.state.__request_context__.id` > `forwardedProps.visitorBizId` > `randomUUID()` 的顺序来确定用户 ID，Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。你也可以参照 `Agent 适配与自定义` 中的示例，通过重写 `generateRequestBody` 方法将用户 ID 注入到请求体的 `visitorBizId` 中来实现同样的功能。
 
 ### 历史消息处理机制
 
@@ -108,13 +114,11 @@ ADP 会自动管理对话历史的保存与恢复，开发者**无需**在客户
 
 ### Agent 实例创建
 
-在 `createAgent` 函数的参数中，管理 Agent 实例的配置，可以调整 ADP 应用密钥与优先模型配置等：
-
-在云函数环境下，secretId、secretKey、sessionToken 这些用户认证信息的环境变量会自动注入：
+在 `createAgent` 函数的参数中，管理 Agent 实例的配置，可以调整 ADP 应用密钥等配置，详细请查看 `@cloudbase/agent-adapter-adp` 包文档：
 
 ```typescript
 function createAgent() {
-  const agent = new MyAgent({
+  const agent = new AdpAgent({
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
       credential: {
@@ -164,26 +168,16 @@ npm install
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，配置以下环境变量：
+编辑 `.env` 文件，配置以下必填的环境变量：
 
 ```env
-# ADP 应用密钥（必填）
+# ADP 应用密钥
 ADP_APP_KEY=your_adp_app_key_here
 
-# 腾讯云 API 密钥（选填，对话记录、文档解析等功能需要使用）
+# 腾讯云 API 密钥
 TENCENTCLOUD_SECRETID=your_secret_id_here
 TENCENTCLOUD_SECRETKEY=your_secret_key_here
-TENCENTCLOUD_SESSIONTOKEN=your_session_token_here  # 可选，临时凭证
 ```
-
-**环境变量说明**：
-
-| 变量名                      | 说明                | 是否必填 |
-| --------------------------- | ------------------- | -------- |
-| `ADP_APP_KEY`               | ADP 应用密钥        | ✅ 必填  |
-| `TENCENTCLOUD_SECRETID`     | 腾讯云 API 密钥 ID  | ⭕ 选填  |
-| `TENCENTCLOUD_SECRETKEY`    | 腾讯云 API 密钥 Key | ⭕ 选填  |
-| `TENCENTCLOUD_SESSIONTOKEN` | 临时凭证 Token      | ⭕ 选填  |
 
 ### 第 3 步：构建项目
 

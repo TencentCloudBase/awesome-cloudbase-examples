@@ -6,19 +6,11 @@ import { jwtDecode } from "jwt-decode";
  * 从 Authorization header 中提取 JWT token，解析用户 ID 并注入到 input.state
  */
 export class DetectCloudbaseUserMiddleware extends Middleware {
-  /**
-   * @param {Request} req
-   */
   constructor(req) {
     super();
     this._req = req;
   }
 
-  /**
-   * @param {import('@ag-ui/client').RunAgentInput} input
-   * @param {import('@ag-ui/client').AbstractAgent} next
-   * @returns {import('rxjs').Observable<import('@ag-ui/client').BaseEvent>}
-   */
   run(input, next) {
     let jwtToken = {};
     try {
