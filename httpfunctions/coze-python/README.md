@@ -10,6 +10,7 @@
 - ✅ **`app.py`** - 应用入口和服务启动（基于 `AgentServiceApp`）
 - ✅ **`auth.py`** - JWT 认证辅助模块（从 Authorization header 提取 user_id）
 - ✅ **`scf_bootstrap`** - SCF 云函数启动脚本
+- ✅ **`Dockerfile`** - 生产级容器化部署配置，便于在云环境或本地通过 Docker 直接运行本项目。
 - ✅ 支持 Coze Chat V3 API
 - ✅ 支持流式响应（streaming）
 - ✅ 支持推理内容（reasoning content）
@@ -177,6 +178,7 @@ coze-python/
 ├── auth.py               # ✅ 已实现：JWT 认证辅助模块
 ├── scf_bootstrap         # ✅ 已实现：SCF 启动脚本
 ├── requirements.txt      # 依赖列表
+├── Dockerfile            # ✅ 已实现：容器化部署配置
 ├── .env.example          # 环境变量示例
 ├── .env                  # 环境变量配置（需创建）
 └── env/                  # 依赖包目录（自动生成）
