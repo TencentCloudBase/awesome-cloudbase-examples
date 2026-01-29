@@ -23,6 +23,6 @@ RUN uv pip install --system --no-cache \
     --extra-index-url https://pypi.org/simple \
     -r requirements.txt
     
-COPY app.py agent.py ./
+COPY app.py agent.py auth.py ./
 
 CMD ["python3", "app.py"]
