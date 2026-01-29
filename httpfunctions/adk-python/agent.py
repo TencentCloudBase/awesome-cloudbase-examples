@@ -30,26 +30,9 @@ def create_adk_agent() -> ADKAgent:
         ValueError: If required environment variables are missing
     """
     # Read environment variables
-    model_name = os.getenv("OPENAI_MODEL")
-    base_url = os.getenv("OPENAI_BASE_URL")
-    api_key = os.getenv("OPENAI_API_KEY")
-    
-    # Validate required variables
-    if not api_key:
-        raise ValueError(
-            "OPENAI_API_KEY not found in environment variables. "
-        )
-    
-    if not model_name:
-        raise ValueError(
-            "OPENAI_MODEL not found in environment variables. "
-        )
-    
-    if not base_url:
-        raise ValueError(
-            "OPENAI_BASE_URL not found in environment variables. "
-        )
-
+    model_name = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+    base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1/chat/completions")
+    api_key = os.getenv("OPENAI_API_KEY", "")
     
     # CRITICAL: Ensure environment variables are set for LiteLLM
     # LiteLLM in ADK context reads from environment variables

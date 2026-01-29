@@ -25,8 +25,6 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 # pip install scipy 等数学包失败，可使用 apk add py3-scipy 进行， 参考安装 https://pkgs.alpinelinux.org/packages?name=py3-scipy&branch=v3.13
 && pip install --user -r requirements.txt --break-system-packages
 
-# 设置腾讯云 SCF 运行环境标识
-ENV TENCENTCLOUD_RUNENV=SCF
 
 # 执行启动命令
 # 写多行独立的CMD命令是错误写法！只有最后一行CMD命令会被执行，之前的都会被忽略，导致业务报错。
