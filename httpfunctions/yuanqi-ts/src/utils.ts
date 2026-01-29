@@ -18,7 +18,6 @@ export class DetectCloudbaseUserMiddleware extends Middleware {
     this._req = req;
   }
   run(input: RunAgentInput, next: AbstractAgent): Observable<BaseEvent> {
-    let jwtString: string = "";
     let jwtToken: JwtPayload = {};
     try {
       // 获取 Authorization header
@@ -29,7 +28,6 @@ export class DetectCloudbaseUserMiddleware extends Middleware {
         if (!jwt) {
           throw new Error("invalid jwt");
         }
-        jwtString = jwt;
         // 解码 JWT 获取用户信息
         const decoded = jwtDecode(jwt);
         if (!decoded || !decoded.sub) {
@@ -47,8 +45,11 @@ export class DetectCloudbaseUserMiddleware extends Middleware {
         state: {
           ...input.state,
           __request_context__: {
-            id: jwtToken.sub,
-            jwt: jwtString,
+            user: {
+              id: jwtToken.sub,
+              jwt: jwtToken,
+            },
+            request: this._req,
           },
         },
       });
