@@ -1,6 +1,6 @@
 ---
 name: auth-web-cloudbase
-description: CloudBase Auth v3 Web SDK - Quick Reference Guide
+description: CloudBase Web Authentication Quick Guide - Provides concise and practical Web frontend authentication solutions with multiple login methods and complete user management.
 alwaysApply: false
 ---
 
@@ -11,11 +11,17 @@ alwaysApply: false
 
 ---
 
-## When to Use
+## Core Capabilities
 
-Web frontend authentication with `@cloudbase/js-sdk@2.24.0+`, Compatible with `supabase-js` Auth API and type declarations. **NOT for** server-side or direct HTTP API.
+**Use Case**: Web frontend projects using `@cloudbase/js-sdk@2.24.0+` for user authentication  
+**Key Benefits**: Compatible with `supabase-js` API, supports phone, email, anonymous, username/password, and third-party login methods
+**`@cloudbase/js-sdk` cdn source**: `https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js`
 
-`@cloudbase/js-sdk` cdn source `https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js`
+
+## Prerequisites
+
+- Automatically use `auth-tool-cloudbase` to get `publishable key` and configure login methods. 
+- If `auth-tool-cloudbase` failed, let user go to `https://tcb.cloud.tencent.com/dev?envId={env}#/env/apikey` to get `publishable key` and `https://tcb.cloud.tencent.com/dev?envId={env}#/identity/login-manage` to set up login methods
 
 ## Quick Start
 
@@ -25,60 +31,61 @@ import cloudbase from '@cloudbase/js-sdk'
 const app = cloudbase.init({
   env: `env`, // CloudBase environment ID
   region: `region`,  // CloudBase environment Region, default 'ap-shanghai'
-  accessKey: 'publishable key', // required，get publishable key from auth-tool-cloudbase('Get Publishable Key')
-  auth: { detectSessionInUrl: true },
+  accessKey: 'publishable key', // required, get from auth-tool-cloudbase
+  auth: { detectSessionInUrl: true }, // required
 })
 
 const auth = app.auth
-```
-
-**⚠️ Console Setup Required**: `https://tcb.cloud.tencent.com/dev?envId={envId}#/identity/login-manage`
-- Enable login methods, configure templates, add domain to whitelist
-
-**Tokens**: `access_token` (2h), `refresh_token` (30d, auto-refresh), stored in localStorage
+``
 
 ---
 
 ## Login Methods
 
 **1. Phone OTP (Recommended)**
+- Automatically use `auth-tool-cloudbase` turn on `SMS Login`
 ```js
-const { data } = await auth.signInWithOtp({ phone: '13800138000' })
-const { data: loginData } = await data.verifyOtp({ token:'123456' })
+const { data, error } = await auth.signInWithOtp({ phone: '13800138000' })
+const { data: loginData, error: loginError } = await data.verifyOtp({ token:'123456' })
 ```
 
 **2. Email OTP**
+- Automatically use `auth-tool-cloudbase` turn on `Email Login`
 ```js
-const { data } = await auth.signInWithOtp({ email: 'user@example.com' })
-const { data: loginData } = await data.verifyOtp({ token: '654321' })
+const { data, error } = await auth.signInWithOtp({ email: 'user@example.com' })
+const { data: loginData, error: loginError } = await data.verifyOtp({ token: '654321' })
 ```
 
 **3. Password**
 ```js
-await auth.signInWithPassword({ username: 'test_user', password: 'pass123' })
-await auth.signInWithPassword({ email: 'user@example.com', password: 'pass123' })
-await auth.signInWithPassword({ phone: '13800138000', password: 'pass123' })
+const { data, error } = await auth.signInWithPassword({ username: 'test_user', password: 'pass123' })
+const { data, error } = await auth.signInWithPassword({ email: 'user@example.com', password: 'pass123' })
+const { data, error } = await auth.signInWithPassword({ phone: '13800138000', password: 'pass123' })
 ```
 
 **4. Registration (Smart: auto-login if exists)**
+- Only support email and phone otp registration
+- Automatically use `auth-tool-cloudbase` turn on `Email Login` or `SMS Login`
 ```js
-// Email
-const { data } = await auth.signUp({ email: 'new@example.com', nickname: 'User' })
-const { data: loginData } = await data.verifyOtp({ token: '123456' })
+// Email Otp
+const { data, error } = await auth.signUp({ email: 'new@example.com', nickname: 'User' })
+const { data: loginData, error: loginError } = await data.verifyOtp({ token: '123456' })
 
-// Phone
-const { data } = await auth.signUp({ phone: '13800138000', nickname: 'User' })
-const { data: loginData } = await data.verifyOtp({ token: '123456' })
+// Phone Otp
+const { data, error } = await auth.signUp({ phone: '13800138000', nickname: 'User' })
+const { data: loginData, error: loginError } = await data.verifyOtp({ token: '123456' })
 ```
 
 **5. Anonymous**
+- Automatically use `auth-tool-cloudbase` turn on `Anonymous Login`
 ```js
-const { data } = await auth.signInAnonymously()
+const { data, error } = await auth.signInAnonymously()
 ```
 
 **6. OAuth (Google/WeChat)**
+- Automatically use `auth-tool-cloudbase` turn on `Google Login` or `WeChat Login`
 ```js
-const { data } = await auth.signInWithOAuth({ provider: 'google' })
+const { data, error } = await auth.signInWithOAuth({ provider: 'google' })
 window.location.href = data.url // Auto-complete after callback
 ```
 
@@ -92,8 +99,8 @@ await auth.signInWithCustomTicket(async () => {
 
 **8. Upgrade Anonymous**
 ```js
-const { data } = await auth.getSession()
-const { data: signUpData } = await auth.signUp({
+const { data, error } = await auth.getSession()
+const { data: signUpData, error: signUpError} = await auth.signUp({
   phone: '13800000000',
   anonymous_token: data.session.access_token,
 })
@@ -106,47 +113,47 @@ await signUpData.verifyOtp({ token: '123456' })
 
 ```js
 // Sign out
-await auth.signOut()
+const { data, error } = await auth.signOut()
 
 // Get user
-const { data } = await auth.getUser()
+const { data, error } = await auth.getUser()
 console.log(data.user.email, data.user.phone, data.user.user_metadata?.nickName)
 
 // Update user (except email, phone)
-await auth.updateUser({ nickname: 'New Name', gender: 'MALE', avatar_url: 'url' })
+const { data, error } = await auth.updateUser({ nickname: 'New Name', gender: 'MALE', avatar_url: 'url' })
 
 // Update user (email or phone)
-const { data } = await auth.updateUser({ email: 'new@example.com' })
-await data.verifyOtp({ email: "new@example.com", token: "123456" });
+const { data, error } = await auth.updateUser({ email: 'new@example.com' })
+const { data, error } = await data.verifyOtp({ email: "new@example.com", token: "123456" });
 
 // Change password (logged in)
-await auth.resetPasswordForOld({ old_password: 'old', new_password: 'new' })
+const { data, error } = await auth.resetPasswordForOld({ old_password: 'old', new_password: 'new' })
 
 // Reset password (forgot)
-const { data } = await auth.reauthenticate()
-await data.updateUser({ nonce: '123456', password: 'new' })
+const { data, error } = await auth.reauthenticate()
+const { data, error } = await data.updateUser({ nonce: '123456', password: 'new' })
 
 // Link third-party
-const { data } = await auth.linkIdentity({ provider: 'google' })
+const { data, error } = await auth.linkIdentity({ provider: 'google' })
 
 // View/Unlink identities
-const { data } = await auth.getUserIdentities()
-await auth.unlinkIdentity({ provider: data.identities[0].id })
+const { data, error } = await auth.getUserIdentities()
+const { data, error } = await auth.unlinkIdentity({ provider: data.identities[0].id })
 
 // Delete account
-await auth.deleteMe({ password: 'current' })
+const { data, error } = await auth.deleteMe({ password: 'current' })
 
 // Listen to state changes
-auth.onAuthStateChange((event, session, info) => {
+const { data, error } = auth.onAuthStateChange((event, session, info) => {
   // INITIAL_SESSION, SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED, USER_UPDATED, PASSWORD_RECOVERY, BIND_IDENTITY
 })
 
 // Get access token
-const { data } = await auth.getSession()
+const { data, error } = const { data, error } = await auth.getSession()
 fetch('/api/protected', { headers: { Authorization: `Bearer ${data.session?.access_token}` } })
 
 // Refresh user
-await auth.refreshUser()
+const { data, error } = await auth.refreshUser()
 ```
 
 ---
@@ -240,11 +247,11 @@ class PhoneLoginPage {
 
 ```js
 // Silent login with OpenID
-await auth.signInWithOpenId() // WeChat Cloud mode (default)
-await auth.signInWithOpenId({ useWxCloud: false }) // HTTP mode
+const { data, error } = await auth.signInWithOpenId() // WeChat Cloud mode (default)
+const { data, error } = await auth.signInWithOpenId({ useWxCloud: false }) // HTTP mode
 
 // Phone authorization login
-await auth.signInWithPhoneAuth({ phoneCode: 'xxx' })
+const { data, error } = await auth.signInWithPhoneAuth({ phoneCode: 'xxx' })
 ```
 
 ---
