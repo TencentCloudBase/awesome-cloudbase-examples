@@ -41,7 +41,7 @@ function createAgent({ request }: { request: Request }) {
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
       credential: {
-        // 方法 1/2 二选一，云函数环境下已自动注入，无需手动配置
+        // 方法 1/1+2 二选一，云函数环境下已自动注入，无需手动配置
         // 1. 从环境变量中获取腾讯云用户认证信息
         secretId: process.env.TENCENTCLOUD_SECRETID || "",
         secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",

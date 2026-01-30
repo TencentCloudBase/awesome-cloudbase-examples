@@ -122,8 +122,13 @@ function createAgent() {
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
       credential: {
-        secretId: process.env.TENCENTCLOUD_SECRETID || "", // 可选，当 enableUpload 为 true 时必填
-        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "", // 可选，当 enableUpload 为 true 时必填
+        // 当 enableUpload 为 true 时， credential 为必填项
+        // 方法 1/1+2 二选一，云函数环境下已自动注入，无需手动配置
+        // 1. 从环境变量中获取腾讯云用户认证信息
+        secretId: process.env.TENCENTCLOUD_SECRETID || "",
+        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
+        // 2. 获取临时密钥 sessionToken（https://cloud.tencent.com/document/product/1312/48197）
+        token: process.env.TENCENTCLOUD_SESSIONTOKEN || "",
       },
       // 启用文件/图片上传功能（需要配置 credential）
       enableUpload: false,

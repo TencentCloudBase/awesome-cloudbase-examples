@@ -158,7 +158,7 @@ function createAgent({ request }: { request: Request }) {
       // 云开发环境 ID，用于对话历史持久化
       envId: process.env.CLOUDBASE_ENV_ID || "",
       credential: {
-        // 方法 1/2 二选一，云函数环境下已自动注入，无需手动配置
+        // 方法 1/1+2 二选一，云函数环境下已自动注入，无需手动配置
         // 1. 从环境变量中获取腾讯云用户认证信息
         secretId: process.env.TENCENTCLOUD_SECRETID || "",
         secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
