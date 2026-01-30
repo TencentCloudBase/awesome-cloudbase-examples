@@ -36,6 +36,9 @@ class MyAgent extends AdpAgent {
     });
     // 从 forwardedProps 提取自定义参数
     req.modelName = forwardedProps.modelName || "";
+    // 可以继续添加更多自定义逻辑
+    // req.customVariables = forwardedProps.customVariables || {};
+    // req.searchNetwork = forwardedProps.searchNetwork || "enable";
     return req;
   }
 }
@@ -43,7 +46,7 @@ class MyAgent extends AdpAgent {
 
 ### 用户参数注入
 
-通过 AG-UI 的 `Middleware` 机制，可以在 Agent 处理请求前注入用户信息：
+通过 AG-UI 的 [`Middleware` 机制](https://docs.ag-ui.com/concepts/middleware)，可以在 Agent 处理请求前注入用户信息：
 
 ```javascript
 function createAgent({ request }) {
@@ -54,7 +57,7 @@ function createAgent({ request }) {
 }
 ```
 
-`DetectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并在默认情况下将其注入到 `input.state.__request_context__` 中。Agent 中会以 `input.state.__request_context__.id` > `forwardedProps.visitorBizId` > `randomUUID()` 的顺序来确定用户 ID，Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。你也可以参照 `Agent 适配与自定义` 中的示例，通过重写 `generateRequestBody` 方法将用户 ID 注入到请求体的 `visitorBizId` 中来实现同样的功能。
+`DetectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并在默认情况下将其注入到 `input.state.__request_context__` 中。Agent 中会以 `input.state.__request_context__.user.id` > `forwardedProps.visitorBizId` > `randomUUID()` 的顺序来确定用户 ID，Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。你也可以参照 `Agent 适配与自定义` 中的示例，通过重写 `generateRequestBody` 方法将用户 ID 注入到请求体的 `visitorBizId` 中来实现同样的功能。
 
 ### 历史消息处理机制
 
@@ -68,6 +71,23 @@ ADP 会自动管理对话历史的保存与恢复，开发者**无需**在客户
 2. **丢弃该消息及之前的所有内容**（包括该 assistant 消息本身）
 3. **只保留最后一条 assistant 消息之后的用户消息**作为本次请求内容
 
+**示例**：
+
+```javascript
+// 客户端发送的消息
+{
+  "messages": [
+    { "id": "msg-1", "role": "user", "content": "你是谁" },
+    { "id": "msg-2", "role": "assistant", "content": "我是 AI 助手" },  // ← 从这里开始裁剪
+    { "id": "msg-3", "role": "user", "content": "你能做什么？" }
+  ]
+}
+
+// 实际发送给 ADP 的内容
+// 只包含: "user: 你能做什么？"
+// msg-1 和 msg-2 被自动裁剪
+```
+
 **最佳实践**：
 
 ```javascript
@@ -76,6 +96,16 @@ ADP 会自动管理对话历史的保存与恢复，开发者**无需**在客户
   "threadId": "conversation-123",
   "messages": [
     { "id": "msg-new", "role": "user", "content": "新的问题" }
+  ]
+}
+
+// ⚠️ 不推荐：发送完整历史（会被自动裁剪）
+{
+  "threadId": "conversation-123",
+  "messages": [
+    { "id": "msg-1", "role": "user", "content": "历史问题1" },
+    { "id": "msg-2", "role": "assistant", "content": "历史回答1" },
+    { "id": "msg-3", "role": "user", "content": "新的问题" }
   ]
 }
 ```
@@ -92,14 +122,31 @@ function createAgent() {
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
       credential: {
+        // 当 enableUpload 为 true 时， credential 为必填项
+        // 方法 1/1+2 二选一，云函数环境下已自动注入，无需手动配置
+        // 1. 从环境变量中获取腾讯云用户认证信息
         secretId: process.env.TENCENTCLOUD_SECRETID || "",
         secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
+        // 2. 获取临时密钥 sessionToken（https://cloud.tencent.com/document/product/1312/48197）
+        token: process.env.TENCENTCLOUD_SESSIONTOKEN || "",
       },
+      // 启用文件/图片上传功能（需要配置 credential）
+      enableUpload: false,
     },
   });
   return { agent };
 }
 ```
+
+#### `enableUpload` 参数说明
+
+| 参数           | 类型      | 默认值  | 说明                      |
+| -------------- | --------- | ------- | ------------------------- |
+| `enableUpload` | `boolean` | `false` | 是否启用文件/图片上传功能 |
+
+**使用前提**：启用 `enableUpload` 功能需要先配置 `credential`（腾讯云 API 密钥）。在云函数环境下，密钥会自动注入环境变量，无需手动配置。
+
+**功能说明**：开启后，用户可以在对话中上传文件或图片，适配器会自动处理文件解析并将文件信息传递给 ADP 服务进行处理。
 
 ### 路由自动生成
 
@@ -138,13 +185,13 @@ npm install
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，配置以下必填的环境变量：
+编辑 `.env` 文件，配置以下环境变量：
 
 ```env
 # ADP 应用密钥
 ADP_APP_KEY=your_adp_app_key_here
 
-# 腾讯云 API 密钥
+# 腾讯云 API 密钥（可选，仅在启用文件/图片上传功能时需要配置）
 TENCENTCLOUD_SECRETID=your_secret_id_here
 TENCENTCLOUD_SECRETKEY=your_secret_key_here
 ```
@@ -164,18 +211,27 @@ npm start
 3. 点击应用行右侧操作区域的「调用」按钮
 4. 在弹窗中复制 **AppKey**
 
+详细教程请参考：[ADP 应用密钥获取指南](https://cloud.tencent.com/document/product/1759/104209#b38b2119-e126-4ad3-aa4f-4c3a19a7f4a0)
+
 ## 🔧 本地调试
 
 ### 使用 cURL 测试
 
 ```bash
+# 发送消息（流式响应）
 curl -X POST http://localhost:9000/send-message \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{
     "threadId": "test-thread-123",
     "runId": "test-run-001",
-    "messages": [{"id": "msg-1", "role": "user", "content": "你好"}],
+    "messages": [
+      {
+        "id": "msg-1",
+        "role": "user",
+        "content": "你好，请介绍一下自己"
+      }
+    ],
     "tools": [],
     "context": [],
     "state": {},
@@ -256,6 +312,7 @@ adp-js/
 ├── src/
 │   ├── index.js              # 主入口文件
 │   └── utils.js              # 工具函数和中间件
+├── .env.example              # 环境变量示例
 ├── package.json              # 项目配置
 ├── scf_bootstrap             # 云函数启动脚本
 ├── Dockerfile                # Docker 镜像配置

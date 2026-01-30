@@ -28,13 +28,15 @@ function createAgent({ request }) {
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
       credential: {
-        // 方法 1/2 二选一，云函数环境下已自动注入，无需手动配置
+        // 方法 1/1+2 二选一，云函数环境下已自动注入，无需手动配置
         // 1. 从环境变量中获取腾讯云用户认证信息
         secretId: process.env.TENCENTCLOUD_SECRETID || "",
         secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
         // 2. 获取临时密钥 sessionToken（https://cloud.tencent.com/document/product/1312/48197）
         token: process.env.TENCENTCLOUD_SESSIONTOKEN || "",
       },
+      // 仅当配置了 credential 后才可开启文件/图片上传功能
+      enableUpload: false,
     },
   });
   // 该中间件从请求头 Authorization 中的 JWT 提取用户 ID
