@@ -22,6 +22,26 @@ class MyAgent extends YuanqiAgent {
     req.customVariables = forwardedProps?.myVariable || {};
     return req;
   }
+
+  // 重写父类方法，获取历史对话
+  async getChatHistory(subscriber, latestUserMessage) {
+    // 调用父类方法获取历史对话
+    const history = await super.getChatHistory(subscriber, latestUserMessage);
+    // 也可以忽略父类方法，自行处理历史对话的获取逻辑
+    // const history = await myMethodToGetChatHistory(subscriber, latestUserMessage);
+    // 可以在这里对历史对话进行处理
+    return history;
+  }
+
+  // 重写父类方法，保存历史对话
+  // async saveChatHistory(
+  //   subscriber,
+  //   input,
+  //   userRecordId,
+  //   assistantRecordId,
+  //   userContent,
+  //   assistantContent,
+  // ) {}
 }
 
 function createAgent({ request }) {
@@ -42,6 +62,18 @@ function createAgent({ request }) {
           ...headers,
         },
       },
+      // 云开发环境 ID，用于云开发身份认证
+      envId: process.env.CLOUDBASE_ENV_ID || "",
+      credential: {
+        // 方法 1/2 二选一，云函数环境下已自动注入，无需手动配置
+        // 1. 从环境变量中获取腾讯云用户认证信息
+        secretId: process.env.TENCENTCLOUD_SECRETID || "",
+        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
+        // 2. 获取临时密钥 sessionToken（https://cloud.tencent.com/document/product/1312/48197）
+        token: process.env.TENCENTCLOUD_SESSIONTOKEN || "",
+      },
+      // 可以自行增减历史对话轮数
+      historyCount: 20,
     },
   });
   // 该中间件从请求头 Authorization 中的 JWT 提取用户 ID

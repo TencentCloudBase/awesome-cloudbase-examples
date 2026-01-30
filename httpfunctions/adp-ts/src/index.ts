@@ -48,6 +48,8 @@ function createAgent({ request }: { request: Request }) {
         // 2. 获取临时密钥 sessionToken（https://cloud.tencent.com/document/product/1312/48197）
         token: process.env.TENCENTCLOUD_SESSIONTOKEN || "",
       },
+      // 仅当配置了 credential 后才可开启文件/图片上传功能
+      enableUpload: false,
     },
   });
   // 该中间件从请求头 Authorization 中的 JWT 提取用户 ID

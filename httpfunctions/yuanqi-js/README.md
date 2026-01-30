@@ -1,6 +1,6 @@
 # 腾讯元器 JavaScript 模板
 
-基于腾讯元器的 JavaScript Agent 函数型模板。本模板提供了将腾讯元器智能体快速部署为 HTTP 云函数的完整解决方案，支持流式响应、用户认证、自定义参数等功能。
+基于腾讯元器的 JavaScript Agent 函数型模板。本模板提供了将腾讯元器智能体快速部署为 HTTP 云函数的完整解决方案，支持流式响应、用户认证、对话历史持久化、自定义参数等功能。
 
 ## 📋 项目概述
 
@@ -9,24 +9,29 @@
 ### 核心特性
 
 - ✅ **腾讯元器集成** - 快速接入腾讯元器智能体平台
+- ✅ **对话历史持久化** - 通过云开发数据库自动保存和加载对话历史
 - ✅ **自定义参数支持** - 支持传递自定义变量到工作流和知识库
+- ✅ **思考/推理支持** - 支持元器模型的推理内容展示
 
 ### 调用链路
 
 ```
 客户端 → HTTP 云函数 → Yuanqi Agent → 腾讯元器服务 → 流式响应返回
+                            ↓
+                    云开发数据库（对话历史）
 ```
 
 ## 使用方法
 
 ### Agent 适配与自定义
 
-通过继承 `YuanqiAgent` 类，可以自定义请求体的生成逻辑，实现参数的灵活传递。例如，用户可以在标准 AG-UI 协议中的 `forwardedProps` 字段传递自定义参数（如自定义变量等，详细字段参数可以查看 [腾讯元器官方文档](https://yuanqi.tencent.com/guide/publish-agent-api-documentation)），并注入到元器请求中：
+通过继承 `YuanqiAgent` 类，可以自定义请求体的生成逻辑和对话历史的处理方式。例如，用户可以在标准 AG-UI 协议中的 `forwardedProps` 字段传递自定义参数（如自定义变量等，详细字段参数可以查看 [腾讯元器官方文档](https://yuanqi.tencent.com/guide/publish-agent-api-documentation)），并注入到元器请求中：
 
 ```javascript
 import { YuanqiAgent } from "@cloudbase/agent-adapter-yuanqi";
 
 class MyAgent extends YuanqiAgent {
+  // 重写请求体生成方法
   generateRequestBody({ messages, input }) {
     const { forwardedProps } = input;
     // 调用父类方法生成基础请求体
@@ -40,6 +45,25 @@ class MyAgent extends YuanqiAgent {
     req.customVariables = forwardedProps?.myVariable || {};
     return req;
   }
+
+  // 重写父类方法，自定义获取历史对话的逻辑
+  async getChatHistory(subscriber, latestUserMessage) {
+    // 调用父类方法获取历史对话（从云开发数据库读取）
+    const history = await super.getChatHistory(subscriber, latestUserMessage);
+    // 也可以忽略父类方法，自行处理历史对话的获取逻辑
+    // const history = await myMethodToGetChatHistory(subscriber, latestUserMessage);
+    return history;
+  }
+
+  // 重写父类方法，自定义保存历史对话的逻辑
+  // async saveChatHistory(
+  //   subscriber,
+  //   input,
+  //   userRecordId,
+  //   assistantRecordId,
+  //   userContent,
+  //   assistantContent,
+  // ) {}
 }
 ```
 
@@ -52,7 +76,7 @@ import { DetectCloudbaseUserMiddleware } from "./utils.js";
 
 function createAgent({ request }) {
   const agent = new MyAgent({
-    config: {
+    yuanqiConfig: {
       appId: process.env.YUANQI_APP_ID || "",
       appKey: process.env.YUANQI_APP_KEY || "",
     },
@@ -63,49 +87,71 @@ function createAgent({ request }) {
 }
 ```
 
-`DetectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并在默认情况下将其注入到 `input.state.__request_context__` 中。Agent 中会以 `input.state.__request_context__.id` > `forwardedProps.userId` > `randomUUID()` 的顺序来确定用户 ID，Agent 就能获取到当前请求用户的身份信息，辅助元器 Agent 实现多租户隔离的功能。你也可以参照 `Agent 适配与自定义` 中的示例，通过重写 `generateRequestBody` 方法将用户 ID 注入到请求体的 `userId` 中来实现同样的功能。
+`DetectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并将其注入到 `input.state.__request_context__` 中。Agent 中会以 `input.state.__request_context__.user.id` > `forwardedProps.userId` > `randomUUID()` 的顺序来确定用户 ID，Agent 就能获取到当前请求用户的身份信息，辅助元器 Agent 实现多租户隔离的功能。
 
 ### 历史消息处理机制
 
-腾讯元器会自动管理对话历史的保存与恢复，开发者可以选择在客户端手动管理消息历史，也可以让元器自动处理。
+`@cloudbase/agent-adapter-yuanqi` 适配器会通过云开发数据库自动管理对话历史的保存与加载。开发者只需要传递当前用户的最新消息，适配器会自动：
 
-**消息传递方式**：
+1. 从云开发数据库加载历史对话（默认 10 轮，可通过 `historyCount` 配置）
+2. 将历史对话与当前消息合并后发送给元器
+3. 自动保存用户消息和 AI 回复到数据库
 
-在 `generateRequestBody` 方法中，你可以完全控制传递给元器的消息内容：
+**自定义历史对话处理**：
+
+如果需要自定义历史对话的获取逻辑，可以重写 `getChatHistory` 方法：
 
 ```javascript
-generateRequestBody({ messages, input }) {
-  const req = super.generateRequestBody({ messages, input });
-  // 可以在这里对 messages 进行处理
-  req.messages = messages || [];
-  return req;
+async getChatHistory(subscriber, latestUserMessage) {
+  // 自定义获取历史对话的逻辑
+  const history = await myCustomHistoryService.getHistory();
+  return history;
 }
 ```
 
-**最佳实践**：
+**客户端请求示例**：
 
-```javascript
-// ✅ 推荐：发送当前用户的消息
+```json
+// ✅ 推荐：只发送当前用户的消息，历史对话由服务端自动管理
 {
   "threadId": "conversation-123",
-  "messages": [
-    { "id": "msg-new", "role": "user", "content": "新的问题" }
-  ]
+  "messages": [{ "id": "msg-new", "role": "user", "content": "新的问题" }]
 }
 ```
 
 ### Agent 实例创建
 
-在 `createAgent` 函数中配置 Agent 实例，需要提供元器应用的 `appId` 和 `appKey`：
+在 `createAgent` 函数中配置 Agent 实例，需要提供元器应用的 `appId`、`appKey` 以及可选的云开发配置：
 
 ```javascript
+import { DetectCloudbaseUserMiddleware } from "./utils.js";
+
 function createAgent({ request }) {
+  // 创建元器 Agent 实例
   const agent = new MyAgent({
-    config: {
+    yuanqiConfig: {
       appId: process.env.YUANQI_APP_ID || "",
       appKey: process.env.YUANQI_APP_KEY || "",
+      request: {
+        headers: {
+          ...headers,
+        },
+      },
+      // 云开发环境 ID，用于对话历史持久化
+      envId: process.env.CLOUDBASE_ENV_ID || "",
+      credential: {
+        // 方法 1/2 二选一，云函数环境下已自动注入，无需手动配置
+        // 1. 从环境变量中获取腾讯云用户认证信息
+        secretId: process.env.TENCENTCLOUD_SECRETID || "",
+        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
+        // 2. 获取临时密钥 sessionToken（https://cloud.tencent.com/document/product/1312/48197）
+        token: process.env.TENCENTCLOUD_SESSIONTOKEN || "",
+      },
+      // 可以自行增减历史对话轮数
+      historyCount: 20,
     },
   });
+  // 该中间件从请求头 Authorization 中的 JWT 提取用户 ID
   agent.use(new DetectCloudbaseUserMiddleware(request));
   return { agent };
 }
@@ -154,14 +200,31 @@ cp .env.example .env
 # 腾讯元器应用配置（必填）
 YUANQI_APP_ID=your_yuanqi_app_id_here
 YUANQI_APP_KEY=your_yuanqi_app_key_here
+
+# 云开发配置（对话历史持久化需要）
+CLOUDBASE_ENV_ID=your_cloudbase_env_id_here
+
+# 腾讯云认证信息（对话历史持久化需要，云函数环境下已自动注入，本地开发需要配置）
+# 方法 1: 使用永久密钥
+TENCENTCLOUD_SECRETID=your_secret_id_here
+TENCENTCLOUD_SECRETKEY=your_secret_key_here
+
+# 方法 2: 使用临时密钥
+# TENCENTCLOUD_SESSIONTOKEN=your_session_token_here
 ```
 
 **环境变量说明**：
 
-| 变量名           | 说明             | 是否必填 |
-| ---------------- | ---------------- | -------- |
-| `YUANQI_APP_ID`  | 腾讯元器应用 ID  | ✅ 必填  |
-| `YUANQI_APP_KEY` | 腾讯元器应用密钥 | ✅ 必填  |
+| 变量名                      | 说明                         | 是否必填           |
+| --------------------------- | ---------------------------- | ------------------ |
+| `YUANQI_APP_ID`             | 腾讯元器应用 ID              | ✅ 必填            |
+| `YUANQI_APP_KEY`            | 腾讯元器应用密钥             | ✅ 必填            |
+| `CLOUDBASE_ENV_ID`          | 云开发环境 ID                | 对话历史持久化需要 |
+| `TENCENTCLOUD_SECRETID`     | 腾讯云 SecretId              | 对话历史持久化需要 |
+| `TENCENTCLOUD_SECRETKEY`    | 腾讯云 SecretKey             | 对话历史持久化需要 |
+| `TENCENTCLOUD_SESSIONTOKEN` | 腾讯云临时密钥 Session Token | 对话历史持久化需要 |
+
+> **注意**：在云函数环境下，`TENCENTCLOUD_SECRETID`、`TENCENTCLOUD_SECRETKEY` 和 `TENCENTCLOUD_SESSIONTOKEN` 已自动注入，无需手动配置。
 
 ### 第 3 步：启动服务
 
@@ -294,10 +357,19 @@ yuanqi-js/
 # 构建镜像
 docker build -t yuanqi-agent .
 
-# 运行容器
+# 运行容器（基础配置）
 docker run -p 9000:9000 \
   -e YUANQI_APP_ID=your_app_id \
   -e YUANQI_APP_KEY=your_app_key \
+  yuanqi-agent
+
+# 运行容器（包含对话历史持久化配置）
+docker run -p 9000:9000 \
+  -e YUANQI_APP_ID=your_app_id \
+  -e YUANQI_APP_KEY=your_app_key \
+  -e CLOUDBASE_ENV_ID=your_env_id \
+  -e TENCENTCLOUD_SECRETID=your_secret_id \
+  -e TENCENTCLOUD_SECRETKEY=your_secret_key \
   yuanqi-agent
 ```
 

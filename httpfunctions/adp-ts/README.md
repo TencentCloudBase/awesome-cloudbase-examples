@@ -57,7 +57,7 @@ function createAgent({ request }: { request: Request }) {
 }
 ```
 
-`DetectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并在默认情况下将其注入到 `input.state.__request_context__` 中。Agent 中会以 `input.state.__request_context__.id` > `forwardedProps.visitorBizId` > `randomUUID()` 的顺序来确定用户 ID，Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。你也可以参照 `Agent 适配与自定义` 中的示例，通过重写 `generateRequestBody` 方法将用户 ID 注入到请求体的 `visitorBizId` 中来实现同样的功能。
+`DetectCloudbaseUserMiddleware` 中间件会自动从 HTTP 请求的 `Authorization` header 中提取 JWT Token，解析出用户 ID（`sub` 字段），并在默认情况下将其注入到 `input.state.__request_context__` 中。Agent 中会以 `input.state.__request_context__.user.id` > `forwardedProps.visitorBizId` > `randomUUID()` 的顺序来确定用户 ID，Agent 就能获取到当前请求用户的身份信息，辅助 ADP 实现多租户隔离的功能。你也可以参照 `Agent 适配与自定义` 中的示例，通过重写 `generateRequestBody` 方法将用户 ID 注入到请求体的 `visitorBizId` 中来实现同样的功能。
 
 ### 历史消息处理机制
 
@@ -122,14 +122,26 @@ function createAgent() {
     adpConfig: {
       appKey: process.env.ADP_APP_KEY || "",
       credential: {
-        secretId: process.env.TENCENTCLOUD_SECRETID || "",
-        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "",
+        secretId: process.env.TENCENTCLOUD_SECRETID || "", // 可选，当 enableUpload 为 true 时必填
+        secretKey: process.env.TENCENTCLOUD_SECRETKEY || "", // 可选，当 enableUpload 为 true 时必填
       },
+      // 启用文件/图片上传功能（需要配置 credential）
+      enableUpload: false,
     },
   });
   return { agent };
 }
 ```
+
+#### `enableUpload` 参数说明
+
+| 参数           | 类型      | 默认值  | 说明                      |
+| -------------- | --------- | ------- | ------------------------- |
+| `enableUpload` | `boolean` | `false` | 是否启用文件/图片上传功能 |
+
+**使用前提**：启用 `enableUpload` 功能需要先配置 `credential`（腾讯云 API 密钥）。在云函数环境下，密钥会自动注入环境变量，无需手动配置。
+
+**功能说明**：开启后，用户可以在对话中上传文件或图片，适配器会自动处理文件解析并将文件信息传递给 ADP 服务进行处理。
 
 ### 路由自动生成
 
@@ -168,13 +180,13 @@ npm install
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，配置以下必填的环境变量：
+编辑 `.env` 文件，配置以下环境变量：
 
 ```env
 # ADP 应用密钥
 ADP_APP_KEY=your_adp_app_key_here
 
-# 腾讯云 API 密钥
+# 腾讯云 API 密钥（可选，仅在启用文件/图片上传功能时需要配置）
 TENCENTCLOUD_SECRETID=your_secret_id_here
 TENCENTCLOUD_SECRETKEY=your_secret_key_here
 ```
