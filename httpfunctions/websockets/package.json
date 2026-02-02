@@ -1,0 +1,34 @@
+{
+  "name": "websockets-example",
+  "version": "1.0.0",
+  "description": "简单的 WebSocket 服务端和客户端示例",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "node server.js",
+    "client": "node client.js",
+    "dev": "npm run server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "websocket",
+    "nodejs",
+    "realtime",
+    "chat",
+    "example"
+  ],
+  "author": "CloudBase Examples",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TencentCloudBase/awesome-cloudbase-examples.git",
+    "directory": "websockets"
+  }
+}
