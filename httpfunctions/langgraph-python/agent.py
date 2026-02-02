@@ -46,10 +46,18 @@ from langgraph.graph.state import CompiledStateGraph
 
 class State(MessagesState):
     tools: List[Any]
+    forwarded_props: Optional[dict] = None  # 添加 forwarded_props 字段
 
 
 def chat_node(state: State, config: Optional[RunnableConfig] = None) -> dict:
     try:
+        # 获取客户端传递的 forwardedProps 参数
+        forwarded_props = state.get("forwarded_props", {}) or {}
+        
+        # 记录接收到的参数（用于调试）
+        if forwarded_props:
+            print(f"[chat_node] Received forwardedProps: {forwarded_props}")
+        
         # Validate required environment variables
         model_name = os.getenv("OPENAI_MODEL")
         api_key = os.getenv("OPENAI_API_KEY")

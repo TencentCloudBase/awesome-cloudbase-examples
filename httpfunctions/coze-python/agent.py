@@ -46,23 +46,37 @@ def build_coze_agent(
     return agent
 
 
-def create_jwt_request_preprocessor():
-    """Create request preprocessor for JWT authentication.
+def jwt_middleware(input_data, request):
+    """JWT authentication middleware.
     
     Extracts user_id from JWT 'sub' field in Authorization header
-    and writes to request.forwarded_props.user_id.
+    and injects it into input_data.forwarded_props.user_id.
+    
+    Uses generator pattern with yield for control flow transfer.
     """
-    from ag_ui.core import RunAgentInput
-    from fastapi import Request
+    import logging
     
-    def jwt_preprocessor(request: RunAgentInput, http_context: Request) -> None:
-        user_id = extract_user_id_from_request(http_context)
+    logger = logging.getLogger(__name__)
+    
+    try:
+        user_id = extract_user_id_from_request(request)
         if user_id:
-            if not request.forwarded_props:
-                request.forwarded_props = {}
-            request.forwarded_props["user_id"] = user_id
+            if not input_data.forwarded_props:
+                input_data.forwarded_props = {}
+            input_data.forwarded_props["user_id"] = user_id
+            logger.info(f"JWT middleware: User authenticated with ID: {user_id}")
+        else:
+            logger.debug("JWT middleware: No valid user_id found in request")
+    except Exception as e:
+        logger.error(f"JWT middleware error: {e}")
+        # Continue processing even if JWT extraction fails
+        pass
     
-    return jwt_preprocessor
+    # Transfer control to next middleware or agent
+    yield
+    
+    # Post-processing (optional)
+    logger.debug("JWT middleware: Post-processing completed")
 
 
 
