@@ -32,7 +32,7 @@ npm start
 node server.js
 ```
 
-服务端将在 `http://localhost:8080` 启动，WebSocket 连接地址为 `ws://localhost:8080`。
+服务端将在 `http://localhost:9000` 启动，WebSocket 连接地址为 `ws://localhost:9000`。
 
 ### 3. 连接客户端
 
@@ -46,12 +46,25 @@ npm run client
 node client.js
 
 # 指定服务器地址和客户端ID
-node client.js ws://localhost:8080 my-client-id
+node client.js ws://localhost:9000 my-client-id
 ```
 
 #### 方式二：浏览器客户端
 
 直接在浏览器中打开 `client-browser.html` 文件，或者通过 HTTP 服务器访问。
+
+## 部署到 HTTP 云函数
+
+编写 `scf_bootstrap` 文件，内容如下:
+
+```bash
+#!/bin/bash
+node server.js
+```
+
+然后上传到云函数，即可部署成功。(部署 HTTP 云函数时， WebSocket 协议需要勾选为 true)
+
+部署到 HTTP 云函数时，访问使用 `wss://` 访问。
 
 ## 💡 功能特性
 
@@ -87,7 +100,7 @@ node client.js ws://localhost:8080 my-client-id
 
 ### 浏览器客户端操作
 
-1. 输入 WebSocket 服务器地址（默认：`ws://localhost:8080`）
+1. 输入 WebSocket 服务器地址（默认：`ws://localhost:9000`）
 2. 可选：输入自定义客户端ID
 3. 点击"连接"按钮
 4. 在消息输入框中输入内容并发送
@@ -140,7 +153,7 @@ node client.js ws://localhost:8080 my-client-id
 可以在 `server.js` 中修改以下配置：
 
 ```javascript
-const PORT = process.env.PORT || 8080;  // 监听端口
+const PORT = process.env.PORT || 9000;  // 监听端口
 const heartbeatInterval = 30000;        // 心跳间隔（毫秒）
 const maxReconnectAttempts = 5;         // 最大重连次数
 ```
@@ -173,13 +186,13 @@ npm run client
 
 ```bash
 # 终端1
-node client.js ws://localhost:8080 alice
+node client.js ws://localhost:9000 alice
 
 # 终端2  
-node client.js ws://localhost:8080 bob
+node client.js ws://localhost:9000 bob
 
 # 终端3
-node client.js ws://localhost:8080 charlie
+node client.js ws://localhost:9000 charlie
 ```
 
 ### 日志输出
@@ -187,98 +200,9 @@ node client.js ws://localhost:8080 charlie
 服务端会输出详细的连接和消息日志：
 
 ```
-WebSocket 服务器运行在端口 8080
-WebSocket 连接地址: ws://localhost:8080
+WebSocket 服务器运行在端口 9000
+WebSocket 连接地址: ws://localhost:9000
 新客户端连接: alice
 收到来自 alice 的消息: { type: 'chat', content: 'Hello!' }
 客户端 bob 断开连接
 ```
-
-## 🚀 部署建议
-
-### 生产环境部署
-
-1. **使用进程管理器**：
-   ```bash
-   # 使用 PM2
-   npm install -g pm2
-   pm2 start server.js --name websocket-server
-   ```
-
-2. **反向代理配置**（Nginx）：
-   ```nginx
-   location /ws {
-       proxy_pass http://localhost:8080;
-       proxy_http_version 1.1;
-       proxy_set_header Upgrade $http_upgrade;
-       proxy_set_header Connection "upgrade";
-       proxy_set_header Host $host;
-   }
-   ```
-
-3. **HTTPS/WSS 支持**：
-   ```javascript
-   const https = require('https');
-   const fs = require('fs');
-   
-   const server = https.createServer({
-     cert: fs.readFileSync('path/to/cert.pem'),
-     key: fs.readFileSync('path/to/key.pem')
-   });
-   ```
-
-### 性能优化
-
-- 使用连接池管理大量连接
-- 实现消息队列处理高并发
-- 添加速率限制防止滥用
-- 使用 Redis 实现多实例消息同步
-
-## 🛠️ 故障排除
-
-### 常见问题
-
-1. **连接失败**
-   - 检查服务端是否正常启动
-   - 确认端口没有被占用
-   - 检查防火墙设置
-
-2. **消息发送失败**
-   - 确认 WebSocket 连接状态
-   - 检查消息格式是否正确
-   - 查看服务端错误日志
-
-3. **频繁断线重连**
-   - 检查网络稳定性
-   - 调整心跳间隔设置
-   - 查看服务端资源使用情况
-
-### 调试技巧
-
-- 使用浏览器开发者工具查看 WebSocket 连接
-- 启用详细日志输出
-- 使用 WebSocket 测试工具验证服务端
-
-## 📚 扩展功能
-
-可以基于此示例实现更多功能：
-
-- 🔐 用户认证和授权
-- 💾 消息持久化存储
-- 🏠 聊天室/频道管理
-- 📁 文件传输支持
-- 🎮 实时游戏功能
-- 📊 连接统计和监控
-- 🔄 负载均衡和集群
-
-## 📄 许可证
-
-MIT License
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
----
-
-**享受实时通信的乐趣！** 🎉

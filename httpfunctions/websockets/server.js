@@ -138,7 +138,7 @@ setInterval(() => {
 }, 30000);
 
 // 启动服务器
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 9000;
 server.listen(PORT, () => {
   console.log(`WebSocket 服务器运行在端口 ${PORT}`);
   console.log(`WebSocket 连接地址: ws://localhost:${PORT}`);
