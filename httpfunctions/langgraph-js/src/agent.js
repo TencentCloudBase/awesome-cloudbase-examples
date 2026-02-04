@@ -33,6 +33,9 @@ async function chatNode(state, config) {
     apiKey: process.env.OPENAI_API_KEY,
     configuration: {
       baseURL: process.env.OPENAI_BASE_URL,
+      defaultHeaders: {
+        Accept: "text/event-stream",
+      },
     },
   });
 
