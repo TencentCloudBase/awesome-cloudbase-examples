@@ -6,7 +6,7 @@ import cors from "cors";
 import dotenvx from "@dotenvx/dotenvx";
 import pino from "pino";
 import { v4 as uuidv4 } from "uuid";
-import { checkOpenAIEnvMiddleware } from "./utils.js";
+import { checkOpenAIEnvMiddleware, parseJwtFromRequest } from "./utils.js";
 
 // 加载 .env 文件中的环境变量
 dotenvx.config();
@@ -57,16 +57,34 @@ const createAgent = ({ request, logger, requestId }) => {
   return {
     agent: new LanggraphAgent({
       compiledWorkflow: agenticChatGraph,
-    }).use((input, next) => {
-      // 使用 AG-UI TypeScript SDK 的 middleware 机制
-      // 确保每个请求都有 threadId，用于会话追踪
-      // 如果客户端未提供 threadId，则自动生成一个 UUID
-      return next.run(
-        typeof input.threadId === "string"
-          ? input
-          : { ...input, threadId: uuidv4() },
-      );
-    }),
+    })
+      .use((input, next) => {
+        // 使用 AG-UI TypeScript SDK 的 middleware 机制
+        // 确保每个请求都有 threadId，用于会话追踪
+        // 如果客户端未提供 threadId，则自动生成一个 UUID
+        return next.run(
+          typeof input.threadId === "string"
+            ? input
+            : { ...input, threadId: uuidv4() },
+        );
+      })
+      .use((input, next) => {
+        // 将请求上下文注入到 Agent 状态中，供后续处理使用
+        // - user: 从 Authorization header 解析 JWT 获取用户信息
+        //         包含 id (sub)、exp、iat 等 JWT 标准字段
+        //         如果未携带有效 JWT 则为 null
+        // - req: 原始 Web Request 对象，可用于获取其他请求信息
+        return next.run({
+          ...input,
+          state: {
+            ...(input.state || {}),
+            __request_context__: {
+              user: parseJwtFromRequest(request),
+              req: request,
+            },
+          },
+        });
+      }),
   };
 };
 
