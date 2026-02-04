@@ -22,7 +22,7 @@
     "@langchain/langgraph": "^0.3.1",
     "@langchain/langgraph-supervisor": "^0.0.13",
     "@langchain/textsplitters": "^0.1.0",
-    "@modelcontextprotocol/sdk": "1.13.2",
+    "@modelcontextprotocol/sdk": "1.26.0",
     "js-yaml": "^4.1.0",
     "langchain": "^0.3.27",
     "remeda": "^2.23.0",
