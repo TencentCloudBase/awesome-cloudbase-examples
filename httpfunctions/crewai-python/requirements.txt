@@ -1,5 +1,5 @@
 fastapi==0.125.0
-cloudbase-agent-server==0.1.12
+cloudbase-agent-server==0.1.18
 cloudbase-agent-core==0.1.11
 cloudbase-agent-crewai==0.1.12
 crewai==1.7.2
