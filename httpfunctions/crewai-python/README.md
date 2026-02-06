@@ -53,6 +53,8 @@ OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 # API Key (必填)
 OPENAI_API_KEY=your_api_key_here
 
+# Trace log to stdout（可选）
+AUTO_TRACES_STDOUT=true
 ```
 
 **注意**: 部署到 SCF 时，需要在云函数控制台配置这些环境变量。
