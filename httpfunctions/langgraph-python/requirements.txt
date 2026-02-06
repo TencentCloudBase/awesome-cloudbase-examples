@@ -1,10 +1,13 @@
 fastapi==0.115.0
-cloudbase-agent-core==0.1.11
-cloudbase-agent-server==0.1.18
-cloudbase-agent-langgraph==0.1.12
 langgraph==1.0.5
 langchain-openai==1.1.6
 ag-ui-protocol==0.1.10
 ag-ui-langgraph==0.0.22
 python-dotenv==1.0.1
 zstandard>=0.22.0
+
+--extra-index-url https://test.pypi.org/simple/
+cloudbase-agent-core==0.1.12
+cloudbase-agent-server==0.1.18a16
+cloudbase-agent-langgraph==0.1.12a5
+cloudbase-agent-observability==0.1.1a10

@@ -31,13 +31,14 @@
 
 启动服务前，需要配置以下环境变量：
 
-| 变量名 | 必填 | 说明 |
-|--------|------|------|
-| `OPENAI_API_KEY` | ✅ | OpenAI API 密钥或兼容服务的 API 密钥 |
-| `OPENAI_BASE_URL` | ✅ | API 基础地址，如 `https://api.openai.com/v1` |
-| `OPENAI_MODEL` | ✅ | 模型名称，如 `gpt-4o` 或 `gpt-3.5-turbo` |
+| 变量名 | 必填 | 说明                                                              |
+|--------|------|-----------------------------------------------------------------|
+| `OPENAI_API_KEY` | ✅ | OpenAI API 密钥或兼容服务的 API 密钥                                      |
+| `OPENAI_BASE_URL` | ✅ | API 基础地址，如 `https://api.openai.com/v1`                          |
+| `OPENAI_MODEL` | ✅ | 模型名称，如 `gpt-4o` 或 `gpt-3.5-turbo`                               |
 | `LOG_LEVEL` | ❌ | 日志级别，可选值：`trace`/`debug`/`info`/`warn`/`error`/`fatal`，默认 `info` |
-| `ENABLE_CORS` | ❌ | 是否启用 CORS，设为 `true` 启用。本地开发跨域调试时可启用，生产环境建议通过网关配置 |
+| `ENABLE_CORS` | ❌ | 是否启用 CORS，设为 `true` 启用。本地开发跨域调试时可启用，生产环境建议通过网关配置                |
+| `AUTO_TRACES_STDOUT` | ❌ | 是否启用可观测日志打印到stdout                        |
 
 复制 `.env.example` 并重命名为 `.env`，填入实际值：
 
