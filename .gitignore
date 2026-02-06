@@ -60,3 +60,7 @@ app.*.map.json
 android/app/debug
 android/app/profile
 android/app/release
+
+venv
+.venv
+temp-build.zip

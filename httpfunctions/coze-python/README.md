@@ -49,6 +49,9 @@ python -m pip install -r ./requirements.txt \
 ```bash
 COZE_API_TOKEN=your_api_token_here
 COZE_BOT_ID=your_bot_id_here
+
+# Trace log to stdout（可选）
+AUTO_TRACES_STDOUT=true
 ```
 
 **环境变量说明**：
