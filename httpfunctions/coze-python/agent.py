@@ -51,16 +51,19 @@ def create_jwt_request_preprocessor():
     
     Extracts user_id from JWT 'sub' field in Authorization header
     and writes to request.forwarded_props.user_id.
+    
+    Note: This is a middleware generator following the onion model.
     """
     from ag_ui.core import RunAgentInput
     from fastapi import Request
     
-    def jwt_preprocessor(request: RunAgentInput, http_context: Request) -> None:
+    def jwt_preprocessor(request: RunAgentInput, http_context: Request):
         user_id = extract_user_id_from_request(http_context)
         if user_id:
             if not request.forwarded_props:
                 request.forwarded_props = {}
             request.forwarded_props["user_id"] = user_id
+        yield  # Required for middleware generator pattern
     
     return jwt_preprocessor
 

@@ -14,10 +14,9 @@ def main():
     """Application entry point."""
     try:
         agent = build_coze_agent()
-        AgentServiceApp().run(
-            lambda: {"agent": agent},
-            request_preprocessor=create_jwt_request_preprocessor(),
-        )
+        app = AgentServiceApp()
+        app.use(create_jwt_request_preprocessor())
+        app.run(lambda: {"agent": agent})
     except ValueError as e:
         print(f"Configuration Error: {e}", file=sys.stderr)
         sys.exit(1)
