@@ -39,6 +39,9 @@ python -m pip install -r ./requirements.txt \
 OPENAI_API_KEY=your_api_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1
 OPENAI_MODEL=gpt-4o-mini
+
+# Trace log to stdout（可选）
+AUTO_TRACES_STDOUT=true
 ```
 
 **注意**: 部署到 SCF 时，需要在云函数控制台配置这些环境变量。
