@@ -13,6 +13,10 @@ from dotenv import load_dotenv
 # Configure environment for SCF compatibility
 os.environ["HOME"] = "/tmp"
 
+# disable crewAI telemetry
+os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
+os.environ["CREWAI_DISABLE_TRACKING"] = "true"
+
 import pysqlite3
 sys.modules['sqlite3'] = pysqlite3
 

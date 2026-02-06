@@ -1,10 +1,16 @@
 fastapi==0.125.0
-cloudbase-agent-server==0.1.12
-cloudbase-agent-core==0.1.11
-cloudbase-agent-crewai==0.1.12
 crewai==1.7.2
+# Pin cryptography to version WITHOUT Rust bindings (GLIBC compatibility)
+# cryptography>=39.0.0 uses Rust, requires GLIBC 2.30+ (Cloud Function has older version)
+cryptography==38.0.4
 pysqlite3-binary==0.5.4
 litellm==1.50.0
 openai==1.83.0
 python-dotenv==1.1.1
 async_timeout>=4.0.0
+
+--extra-index-url https://test.pypi.org/simple/
+cloudbase-agent-server==0.1.18a16
+cloudbase-agent-core==0.1.12
+cloudbase-agent-crewai==0.1.13a16
+cloudbase-agent-observability[crewai]==0.1.1a10
