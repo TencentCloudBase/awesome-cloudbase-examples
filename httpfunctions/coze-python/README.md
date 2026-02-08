@@ -401,3 +401,68 @@ A: 通过客户端请求的 `forwarded_props.parameters` 动态传递，它会�
 **Q: 支持哪些 Coze API 功能？**
 A: 支持 Coze Chat V3 API 的所有功能，包括流式响应和推理内容。
 
+---
+
+## 可观测性配置
+
+本项目支持 OpenTelemetry 协议的可观测性（Observability）功能，可以追踪 Coze Agent 的执行链路（traces）并导出到控制台或 OTLP 后端（如 Langfuse、Jaeger 等）。
+
+### 启用方式
+
+本项目提供两种启用可观测性的方式：
+
+#### 方式一：环境变量（推荐用于部署环境）
+
+在 `.env` 文件中设置：
+
+```bash
+# 启用可观测性（设为 true、1、yes 均可启用，设为 false 或 0 则关闭）
+AUTO_TRACES_STDOUT=true
+```
+
+或在 CloudBase 云函数控制台的环境变量设置中，添加：
+
+| 变量名 | 值 |
+|--------|-----|
+| `AUTO_TRACES_STDOUT` | `true` |
+
+#### 方式二：代码配置（推荐用于开发调试）
+
+在 `app.py` 中修改 `AgentServiceApp` 的初始化：
+
+```python
+from cloudbase_agent.observability.server import ConsoleTraceConfig
+
+# 显式传入可观测性配置
+AgentServiceApp(observability=ConsoleTraceConfig()).run(lambda: {"agent": agent})
+```
+
+### 关闭可观测性
+
+如需关闭可观测性功能，可采用以下任一方式：
+
+**方式一：本地开发（.env 文件）**
+
+```bash
+# 关闭可观测性
+AUTO_TRACES_STDOUT=false
+```
+
+**方式二：云函数控制台（部署环境）**
+
+在 CloudBase 云函数控制台的环境变量设置中，添加：
+
+| 变量名 | 值 |
+|--------|-----|
+| `AUTO_TRACES_STDOUT` | `false` |
+
+**方式三：代码配置**
+
+```python
+AgentServiceApp(observability=None).run(lambda: {"agent": agent})
+```
+
+### 输出格式
+
+启用后， traces 将以 JSON 格式输出到 stdout，每行一个 span，便于使用 `grep`、`jq` 等工具分析。
+
