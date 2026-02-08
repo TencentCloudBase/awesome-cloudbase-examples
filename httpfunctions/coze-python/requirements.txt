@@ -1,9 +1,6 @@
-
+cloudbase-agent-core==0.1.12
+cloudbase-agent-server==0.1.21
+cloudbase-agent-coze==0.1.18
+cloudbase-agent-observability==0.1.2
 cozepy>=0.20.0
 python-dotenv>=1.2.1
-
---extra-index-url https://test.pypi.org/simple/
-cloudbase-agent-core==0.1.12
-cloudbase-agent-server==0.1.18a16
-cloudbase-agent-coze==0.1.18b5
-cloudbase-agent-observability==0.1.1a10
