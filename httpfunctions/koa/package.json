@@ -1,0 +1,33 @@
+{
+  "name": "koa-helloworld-cloudbase",
+  "version": "1.0.0",
+  "description": "Koa HelloWorld 云函数示例，专为腾讯云开发环境优化",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "koa",
+    "cloudbase",
+    "serverless",
+    "tencent-cloud",
+    "http-function"
+  ],
+  "author": "CloudBase Team",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.14.2",
+    "koa-router": "^12.0.0",
+    "koa-bodyparser": "^4.4.1",
+    "koa-cors": "^0.0.16",
+    "koa-logger": "^3.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
