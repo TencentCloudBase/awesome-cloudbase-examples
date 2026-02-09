@@ -7,9 +7,19 @@ import dotenvx from "@dotenvx/dotenvx";
 import pino from "pino";
 import { v4 as uuidv4 } from "uuid";
 import { checkOpenAIEnvMiddleware, parseJwtFromRequest } from "./utils.js";
+import { ExporterType } from "@cloudbase/agent-observability/server";
 
 // 加载 .env 文件中的环境变量
 dotenvx.config();
+
+/**
+ * 判断是否启用可观测性
+ * 读取 AUTO_TRACES_STDOUT 环境变量，为 "false" 时不启用
+ */
+const isObservabilityEnabled = () => {
+  const value = process.env.AUTO_TRACES_STDOUT?.toLowerCase();
+  return value !== "false" && value !== "0";
+};
 
 /**
  * 创建 Logger 实例
@@ -102,6 +112,7 @@ createExpressRoutes({
   createAgent,
   express: app,
   logger,
+  observability: isObservabilityEnabled() ? { type: ExporterType.Console } : undefined,
 });
 
 app.listen(9000, () => logger.info("Listening on 9000!"));

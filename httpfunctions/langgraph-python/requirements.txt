@@ -1,7 +1,8 @@
 fastapi==0.115.0
-cloudbase-agent-core==0.1.11
-cloudbase-agent-server==0.1.18
-cloudbase-agent-langgraph==0.1.12
+cloudbase-agent-core==0.1.12
+cloudbase-agent-server==0.1.21
+cloudbase-agent-langgraph==0.1.13
+cloudbase-agent-observability==0.1.2
 langgraph==1.0.5
 langchain-openai==1.1.6
 ag-ui-protocol==0.1.10
