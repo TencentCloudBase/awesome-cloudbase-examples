@@ -1,23 +1,32 @@
 # -*- coding: utf-8 -*-
 """Coze Agent Application Entry Point."""
 
+import os
 import sys
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from cloudbase_agent.server import AgentServiceApp
+from cloudbase_agent.observability.server import ConsoleTraceConfig
 from agent import build_coze_agent, create_jwt_request_preprocessor
+
+
+def is_observability_enabled():
+    value = os.environ.get("AUTO_TRACES_STDOUT", "").lower()
+    return value not in ("false", "0")
 
 
 def main():
     """Application entry point."""
     try:
         agent = build_coze_agent()
-        AgentServiceApp().run(
-            lambda: {"agent": agent},
-            request_preprocessor=create_jwt_request_preprocessor(),
-        )
+        
+        observability = ConsoleTraceConfig() if is_observability_enabled() else None
+        
+        app = AgentServiceApp(observability=observability)
+        app.use(create_jwt_request_preprocessor())
+        app.run(lambda: {"agent": agent})
     except ValueError as e:
         print(f"Configuration Error: {e}", file=sys.stderr)
         sys.exit(1)
