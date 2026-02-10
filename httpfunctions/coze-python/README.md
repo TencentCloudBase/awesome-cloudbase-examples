@@ -49,9 +49,6 @@ python -m pip install -r ./requirements.txt \
 ```bash
 COZE_API_TOKEN=your_api_token_here
 COZE_BOT_ID=your_bot_id_here
-
-# Trace log to stdout（可选）
-AUTO_TRACES_STDOUT=true
 ```
 
 **环境变量说明**：
@@ -61,6 +58,7 @@ AUTO_TRACES_STDOUT=true
 | `COZE_API_TOKEN` | Coze 平台的 API Token | ✅ 必填 |
 | `COZE_BOT_ID` | Coze 平台的 Bot ID | ✅ 必填 |
 | `COZE_API_BASE` | Coze API 基础 URL（默认: https://api.coze.cn） | ⭕ 可选 |
+| `AUTO_TRACES_STDOUT` | 是否将 trace 输出到 stdout（默认: true，设 false/0 关闭） | ⭕ 可选 |
 
 **动态 User ID（每请求用户身份）**：
 
@@ -83,22 +81,23 @@ Adapter 支持每个请求使用不同的 `user_id`，允许多个用户使用�
    - 支持 base64url 解码和 padding 处理
    - 包含完整的错误处理和日志记录
 
-2. **`agent.py`** - JWT 请求预处理器：
-   - `create_jwt_request_preprocessor()` - 创建 JWT 认证预处理器
-   - 自动从 Authorization header 提取 user_id
-   - 将 user_id 写入 `request.forwarded_props.user_id`，供 Coze SDK 使用
+2. **`agent.py`** - JWT 认证中间件：
+   - `jwt_middleware(input_data, request)` - JWT 认证中间件（生成器）
+   - 从 Authorization header 解析 JWT，将 user_id 写入 `forwarded_props.user_id`
+   - 将 `state.__request_context__.user` 写入完整用户信息（含 jwt payload）供工作流使用
 
 **使用方式**：
 
 ```python
 from cloudbase_agent.server import AgentServiceApp
-from agent import build_coze_agent, create_jwt_request_preprocessor
+from cloudbase_agent.observability.server import ConsoleTraceConfig
+from agent import build_coze_agent, jwt_middleware
 
 agent = build_coze_agent()
-AgentServiceApp().run(
-    lambda: {"agent": agent},
-    request_preprocessor=create_jwt_request_preprocessor(),
-)
+observability = ConsoleTraceConfig() if is_observability_enabled() else None
+app = AgentServiceApp(observability=observability)
+app.use(jwt_middleware)
+app.run(lambda: {"agent": agent})
 ```
 
 **JWT Token 格式要求**：
@@ -213,21 +212,9 @@ def build_coze_agent():
     )
 ```
 
-**2. `create_jwt_request_preprocessor()` - JWT 认证预处理器**
+**2. `jwt_middleware(input_data, request)` - JWT 认证中间件**
 
-```python
-from auth import extract_user_id_from_request
-
-def create_jwt_request_preprocessor():
-    """创建 JWT 认证预处理器，从 Authorization header 提取 user_id"""
-    def jwt_preprocessor(request, http_context):
-        user_id = extract_user_id_from_request(http_context)
-        if user_id:
-            if not request.forwarded_props:
-                request.forwarded_props = {}
-            request.forwarded_props["user_id"] = user_id
-    return jwt_preprocessor
-```
+从 Authorization header 解析 JWT，写入 `forwarded_props.user_id` 与 `state.__request_context__.user`（供工作流使用）。使用生成器模式，通过 `yield` 传递控制流。
 
 ### `auth.py` - JWT 认证辅助模块
 
@@ -235,13 +222,14 @@ def create_jwt_request_preprocessor():
 
 **核心函数**：
 
-1. **`extract_user_id_from_jwt(token)`** - 从 JWT token 提取 user_id
-   - 解析 JWT 格式（header.payload.signature）
-   - 解码 base64url 编码的 payload
-   - 从 `sub` 字段提取用户身份
+1. **`decode_jwt(token)`** - 解码 JWT，返回 `(user_id, payload)`
+   - 供 `jwt_middleware` 使用，用于写入 `forwarded_props.user_id` 和 `state.__request_context__.user.jwt`
+
+2. **`extract_user_id_from_jwt(token)`** - 从 JWT token 提取 user_id
+   - 内部调用 `decode_jwt`，返回 user_id
    - 包含完整的错误处理和日志记录
 
-2. **`extract_user_id_from_request(http_context)`** - 从 HTTP 请求提取 user_id
+3. **`extract_user_id_from_request(http_context)`** - 从 HTTP 请求提取 user_id
    - 从 Authorization header 读取 Bearer token
    - 调用 `extract_user_id_from_jwt()` 解析 token
    - 返回 user_id 或 None（如果解析失败）
@@ -258,18 +246,21 @@ def create_jwt_request_preprocessor():
 
 ```python
 from cloudbase_agent.server import AgentServiceApp
-from agent import build_coze_agent, create_jwt_request_preprocessor
+from cloudbase_agent.observability.server import ConsoleTraceConfig
+from agent import build_coze_agent, jwt_middleware
 
 agent = build_coze_agent()
-AgentServiceApp().run(
-    lambda: {"agent": agent},
-    request_preprocessor=create_jwt_request_preprocessor(),
-)
+observability = ConsoleTraceConfig() if is_observability_enabled() else None
+app = AgentServiceApp(observability=observability)
+app.use(jwt_middleware)
+app.run(lambda: {"agent": agent})
 ```
 
 **服务端口**：默认 9000（由 `cloudbase_agent.server` 管理）
 
-**JWT 认证**：通过 `request_preprocessor` 参数自动启用，从 Authorization header 提取 user_id
+**JWT 认证**：通过 `app.use(jwt_middleware)` 启用，从 Authorization header 提取 user_id 并注入 state
+
+**可观测性**：通过 `AUTO_TRACES_STDOUT` 环境变量控制是否将 trace 输出到 stdout
 
 ### `scf_bootstrap` - SCF 启动脚本
 
@@ -400,69 +391,4 @@ A: 通过客户端请求的 `forwarded_props.parameters` 动态传递，它会�
 
 **Q: 支持哪些 Coze API 功能？**
 A: 支持 Coze Chat V3 API 的所有功能，包括流式响应和推理内容。
-
----
-
-## 可观测性配置
-
-本项目支持 OpenTelemetry 协议的可观测性（Observability）功能，可以追踪 Coze Agent 的执行链路（traces）并导出到控制台或 OTLP 后端（如 Langfuse、Jaeger 等）。
-
-### 启用方式
-
-本项目提供两种启用可观测性的方式：
-
-#### 方式一：环境变量（推荐用于部署环境）
-
-在 `.env` 文件中设置：
-
-```bash
-# 启用可观测性（设为 true、1、yes 均可启用，设为 false 或 0 则关闭）
-AUTO_TRACES_STDOUT=true
-```
-
-或在 CloudBase 云函数控制台的环境变量设置中，添加：
-
-| 变量名 | 值 |
-|--------|-----|
-| `AUTO_TRACES_STDOUT` | `true` |
-
-#### 方式二：代码配置（推荐用于开发调试）
-
-在 `app.py` 中修改 `AgentServiceApp` 的初始化：
-
-```python
-from cloudbase_agent.observability.server import ConsoleTraceConfig
-
-# 显式传入可观测性配置
-AgentServiceApp(observability=ConsoleTraceConfig()).run(lambda: {"agent": agent})
-```
-
-### 关闭可观测性
-
-如需关闭可观测性功能，可采用以下任一方式：
-
-**方式一：本地开发（.env 文件）**
-
-```bash
-# 关闭可观测性
-AUTO_TRACES_STDOUT=false
-```
-
-**方式二：云函数控制台（部署环境）**
-
-在 CloudBase 云函数控制台的环境变量设置中，添加：
-
-| 变量名 | 值 |
-|--------|-----|
-| `AUTO_TRACES_STDOUT` | `false` |
-
-**方式三：代码配置**
-
-```python
-AgentServiceApp(observability=None).run(lambda: {"agent": agent})
-```
-
-### 输出格式
-
-启用后， traces 将以 JSON 格式输出到 stdout，每行一个 span，便于使用 `grep`、`jq` 等工具分析。
 

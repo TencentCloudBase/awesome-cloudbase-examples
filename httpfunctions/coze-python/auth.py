@@ -1,59 +1,53 @@
 # -*- coding: utf-8 -*-
 """JWT Authentication Helper.
 
-Extracts user_id from JWT 'sub' field in Authorization header.
+Extracts user_id from JWT 'sub' field and full decoded payload (all claims) from Authorization header.
 """
 
 import base64
 import json
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple
 
 from fastapi import Request
 
 logger = logging.getLogger(__name__)
 
 
-def extract_user_id_from_jwt(token: str) -> Optional[str]:
-    """Extract user_id from JWT token 'sub' field."""
+def decode_jwt(token: str) -> Tuple[Optional[str], Dict[str, Any]]:
+    """Decode JWT token and return (user_id from 'sub', full payload as dict).
+
+    Payload is the decoded body (all claims flattened) for state.__request_context__.user.jwt.
+    """
     try:
-        # JWT format: header.payload.signature
         parts = token.split(".")
         if len(parts) != 3:
             logger.warning("Invalid JWT format: expected 3 parts, got %d", len(parts))
-            return None
-        
-        # Decode payload (second part)
+            return None, {}
+
         payload_part = parts[1]
-        # Add padding if needed
         padding = 4 - len(payload_part) % 4
         if padding != 4:
             payload_part += "=" * padding
-        
-        # Decode base64url
+
         payload_bytes = base64.urlsafe_b64decode(payload_part)
         payload = json.loads(payload_bytes)
-        
-        # Extract user_id from `sub` field (standard JWT claim for subject/user identifier)
-        # This is the primary and recommended field for user identity in JWT
+        if not isinstance(payload, dict):
+            return None, {}
+
         sub = payload.get("sub")
-        
-        if sub and isinstance(sub, str) and sub.strip():
-            return sub.strip()
-        
-        # If sub is empty or missing, log warning
-        # Coze SDK requires user_id, so this will cause an error downstream
-        logger.warning(
-            "JWT payload 'sub' field is empty or missing. "
-            "Coze SDK requires user_id, so this will cause an error. "
-            "Available claims: %s",
-            list(payload.keys())
-        )
-        return None
-        
+        user_id = sub.strip() if isinstance(sub, str) and sub and sub.strip() else None
+        return user_id, payload
+
     except Exception as e:
-        logger.warning("Failed to extract user_id from JWT: %s", str(e))
-        return None
+        logger.warning("Failed to decode JWT: %s", str(e))
+        return None, {}
+
+
+def extract_user_id_from_jwt(token: str) -> Optional[str]:
+    """Extract user_id from JWT token 'sub' field."""
+    user_id, _ = decode_jwt(token)
+    return user_id
 
 
 def extract_user_id_from_request(http_context: Request) -> Optional[str]:

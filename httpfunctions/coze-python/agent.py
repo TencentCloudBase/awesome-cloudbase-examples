@@ -7,7 +7,7 @@ import os
 from typing import Optional
 
 from cloudbase_agent.coze import CozeAgent
-from auth import extract_user_id_from_request
+from auth import decode_jwt
 
 
 def build_coze_agent(
@@ -46,26 +46,44 @@ def build_coze_agent(
     return agent
 
 
-def create_jwt_request_preprocessor():
-    """Create request preprocessor for JWT authentication.
-    
-    Extracts user_id from JWT 'sub' field in Authorization header
-    and writes to request.forwarded_props.user_id.
-    
-    Note: This is a middleware generator following the onion model.
+STATE_REQUEST_CONTEXT_KEY = "__request_context__"
+
+
+def jwt_middleware(input_data, request):
+    """JWT authentication middleware.
+
+    Decodes JWT from Authorization header and injects into input_data:
+    - forwarded_props.user_id (sub) only; parameters come from client. Do not pass jwt in forwarded_props.
+    - state.__request_context__.user = {"id": user_id, "jwt": payload} for workflow use
+
+    Auth and state injection in the example only; adapter does not touch state.
+    Uses generator pattern with yield for control flow transfer.
     """
-    from ag_ui.core import RunAgentInput
-    from fastapi import Request
-    
-    def jwt_preprocessor(request: RunAgentInput, http_context: Request):
-        user_id = extract_user_id_from_request(http_context)
-        if user_id:
-            if not request.forwarded_props:
-                request.forwarded_props = {}
-            request.forwarded_props["user_id"] = user_id
-        yield  # Required for middleware generator pattern
-    
-    return jwt_preprocessor
+    import logging
 
+    logger = logging.getLogger(__name__)
 
+    try:
+        auth_header = getattr(request, "headers", None) and request.headers.get("Authorization") or ""
+        if isinstance(auth_header, str) and auth_header.startswith("Bearer "):
+            token = auth_header[7:].strip()
+            if token:
+                user_id, payload = decode_jwt(token)
+                if not input_data.forwarded_props:
+                    input_data.forwarded_props = {}
+                if user_id:
+                    input_data.forwarded_props["user_id"] = user_id
+                    logger.info("JWT middleware: User authenticated with ID: %s", user_id)
+                if user_id:
+                    if input_data.state is None:
+                        input_data.state = {}
+                    existing = dict(input_data.state.get(STATE_REQUEST_CONTEXT_KEY) or {})
+                    existing["user"] = {"id": user_id.strip(), "jwt": payload}
+                    input_data.state[STATE_REQUEST_CONTEXT_KEY] = existing
+        else:
+            logger.debug("JWT middleware: No valid Authorization Bearer token found")
+    except Exception as e:
+        logger.error("JWT middleware error: %s", e)
 
+    yield
+    logger.debug("JWT middleware: Post-processing completed")

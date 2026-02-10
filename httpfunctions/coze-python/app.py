@@ -9,7 +9,7 @@ load_dotenv()
 
 from cloudbase_agent.server import AgentServiceApp
 from cloudbase_agent.observability.server import ConsoleTraceConfig
-from agent import build_coze_agent, create_jwt_request_preprocessor
+from agent import build_coze_agent, jwt_middleware
 
 
 def is_observability_enabled():
@@ -25,7 +25,7 @@ def main():
         observability = ConsoleTraceConfig() if is_observability_enabled() else None
         
         app = AgentServiceApp(observability=observability)
-        app.use(create_jwt_request_preprocessor())
+        app.use(jwt_middleware)
         app.run(lambda: {"agent": agent})
     except ValueError as e:
         print(f"Configuration Error: {e}", file=sys.stderr)
