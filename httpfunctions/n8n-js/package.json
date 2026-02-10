@@ -1,0 +1,30 @@
+{
+  "name": "n8n-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0",
+  "pnpm": {
+    "overrides": {
+      "rxjs": "7.8.1",
+      "memfs": "4.55.0"
+    }
+  },
+  "overrides": {
+    "rxjs": "7.8.1",
+    "memfs": "4.55.0"
+  },
+  "dependencies": {
+    "@cloudbase/agent-adapter-n8n": "0.0.18",
+    "@cloudbase/agent-server": "0.0.18",
+    "@cloudbase/agent-observability": "0.0.18",
+    "@dotenvx/dotenvx": "^1.51.1",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "pino": "^10.2.1"
+  }
+}
