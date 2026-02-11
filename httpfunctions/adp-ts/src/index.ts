@@ -9,6 +9,7 @@ import { RunAgentInput } from "@ag-ui/client";
 import dotenvx from "@dotenvx/dotenvx";
 // import cors from "cors";
 import { DetectCloudbaseUserMiddleware } from "./utils.js";
+import { WeChatAgent, createWxMessageHandler, WeChatHistoryManager, WeChatSendMode } from '@cloudbase/agent-adapter-wx';
 
 dotenvx.config();
 
@@ -57,6 +58,34 @@ function createAgent({ request }: { request: Request }) {
   return { agent };
 }
 
+/**
+ * Create WeChat Agent Adapter that wraps ADP agent
+ */
+function createWxAgent({ request, options }: { request: any; options?: { agentId?: string } }) {
+  const { agent: baseAgent } = createAgent({ request });
+  const envId = process.env.TCB_ENV || process.env.ENV_ID;
+
+  return {
+    agent: new WeChatAgent({
+      agentId: options?.agentId || 'agent-wx',
+      agent: baseAgent,
+      wechatConfig: {
+        sendMode: WeChatSendMode.AITOOLS,
+        context: {
+          extendedContext: {
+            envId,
+            accessToken: request.headers.get('authorization') || undefined,
+          }
+        }
+      } as any,
+      // @ts-ignore
+      historyManager: new WeChatHistoryManager({
+        envId,
+      })
+    })
+  };
+}
+
 const app = express();
 
 // 调试若遇 CORS 问题可启用 CORS 中间件
@@ -71,5 +100,9 @@ createExpressRoutes({
   createAgent,
   express: app,
 });
+
+// Register WeChat message route
+app.post('/wx-send-message', express.json(), createWxMessageHandler(createWxAgent));
+app.post('/v1/aibot/bots/:agentId/wx-send-message', express.json(), createWxMessageHandler(createWxAgent));
 
 app.listen(9000, () => console.log("Listening on 9000!"));
