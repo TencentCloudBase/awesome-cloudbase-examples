@@ -2,7 +2,7 @@
 
 本文档介绍如何将一个基于 CrewAI Flow 的 AI Agent 应用部署到 CloudBase HTTP 云函数。该项目使用 `cloudbase-agent-server` 作为应用程序运行框架。
 
-我们这里使用 `python3.10` 进行开发。
+我们这里使用 `python3.11` 进行开发。
 
 ## 第1步: 编写基础应用
 
@@ -16,7 +16,7 @@ cd crewai-python
 创建虚拟环境
 
 ```bash
-python3.10 -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate  # 激活虚拟环境
 ```
 
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 ```bash
 #!/bin/bash
 export PYTHONPATH="./env:$PYTHONPATH"
-/var/lang/python310/bin/python3 -u app.py
+/var/lang/python311/bin/python3 -u app.py
 ```
 
 **说明**:

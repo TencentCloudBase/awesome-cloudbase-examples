@@ -20,7 +20,7 @@ adk-python/
 使用 Python 3.10 安装依赖到 `./env` 目录：
 
 ```bash
-python3.10 -m pip install -r ./requirements.txt \
+python3.11 -m pip install -r ./requirements.txt \
     --platform manylinux_2_17_x86_64 \
     --target ./env \
     --python-version 3.10 \
