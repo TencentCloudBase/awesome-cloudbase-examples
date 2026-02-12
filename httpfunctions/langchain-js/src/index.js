@@ -145,6 +145,7 @@ createExpressRoutes({
   createAgent,
   express: app,
   logger,
+  observability: isObservabilityEnabled() ? { type: ExporterType.Console } : undefined,
 });
 
 // Register WeChat message route

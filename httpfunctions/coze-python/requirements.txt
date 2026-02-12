@@ -1,6 +1,6 @@
-cloudbase-agent-core==0.1.12
-cloudbase-agent-server==0.1.21
+cloudbase-agent-core==0.1.13
+cloudbase-agent-server==0.1.22
 cloudbase-agent-coze==0.1.19
-cloudbase-agent-observability==0.1.2
+cloudbase-agent-observability==0.1.3
 cozepy>=0.20.0
 python-dotenv>=1.2.1
