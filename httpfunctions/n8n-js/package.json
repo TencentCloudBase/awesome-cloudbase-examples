@@ -19,9 +19,9 @@
     "memfs": "4.55.0"
   },
   "dependencies": {
-    "@cloudbase/agent-adapter-n8n": "0.0.18",
-    "@cloudbase/agent-server": "0.0.18",
-    "@cloudbase/agent-observability": "0.0.18",
+    "@cloudbase/agent-adapter-n8n": "0.0.21",
+    "@cloudbase/agent-server": "0.0.21",
+    "@cloudbase/agent-observability": "0.0.21",
     "@dotenvx/dotenvx": "^1.51.1",
     "cors": "^2.8.5",
     "express": "^5.2.1",

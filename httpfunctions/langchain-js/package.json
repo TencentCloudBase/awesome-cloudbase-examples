@@ -24,10 +24,10 @@
     "memfs": "4.55.0"
   },
   "dependencies": {
-    "@cloudbase/agent-adapter-langchain": "0.0.20",
-    "@cloudbase/agent-server": "0.0.20",
-    "@cloudbase/agent-observability": "0.0.20",
-    "@cloudbase/agent-adapter-wx": "0.0.20",
+    "@cloudbase/agent-adapter-langchain": "0.0.21",
+    "@cloudbase/agent-server": "0.0.21",
+    "@cloudbase/agent-observability": "0.0.21",
+    "@cloudbase/agent-adapter-wx": "0.0.21",
     "@dotenvx/dotenvx": "^1.51.1",
     "@langchain/core": "^1.1.8",
     "@langchain/langgraph": "^1.0.4",
