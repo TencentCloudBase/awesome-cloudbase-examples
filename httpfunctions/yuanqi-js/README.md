@@ -100,7 +100,7 @@ function createAgent({ request }) {
 
 `@cloudbase/agent-adapter-yuanqi` 适配器会通过云开发数据库自动管理对话历史的保存与加载。开发者只需要传递当前用户的最新消息，适配器会自动：
 
-1. 从云开发数据库加载历史对话（默认 10 轮，可通过 `historyCount` 配置）
+1. 从云开发数据库加载历史对话（默认 10 条，可通过 `historyCount` 配置）
 2. 将历史对话与当前消息合并后发送给元器
 3. 自动保存用户消息和 AI 回复到数据库
 
