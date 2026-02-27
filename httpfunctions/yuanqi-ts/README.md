@@ -1,10 +1,10 @@
 # 腾讯元器 TypeScript 模板
 
-基于腾讯元器的 TypeScript Agent 函数型模板。本模板提供了将腾讯元器智能体快速部署为 HTTP 云函数的完整解决方案，支持流式响应、用户认证、对话历史持久化、自定义参数等功能。
+基于腾讯元器的 TypeScript Agent 函数型模板。本模板提供了将腾讯元器智能体快速部署为 HTTP 云函数的完整解决方案，支持流式响应、用户认证、对话历史持久化、自定义参数、微信消息接入等功能。
 
 ## 📋 项目概述
 
-本模板使用 `@cloudbase/agent-adapter-yuanqi` 适配器，将腾讯元器智能体封装为符合 AG-UI 协议的 Agent 服务，并通过 `@cloudbase/agent-server` 提供标准的 HTTP API 接口。
+本模板使用 `@cloudbase/agent-adapter-yuanqi` 适配器，将腾讯元器智能体封装为符合 AG-UI 协议的 Agent 服务，并通过 `@cloudbase/agent-server` 提供标准的 HTTP API 接口。同时支持通过 `@cloudbase/agent-adapter-wx` 适配器接入微信消息。
 
 ### 核心特性
 
@@ -12,6 +12,7 @@
 - ✅ **对话历史持久化** - 通过云开发数据库自动保存和加载对话历史
 - ✅ **自定义参数支持** - 支持传递自定义变量到工作流和知识库
 - ✅ **思考/推理支持** - 支持元器模型的推理内容展示
+- ✅ **微信消息接入** - 支持通过微信适配器接收和处理微信消息
 
 ### 调用链路
 
@@ -19,6 +20,8 @@
 客户端 → HTTP 云函数 → Yuanqi Agent → 腾讯元器服务 → 流式响应返回
                             ↓
                     云开发数据库（对话历史）
+
+微信 → /wx-send-message → WeChatAgent → Yuanqi Agent → 腾讯元器服务
 ```
 
 ## 使用方法
@@ -61,12 +64,17 @@ class MyAgent extends YuanqiAgent {
   // 重写父类方法，自定义获取历史对话的逻辑
   protected async getChatHistory(
     subscriber: Subscriber<BaseEvent>,
+    input: RunAgentInput,
     latestUserMessage: Message,
   ) {
     // 调用父类方法获取历史对话（从云开发数据库读取）
-    const history = await super.getChatHistory(subscriber, latestUserMessage);
+    const history = await super.getChatHistory(
+      subscriber,
+      input,
+      latestUserMessage,
+    );
     // 也可以忽略父类方法，自行处理历史对话的获取逻辑
-    // const history = await myMethodToGetChatHistory(subscriber, latestUserMessage);
+    // const history = await myMethodToGetChatHistory(subscriber, input, latestUserMessage);
     return history;
   }
 
@@ -108,7 +116,7 @@ function createAgent({ request }: { request: Request }) {
 
 `@cloudbase/agent-adapter-yuanqi` 适配器会通过云开发数据库自动管理对话历史的保存与加载。开发者只需要传递当前用户的最新消息，适配器会自动：
 
-1. 从云开发数据库加载历史对话（默认 10 轮，可通过 `historyCount` 配置）
+1. 从云开发数据库加载历史对话（默认 10 条，可通过 `historyCount` 配置）
 2. 将历史对话与当前消息合并后发送给元器
 3. 自动保存用户消息和 AI 回复到数据库
 
@@ -191,6 +199,67 @@ createExpressRoutes({
 - `POST /send-message` - AG-UI 协议的消息发送接口（SSE 流式响应）
 - `POST /chat/completions` - OpenAI 兼容的聊天接口
 - `GET /healthz` - 健康检查接口
+
+### 微信消息路由
+
+本模板还提供了微信消息处理路由，支持通过 `@cloudbase/agent-adapter-wx` 接入微信消息：
+
+```typescript
+import {
+  WeChatAgent,
+  createWxMessageHandler,
+  WeChatHistoryManager,
+  WeChatSendMode,
+} from "@cloudbase/agent-adapter-wx";
+
+// 创建微信 Agent 适配器
+function createWxAgent({
+  request,
+  options,
+}: {
+  request: any;
+  options?: { agentId?: string };
+}) {
+  const { agent: baseAgent } = createAgent({ request });
+  const envId = process.env.TCB_ENV || process.env.ENV_ID;
+
+  return {
+    agent: new WeChatAgent({
+      agentId: options?.agentId || "agent-wx",
+      agent: baseAgent,
+      wechatConfig: {
+        sendMode: WeChatSendMode.AITOOLS,
+        context: {
+          extendedContext: {
+            envId,
+            accessToken: request.headers.get("authorization") || undefined,
+          },
+        },
+      },
+      historyManager: new WeChatHistoryManager({
+        envId,
+      }),
+    }),
+  };
+}
+
+// 注册微信消息路由
+app.post(
+  "/wx-send-message",
+  express.json(),
+  createWxMessageHandler(createWxAgent),
+);
+app.post(
+  "/v1/aibot/bots/:agentId/wx-send-message",
+  express.json(),
+  createWxMessageHandler(createWxAgent),
+);
+```
+
+微信消息路由：
+
+- `POST /wx-send-message` - 微信消息处理接口
+- `POST /v1/aibot/bots/:agentId/wx-send-message` - 带 agentId 参数的微信消息处理接口
 
 ## 🚀 快速开始
 
@@ -412,6 +481,7 @@ docker run -p 9000:9000 \
 ### SDK 和工具
 
 - [@cloudbase/agent-adapter-yuanqi](https://www.npmjs.com/package/@cloudbase/agent-adapter-yuanqi) - 元器适配器
+- [@cloudbase/agent-adapter-wx](https://www.npmjs.com/package/@cloudbase/agent-adapter-wx) - 微信适配器
 - [@cloudbase/agent-server](https://www.npmjs.com/package/@cloudbase/agent-server) - Agent 服务器
 
 ---
