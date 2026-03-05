@@ -13,8 +13,7 @@ dependencies:
   dio: ^5.4.0
   shared_preferences: ^2.2.2
   uuid: ^4.2.1
-  cloudbase_flutter:
-    path: /Users/zhenyu/Desktop/cloudbase_flutter
+  cloudbase_flutter: ^1.0.5
 
 dev_dependencies:
   flutter_test:

@@ -36,10 +36,11 @@ packages:
   cloudbase_flutter:
     dependency: "direct main"
     description:
-      path: "/Users/zhenyu/Desktop/cloudbase_flutter"
-      relative: false
-    source: path
-    version: "1.0.4"
+      name: cloudbase_flutter
+      sha256: "73d9c374f9aca8829ddd4b537f6b38e134f95322118899523de23af0fcbfddd1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   collection:
     dependency: transitive
     description:
