@@ -1,0 +1,78 @@
+/**
+ * DetectCloudbaseUserMiddleware
+ * 从 Authorization header 中提取 JWT token，解析用户 ID 并注入到 input.state
+ * 参照 adp-ts/src/utils.ts 实现
+ */
+
+import {
+  Middleware,
+  RunAgentInput,
+  AbstractAgent,
+  BaseEvent
+} from '@ag-ui/client'
+import { jwtDecode, JwtPayload } from 'jwt-decode'
+import { Observable } from 'rxjs'
+
+/**
+ * 用户认证中间件
+ * 从 Authorization header 中提取 JWT token，解析用户 ID 并注入到 input.state
+ */
+export class DetectCloudbaseUserMiddleware extends Middleware {
+  private _req: Request
+
+  constructor(req: Request) {
+    super()
+    this._req = req
+  }
+
+  run(input: RunAgentInput, next: AbstractAgent): Observable<BaseEvent> {
+    let jwtToken: JwtPayload = {}
+
+    try {
+      // 获取 Authorization header
+      const authHeader = 
+        (this._req.headers as unknown as Record<string, string>)?.Authorization ||
+        (this._req.headers as unknown as Record<string, string>)?.authorization ||
+        this._req.headers?.get?.('Authorization') ||
+        this._req.headers?.get?.('authorization')
+
+      if (authHeader) {
+        // 提取 Bearer token 中的 JWT 部分
+        const jwt = authHeader.split(' ')[1]
+        if (!jwt) {
+          throw new Error('invalid jwt')
+        }
+        // 解码 JWT 获取用户信息
+        const decoded = jwtDecode(jwt)
+        if (!decoded || !decoded.sub) {
+          throw new Error('invalid jwt')
+        }
+        jwtToken = decoded
+      }
+    } catch (e) {
+      // 忽略错误，继续处理请求
+      console.log('JWT decode error:', e)
+    }
+
+    if (jwtToken?.sub) {
+      // 将用户 ID 注入到 input.state.__request_context__
+      return next.run({
+        ...input,
+        state: {
+          ...input.state,
+          __request_context__: {
+            user: {
+              id: jwtToken.sub,
+              jwt: jwtToken
+            },
+            request: this._req
+          }
+        }
+      }) as any
+    } else {
+      return next.run(input) as any
+    }
+  }
+}
+
+
