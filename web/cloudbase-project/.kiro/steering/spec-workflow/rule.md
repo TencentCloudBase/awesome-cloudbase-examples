@@ -35,7 +35,7 @@ Use this skill for **structured development workflow** when you need to:
    - Format: `While <optional precondition>, when <optional trigger>, the <system name> shall <system response>`
 
 3. **Reference UI design rules when needed**
-   - If requirements involve frontend pages, must strictly reference `rules/ui-design.mdc`
+   - If requirements involve frontend pages, must strictly reference `ui-design` skill
    - Determine design style and color palette in requirements phase
    - Confirm design details with user before finalizing requirements
 
@@ -58,7 +58,7 @@ Use this skill for **structured development workflow** when you need to:
 
 ## Phase 1: Requirements Document and Acceptance Criteria Design
 
-First complete the requirements design using EARS (Easy Approach to Requirements Syntax) method. If you determine the requirements involve frontend pages, **you must strictly reference `rules/ui-design.mdc` rule file**. Determine design style and color palette in the requirements phase. You must confirm requirement details with the user. After final confirmation, the requirements are finalized, then proceed to the next phase.
+First complete the requirements design using EARS (Easy Approach to Requirements Syntax) method. If you determine the requirements involve frontend pages, **you must strictly reference `ui-design` skill**. Determine design style and color palette in the requirements phase. You must confirm requirement details with the user. After final confirmation, the requirements are finalized, then proceed to the next phase.
 
 Save to `specs/spec_name/requirements.md`. After confirming with the user, proceed to the next phase.
 

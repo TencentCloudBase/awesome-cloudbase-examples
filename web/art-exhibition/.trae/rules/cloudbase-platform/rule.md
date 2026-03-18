@@ -37,6 +37,26 @@ Use this skill for **CloudBase platform knowledge** when you need to:
    - MySQL data models must use models SDK, not collection API
    - Use `envQuery` tool to get environment ID
 
+4. **Use CloudBase MCP via mcporter (CLI) when IDE MCP is not available**
+   - You do **not** need to hard-code Secret ID / Secret Key / Env ID in config
+   - CloudBase MCP will support device-code login via the `auth` tool, so credentials can be obtained interactively
+   - Add CloudBase MCP server:
+     ```bash
+     npx mcporter config add cloudbase \
+       --command "npx" \
+       --arg "@cloudbase/cloudbase-mcp@latest" \
+       --description "CloudBase MCP"
+     ```
+   - Discover tools and schemas:
+     - `npx mcporter list` — list configured servers
+     - `npx mcporter describe cloudbase --all-parameters` — inspect CloudBase server config and get full tool schemas with all parameters (⚠️ **必须加 `--all-parameters` 才能获取完整参数信息**)
+     - `npx mcporter list cloudbase --schema` — get full JSON schema for all CloudBase tools
+     - `npx mcporter call cloudbase.help --output json` — discover available CloudBase tools and their schemas
+   - Call CloudBase tools (auth flow examples):
+     - `npx mcporter call cloudbase.auth action=status --output json`
+     - `npx mcporter call cloudbase.auth action=start_auth authMode=device --output json`
+     - `npx mcporter call cloudbase.auth action=set_env envId=env-xxx --output json`
+
 ---
 
 # CloudBase Platform Knowledge

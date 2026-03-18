@@ -27,7 +27,6 @@ When this document references a rule file, try locations in this order:
 | `auth-web` | Web Authentication |
 | `auth-wechat` | WeChat Mini Program Authentication |
 | `auth-nodejs` | Node.js Authentication |
-| `auth-http-api` | HTTP API Authentication |
 | `web-development` | Web Platform Development |
 | `miniprogram-development` | Mini Program Platform Development |
 | `cloudrun-development` | CloudRun Backend Development |
@@ -362,7 +361,6 @@ For example, many interfaces require a confirm parameter, which is a boolean typ
 - **Web**: `rules/auth-web/rule.md` - **MUST use Web SDK built-in authentication**
 - **Mini Program**: `rules/auth-wechat/rule.md` - **Naturally login-free, get OPENID in cloud functions**
 - **Node.js**: `rules/auth-nodejs/rule.md`
-- **HTTP API**: `rules/auth-http-api/rule.md`
 - **Auth Tool (MCP)**: `rules/auth-tool/rule.md` - Configure and manage authentication providers (enable/disable login methods, setup provider settings) via MCP tools
 
 ### Database Skills

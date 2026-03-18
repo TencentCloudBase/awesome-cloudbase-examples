@@ -19,8 +19,8 @@ Use it when you need to:
 
 **Do NOT use for:**
 
-- Web-based WeChat login (use the **CloudBase Web Auth** skill at `skills/auth-web-skill`)
-- Server-side auth with Node SDK (use the **CloudBase Node Auth** skill at `skills/auth-nodejs-skill`)
+- Web-based WeChat login (use the **auth-web** skill)
+- Server-side auth with Node SDK (use the **auth-nodejs** skill)
 - Non-WeChat authentication methods (use appropriate auth skills)
 
 ---
