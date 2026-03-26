@@ -1,8 +1,39 @@
 ---
 name: auth-web-cloudbase
-description: CloudBase Web Authentication Quick Guide - Provides concise and practical Web frontend authentication solutions with multiple login methods and complete user management.
+description: CloudBase Web Authentication Quick Guide for frontend integration after auth-tool has already been checked. Provides concise and practical Web authentication solutions with multiple login methods and complete user management.
 alwaysApply: false
 ---
+
+## Activation Contract
+
+### Use this first when
+
+- The task is a CloudBase Web login, registration, session, or user profile flow built with `@cloudbase/js-sdk` and the auth provider setup has already been checked.
+
+### Read before writing code if
+
+- The user needs a login page, auth modal, session handling, or protected Web route. Read `auth-tool` first to ensure providers are enabled, then return here for frontend integration.
+
+### Then also read
+
+- `../auth-tool/SKILL.md` for provider setup
+- `../web-development/SKILL.md` for Web project structure and deployment
+
+### Do not start here first when
+
+- The request is a Web auth flow but provider configuration has not been verified yet.
+- In that case, activate `auth-tool-cloudbase` before `auth-web-cloudbase`.
+
+### Do NOT use for
+
+- Mini program auth, native App auth, or server-side auth setup.
+
+### Common mistakes / gotchas
+
+- Skipping publishable key and provider checks.
+- Replacing built-in Web auth with cloud function login logic.
+- Reusing this flow in Flutter, React Native, or native iOS/Android code.
+- Creating a detached helper file with `auth.signUp` / `verifyOtp` but never wiring it into the existing form handlers, so the actual button clicks still do nothing.
 
 ## Overview
 
@@ -15,13 +46,22 @@ alwaysApply: false
 
 **Use Case**: Web frontend projects using `@cloudbase/js-sdk@2.24.0+` for user authentication  
 **Key Benefits**: Compatible with `supabase-js` API, supports phone, email, anonymous, username/password, and third-party login methods
-**`@cloudbase/js-sdk` cdn source**: `https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js`
+**Official `@cloudbase/js-sdk` CDN**: `https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js`
 
+Use the same CDN address as `web-development`. Prefer npm installation in modern bundler projects, and use the CDN form for static HTML, no-build demos, or low-friction examples.
 
 ## Prerequisites
 
 - Automatically use `auth-tool-cloudbase` to get `publishable key` and configure login methods. 
 - If `auth-tool-cloudbase` failed, let user go to `https://tcb.cloud.tencent.com/dev?envId={env}#/env/apikey` to get `publishable key` and `https://tcb.cloud.tencent.com/dev?envId={env}#/identity/login-manage` to set up login methods
+
+### Parameter map
+
+- `auth.signInWithOtp({ phone })` and `auth.signUp({ phone })` use the phone number in a `phone` field, not `phone_number`
+- `auth.signInWithOtp({ email })` and `auth.signUp({ email })` use `email`
+- `verifyOtp({ token })` expects the SMS or email code in `token`
+- `accessKey` is the publishable key from `auth-tool-cloudbase`, not a secret key
+- If the task mentions provider setup, stop and read `auth-tool-cloudbase` before writing frontend code
 
 ## Quick Start
 
@@ -66,6 +106,7 @@ const { data, error } = await auth.signInWithPassword({ phone: '13800138000', pa
 **4. Registration (Smart: auto-login if exists)**
 - Only support email and phone otp registration
 - Automatically use `auth-tool-cloudbase` turn on `Email Login` or `SMS Login`
+- Use `phone` or `email` in the sign-up payload; do not invent `phone_number`
 ```js
 // Email Otp
 const { data, error } = await auth.signUp({ email: 'new@example.com', nickname: 'User' })
@@ -74,6 +115,29 @@ const { data: loginData, error: loginError } = await data.verifyOtp({ token: '12
 // Phone Otp
 const { data, error } = await auth.signUp({ phone: '13800138000', nickname: 'User' })
 const { data: loginData, error: loginError } = await data.verifyOtp({ token: '123456' })
+```
+
+When the project already has `handleSendCode` / `handleRegister` or similar UI handlers, wire the SDK calls there directly instead of leaving them commented out in `App.tsx`.
+
+```tsx
+const handleSendCode = async () => {
+  const { data, error } = await auth.signUp({
+    email,
+    name: username || email.split('@')[0],
+  })
+  if (error) throw error
+  setSignUpData(data)
+}
+
+const handleRegister = async () => {
+  if (!signUpData?.verifyOtp) throw new Error('Please send the code first')
+  const { error } = await signUpData.verifyOtp({
+    email,
+    token: code,
+    type: 'signup',
+  })
+  if (error) throw error
+}
 ```
 
 **5. Anonymous**

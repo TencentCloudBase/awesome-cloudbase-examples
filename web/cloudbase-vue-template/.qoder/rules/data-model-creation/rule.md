@@ -14,7 +14,7 @@ This is an **OPTIONAL advanced modeling tool** for complex database design. Most
 - Automated field type mapping and constraint generation
 - Enterprise-level data model documentation
 
-**For most cases, use `rules/relational-database-tool/rule.md` instead:**
+**For most cases, use `relational-database-tool` skill instead:**
 - Simple table creation with CREATE TABLE statements
 - Basic CRUD operations
 - Schema modifications with ALTER TABLE
@@ -54,13 +54,13 @@ When you do use this advanced modeling approach:
 
 ## Quick Decision Guide
 
-**Most Database Tasks → `rules/relational-database-tool/rule.md`**
+**Most Database Tasks → `relational-database-tool` skill**
 - ✅ Simple table creation
 - ✅ Data queries and modifications
 - ✅ Schema changes
 - ✅ Direct SQL execution
 
-**Complex Modeling Only → This rule (`rules/data-model-creation/rule.md`)**
+**Complex Modeling Only → This skill (`data-model-creation`)**
 - 🎯 Multi-entity relationship modeling
 - 🎯 Automated foreign key management
 - 🎯 Visual ER diagram generation
@@ -72,7 +72,7 @@ When you do use this advanced modeling approach:
 
 ## ⚠️ IMPORTANT: Simplified Workflow Recommendation
 
-**For most database table creation tasks, use `rules/relational-database-tool/rule.md` directly:**
+**For most database table creation tasks, use `relational-database-tool` skill directly:**
 
 - Simple table creation: `CREATE TABLE users (id INT PRIMARY KEY, name VARCHAR(255))`
 - Schema modifications: `ALTER TABLE users ADD COLUMN email VARCHAR(255)`
@@ -234,10 +234,10 @@ classDiagram
 4. **Only when you need to update existing data model structure AND want visual ER diagrams**
 
 ### When to SKIP this tool (Most Cases)
-- Simple table creation → Use `executeWriteSQL` with CREATE TABLE
-- Schema changes → Use `executeWriteSQL` with ALTER TABLE
+- Simple table creation → Use `manageSqlDatabase(action="runStatement")` with CREATE TABLE
+- Schema changes → Use `manageSqlDatabase(action="runStatement")` with ALTER TABLE
 - Basic CRUD → Use appropriate SQL statements directly
-- Data queries → Use `executeReadOnlySQL`
+- Data queries → Use `querySqlDatabase(action="runQuery")`
 
 ### Parameter Usage Guide
 - `mermaidDiagram`: Complete mermaid classDiagram code
@@ -330,4 +330,3 @@ classDiagram
 ```
 
 These rules will guide AI Agents to generate high-quality, business-requirement-compliant data models during the data modeling process.
-

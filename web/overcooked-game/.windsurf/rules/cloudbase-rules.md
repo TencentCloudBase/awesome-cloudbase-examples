@@ -7,6 +7,30 @@ inclusion: always
 
 # CloudBase AI Development Rules Guide
 
+## Activation Contract
+
+This file is a compatibility projection of the CloudBase routing contract. Keep its semantics aligned with the CloudBase source guideline, and express routing with stable skill identifiers rather than repo-specific file paths.
+
+### Global must-read rules
+
+- Identify the scenario first. Do not start implementation before reading the matching rule file.
+- Login or registration request -> read `{auth-tool}` first, then the platform auth rule.
+- UI request -> read `rules/ui-design/rule.md` first and output the design specification before code.
+- Native App / Flutter / React Native request -> route to `{http-api}`, not Web SDK rules.
+- Cloud Function request -> route to `{cloud-functions}`, not `cloudrun-development`, unless the task explicitly needs container service behavior.
+- Generated, mirrored, or IDE-specific artifacts are compatibility outputs, not the primary semantic source.
+
+### High-priority routing table
+
+| Scenario | Read first | Then read | Do NOT route to first | Must check before action |
+|----------|------------|-----------|------------------------|--------------------------|
+| Web login / registration | `{auth-tool}` | `{auth-web}`, `{web-development}` | `{cloud-functions}`, `{http-api}` | Provider status and publishable key |
+| Mini program + CloudBase | `{miniprogram-development}` | `{auth-wechat}`, `{no-sql-wx-mp-sdk}` | `{auth-web}`, `{web-development}` | Whether the project uses `wx.cloud` |
+| Native App / raw HTTP | `{http-api}` | `{auth-tool}`, `{relational-database-tool}` | `{auth-web}`, `{no-sql-web-sdk}` | SDK boundary, OpenAPI, auth method |
+| Cloud Functions | `{cloud-functions}` | domain rule | `{cloudrun-development}` | Event vs HTTP function, runtime |
+| CloudRun backend | `{cloudrun-development}` | domain rule | `{cloud-functions}` | Container boundary, Dockerfile, CORS |
+| UI generation | `rules/ui-design/rule.md` | platform rule | backend-only rules | Design specification first |
+
 ## 🗂️ Rule File Path Resolution Strategy
 
 **CRITICAL: All rule file paths in this document follow a smart resolution strategy to support multiple AI editors.**
@@ -27,7 +51,6 @@ When this document references a rule file, try locations in this order:
 | `auth-web` | Web Authentication |
 | `auth-wechat` | WeChat Mini Program Authentication |
 | `auth-nodejs` | Node.js Authentication |
-| `auth-http-api` | HTTP API Authentication |
 | `web-development` | Web Platform Development |
 | `miniprogram-development` | Mini Program Platform Development |
 | `cloudrun-development` | CloudRun Backend Development |
@@ -191,11 +214,13 @@ As the most important part of application development, the following four core c
 **Refer to deployment process in `rules/web-development/rule.md`**
 - Use CloudBase static hosting after build completion
 - Deploy using `uploadFiles` tool
+- `uploadFiles` is for static hosting only; use `manageStorage` / `queryStorage` when the task needs a COS object that must be queried by the storage SDK
 - Remind users that CDN has a few minutes of cache after deployment
 - Generate markdown format access links with random queryString
 
 ### 4. Backend Deployment (Cloud Functions or CloudRun)
-- **Cloud Function Deployment**: Refer to `rules/cloud-functions/rule.md` - Use `getFunctionList` to query, then call `createFunction` or `updateFunctionCode` to deploy. **Important**: Runtime cannot be changed after creation, must select correct runtime initially.
+- **Cloud Function Deployment**: Refer to `rules/cloud-functions/rule.md` - Prefer `queryFunctions` to inspect existing functions, then call `manageFunctions(action="createFunction")` or `manageFunctions(action="updateFunctionCode")` to deploy. **Important**: Runtime cannot be changed after creation, must select correct runtime initially.
+  - Legacy compatibility: if older prompts mention `getFunctionList`, `createFunction`, or `updateFunctionCode`, map them to `queryFunctions` / `manageFunctions(...)` before execution.
 - **CloudRun Deployment**: Refer to `rules/cloudrun-development/rule.md` - Use `manageCloudRun` tool for containerized deployment
 - Ensure backend code supports CORS, prepare Dockerfile (for container type)
 
@@ -320,9 +345,10 @@ If remote links are needed in the application, can continue to call uploadFile t
 
 ### Deployment Process
 
-1. **Cloud Function Deployment Process**: Can use getFunctionList tool to query if there are cloud functions, then directly call createFunction or updateFunctionCode to update cloud function code. Only need to point functionRootPath to parent directory of cloud function directory (e.g., absolute path of cloudfunctions directory). No need for code compression and other operations. The above tools will automatically read files from cloud function subdirectories with same name under parent directory and automatically deploy
+1. **Cloud Function Deployment Process**: Prefer `queryFunctions(action="listFunctions")` to inspect existing functions, then call `manageFunctions(action="createFunction")` or `manageFunctions(action="updateFunctionCode")` to deploy cloud function code. Only need to point `functionRootPath` to the parent directory of the cloud function directory (for example, the absolute path of the `cloudfunctions` directory). No need for code compression and other operations. The tools will automatically read files from same-name subdirectories under the parent directory and deploy them.
 
-2. **Cloud Function Deployment Process**: For Node.js cloud functions, use `getFunctionList` to query, then call `createFunction` or `updateFunctionCode` to deploy. **Important**: Runtime cannot be changed after creation. For details, refer to `rules/cloud-functions/rule.md`
+2. **Cloud Function Deployment Process**: For Node.js cloud functions, use `queryFunctions` to query, then call `manageFunctions(action="createFunction")` or `manageFunctions(action="updateFunctionCode")` to deploy. **Important**: Runtime cannot be changed after creation. For details, refer to `rules/cloud-functions/rule.md`
+   - Legacy compatibility: if older materials still say `getFunctionList`, `createFunction`, or `updateFunctionCode`, treat them as aliases for the converged flow above.
 
 3. **CloudRun Deployment Process**: For non-cloud function backend services (Java, Go, PHP, Python, Node.js, etc.), use manageCloudRun tool for deployment. Ensure backend code supports CORS, prepare Dockerfile, then call manageCloudRun for containerized deployment. For details, refer to `rules/cloudrun-development/rule.md`
 
@@ -362,7 +388,6 @@ For example, many interfaces require a confirm parameter, which is a boolean typ
 - **Web**: `rules/auth-web/rule.md` - **MUST use Web SDK built-in authentication**
 - **Mini Program**: `rules/auth-wechat/rule.md` - **Naturally login-free, get OPENID in cloud functions**
 - **Node.js**: `rules/auth-nodejs/rule.md`
-- **HTTP API**: `rules/auth-http-api/rule.md`
 - **Auth Tool (MCP)**: `rules/auth-tool/rule.md` - Configure and manage authentication providers (enable/disable login methods, setup provider settings) via MCP tools
 
 ### Database Skills
@@ -438,7 +463,8 @@ When users request deployment to CloudBase:
    - Determine if this is a new deployment or update to existing services
 
 1. **Backend Deployment (if applicable)**:
-   - Only for nodejs cloud functions: deploy directly using `createFunction` tools
+   - Only for nodejs cloud functions: deploy directly using `manageFunctions(action="createFunction")` / `manageFunctions(action="updateFunctionCode")`
+     - Legacy compatibility: if older materials mention `createFunction`, `updateFunctionCode`, or `getFunctionList`, map them to the converged tools first
      - Criteria: function directory contains `index.js` with cloud function format export: `exports.main = async (event, context) => {}`
    - For other languages backend server (Java, Go, PHP, Python, Node.js): deploy to Cloud Run
    - Ensure backend code supports CORS by default

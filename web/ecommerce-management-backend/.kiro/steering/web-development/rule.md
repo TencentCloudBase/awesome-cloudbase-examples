@@ -4,6 +4,32 @@ description: Web frontend project development rules. Use this skill when develop
 alwaysApply: false
 ---
 
+## Activation Contract
+
+### Use this first when
+
+- The request is for a CloudBase Web app, static hosting site, frontend page, or Web SDK integration.
+
+### Read before writing code if
+
+- The task includes frontend structure, build config, deployment, routing, or Web SDK usage.
+
+### Then also read
+
+- Login flow -> `../auth-tool/SKILL.md`, then `../auth-web/SKILL.md`
+- UI work -> `../ui-design/SKILL.md` first
+- NoSQL / MySQL data work -> matching database skill
+
+### Do NOT use for
+
+- Mini programs, native Apps, or container backend services.
+
+### Common mistakes / gotchas
+
+- Treating cloud functions as the default solution for Web authentication.
+- Starting UI implementation before reading `ui-design`.
+- Routing native App requests into Web SDK code paths.
+
 ## When to use this skill
 
 Use this skill for **Web frontend project development** when you need to:
@@ -33,6 +59,7 @@ Use this skill for **Web frontend project development** when you need to:
    - Always use SDK built-in authentication features
    - Never implement login logic in cloud functions
    - Use `envQuery` tool to get environment ID
+   - Mention the official CDN early when the user needs a static HTML or no-build integration
 
 3. **Deploy and preview properly**
    - Build project first (ensure `npm install` is executed)
@@ -78,6 +105,19 @@ Use this skill for **Web frontend project development** when you need to:
 
 1. **SDK Integration**:
    - If user's project needs database, cloud functions, and other features, need to introduce `@cloudbase/js-sdk@latest` in the web application
+   - Official CDN: `https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js`
+   - Prefer npm for React, Vue, Vite, Webpack, and other bundler-based projects
+   - Prefer the CDN only for static HTML pages, quick demos, embedded snippets, or README examples where a build step is unnecessary
+
+**CDN quick start (static HTML / no-build)**:
+```html
+<script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"></script>
+<script>
+const app = cloudbase.init({
+  env: "xxxx-yyy",
+});
+</script>
+```
 
 **Important: Authentication must use SDK built-in features. It is strictly forbidden to implement login authentication logic using cloud functions!**
 

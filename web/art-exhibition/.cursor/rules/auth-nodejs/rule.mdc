@@ -15,8 +15,8 @@ Use this skill whenever the task involves **server-side authentication or identi
 
 **Do NOT use this skill for:**
 
-- Frontend Web login / sign-up flows using `@cloudbase/js-sdk` (handle those with the **CloudBase Web Auth** skill at `skills/web-auth-skill`, not this Node skill).
-- Direct HTTP auth API integrations (this skill does not describe raw HTTP endpoints; use the **CloudBase HTTP Auth** skill at `skills/auth-http-api-skill` instead).
+- Frontend Web login / sign-up flows using `@cloudbase/js-sdk` (handle those with the **auth-web** skill, not this Node skill).
+- Direct HTTP auth API integrations (this skill does not describe raw HTTP endpoints; use the **http-api** skill instead).
 - Database or storage operations that do not involve identity (use database/storage docs or skills).
 
 When the user request mixes frontend and backend concerns (e.g. "build a web login page and a Node API that knows the user"), treat them separately:

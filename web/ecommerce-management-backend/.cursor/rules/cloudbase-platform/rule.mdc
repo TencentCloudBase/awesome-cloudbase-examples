@@ -37,6 +37,33 @@ Use this skill for **CloudBase platform knowledge** when you need to:
    - MySQL data models must use models SDK, not collection API
    - Use `envQuery` tool to get environment ID
 
+4. **Use CloudBase MCP via mcporter (CLI) when IDE MCP is not available**
+   - You do **not** need to hard-code Secret ID / Secret Key / Env ID in config
+   - CloudBase MCP will support device-code login via the `auth` tool, so credentials can be obtained interactively
+   - Add CloudBase MCP server in `config/mcporter.json`:
+     If other MCP servers already exist, keep them and only add the `cloudbase` entry.
+     ```json
+     {
+       "mcpServers": {
+         "cloudbase": {
+           "command": "npx",
+           "args": ["@cloudbase/cloudbase-mcp@latest"],
+           "description": "CloudBase MCP",
+           "lifecycle": "keep-alive"
+         }
+       }
+     }
+     ```
+   - Discover tools and schemas:
+     - `npx mcporter list` — list configured servers
+     - `npx mcporter describe cloudbase --all-parameters` — inspect CloudBase server config and get full tool schemas with all parameters (⚠️ **必须加 `--all-parameters` 才能获取完整参数信息**)
+     - `npx mcporter list cloudbase --schema` — get full JSON schema for all CloudBase tools
+     - `npx mcporter call cloudbase.help --output json` — discover available CloudBase tools and their schemas
+   - Call CloudBase tools (auth flow examples):
+     - `npx mcporter call cloudbase.auth action=status --output json`
+     - `npx mcporter call cloudbase.auth action=start_auth authMode=device --output json`
+     - `npx mcporter call cloudbase.auth action=set_env envId=env-xxx --output json`
+
 ---
 
 # CloudBase Platform Knowledge
@@ -48,6 +75,7 @@ Use this skill for **CloudBase platform knowledge** when you need to:
    - Generally, publicly accessible files can be stored in static hosting, which provides a public web address
    - Static hosting supports custom domain configuration (requires console operation)
    - Cloud storage is suitable for files with privacy requirements, can get temporary access addresses via temporary file URLs
+   - If the task needs COS SDK polling, file metadata lookup, or temporary URLs for an uploaded object, use cloud storage tools (`manageStorage` / `queryStorage`), not `uploadFiles`
 
 2. **Static Hosting Domain**:
    - CloudBase static hosting domain can be obtained via `getWebsiteConfig` tool
@@ -84,8 +112,8 @@ Use this skill for **CloudBase platform knowledge** when you need to:
 
 1. **Node.js Cloud Functions**:
    - Node.js cloud functions need to include `package.json`, declaring required dependencies
-   - Can use `createFunction` to create functions
-   - Use `updateFunctionCode` to deploy cloud functions
+   - Can use `manageFunctions(action="createFunction")` to create functions
+   - Use `manageFunctions(action="updateFunctionCode")` to deploy cloud functions
    - Prioritize cloud dependency installation, do not upload node_modules
    - `functionRootPath` refers to the parent directory of function directories, e.g., `cloudfunctions` directory
 
