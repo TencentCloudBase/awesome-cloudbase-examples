@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: Professional UI design and frontend interface guidelines. Use this skill when creating web pages, mini-program interfaces, prototypes, or any frontend UI components that require distinctive, production-grade design with exceptional aesthetic quality.
+description: UI design specification and visual direction guide. This skill should be used when users need aesthetic direction, layout decisions, prototypes, or interface design specs before implementation across web or mini program surfaces.
 alwaysApply: false
 ---
 
@@ -8,11 +8,13 @@ alwaysApply: false
 
 ### Use this first when
 
-- The request involves any page, component, screen, visual prototype, or frontend styling work.
+- The request is to decide visual direction, produce a design specification, create a prototype, or make layout, typography, color, and visual hierarchy choices for an interface.
+- The implementation should follow a deliberate aesthetic rather than directly coding an already-approved design.
 
 ### Read before writing code if
 
-- The response will include UI code, layout structure, typography, color decisions, or visual behavior.
+- The response must choose typography, color, spacing, layout strategy, or other visual rules before code exists.
+- The user asks for "design", "prototype", "look and feel", or "style" rather than straight implementation.
 
 ### Then also read
 
@@ -22,11 +24,13 @@ alwaysApply: false
 ### Do NOT use for
 
 - Backend-only tasks, database design, or pure API work without interface output.
+- Straight implementation of an already-approved UI without new design decisions.
 
 ### Common mistakes / gotchas
 
 - Writing JSX, WXML, or CSS before outputting the design specification.
 - Falling back to generic AI layouts instead of an explicit aesthetic direction.
+- Jumping into implementation when the design intent is still unclear.
 - Ignoring platform constraints after the visual concept is defined.
 
 ### Minimal checklist

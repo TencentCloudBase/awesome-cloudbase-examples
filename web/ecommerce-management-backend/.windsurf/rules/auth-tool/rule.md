@@ -1,6 +1,6 @@
 ---
 name: auth-tool-cloudbase
-description: First-step CloudBase auth provider setup skill for login and registration flows. Use it before auth-web to configure and manage authentication providers for web applications - enable/disable login methods (SMS, Email, WeChat Open Platform, Google, Anonymous, Username/password, OAuth, SAML, CAS, Dingding, etc.) and configure provider settings via MCP tools `callCloudApi`.
+description: CloudBase auth provider configuration and login-readiness guide. This skill should be used when users need to inspect, enable, disable, or configure auth providers, publishable-key prerequisites, login methods, SMS/email sender setup, or other provider-side readiness before implementing a client or backend auth flow.
 alwaysApply: false
 ---
 
@@ -8,28 +8,33 @@ alwaysApply: false
 
 ### Use this first when
 
-- The user mentions login, registration, authentication, provider setup, SMS, email, anonymous login, or third-party login.
-- A Web, native App, or backend flow needs CloudBase auth configuration before implementation.
-- For any CloudBase Web auth flow, activate this skill before `auth-web`.
+- The task is to inspect, enable, disable, or configure CloudBase auth providers, login methods, publishable key prerequisites, SMS/email delivery, or third-party login readiness.
+- An auth implementation cannot proceed until provider status and login configuration are confirmed.
+- A CloudBase Web auth flow needs provider verification before `auth-web`.
 
 ### Read before writing code if
 
-- The request includes any auth UI or auth API work. Provider status must be checked first.
-- When the task is a Web auth flow, read `auth-web` after this skill and before writing frontend code.
+- The request mentions provider setup, auth console configuration, publishable key retrieval, login method availability, SMS/email sender setup, or third-party provider credentials.
+- The task mixes provider configuration with Web, mini program, Node, or raw HTTP auth implementation.
 
 ### Then also read
 
 - Web auth UI -> `../auth-web/SKILL.md`
-- Mini program auth -> `../auth-wechat/SKILL.md`
-- Native App / raw HTTP -> `../http-api/SKILL.md`
+- Mini program native auth -> `../auth-wechat/SKILL.md`
+- Node server-side identity / custom ticket -> `../auth-nodejs/SKILL.md`
+- Native App / raw HTTP auth client -> `../http-api/SKILL.md`
 
 ### Do NOT use this as
 
-- A replacement for platform implementation rules. This skill configures providers; it does not define the full frontend or client integration path.
+- The default implementation guide for every login or registration request.
+- A replacement for mini program native auth behavior when no provider change is involved.
+- A replacement for Node-side caller identity, user lookup, or custom login ticket flows.
+- A replacement for frontend integration, session handling, or client UX implementation.
 
 ### Common mistakes / gotchas
 
 - Writing login UI before enabling the required provider.
+- Treating any mention of "auth" as a provider-management task.
 - Implementing Web login in cloud functions.
 - Routing native App auth to Web SDK flows.
 

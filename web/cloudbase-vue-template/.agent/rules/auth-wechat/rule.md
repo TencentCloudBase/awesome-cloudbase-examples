@@ -1,8 +1,37 @@
 ---
 name: auth-wechat-miniprogram
-description: Complete guide for WeChat Mini Program authentication with CloudBase - native login, user identity, and cloud function integration.
+description: CloudBase WeChat Mini Program native authentication guide. This skill should be used when users need mini program identity handling, OPENID/UNIONID access, or `wx.cloud` auth behavior in projects where login is native and automatic.
 alwaysApply: false
 ---
+
+## Activation Contract
+
+### Use this first when
+
+- The task is about WeChat Mini Program auth behavior, `wx.cloud` identity, `OPENID` / `UNIONID`, or how a mini program caller is identified in CloudBase.
+- The project is a CloudBase mini program and the auth question is about native mini program identity rather than provider configuration.
+
+### Read before writing code if
+
+- The request mentions mini program login, user identity in cloud functions, or `wx.cloud` auth assumptions.
+- The user expects a Web-style login page or explicit token exchange in a mini program; route them back to native mini program auth behavior.
+
+### Then also read
+
+- Mini program project implementation -> `../miniprogram-development/SKILL.md`
+- Cloud function implementation -> `../cloud-functions/SKILL.md`
+
+### Do NOT use for
+
+- Web-based WeChat login or Web auth UI.
+- Provider enable/disable or auth console setup.
+- Generic Node-side auth flows outside mini program identity handling.
+
+### Common mistakes / gotchas
+
+- Generating a Web-style login page for a `wx.cloud` mini program.
+- Treating mini program auth as a provider-configuration problem.
+- Forgetting that caller identity is injected in cloud functions automatically.
 
 ## When to use this skill
 
@@ -10,7 +39,7 @@ Use this skill for **WeChat Mini Program (小程序) authentication** in a Cloud
 
 Use it when you need to:
 
-- Implement WeChat Mini Program login with CloudBase
+- Implement identity-aware WeChat Mini Program flows with CloudBase
 - Access user identity (openid, unionid) in cloud functions
 - Understand how WeChat authentication integrates with CloudBase
 - Build Mini Program features that require user identification

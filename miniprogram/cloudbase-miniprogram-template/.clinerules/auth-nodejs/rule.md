@@ -1,8 +1,38 @@
 ---
 name: auth-nodejs-cloudbase
-description: Complete guide for CloudBase Auth using the CloudBase Node SDK – caller identity, user lookup, custom login tickets, and server-side best practices.
+description: CloudBase Node SDK auth guide for server-side identity, user lookup, and custom login tickets. This skill should be used when Node.js code must read caller identity, inspect end users, or bridge an existing user system into CloudBase; not when configuring providers or building client login UI.
 alwaysApply: false
 ---
+
+## Activation Contract
+
+### Use this first when
+
+- Node.js code in cloud functions or backend services must read caller identity, look up users, or issue custom login tickets.
+- The backend responsibility is auth / identity, not provider setup or frontend login UI.
+
+### Read before writing code if
+
+- The task mentions `@cloudbase/node-sdk`, server-side auth, custom login tickets, or "who is calling".
+- The request mixes frontend login with backend identity logic; split the flow and route client-side work elsewhere.
+
+### Then also read
+
+- Provider setup / publishable key -> `../auth-tool/SKILL.md`
+- Web login UI that consumes custom tickets -> `../auth-web/SKILL.md`
+- Raw HTTP auth client -> `../http-api/SKILL.md`
+
+### Do NOT use for
+
+- Provider enable/disable or login console configuration.
+- Frontend login / sign-up UI.
+- Mini program native auth.
+
+### Common mistakes / gotchas
+
+- Using this skill as the entry point for every auth request.
+- Mixing provider-management work with Node-side identity code.
+- Reaching for raw HTTP examples when Node SDK already covers the job.
 
 ## When to use this skill
 

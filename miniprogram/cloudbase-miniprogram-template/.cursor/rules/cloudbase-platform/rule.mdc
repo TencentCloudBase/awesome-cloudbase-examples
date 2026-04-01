@@ -1,18 +1,51 @@
 ---
 name: cloudbase-platform
-description: CloudBase platform knowledge and best practices. Use this skill for general CloudBase platform understanding, including storage, hosting, authentication, cloud functions, database permissions, and data models.
+description: CloudBase platform overview and routing guide. This skill should be used when users need high-level capability selection, platform concepts, console navigation, or cross-platform best practices before choosing a more specific implementation skill.
 alwaysApply: false
 ---
+
+## Activation Contract
+
+### Use this first when
+
+- The user asks which CloudBase capability, service, or tool to use, or needs a high-level understanding of hosting, storage, authentication, cloud functions, or database options.
+- The task is about console navigation, cross-platform differences, permission models, or platform-level best practices before implementation.
+
+### Read before writing code if
+
+- It is still unclear whether the task belongs to Web, mini program, cloud functions, storage, MySQL / NoSQL, or auth.
+- The response needs platform selection, conceptual explanation, or control-plane navigation more than direct implementation steps.
+
+### Then also read
+
+- Web app implementation -> `../web-development/SKILL.md`
+- Web auth and provider setup -> `../auth-tool/SKILL.md`, `../auth-web/SKILL.md`
+- Mini program development -> `../miniprogram-development/SKILL.md`
+- Cloud functions -> `../cloud-functions/SKILL.md`
+- Official HTTP API clients -> `../http-api/SKILL.md`
+- Document database -> `../no-sql-web-sdk/SKILL.md` or `../no-sql-wx-mp-sdk/SKILL.md`
+- Relational database / data modeling -> `../relational-database-tool/SKILL.md` or `../data-model-creation/SKILL.md`
+- Cloud storage -> `../cloud-storage-web/SKILL.md`
+
+### Do NOT use for
+
+- Direct implementation of web pages, auth flows, functions, or database operations when a more specific skill already fits.
+- Low-level API parameter references or SDK recipes that belong in specialized skills.
+
+### Common mistakes / gotchas
+
+- Treating this general skill as the default entry point for all CloudBase development.
+- Staying here after the correct implementation skill is already clear.
+- Mixing platform overview with platform-specific API shapes or SDK details.
 
 ## When to use this skill
 
 Use this skill for **CloudBase platform knowledge** when you need to:
 
 - Understand CloudBase storage and hosting concepts
-- Configure authentication for different platforms (Web vs Mini Program)
-- Deploy and manage cloud functions
+- Compare platform capabilities before implementation
+- Understand cross-platform auth differences (Web vs Mini Program)
 - Understand database permissions and access control
-- Work with data models (MySQL and NoSQL)
 - Access CloudBase console management pages
 
 **This skill provides foundational knowledge** that applies to all CloudBase projects, regardless of whether they are Web, Mini Program, or backend services.

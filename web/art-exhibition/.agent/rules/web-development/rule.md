@@ -1,6 +1,6 @@
 ---
 name: web-development
-description: Web frontend project development rules. Use this skill when developing web frontend pages, deploying static hosting, and integrating CloudBase Web SDK.
+description: CloudBase Web implementation and deployment rules. This skill should be used when users need to build, integrate, debug, or deploy web frontend code and CloudBase Web SDK after the visual direction is already known.
 alwaysApply: false
 ---
 
@@ -8,26 +8,29 @@ alwaysApply: false
 
 ### Use this first when
 
-- The request is for a CloudBase Web app, static hosting site, frontend page, or Web SDK integration.
+- The request is to implement, integrate, debug, or deploy a CloudBase Web app, static site, or Web SDK flow.
+- The design direction is already decided, or the user is asking for engineering execution rather than visual exploration.
 
 ### Read before writing code if
 
 - The task includes frontend structure, build config, deployment, routing, or Web SDK usage.
+- The request includes UI implementation but the visual direction is already fixed; otherwise read `ui-design` first.
 
 ### Then also read
 
 - Login flow -> `../auth-tool/SKILL.md`, then `../auth-web/SKILL.md`
-- UI work -> `../ui-design/SKILL.md` first
+- If visual direction is not settled -> `../ui-design/SKILL.md` first
 - NoSQL / MySQL data work -> matching database skill
 
 ### Do NOT use for
 
+- Visual direction setting, aesthetic exploration, or prototype-first design work.
 - Mini programs, native Apps, or container backend services.
 
 ### Common mistakes / gotchas
 
 - Treating cloud functions as the default solution for Web authentication.
-- Starting UI implementation before reading `ui-design`.
+- Starting engineering implementation before clarifying whether the task is design or implementation.
 - Routing native App requests into Web SDK code paths.
 
 ## When to use this skill

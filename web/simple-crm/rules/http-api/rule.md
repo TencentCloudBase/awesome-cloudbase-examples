@@ -1,6 +1,6 @@
 ---
 name: http-api-cloudbase
-description: Use CloudBase HTTP API to access CloudBase platform features (database, authentication, cloud functions, cloud hosting, cloud storage, AI) via HTTP protocol from backends or scripts that are not using SDKs.
+description: CloudBase official HTTP API client guide. This skill should be used when backends, scripts, or non-SDK clients must call CloudBase platform APIs over raw HTTP instead of using a platform SDK or MCP management tool.
 alwaysApply: false
 ---
 
@@ -8,25 +8,30 @@ alwaysApply: false
 
 ### Use this first when
 
-- The request comes from Android, iOS, Flutter, React Native, non-Node backends, or admin scripts that must call CloudBase via raw HTTP.
+- The request comes from Android, iOS, Flutter, React Native, non-Node backends, or admin scripts that must call official CloudBase APIs via raw HTTP.
+- The task is to consume CloudBase platform endpoints, not to build a new HTTP service on CloudBase.
 
 ### Read before writing code if
 
 - The platform does not support a CloudBase SDK, or the user explicitly asks for HTTP API integration.
+- The user says "HTTP API" but it is unclear whether they mean official CloudBase endpoints or their own business API.
 
 ### Then also read
 
 - Auth configuration -> `../auth-tool/SKILL.md`
 - MySQL MCP management -> `../relational-database-tool/SKILL.md`
+- Your own HTTP service on CloudBase -> `../cloud-functions/SKILL.md` or `../cloudrun-development/SKILL.md`
 
 ### Do NOT use for
 
 - CloudBase Web SDK flows, mini program SDK flows, or MCP-driven management tasks.
+- Building your own HTTP service or REST API on CloudBase.
 
 ### Common mistakes / gotchas
 
 - Treating Web SDK examples as valid for native Apps.
 - Guessing endpoints without reading OpenAPI definitions.
+- Confusing official CloudBase HTTP APIs with your own function or CloudRun endpoint.
 - Mixing raw HTTP API integration with MCP management logic.
 
 ### Minimal checklist
