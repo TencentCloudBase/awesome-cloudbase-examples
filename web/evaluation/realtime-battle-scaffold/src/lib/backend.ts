@@ -6,7 +6,7 @@
  * 约束：
  *
  * - 必须使用 npm 安装依赖，不能使用 CDN
- * - 导出的 app 实例将在 auth.ts、cms-service.ts、storage-service.ts 中使用
+ * - 导出的 app 实例将在 game-api.ts 中使用
  * - 这里不要写死任何特定后端平台名称，保持模板中立
  */
 
