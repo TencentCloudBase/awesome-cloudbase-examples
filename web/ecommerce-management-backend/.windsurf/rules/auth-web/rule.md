@@ -1,6 +1,7 @@
 ---
 name: auth-web-cloudbase
 description: CloudBase Web Authentication Quick Guide for frontend integration after auth-tool has already been checked. Provides concise and practical Web authentication solutions with multiple login methods and complete user management.
+version: 2.15.4
 alwaysApply: false
 ---
 
@@ -75,8 +76,8 @@ const app = cloudbase.init({
   auth: { detectSessionInUrl: true }, // required
 })
 
-const auth = app.auth
-``
+const auth = app.auth()
+```
 
 ---
 
@@ -98,9 +99,9 @@ const { data: loginData, error: loginError } = await data.verifyOtp({ token: '65
 
 **3. Password**
 ```js
-const { data, error } = await auth.signInWithPassword({ username: 'test_user', password: 'pass123' })
-const { data, error } = await auth.signInWithPassword({ email: 'user@example.com', password: 'pass123' })
-const { data, error } = await auth.signInWithPassword({ phone: '13800138000', password: 'pass123' })
+const usernameLogin = await auth.signInWithPassword({ username: 'test_user', password: 'pass123' })
+const emailLogin = await auth.signInWithPassword({ email: 'user@example.com', password: 'pass123' })
+const phoneLogin = await auth.signInWithPassword({ phone: '13800138000', password: 'pass123' })
 ```
 
 **4. Registration (Smart: auto-login if exists)**
@@ -109,34 +110,43 @@ const { data, error } = await auth.signInWithPassword({ phone: '13800138000', pa
 - Use `phone` or `email` in the sign-up payload; do not invent `phone_number`
 ```js
 // Email Otp
-const { data, error } = await auth.signUp({ email: 'new@example.com', nickname: 'User' })
-const { data: loginData, error: loginError } = await data.verifyOtp({ token: '123456' })
+const emailSignUp = await auth.signUp({ email: 'new@example.com', nickname: 'User' })
+const emailVerifyResult = await emailSignUp.data.verifyOtp({ token: '123456' })
 
 // Phone Otp
-const { data, error } = await auth.signUp({ phone: '13800138000', nickname: 'User' })
-const { data: loginData, error: loginError } = await data.verifyOtp({ token: '123456' })
+const phoneSignUp = await auth.signUp({ phone: '13800138000', nickname: 'User' })
+const phoneVerifyResult = await phoneSignUp.data.verifyOtp({ token: '123456' })
 ```
 
 When the project already has `handleSendCode` / `handleRegister` or similar UI handlers, wire the SDK calls there directly instead of leaving them commented out in `App.tsx`.
 
 ```tsx
 const handleSendCode = async () => {
-  const { data, error } = await auth.signUp({
-    email,
-    name: username || email.split('@')[0],
-  })
-  if (error) throw error
-  setSignUpData(data)
+  try {
+    const { data, error } = await auth.signUp({
+      email,
+      name: username || email.split('@')[0],
+    })
+    if (error) throw error
+    setSignUpData(data)
+  } catch (error) {
+    console.error('Failed to send sign-up code', error)
+  }
 }
 
 const handleRegister = async () => {
-  if (!signUpData?.verifyOtp) throw new Error('Please send the code first')
-  const { error } = await signUpData.verifyOtp({
-    email,
-    token: code,
-    type: 'signup',
-  })
-  if (error) throw error
+  try {
+    if (!signUpData?.verifyOtp) throw new Error('Please send the code first')
+
+    const { error } = await signUpData.verifyOtp({
+      email,
+      token: code,
+      type: 'signup',
+    })
+    if (error) throw error
+  } catch (error) {
+    console.error('Failed to complete sign-up', error)
+  }
 }
 ```
 
@@ -163,12 +173,12 @@ await auth.signInWithCustomTicket(async () => {
 
 **8. Upgrade Anonymous**
 ```js
-const { data, error } = await auth.getSession()
-const { data: signUpData, error: signUpError} = await auth.signUp({
+const sessionResult = await auth.getSession()
+const upgradeResult = await auth.signUp({
   phone: '13800000000',
-  anonymous_token: data.session.access_token,
+  anonymous_token: sessionResult.data.session.access_token,
 })
-await signUpData.verifyOtp({ token: '123456' })
+await upgradeResult.data.verifyOtp({ token: '123456' })
 ```
 
 ---
@@ -177,47 +187,68 @@ await signUpData.verifyOtp({ token: '123456' })
 
 ```js
 // Sign out
-const { data, error } = await auth.signOut()
+const signOutResult = await auth.signOut()
 
 // Get user
-const { data, error } = await auth.getUser()
-console.log(data.user.email, data.user.phone, data.user.user_metadata?.nickName)
+const userResult = await auth.getUser()
+console.log(
+  userResult.data.user.email,
+  userResult.data.user.phone,
+  userResult.data.user.user_metadata?.nickName,
+)
 
 // Update user (except email, phone)
-const { data, error } = await auth.updateUser({ nickname: 'New Name', gender: 'MALE', avatar_url: 'url' })
+const updateProfileResult = await auth.updateUser({
+  nickname: 'New Name',
+  gender: 'MALE',
+  avatar_url: 'url',
+})
 
 // Update user (email or phone)
-const { data, error } = await auth.updateUser({ email: 'new@example.com' })
-const { data, error } = await data.verifyOtp({ email: "new@example.com", token: "123456" });
+const updateEmailResult = await auth.updateUser({ email: 'new@example.com' })
+const verifyEmailResult = await updateEmailResult.data.verifyOtp({
+  email: 'new@example.com',
+  token: '123456',
+})
 
 // Change password (logged in)
-const { data, error } = await auth.resetPasswordForOld({ old_password: 'old', new_password: 'new' })
+const resetPasswordResult = await auth.resetPasswordForOld({
+  old_password: 'old',
+  new_password: 'new',
+})
 
 // Reset password (forgot)
-const { data, error } = await auth.reauthenticate()
-const { data, error } = await data.updateUser({ nonce: '123456', password: 'new' })
+const reauthResult = await auth.reauthenticate()
+const forgotPasswordResult = await reauthResult.data.updateUser({
+  nonce: '123456',
+  password: 'new',
+})
 
 // Link third-party
-const { data, error } = await auth.linkIdentity({ provider: 'google' })
+const linkIdentityResult = await auth.linkIdentity({ provider: 'google' })
 
 // View/Unlink identities
-const { data, error } = await auth.getUserIdentities()
-const { data, error } = await auth.unlinkIdentity({ provider: data.identities[0].id })
+const identitiesResult = await auth.getUserIdentities()
+const unlinkIdentityResult = await auth.unlinkIdentity({
+  provider: identitiesResult.data.identities[0].id,
+})
 
 // Delete account
-const { data, error } = await auth.deleteMe({ password: 'current' })
+const deleteMeResult = await auth.deleteMe({ password: 'current' })
 
 // Listen to state changes
-const { data, error } = auth.onAuthStateChange((event, session, info) => {
+const authStateSubscription = auth.onAuthStateChange((event, session, info) => {
   // INITIAL_SESSION, SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED, USER_UPDATED, PASSWORD_RECOVERY, BIND_IDENTITY
 })
 
 // Get access token
-const { data, error } = const { data, error } = await auth.getSession()
-fetch('/api/protected', { headers: { Authorization: `Bearer ${data.session?.access_token}` } })
+const sessionResult = await auth.getSession()
+await fetch('/api/protected', {
+  headers: { Authorization: `Bearer ${sessionResult.data.session?.access_token}` },
+})
 
 // Refresh user
-const { data, error } = await auth.refreshUser()
+const refreshUserResult = await auth.refreshUser()
 ```
 
 ---
@@ -271,7 +302,7 @@ class PhoneLoginPage {
     const { data, error } = await auth.signInWithOtp({ phone })
     if (error) return alert('Send failed: ' + error.message)
 
-    this.verifyFunction = data.verify
+    this.verifyOtp = data.verifyOtp
     document.getElementById('codeSection').style.display = 'block'
     this.startCountdown(60)
   }
@@ -279,8 +310,9 @@ class PhoneLoginPage {
   async verifyCode() {
     const code = document.getElementById('code').value
     if (!code) return alert('Enter code')
+    if (!this.verifyOtp) return alert('Send the code first')
 
-    const { data, error } = await this.verifyFunction(code)
+    const { data, error } = await this.verifyOtp({ token: code })
     if (error) return alert('Verification failed: ' + error.message)
 
     console.log('Login successful:', data.user)
@@ -304,18 +336,3 @@ class PhoneLoginPage {
   }
 }
 ```
-
----
-
-## WeChat Mini Program
-
-```js
-// Silent login with OpenID
-const { data, error } = await auth.signInWithOpenId() // WeChat Cloud mode (default)
-const { data, error } = await auth.signInWithOpenId({ useWxCloud: false }) // HTTP mode
-
-// Phone authorization login
-const { data, error } = await auth.signInWithPhoneAuth({ phoneCode: 'xxx' })
-```
-
----

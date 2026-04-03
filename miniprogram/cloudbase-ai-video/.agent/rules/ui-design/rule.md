@@ -1,6 +1,7 @@
 ---
 name: ui-design
 description: UI design specification and visual direction guide. This skill should be used when users need aesthetic direction, layout decisions, prototypes, or interface design specs before implementation across web or mini program surfaces.
+version: 2.15.4
 alwaysApply: false
 ---
 
@@ -82,6 +83,11 @@ Use this skill for **frontend UI design and interface creation** in any project 
    - Icon audit (verify no emoji icons, using professional icon libraries)
    - Layout audit (verify asymmetry/creativity)
    - Design specification compliance check
+
+5. **Respect brand or design-system overrides when they are real constraints**
+   - If the project already has approved brand colors, font tokens, or a design system, treat those as higher-priority constraints
+   - Explicitly document which default UI-design prohibitions are being overridden and why
+   - Keep the override narrow: preserve the overall quality bar instead of falling back to generic AI styling
 
 ---
 
@@ -169,6 +175,7 @@ DESIGN SPECIFICATION
 - **Unified Aesthetics**: Use CSS variables for consistency
 - **Dominant Colors with Accents**: Using dominant colors with sharp accents is more effective than evenly-distributed color schemes
 - **Theme Consistency**: Choose dark or light themes based on aesthetic direction, ensure color choices match the overall style
+- **Brand Escape Hatch**: If a product already mandates a brand palette or typography system, you may use those tokens, but call out the override explicitly in the design specification
 
 ### Motion Design
 - **Animation Strategy**: Use animations for effects and micro-interactions
@@ -312,4 +319,3 @@ All interface prototypes must:
 **If any audit fails → Re-design with correct approach**
 
 Remember: You are capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
-

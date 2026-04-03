@@ -1,6 +1,7 @@
 ---
 name: spec-workflow
 description: Standard software engineering workflow for requirement analysis, technical design, and task planning. Use this skill when developing new features, complex architecture designs, multi-module integrations, or projects involving database/UI design.
+version: 2.15.4
 alwaysApply: false
 ---
 

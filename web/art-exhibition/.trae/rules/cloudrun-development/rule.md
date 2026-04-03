@@ -1,6 +1,7 @@
 ---
 name: cloudrun-development
 description: CloudBase Run backend development rules (Function mode/Container mode). Use this skill when deploying backend services that require long connections, multi-language support, custom environments, or AI agent development.
+version: 2.15.4
 alwaysApply: false
 ---
 
@@ -143,11 +144,13 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
     "OpenAccessTypes": ["WEB"],
     "Cpu": 0.5,
     "Mem": 1,
-    "MinNum": 0,
+    "MinNum": 1,
     "MaxNum": 5
   }
 }
 ```
+
+`MinNum: 1` is the recommended default when you want to reduce cold-start latency. If the user explicitly prefers lower cost and accepts more cold starts, explain the tradeoff and let them reduce `MinNum` to `0`.
 
 ## Best practices
 

@@ -1,6 +1,7 @@
 ---
 name: ai-model-nodejs
 description: Use this skill when developing Node.js backend services or CloudBase cloud functions (Express/Koa/NestJS, serverless, backend APIs) that need AI capabilities. Features text generation (generateText), streaming (streamText), AND image generation (generateImage) via @cloudbase/node-sdk ≥3.16.0. Built-in models include Hunyuan (hunyuan-2.0-instruct-20251111 recommended), DeepSeek (deepseek-v3.2 recommended), and hunyuan-image for images. This is the ONLY SDK that supports image generation. NOT for browser/Web apps (use ai-model-web) or WeChat Mini Program (use ai-model-wechat).
+version: 2.15.4
 alwaysApply: false
 ---
 
@@ -108,6 +109,25 @@ console.log(result.text);           // Generated text string
 console.log(result.usage);          // { prompt_tokens, completion_tokens, total_tokens }
 console.log(result.messages);       // Full message history
 console.log(result.rawResponses);   // Raw model responses
+```
+
+---
+
+## Error Handling Pattern
+
+```js
+const model = ai.createModel("deepseek");
+
+try {
+  const result = await model.generateText({
+    model: "deepseek-v3.2",
+    messages: [{ role: "user", content: "Summarize today's deployment logs" }],
+  });
+
+  console.log(result.text);
+} catch (error) {
+  console.error("AI request failed", error);
+}
 ```
 
 ---

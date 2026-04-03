@@ -1,6 +1,7 @@
 ---
 name: web-development
 description: CloudBase Web implementation and deployment rules. This skill should be used when users need to build, integrate, debug, or deploy web frontend code and CloudBase Web SDK after the visual direction is already known.
+version: 2.15.4
 alwaysApply: false
 ---
 
@@ -132,31 +133,31 @@ const app = cloudbase.init({
 });
 const auth = app.auth();
 
-// Check current login state
-let loginState = await auth.getLoginState();
+try {
+  // Check current login state
+  const loginState = await auth.getLoginState();
 
-if (loginState && loginState.user) {
-  // Logged in
-  const user = await auth.getCurrentUser();
-  console.log("Current user:", user);
-} else {
-  // Not logged in - use SDK built-in authentication features
-    
-  // Collect user's phone number into variable `phoneNum` by providing a input UI
+  if (loginState && loginState.user) {
+    const user = await auth.getCurrentUser();
+    console.log("Current user:", user);
+  } else {
+    // Not logged in - use SDK built-in authentication features
+    // For full auth recipes and provider prerequisites, read `auth-tool` and `auth-web`.
 
-  // Send SMS code
-  const verificationInfo = await auth.getVerification({
-    phone_number: `+86 ${phoneNum}`,
-  });
-  
-  // Collect user's phone number into variable `verificationCode` by providing a input UI 
-  
-  // Sign in
-  await auth.signInWithSms({
-    verificationInfo,
-    verificationCode,
-    phoneNum,
-  });
+    // Collect user's phone number into variable `phoneNum` by providing an input UI
+    const verificationInfo = await auth.getVerification({
+      phone_number: `+86 ${phoneNum}`,
+    });
+
+    // Collect user's verification code into variable `verificationCode`
+    await auth.signInWithSms({
+      verificationInfo,
+      verificationCode,
+      phoneNum,
+    });
+  }
+} catch (error) {
+  console.error("CloudBase Web authentication failed", error);
 }
 ```
 
@@ -181,7 +182,7 @@ if (loginState && loginState.user) {
 
 3. **User data management**: After login, user information can be obtained via `auth.getCurrentUser()`, then stored to database
 
-4. **Error handling**: All authentication operations should include complete error handling logic
+4. **Error handling**: All authentication operations should include complete error handling logic, and the sample code in this skill should demonstrate that pattern directly
 
 ## Build Process
 

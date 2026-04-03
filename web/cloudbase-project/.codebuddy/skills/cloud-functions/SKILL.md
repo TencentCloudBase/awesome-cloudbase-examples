@@ -1,6 +1,7 @@
 ---
 name: cloud-functions
 description: CloudBase function runtime guide for building, deploying, and debugging your own Event Functions or HTTP Functions. This skill should be used when users need application runtime code on CloudBase, not when they are merely calling CloudBase official platform APIs.
+version: 2.15.4
 alwaysApply: false
 ---
 
@@ -111,6 +112,62 @@ Use this skill when developing, deploying, and operating CloudBase cloud functio
 | `scf_bootstrap` | Not required | Required |
 | Dependencies | Auto-installed from `package.json` | Must be packaged with function code |
 | Best for | serverless handlers, scheduled jobs | APIs, SSE, WebSocket, browser-facing services |
+
+## Minimal code skeletons
+
+### Event Function hello world
+
+`cloudfunctions/hello-event/index.js`
+
+```js
+exports.main = async (event, context) => {
+  return {
+    ok: true,
+    message: "hello from event function",
+    event,
+  };
+};
+```
+
+`cloudfunctions/hello-event/package.json`
+
+```json
+{
+  "name": "hello-event",
+  "version": "1.0.0"
+}
+```
+
+### HTTP Function hello world
+
+`cloudfunctions/hello-http/index.js`
+
+```js
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ ok: true, message: "hello from http function" }));
+});
+
+server.listen(9000);
+```
+
+`cloudfunctions/hello-http/scf_bootstrap`
+
+```bash
+#!/bin/bash
+/var/lang/node18/bin/node index.js
+```
+
+`cloudfunctions/hello-http/package.json`
+
+```json
+{
+  "name": "hello-http",
+  "version": "1.0.0"
+}
+```
 
 ## Preferred tool map
 
