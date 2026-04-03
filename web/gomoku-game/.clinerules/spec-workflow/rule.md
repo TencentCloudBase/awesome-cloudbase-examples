@@ -1,6 +1,6 @@
 ---
 name: spec-workflow
-description: Standard software engineering workflow for requirement analysis, technical design, and task planning. Use this skill when developing new features, complex architecture designs, multi-module integrations, or projects involving database/UI design.
+description: Use when medium-to-large changes need explicit requirements, technical design, and task planning before implementation, especially for multi-module work, unclear acceptance criteria, or architecture-heavy requests.
 version: 2.15.4
 alwaysApply: false
 ---
@@ -43,6 +43,7 @@ alwaysApply: false
 
 - Decide whether the change really needs the full spec flow.
 - If yes, stop and produce requirements first.
+- If the change is small, low-risk, and acceptance is already clear, allow direct execution without forcing spec artifacts.
 - Use EARS-style acceptance criteria.
 - Get confirmation before moving to the next phase.
 
@@ -68,6 +69,7 @@ Use this workflow for structured development when you need to:
 ### Skip the full workflow when
 
 - The task is small, low-risk, and already precise
+- Goal, scope, and acceptance are already clear enough to execute directly
 - The user explicitly wants a direct code change with no planning phase
 
 ## Core workflow

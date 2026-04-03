@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: UI design specification and visual direction guide. This skill should be used when users need aesthetic direction, layout decisions, prototypes, or interface design specs before implementation across web or mini program surfaces.
+description: Use when users need visual direction, interface hierarchy, layout decisions, design specifications, or prototypes before implementing a Web or mini program UI.
 version: 2.15.4
 alwaysApply: false
 ---
@@ -26,6 +26,7 @@ alwaysApply: false
 
 - Backend-only tasks, database design, or pure API work without interface output.
 - Straight implementation of an already-approved UI without new design decisions.
+- Generic frontend coding requests where the visual direction is already settled.
 
 ### Common mistakes / gotchas
 
