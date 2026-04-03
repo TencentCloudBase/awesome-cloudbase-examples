@@ -1,10 +1,11 @@
 {
-  "name": "cms-scaffold",
+  "name": "realtime-battle-scaffold",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "VITE_USE_LOCAL_MOCK=1 vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
