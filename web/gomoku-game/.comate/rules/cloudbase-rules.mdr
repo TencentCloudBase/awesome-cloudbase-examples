@@ -15,6 +15,7 @@ This file is a compatibility projection of the CloudBase routing contract. Keep 
 
 - Identify the scenario first. Do not start implementation before reading the matching rule file.
 - Login or registration request -> read `{auth-tool}` first, then the platform auth rule.
+- Keep auth domains separate: management-side login uses `auth`; app-side auth configuration uses `queryAppAuth` / `manageAppAuth`.
 - UI request -> read `rules/ui-design/rule.md` first and output the design specification before code.
 - Native App / Flutter / React Native request -> route to `{http-api}`, not Web SDK rules.
 - Cloud Function request -> route to `{cloud-functions}`, not `cloudrun-development`, unless the task explicitly needs container service behavior.
@@ -157,7 +158,7 @@ When you see `{rule-name}` notation in this document, apply the path resolution 
 
 1. **FIRST**: Read `{auth-tool}` rule file using the path resolution strategy
 2. **SECOND**: Use `callCloudApi` to check current authentication configuration
-3. **THIRD**: Enable required authentication methods (if not configured)
+3. **THIRD**: Prefer `queryAppAuth` / `manageAppAuth` to inspect or enable required authentication methods
 4. **FOURTH**: Verify configuration is effective
 5. **FIFTH**: Implement frontend authentication code
 

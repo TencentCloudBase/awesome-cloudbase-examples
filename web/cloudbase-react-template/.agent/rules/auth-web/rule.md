@@ -53,7 +53,7 @@ Use the same CDN address as `web-development`. Prefer npm installation in modern
 
 ## Prerequisites
 
-- Automatically use `auth-tool-cloudbase` to get `publishable key` and configure login methods. 
+- Automatically use `auth-tool-cloudbase` to check app-side auth readiness via `queryAppAuth` / `manageAppAuth`, then get the `publishable key` and configure login methods.
 - If `auth-tool-cloudbase` failed, let user go to `https://tcb.cloud.tencent.com/dev?envId={env}#/env/apikey` to get `publishable key` and `https://tcb.cloud.tencent.com/dev?envId={env}#/identity/login-manage` to set up login methods
 
 ### Parameter map
@@ -61,7 +61,7 @@ Use the same CDN address as `web-development`. Prefer npm installation in modern
 - `auth.signInWithOtp({ phone })` and `auth.signUp({ phone })` use the phone number in a `phone` field, not `phone_number`
 - `auth.signInWithOtp({ email })` and `auth.signUp({ email })` use `email`
 - `verifyOtp({ token })` expects the SMS or email code in `token`
-- `accessKey` is the publishable key from `auth-tool-cloudbase`, not a secret key
+- `accessKey` is the publishable key from `queryAppAuth` / `manageAppAuth` via `auth-tool-cloudbase`, not a secret key
 - If the task mentions provider setup, stop and read `auth-tool-cloudbase` before writing frontend code
 
 ## Quick Start
@@ -84,14 +84,14 @@ const auth = app.auth()
 ## Login Methods
 
 **1. Phone OTP (Recommended)**
-- Automatically use `auth-tool-cloudbase` turn on `SMS Login`
+- Automatically use `auth-tool-cloudbase` to turn on `SMS Login` through `manageAppAuth`
 ```js
 const { data, error } = await auth.signInWithOtp({ phone: '13800138000' })
 const { data: loginData, error: loginError } = await data.verifyOtp({ token:'123456' })
 ```
 
 **2. Email OTP**
-- Automatically use `auth-tool-cloudbase` turn on `Email Login`
+- Automatically use `auth-tool-cloudbase` to turn on `Email Login` through `manageAppAuth`
 ```js
 const { data, error } = await auth.signInWithOtp({ email: 'user@example.com' })
 const { data: loginData, error: loginError } = await data.verifyOtp({ token: '654321' })
@@ -106,7 +106,7 @@ const phoneLogin = await auth.signInWithPassword({ phone: '13800138000', passwor
 
 **4. Registration (Smart: auto-login if exists)**
 - Only support email and phone otp registration
-- Automatically use `auth-tool-cloudbase` turn on `Email Login` or `SMS Login`
+- Automatically use `auth-tool-cloudbase` to turn on `Email Login` or `SMS Login` through `manageAppAuth`
 - Use `phone` or `email` in the sign-up payload; do not invent `phone_number`
 ```js
 // Email Otp
@@ -151,13 +151,13 @@ const handleRegister = async () => {
 ```
 
 **5. Anonymous**
-- Automatically use `auth-tool-cloudbase` turn on `Anonymous Login`
+- Automatically use `auth-tool-cloudbase` to turn on `Anonymous Login` through `manageAppAuth`
 ```js
 const { data, error } = await auth.signInAnonymously()
 ```
 
 **6. OAuth (Google/WeChat)**
-- Automatically use `auth-tool-cloudbase` turn on `Google Login` or `WeChat Login`
+- Automatically use `auth-tool-cloudbase` to turn on `Google Login` or `WeChat Login` through `manageAppAuth`
 ```js
 const { data, error } = await auth.signInWithOAuth({ provider: 'google' })
 window.location.href = data.url // Auto-complete after callback

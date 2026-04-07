@@ -49,13 +49,28 @@ Configure CloudBase authentication providers: Anonymous, Username/Password, SMS,
 
 **Prerequisites**: CloudBase environment ID (`env`)
 
+## MCP Tool Boundary
+
+Keep these two auth domains separate:
+
+- `auth`: MCP / management-side login only. Use it for `status`, `start_auth`, `set_env`, `logout`, and `get_temp_credentials`.
+- `queryAppAuth` / `manageAppAuth`: app-side authentication configuration. Use them for login methods, provider settings, publishable key, static domain, client config, and custom login keys.
+
+Preferred execution order for this skill:
+
+1. Use `queryAppAuth` / `manageAppAuth` first when the needed action exists there.
+2. Use `callCloudApi` only as a fallback or for debugging raw request shapes.
+3. Do not route app-side provider configuration back to the MCP `auth` tool.
+
 ---
 
 ## Authentication Scenarios
 
 ### 1. Get Login Config
 
-Use the official login-config API. Do **not** use `lowcode/DescribeLoginStrategy` or `lowcode/ModifyLoginStrategy` as the default path.
+Preferred MCP tool path: `queryAppAuth(action="getLoginConfig")`
+
+Fallback API path: use the official login-config API. Do **not** use `lowcode/DescribeLoginStrategy` or `lowcode/ModifyLoginStrategy` as the default path.
 
 Query current login configuration:
 ```js
@@ -102,6 +117,8 @@ const WritableLoginConfig = {
 
 ### 2. Anonymous Login
 
+Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
+
 1. Get `LoginConfig` (see Scenario 1)
 2. Set `LoginConfig.AnonymousLogin = true` (on) or `false` (off)
 3. Update:
@@ -117,6 +134,8 @@ const WritableLoginConfig = {
 
 ### 3. Username/Password Login
 
+Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
+
 1. Get `LoginConfig` (see Scenario 1)
 2. Set `LoginConfig.UserNameLogin = true` (on) or `false` (off)
 3. Update:
@@ -131,6 +150,8 @@ const WritableLoginConfig = {
 ---
 
 ### 4. SMS Login
+
+Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
 
 1. Get `LoginConfig` (see Scenario 1)
 2. Modify:
@@ -190,6 +211,11 @@ Email has two layers of configuration:
 - `ModifyLoginConfig.EmailLogin`: controls whether email/password login is enabled
 - `ModifyProvider(Id="email")`: controls the email sender channel and SMTP configuration
 - In Web auth code, this maps to `auth.signInWithOtp({ email })` and `auth.signUp({ email })`
+
+Preferred MCP tool path:
+
+- `manageAppAuth(action="updateLoginConfig")` for `EmailLogin`
+- `manageAppAuth(action="updateProvider")` for provider settings
 
 **Turn on email/password login**:
 ```js
@@ -260,6 +286,11 @@ Email has two layers of configuration:
 
 ### 6. WeChat Login
 
+Preferred MCP tool path:
+
+- `queryAppAuth(action="listProviders")` or `queryAppAuth(action="getProvider")`
+- `manageAppAuth(action="updateProvider")`
+
 1. Get WeChat config:
 ```js
 {
@@ -295,6 +326,12 @@ Filter by `Id == "wx_open"`, save as `WeChatProvider`.
 ---
 
 ### 7. Google Login
+
+Preferred MCP tool path:
+
+- `queryAppAuth(action="getStaticDomain")`
+- `queryAppAuth(action="listProviders")` or `queryAppAuth(action="getProvider")`
+- `manageAppAuth(action="updateProvider")`
 
 1. Get redirect URI:
 ```js
@@ -348,6 +385,11 @@ Save `result.Data.StaticDomain` as `staticDomain`.
 
 Use client APIs for client metadata and token/session settings. Do not use them as a replacement for login strategy or provider management.
 
+Preferred MCP tool path:
+
+- `queryAppAuth(action="getClientConfig")`
+- `manageAppAuth(action="updateClientConfig")`
+
 **Query client config**:
 ```js
 {
@@ -374,6 +416,11 @@ Use client APIs for client metadata and token/session settings. Do not use them 
 
 ### 9. Get Publishable Key
 
+Preferred MCP tool path:
+
+- `queryAppAuth(action="listApiKeyTokens")`
+- `manageAppAuth(action="createApiKeyToken")`
+
 **Query existing key**:
 ```js
 {
@@ -393,3 +440,9 @@ Return `PublishableKey.ApiKey` if exists (filter by `Name == "publish_key"`).
 }
 ```
 If creation fails, direct user to: "https://tcb.cloud.tencent.com/dev?envId=`env`#/env/apikey"
+
+### 10. Custom Login Keys
+
+Preferred MCP tool path: `manageAppAuth(action="createCustomLoginKeys")`
+
+Use custom login keys when the application needs CloudBase custom auth integration and the standard provider setup is not enough.

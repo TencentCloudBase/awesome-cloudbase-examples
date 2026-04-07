@@ -27,7 +27,7 @@ alwaysApply: false
 
 ### Do NOT use for
 
-- MCP-based SQL provisioning, schema changes, or security-rule management.
+- MCP-based SQL provisioning, schema changes, or permissions management.
 - Backend/Node service access.
 - Document database operations.
 

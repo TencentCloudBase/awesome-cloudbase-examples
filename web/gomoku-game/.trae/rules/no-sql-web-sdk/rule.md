@@ -30,7 +30,7 @@ alwaysApply: false
 - Mini Program code using `wx.cloud.database()`.
 - Server-side or cloud-function database access.
 - SQL / MySQL database operations.
-- Pure security-rule administration with no browser SDK code.
+- Pure resource-permission administration with no browser SDK code.
 
 ### Common mistakes / gotchas
 
@@ -138,7 +138,7 @@ const result = await db.collection("users")
 2. Use meaningful collection naming conventions.
 3. Select only required fields.
 4. Add indexes for frequent filters or sort keys.
-5. Pair frontend CRUD with explicit security-rule design.
+5. Pair frontend CRUD with explicit permission design.
 6. Use pagination instead of unbounded reads.
 
 ## Error handling

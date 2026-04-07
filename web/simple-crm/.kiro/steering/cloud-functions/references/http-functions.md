@@ -146,7 +146,7 @@ Before enabling anonymous access, confirm both of these:
 1. The access path exists.
 2. The function security rule allows the intended caller identity.
 
-If an external caller reports `EXCEED_AUTHORITY`, inspect the function rule first with `readSecurityRule(resourceType="function")` before widening access.
+If an external caller reports `EXCEED_AUTHORITY`, inspect the function permission first with `queryPermissions(action="getResourcePermission", resourceType="function")` before widening access.
 
 ## SSE and WebSocket notes
 

@@ -75,6 +75,7 @@ Use this skill for **CloudBase platform knowledge** when you need to:
    - This platform overview intentionally does **not** duplicate the full MCP / mcporter config block
    - For the canonical config snippet, CLI commands, and auth examples, read the main `cloudbase` guideline first
    - Keep the same core rules here: use MCP first, inspect tool schemas before execution, and do not hard-code Secret ID / Secret Key / Env ID in config
+   - Keep the auth split explicit: management-side login uses `auth`, while application-side auth configuration uses `queryAppAuth` / `manageAppAuth`
 
 ---
 
@@ -113,6 +114,7 @@ Use this skill for **CloudBase platform knowledge** when you need to:
 - **Recommended method**: SMS login with `auth.getVerification()`, for detailed, refer to web auth related docs
 - **Forbidden behavior**: Do not use cloud functions to implement login authentication logic
 - **User management**: After login, get user information via `auth.getCurrentUser()`
+- **Provider and login-method setup**: Use `queryAppAuth` / `manageAppAuth`, not the MCP `auth` tool
 
 ### Mini Program Authentication
 - **Login-free feature**: Mini program CloudBase is naturally login-free, no login flow needed
@@ -152,9 +154,14 @@ Use this skill for **CloudBase platform knowledge** when you need to:
    ```
    Create collection → Configure security rules → Write code → Test
    ```
-   - Use `writeSecurityRule` MCP tool to configure permissions
+   - Use `managePermissions(action="updateResourcePermission")` to configure resource permissions
    - Wait 2-5 minutes for cache to clear before testing
    - See `no-sql-web-sdk/security-rules.md` for detailed examples
+
+Compatibility note:
+- Canonical plugin name: `permissions`
+- Legacy plugin aliases `security-rule`, `security-rules`, `secret-rule`, `secret-rules`, and `access-control` still resolve to the `permissions` plugin
+- Legacy tools `readSecurityRule` / `writeSecurityRule` are removed; prefer `queryPermissions` / `managePermissions`
 
 4. **Common Scenarios**:
    - **E-commerce products**: `READONLY` (admin manages via cloud functions)
