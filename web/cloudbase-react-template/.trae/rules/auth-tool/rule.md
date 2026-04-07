@@ -1,6 +1,7 @@
 ---
 name: auth-tool-cloudbase
-description: First-step CloudBase auth provider setup skill for login and registration flows. Use it before auth-web to configure and manage authentication providers for web applications - enable/disable login methods (SMS, Email, WeChat Open Platform, Google, Anonymous, Username/password, OAuth, SAML, CAS, Dingding, etc.) and configure provider settings via MCP tools `callCloudApi`.
+description: CloudBase auth provider configuration and login-readiness guide. This skill should be used when users need to inspect, enable, disable, or configure auth providers, publishable-key prerequisites, login methods, SMS/email sender setup, or other provider-side readiness before implementing a client or backend auth flow.
+version: 2.15.4
 alwaysApply: false
 ---
 
@@ -8,28 +9,33 @@ alwaysApply: false
 
 ### Use this first when
 
-- The user mentions login, registration, authentication, provider setup, SMS, email, anonymous login, or third-party login.
-- A Web, native App, or backend flow needs CloudBase auth configuration before implementation.
-- For any CloudBase Web auth flow, activate this skill before `auth-web`.
+- The task is to inspect, enable, disable, or configure CloudBase auth providers, login methods, publishable key prerequisites, SMS/email delivery, or third-party login readiness.
+- An auth implementation cannot proceed until provider status and login configuration are confirmed.
+- A CloudBase Web auth flow needs provider verification before `auth-web`.
 
 ### Read before writing code if
 
-- The request includes any auth UI or auth API work. Provider status must be checked first.
-- When the task is a Web auth flow, read `auth-web` after this skill and before writing frontend code.
+- The request mentions provider setup, auth console configuration, publishable key retrieval, login method availability, SMS/email sender setup, or third-party provider credentials.
+- The task mixes provider configuration with Web, mini program, Node, or raw HTTP auth implementation.
 
 ### Then also read
 
 - Web auth UI -> `../auth-web/SKILL.md`
-- Mini program auth -> `../auth-wechat/SKILL.md`
-- Native App / raw HTTP -> `../http-api/SKILL.md`
+- Mini program native auth -> `../auth-wechat/SKILL.md`
+- Node server-side identity / custom ticket -> `../auth-nodejs/SKILL.md`
+- Native App / raw HTTP auth client -> `../http-api/SKILL.md`
 
 ### Do NOT use this as
 
-- A replacement for platform implementation rules. This skill configures providers; it does not define the full frontend or client integration path.
+- The default implementation guide for every login or registration request.
+- A replacement for mini program native auth behavior when no provider change is involved.
+- A replacement for Node-side caller identity, user lookup, or custom login ticket flows.
+- A replacement for frontend integration, session handling, or client UX implementation.
 
 ### Common mistakes / gotchas
 
 - Writing login UI before enabling the required provider.
+- Treating any mention of "auth" as a provider-management task.
 - Implementing Web login in cloud functions.
 - Routing native App auth to Web SDK flows.
 
@@ -43,13 +49,28 @@ Configure CloudBase authentication providers: Anonymous, Username/Password, SMS,
 
 **Prerequisites**: CloudBase environment ID (`env`)
 
+## MCP Tool Boundary
+
+Keep these two auth domains separate:
+
+- `auth`: MCP / management-side login only. Use it for `status`, `start_auth`, `set_env`, `logout`, and `get_temp_credentials`.
+- `queryAppAuth` / `manageAppAuth`: app-side authentication configuration. Use them for login methods, provider settings, publishable key, static domain, client config, and custom login keys.
+
+Preferred execution order for this skill:
+
+1. Use `queryAppAuth` / `manageAppAuth` first when the needed action exists there.
+2. Use `callCloudApi` only as a fallback or for debugging raw request shapes.
+3. Do not route app-side provider configuration back to the MCP `auth` tool.
+
 ---
 
 ## Authentication Scenarios
 
 ### 1. Get Login Config
 
-Use the official login-config API. Do **not** use `lowcode/DescribeLoginStrategy` or `lowcode/ModifyLoginStrategy` as the default path.
+Preferred MCP tool path: `queryAppAuth(action="getLoginConfig")`
+
+Fallback API path: use the official login-config API. Do **not** use `lowcode/DescribeLoginStrategy` or `lowcode/ModifyLoginStrategy` as the default path.
 
 Query current login configuration:
 ```js
@@ -96,6 +117,8 @@ const WritableLoginConfig = {
 
 ### 2. Anonymous Login
 
+Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
+
 1. Get `LoginConfig` (see Scenario 1)
 2. Set `LoginConfig.AnonymousLogin = true` (on) or `false` (off)
 3. Update:
@@ -111,6 +134,8 @@ const WritableLoginConfig = {
 
 ### 3. Username/Password Login
 
+Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
+
 1. Get `LoginConfig` (see Scenario 1)
 2. Set `LoginConfig.UserNameLogin = true` (on) or `false` (off)
 3. Update:
@@ -125,6 +150,8 @@ const WritableLoginConfig = {
 ---
 
 ### 4. SMS Login
+
+Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
 
 1. Get `LoginConfig` (see Scenario 1)
 2. Modify:
@@ -184,6 +211,11 @@ Email has two layers of configuration:
 - `ModifyLoginConfig.EmailLogin`: controls whether email/password login is enabled
 - `ModifyProvider(Id="email")`: controls the email sender channel and SMTP configuration
 - In Web auth code, this maps to `auth.signInWithOtp({ email })` and `auth.signUp({ email })`
+
+Preferred MCP tool path:
+
+- `manageAppAuth(action="updateLoginConfig")` for `EmailLogin`
+- `manageAppAuth(action="updateProvider")` for provider settings
 
 **Turn on email/password login**:
 ```js
@@ -254,6 +286,11 @@ Email has two layers of configuration:
 
 ### 6. WeChat Login
 
+Preferred MCP tool path:
+
+- `queryAppAuth(action="listProviders")` or `queryAppAuth(action="getProvider")`
+- `manageAppAuth(action="updateProvider")`
+
 1. Get WeChat config:
 ```js
 {
@@ -289,6 +326,12 @@ Filter by `Id == "wx_open"`, save as `WeChatProvider`.
 ---
 
 ### 7. Google Login
+
+Preferred MCP tool path:
+
+- `queryAppAuth(action="getStaticDomain")`
+- `queryAppAuth(action="listProviders")` or `queryAppAuth(action="getProvider")`
+- `manageAppAuth(action="updateProvider")`
 
 1. Get redirect URI:
 ```js
@@ -342,6 +385,11 @@ Save `result.Data.StaticDomain` as `staticDomain`.
 
 Use client APIs for client metadata and token/session settings. Do not use them as a replacement for login strategy or provider management.
 
+Preferred MCP tool path:
+
+- `queryAppAuth(action="getClientConfig")`
+- `manageAppAuth(action="updateClientConfig")`
+
 **Query client config**:
 ```js
 {
@@ -368,6 +416,11 @@ Use client APIs for client metadata and token/session settings. Do not use them 
 
 ### 9. Get Publishable Key
 
+Preferred MCP tool path:
+
+- `queryAppAuth(action="listApiKeyTokens")`
+- `manageAppAuth(action="createApiKeyToken")`
+
 **Query existing key**:
 ```js
 {
@@ -387,3 +440,9 @@ Return `PublishableKey.ApiKey` if exists (filter by `Name == "publish_key"`).
 }
 ```
 If creation fails, direct user to: "https://tcb.cloud.tencent.com/dev?envId=`env`#/env/apikey"
+
+### 10. Custom Login Keys
+
+Preferred MCP tool path: `manageAppAuth(action="createCustomLoginKeys")`
+
+Use custom login keys when the application needs CloudBase custom auth integration and the standard provider setup is not enough.

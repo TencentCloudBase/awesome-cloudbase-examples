@@ -2,16 +2,9 @@
   "version": "2.0",
   "envId": "{{env.ENV_ID}}",
   "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json",
-  "framework": {
-    "name": "cloudbase-vue-template",
-    "plugins": {
-      "client": {
-        "use": "@cloudbase/framework-plugin-website",
-        "inputs": {
-          "outputPath": "dist",
-          "buildCommand": "npm run build"
-        }
-      }
-    }
+  "app": {
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "deployPath": "/"
   }
-} 
+}

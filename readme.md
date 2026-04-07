@@ -1,3 +1,5 @@
+<a href="https://cloud.tencent.com/developer/article/2649588" target="_blank"><img width="3094" height="654" alt="banner" src="https://github.com/user-attachments/assets/37982d04-274a-4b6c-85b8-06983c615d9a" /></a>
+
 ![awsome-cloudbase-examples](https://socialify.git.ci/TencentCloudBase/awsome-cloudbase-examples/image?font=Inter&forks=1&owner=1&pattern=Circuit+Board&stargazers=1)
 
 # Awesome CloudBase Examples

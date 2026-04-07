@@ -18,6 +18,9 @@ Use this checklist before generating any CloudBase authentication flow.
    - Web -> `auth-web`
    - Mini program -> `auth-wechat`
    - Native app / raw HTTP -> `http-api`
+6. Keep MCP tool routing explicit:
+   - management-side login -> `auth`
+   - application-side auth config -> `queryAppAuth` / `manageAppAuth`
 
 ## Common failure patterns
 

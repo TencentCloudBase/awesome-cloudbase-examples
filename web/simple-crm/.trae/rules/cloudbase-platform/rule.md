@@ -1,18 +1,52 @@
 ---
 name: cloudbase-platform
-description: CloudBase platform knowledge and best practices. Use this skill for general CloudBase platform understanding, including storage, hosting, authentication, cloud functions, database permissions, and data models.
+description: CloudBase platform overview and routing guide. This skill should be used when users need high-level capability selection, platform concepts, console navigation, or cross-platform best practices before choosing a more specific implementation skill.
+version: 2.15.4
 alwaysApply: false
 ---
+
+## Activation Contract
+
+### Use this first when
+
+- The user asks which CloudBase capability, service, or tool to use, or needs a high-level understanding of hosting, storage, authentication, cloud functions, or database options.
+- The task is about console navigation, cross-platform differences, permission models, or platform-level best practices before implementation.
+
+### Read before writing code if
+
+- It is still unclear whether the task belongs to Web, mini program, cloud functions, storage, MySQL / NoSQL, or auth.
+- The response needs platform selection, conceptual explanation, or control-plane navigation more than direct implementation steps.
+
+### Then also read
+
+- Web app implementation -> `../web-development/SKILL.md`
+- Web auth and provider setup -> `../auth-tool/SKILL.md`, `../auth-web/SKILL.md`
+- Mini program development -> `../miniprogram-development/SKILL.md`
+- Cloud functions -> `../cloud-functions/SKILL.md`
+- Official HTTP API clients -> `../http-api/SKILL.md`
+- Document database -> `../no-sql-web-sdk/SKILL.md` or `../no-sql-wx-mp-sdk/SKILL.md`
+- Relational database / data modeling -> `../relational-database-tool/SKILL.md` or `../data-model-creation/SKILL.md`
+- Cloud storage -> `../cloud-storage-web/SKILL.md`
+
+### Do NOT use for
+
+- Direct implementation of web pages, auth flows, functions, or database operations when a more specific skill already fits.
+- Low-level API parameter references or SDK recipes that belong in specialized skills.
+
+### Common mistakes / gotchas
+
+- Treating this general skill as the default entry point for all CloudBase development.
+- Staying here after the correct implementation skill is already clear.
+- Mixing platform overview with platform-specific API shapes or SDK details.
 
 ## When to use this skill
 
 Use this skill for **CloudBase platform knowledge** when you need to:
 
 - Understand CloudBase storage and hosting concepts
-- Configure authentication for different platforms (Web vs Mini Program)
-- Deploy and manage cloud functions
+- Compare platform capabilities before implementation
+- Understand cross-platform auth differences (Web vs Mini Program)
 - Understand database permissions and access control
-- Work with data models (MySQL and NoSQL)
 - Access CloudBase console management pages
 
 **This skill provides foundational knowledge** that applies to all CloudBase projects, regardless of whether they are Web, Mini Program, or backend services.
@@ -37,32 +71,11 @@ Use this skill for **CloudBase platform knowledge** when you need to:
    - MySQL data models must use models SDK, not collection API
    - Use `envQuery` tool to get environment ID
 
-4. **Use CloudBase MCP via mcporter (CLI) when IDE MCP is not available**
-   - You do **not** need to hard-code Secret ID / Secret Key / Env ID in config
-   - CloudBase MCP will support device-code login via the `auth` tool, so credentials can be obtained interactively
-   - Add CloudBase MCP server in `config/mcporter.json`:
-     If other MCP servers already exist, keep them and only add the `cloudbase` entry.
-     ```json
-     {
-       "mcpServers": {
-         "cloudbase": {
-           "command": "npx",
-           "args": ["@cloudbase/cloudbase-mcp@latest"],
-           "description": "CloudBase MCP",
-           "lifecycle": "keep-alive"
-         }
-       }
-     }
-     ```
-   - Discover tools and schemas:
-     - `npx mcporter list` — list configured servers
-     - `npx mcporter describe cloudbase --all-parameters` — inspect CloudBase server config and get full tool schemas with all parameters (⚠️ **必须加 `--all-parameters` 才能获取完整参数信息**)
-     - `npx mcporter list cloudbase --schema` — get full JSON schema for all CloudBase tools
-     - `npx mcporter call cloudbase.help --output json` — discover available CloudBase tools and their schemas
-   - Call CloudBase tools (auth flow examples):
-     - `npx mcporter call cloudbase.auth action=status --output json`
-     - `npx mcporter call cloudbase.auth action=start_auth authMode=device --output json`
-     - `npx mcporter call cloudbase.auth action=set_env envId=env-xxx --output json`
+4. **Use the canonical CloudBase MCP setup from the main `cloudbase` guideline**
+   - This platform overview intentionally does **not** duplicate the full MCP / mcporter config block
+   - For the canonical config snippet, CLI commands, and auth examples, read the main `cloudbase` guideline first
+   - Keep the same core rules here: use MCP first, inspect tool schemas before execution, and do not hard-code Secret ID / Secret Key / Env ID in config
+   - Keep the auth split explicit: management-side login uses `auth`, while application-side auth configuration uses `queryAppAuth` / `manageAppAuth`
 
 ---
 
@@ -101,6 +114,7 @@ Use this skill for **CloudBase platform knowledge** when you need to:
 - **Recommended method**: SMS login with `auth.getVerification()`, for detailed, refer to web auth related docs
 - **Forbidden behavior**: Do not use cloud functions to implement login authentication logic
 - **User management**: After login, get user information via `auth.getCurrentUser()`
+- **Provider and login-method setup**: Use `queryAppAuth` / `manageAppAuth`, not the MCP `auth` tool
 
 ### Mini Program Authentication
 - **Login-free feature**: Mini program CloudBase is naturally login-free, no login flow needed
@@ -140,9 +154,14 @@ Use this skill for **CloudBase platform knowledge** when you need to:
    ```
    Create collection → Configure security rules → Write code → Test
    ```
-   - Use `writeSecurityRule` MCP tool to configure permissions
+   - Use `managePermissions(action="updateResourcePermission")` to configure resource permissions
    - Wait 2-5 minutes for cache to clear before testing
    - See `no-sql-web-sdk/security-rules.md` for detailed examples
+
+Compatibility note:
+- Canonical plugin name: `permissions`
+- Legacy plugin aliases `security-rule`, `security-rules`, `secret-rule`, `secret-rules`, and `access-control` still resolve to the `permissions` plugin
+- Legacy tools `readSecurityRule` / `writeSecurityRule` are removed; prefer `queryPermissions` / `managePermissions`
 
 4. **Common Scenarios**:
    - **E-commerce products**: `READONLY` (admin manages via cloud functions)
@@ -178,7 +197,9 @@ Use this skill for **CloudBase platform knowledge** when you need to:
 
 ## Console Management
 
-After creating/deploying resources, provide corresponding console management page links. All console URLs follow the pattern: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/{path}`
+After creating/deploying resources, provide corresponding console management page links. All console URLs follow the pattern: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/{path}`.
+
+The CloudBase console is updated frequently. If a live, logged-in console shows a different hash path from this document, prefer the live console path over stale documentation and then update this skill to match.
 
 ### Core Function Entry Points
 
@@ -186,7 +207,7 @@ After creating/deploying resources, provide corresponding console management pag
    - Main dashboard showing environment status, resource usage, and quick access to key features
    - Displays overview of all CloudBase services and their status
 
-2. **Template Center (模板中心)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/template`
+2. **Template Center (模板中心)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/cloud-template/market`
    - Access project templates for React, Vue, Mini Program, UniApp, and backend frameworks
    - AI Builder templates for rapid application generation
    - Framework templates: React, Vue, Miniapp, UniApp, Gin, Django, Flask, SpringBoot, Express, NestJS, FastAPI
@@ -215,7 +236,7 @@ After creating/deploying resources, provide corresponding console management pag
      - Manage function triggers and environment variables
      - Monitor function invocations and performance
 
-6. **CloudRun (云托管)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/cloudrun`
+6. **CloudRun (云托管)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/platform-run`
    - Manage containerized backend services
    - Deploy services using Function mode or Container mode
    - Configure service scaling, access types, and environment variables
@@ -232,7 +253,7 @@ After creating/deploying resources, provide corresponding console management pag
    - AI Builder for generating templates and code
    - AI image recognition and other AI features
 
-9. **Static Website Hosting (静态网站托管)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/hosting`
+9. **Static Website Hosting (静态网站托管)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/static-hosting`
    - Deploy and manage static websites
    - Alternative URL: `https://console.cloud.tencent.com/tcb/hosting`
    - Configure custom domains and CDN settings
@@ -248,16 +269,16 @@ After creating/deploying resources, provide corresponding console management pag
       - Manage API Keys and Publishable Keys
       - View and manage access tokens
 
-11. **Weida Low-Code (微搭低代码)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/weida`
+11. **Weida Low-Code (微搭低代码)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/lowcode/apps`
     - Access Weida low-code development platform
     - Build applications using visual drag-and-drop interface
 
-12. **Logs & Monitoring (日志监控)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/logs`
+12. **Logs & Monitoring (日志监控)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/devops/log`
     - View logs from cloud functions, CloudRun services, and other resources
     - Monitor resource usage, performance metrics, and error rates
     - Set up alerts and notifications
 
-13. **Environment Settings (环境配置)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/settings`
+13. **Environment Settings (环境配置)**: `https://tcb.cloud.tencent.com/dev?envId=${envId}#/env/http-access`
     - Configure environment-level settings
     - Manage security domains and CORS settings
     - Configure environment variables and secrets

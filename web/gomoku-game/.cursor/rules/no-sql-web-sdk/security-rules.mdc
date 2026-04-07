@@ -4,7 +4,7 @@ This document covers how to configure security rules for CloudBase NoSQL databas
 
 ## Overview
 
-**Important:** To control database permissions, you **MUST** use the MCP tool `writeSecurityRule` to configure security rules. Security rule changes take effect after a few minutes due to caching.
+**Important:** To control database permissions, you **MUST** use `managePermissions(action="updateResourcePermission")` to configure security rules. Security rule changes take effect after a few minutes due to caching.
 
 **General Rule:** In most cases, use **simple permissions** (READONLY, PRIVATE, ADMINWRITE, ADMINONLY). Only use CUSTOM rules when you need fine-grained control.
 
@@ -87,19 +87,25 @@ Use CUSTOM when you need fine-grained control based on document data, user ident
 
 ## Configuring Security Rules
 
-### Using MCP Tool `writeSecurityRule`
+### Using MCP Tool `managePermissions`
 
-**Important:** When developing applications that need permission control, you **MUST** call the `writeSecurityRule` MCP tool to configure database security rules. Do not assume permissions are already configured.
+**Important:** When developing applications that need permission control, you **MUST** call `managePermissions(action="updateResourcePermission")` to configure database security rules. Do not assume permissions are already configured.
+
+Compatibility note:
+- Canonical plugin name: `permissions`
+- Legacy plugin aliases `security-rule`, `security-rules`, `secret-rule`, `secret-rules`, and `access-control` still resolve to the `permissions` plugin
+- Legacy tools `readSecurityRule` and `writeSecurityRule` are removed; use `queryPermissions` and `managePermissions`
 
 **Basic Usage:**
 
 ```javascript
 // Example: Set simple permission (PRIVATE)
-await writeSecurityRule({
-  resourceType: "database",  // or "noSqlDatabase" depending on tool definition
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "collectionName",  // Collection name
-  aclTag: "PRIVATE",  // Simple permission type
-  // rule parameter not needed for simple permissions
+  permission: "PRIVATE",
+  // securityRule parameter not needed for simple permissions
 });
 ```
 
@@ -109,31 +115,35 @@ await writeSecurityRule({
 
 ```javascript
 // Example 1: Public read, creator-only write
-await writeSecurityRule({
-  resourceType: "database",
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "posts",
-  aclTag: "READONLY"
+  permission: "READONLY"
 });
 
 // Example 2: Private collection (only creator and admin)
-await writeSecurityRule({
-  resourceType: "database",
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "userSettings",
-  aclTag: "PRIVATE"
+  permission: "PRIVATE"
 });
 
 // Example 3: Public read, admin-only write
-await writeSecurityRule({
-  resourceType: "database",
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "announcements",
-  aclTag: "ADMINWRITE"
+  permission: "ADMINWRITE"
 });
 
 // Example 4: Admin-only access
-await writeSecurityRule({
-  resourceType: "database",
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "adminLogs",
-  aclTag: "ADMINONLY"
+  permission: "ADMINONLY"
 });
 ```
 
@@ -246,11 +256,12 @@ await db.collection('todos').add({
 **Example 1: User can only read/write their own documents**
 
 ```javascript
-await writeSecurityRule({
-  resourceType: "database",
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "userTodos",
-  aclTag: "CUSTOM",
-  rule: JSON.stringify({
+  permission: "CUSTOM",
+  securityRule: JSON.stringify({
     "read": "auth.uid == doc.user_id",
     "write": "auth.uid == doc.user_id"
   })
@@ -260,11 +271,12 @@ await writeSecurityRule({
 **Example 2: Public read, authenticated users can create, only owner can update/delete**
 
 ```javascript
-await writeSecurityRule({
-  resourceType: "database",
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "publicPosts",
-  aclTag: "CUSTOM",
-  rule: JSON.stringify({
+  permission: "CUSTOM",
+  securityRule: JSON.stringify({
     "read": true,
     "create": "auth != null",
     "update": "auth.uid == doc.author_id",
@@ -276,11 +288,12 @@ await writeSecurityRule({
 **Example 3: Prevent price modification on update**
 
 ```javascript
-await writeSecurityRule({
-  resourceType: "database",
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "orders",
-  aclTag: "CUSTOM",
-  rule: JSON.stringify({
+  permission: "CUSTOM",
+  securityRule: JSON.stringify({
     "read": "auth.uid == doc.user_id",
     "create": "auth != null",
     "update": "auth.uid == doc.user_id && (doc.price == request.data.price || request.data.price == undefined)",
@@ -292,11 +305,12 @@ await writeSecurityRule({
 **Example 4: Admin-only delete, users can read/write their own**
 
 ```javascript
-await writeSecurityRule({
-  resourceType: "database",
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
   resourceId: "userData",
-  aclTag: "CUSTOM",
-  rule: JSON.stringify({
+  permission: "CUSTOM",
+  securityRule: JSON.stringify({
     "read": "auth.uid == doc.user_id",
     "write": "auth.uid == doc.user_id",
     "delete": false  // Only admin can delete (admin bypasses rules)
@@ -889,6 +903,5 @@ Through reasonable permission configuration, you can build a data access control
 
 - [CloudBase Security Rules Documentation](https://cloud.tencent.com/document/product/876/123478)
 - [Security Rules Introduction](/rule/introduce)
-- MCP Tool: `writeSecurityRule` - Configure security rules
-- MCP Tool: `readSecurityRule` - Read current security rules
-
+- MCP Tool: `managePermissions` - Configure resource permissions
+- MCP Tool: `queryPermissions` - Read current resource permissions

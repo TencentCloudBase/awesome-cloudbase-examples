@@ -1,6 +1,7 @@
 ---
 name: ai-model-web
 description: Use this skill when developing browser/Web applications (React/Vue/Angular, static websites, SPAs) that need AI capabilities. Features text generation (generateText) and streaming (streamText) via @cloudbase/js-sdk. Built-in models include Hunyuan (hunyuan-2.0-instruct-20251111 recommended) and DeepSeek (deepseek-v3.2 recommended). NOT for Node.js backend (use ai-model-nodejs), WeChat Mini Program (use ai-model-wechat), or image generation (Node SDK only).
+version: 2.15.4
 alwaysApply: false
 ---
 
@@ -109,6 +110,25 @@ const usage = await res.usage;        // Token usage
 
 ---
 
+## Error Handling Pattern
+
+```js
+const model = ai.createModel("deepseek");
+
+try {
+  const result = await model.generateText({
+    model: "deepseek-v3.2",
+    messages: [{ role: "user", content: "Generate a concise onboarding checklist" }],
+  });
+
+  console.log(result.text);
+} catch (error) {
+  console.error("Failed to call CloudBase AI from Web", error);
+}
+```
+
+---
+
 ## Type Definitions
 
 ```ts
@@ -156,4 +176,3 @@ interface Usage {
 3. **Keep accessKey secure** - Use publishable key, not secret key
 4. **Initialize early** - Initialize SDK in app entry point
 5. **Ensure authentication** - User must be signed in before AI calls
-

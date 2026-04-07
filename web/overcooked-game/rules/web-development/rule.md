@@ -1,185 +1,131 @@
 ---
 name: web-development
-description: Web frontend project development rules. Use this skill when developing web frontend pages, deploying static hosting, and integrating CloudBase Web SDK.
+description: Use when users need to implement, integrate, debug, build, deploy, or validate a Web frontend after the product direction is already clear, especially for React, Vue, Vite, browser flows, or CloudBase Web integration.
+version: 2.15.4
 alwaysApply: false
 ---
+
+# Web Development
 
 ## Activation Contract
 
 ### Use this first when
 
-- The request is for a CloudBase Web app, static hosting site, frontend page, or Web SDK integration.
+- The request is to implement, integrate, debug, build, deploy, or validate a Web frontend or static site.
+- The design direction is already decided, or the user is asking for engineering execution rather than visual exploration.
+- The work involves React, Vue, Vite, routing, browser-based verification, or CloudBase Web integration.
 
 ### Read before writing code if
 
-- The task includes frontend structure, build config, deployment, routing, or Web SDK usage.
+- The task includes project structure, framework conventions, build config, deployment, routing, or frontend test and validation flows.
+- The request includes UI implementation but the visual direction is already fixed; otherwise read `ui-design` first.
 
 ### Then also read
 
+- General React / Vue / Vite guidance -> `frameworks.md`
+- Browser flow checks or page validation -> `browser-testing.md`
 - Login flow -> `../auth-tool/SKILL.md`, then `../auth-web/SKILL.md`
-- UI work -> `../ui-design/SKILL.md` first
-- NoSQL / MySQL data work -> matching database skill
+- CloudBase database work -> matching database skill
 
 ### Do NOT use for
 
-- Mini programs, native Apps, or container backend services.
+- Visual direction setting, prototype-first design work, or pure aesthetic exploration.
+- Mini programs, native Apps, or backend-only services.
 
 ### Common mistakes / gotchas
 
+- Starting implementation before clarifying whether the task is design or engineering execution.
+- Mixing framework setup, deployment, and CloudBase integration concerns into one vague change.
 - Treating cloud functions as the default solution for Web authentication.
-- Starting UI implementation before reading `ui-design`.
-- Routing native App requests into Web SDK code paths.
+- Skipping browser-level validation after a UI or routing change.
 
 ## When to use this skill
 
-Use this skill for **Web frontend project development** when you need to:
+Use this skill for Web engineering work such as:
 
-- Develop web frontend pages and interfaces
-- Deploy static websites to CloudBase static hosting
-- Integrate CloudBase Web SDK for database, cloud functions, and authentication
-- Set up modern frontend build systems (Vite, Webpack, etc.)
-- Handle routing and build configurations for static hosting
+- Implementing React or Vue pages and components
+- Setting up or maintaining Vite-based frontend projects
+- Handling routing, data loading, forms, and build configuration
+- Running browser-based validation and smoke checks
+- Integrating CloudBase Web SDK and static hosting when the project needs CloudBase capabilities
 
 **Do NOT use for:**
-- Mini-program development (use miniprogram-development skill)
-- Backend service development (use cloudrun-development skill)
-- UI design only (use ui-design skill, but may combine with this skill)
-
----
+- UI direction or visual system design only; use `ui-design`
+- Mini program development; use `miniprogram-development`
+- Backend service implementation; use `cloudrun-development` or `cloud-functions`
 
 ## How to use this skill (for a coding agent)
 
-1. **Follow project structure conventions**
-   - Frontend source code in `src` directory
-   - Build output in `dist` directory
-   - Cloud functions in `cloudfunctions` directory
-   - Use modern frontend build systems (Vite, etc.)
+1. **Clarify the execution surface**
+   - Confirm whether the task is framework setup, page implementation, debugging, deployment, validation, or CloudBase integration.
+   - Keep the work scoped to the actual Web app surface instead of spreading into unrelated backend changes.
 
-2. **Use CloudBase Web SDK correctly**
-   - Always use SDK built-in authentication features
-   - Never implement login logic in cloud functions
-   - Use `envQuery` tool to get environment ID
-   - Mention the official CDN early when the user needs a static HTML or no-build integration
+2. **Follow framework and build conventions**
+   - Prefer the existing project stack if one already exists.
+   - For new work, treat Vite as the default bundler unless the repo or user constraints say otherwise.
+   - Put reusable app code under `src` and build output under `dist` unless the repo already uses a different convention.
 
-3. **Deploy and preview properly**
-   - Build project first (ensure `npm install` is executed)
-   - Use relative paths for `publicPath` configuration
-   - Use hash routing for better static hosting compatibility
-   - Deploy to subdirectory if user doesn't specify root directory
+3. **Validate through the browser, not only by reading code**
+   - For interaction, routing, rendering, or regression checks, use `agent-browser` workflows from `browser-testing.md`.
+   - Prefer lightweight smoke validation for changed flows before claiming the frontend work is complete.
 
----
+4. **Treat CloudBase as an integration branch**
+   - Use CloudBase Web SDK and static hosting guidance only when the project actually needs CloudBase platform features.
+   - Reuse `auth-tool` and `auth-web` for login or provider readiness instead of re-describing those flows here.
 
-# Web Frontend Development Rules
+## Core workflow
 
-## Project Structure
+### 1. Choose the right engineering path
 
-1. **Directory Organization**:
-   - Frontend source code should be stored in `src` directory
-   - Build output should be placed in `dist` directory
-   - Cloud functions should be in `cloudfunctions` directory
+- **React / Vue feature work**: implement within the app's existing component, routing, and state conventions
+- **New Web app scaffold**: prefer Vite unless the repo already standardizes on another toolchain
+- **Debugging and regressions**: reproduce in browser, narrow to a specific page or interaction, then patch
+- **CloudBase integration**: wire in Web SDK, auth, data, or static hosting only after the base frontend path is clear
 
-2. **Build System**:
-   - Projects should use modern frontend build systems like Vite
-   - Install dependencies via npm
+### 2. Keep implementation grounded in project reality
 
-3. **Routing**:
-   - If the frontend project involves routing, use hash routing by default
-   - Hash routing solves the 404 refresh issue and is more suitable for static website hosting deployment
+- Follow the repo's package manager, scripts, and lint/test patterns
+- Avoid framework rewrites unless the user explicitly asks for one
+- Prefer the smallest viable page/component/config change that satisfies the task
 
-## Deployment and Preview
+### 3. Validate changed flows explicitly
 
-1. **Static Hosting Deployment**:
-   - For frontend projects, after building, you can use CloudBase static hosting
-   - First start local preview, then confirm with user if deployment to CloudBase static hosting is needed
-   - When deploying, if user has no special requirements, generally do not deploy directly to root directory
-   - Return deployed address in markdown link format
+- Run the relevant local build or test command when available
+- Open the affected page or flow in a browser when behavior depends on rendering, interaction, or navigation
+- Record what was checked: route, action, expected result, and any remaining gap
 
-2. **Local Preview**:
-   - To preview static web pages locally, navigate to the specified output directory and use `npx live-server`
+## CloudBase Web integration
 
-3. **Public Path Configuration**:
-   - When web projects are deployed to static hosting CDN, since paths cannot be known in advance, `publicPath` and similar configurations should use relative paths instead of absolute paths
-   - This solves resource loading issues
+Use this section only when the Web project needs CloudBase platform features.
 
-## CloudBase Web SDK Usage
+### Web SDK rules
 
-1. **SDK Integration**:
-   - If user's project needs database, cloud functions, and other features, need to introduce `@cloudbase/js-sdk@latest` in the web application
-   - Official CDN: `https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js`
-   - Prefer npm for React, Vue, Vite, Webpack, and other bundler-based projects
-   - Prefer the CDN only for static HTML pages, quick demos, embedded snippets, or README examples where a build step is unnecessary
+- Prefer npm installation for React, Vue, Vite, and other bundler-based projects
+- Use the CDN only for static HTML pages, quick demos, embedded snippets, or README examples
+- Only use documented CloudBase Web SDK APIs; do not invent methods or options
+- Keep a shared `app` or `auth` instance instead of re-initializing on every call
 
-**CDN quick start (static HTML / no-build)**:
-```html
-<script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"></script>
-<script>
-const app = cloudbase.init({
-  env: "xxxx-yyy",
-});
-</script>
-```
+### Authentication boundary
 
-**Important: Authentication must use SDK built-in features. It is strictly forbidden to implement login authentication logic using cloud functions!**
+- Authentication must use CloudBase SDK built-in features
+- Do not move Web login logic into cloud functions
+- For provider readiness, login method setup, or publishable key issues, route to `auth-tool` and `auth-web`
+
+### Static hosting defaults
+
+- Build before deployment
+- Prefer relative asset paths for static hosting compatibility
+- Use hash routing by default when the project lacks server-side route rewrites
+- If the user does not specify a root path, avoid deploying directly to the site root by default
+
+### CloudBase quick start
 
 ```js
 import cloudbase from "@cloudbase/js-sdk";
 
 const app = cloudbase.init({
-  env: "xxxx-yyy", // Can query environment ID via envQuery tool
+  env: "xxxx-yyy",
 });
+
 const auth = app.auth();
-
-// Check current login state
-let loginState = await auth.getLoginState();
-
-if (loginState && loginState.user) {
-  // Logged in
-  const user = await auth.getCurrentUser();
-  console.log("Current user:", user);
-} else {
-  // Not logged in - use SDK built-in authentication features
-    
-  // Collect user's phone number into variable `phoneNum` by providing a input UI
-
-  // Send SMS code
-  const verificationInfo = await auth.getVerification({
-    phone_number: `+86 ${phoneNum}`,
-  });
-  
-  // Collect user's phone number into variable `verificationCode` by providing a input UI 
-  
-  // Sign in
-  await auth.signInWithSms({
-    verificationInfo,
-    verificationCode,
-    phoneNum,
-  });
-}
 ```
-
-**Initialization rules (Web, @cloudbase/js-sdk):**
-
-- Always use **synchronous initialization** with the pattern above
-- Do **not** lazy-load the SDK with `import("@cloudbase/js-sdk")`
-- Do **not** wrap SDK initialization in async helpers such as `initCloudBase()` with internal `initPromise` caches
-- Keep a single shared `app`/`auth` instance in your frontend app; reuse it instead of re-initializing
-
-### Web SDK API usage rules
-
-- Only use **documented** CloudBase Web SDK methods
-- Before calling any method on `app`, `auth`, `db`, or other SDK objects, **confirm it exists in the official CloudBase Web SDK documentation**
-- If a method or option is **not** mentioned in the official docs (for example some guessed method name), **do NOT invent or use it**
- 
-## Authentication Best Practices
-
-1. **Must use SDK built-in authentication**: CloudBase Web SDK provides complete authentication features, including login by SMS, anonymous login, custom login, etc.
-
-2. **Forbidden to implement login using cloud functions**: Do not create cloud functions to handle login logic, this is the wrong approach
-
-3. **User data management**: After login, user information can be obtained via `auth.getCurrentUser()`, then stored to database
-
-4. **Error handling**: All authentication operations should include complete error handling logic
-
-## Build Process
-
-**Web project build process**: Ensure `npm install` command has been executed first, then refer to project documentation for building
