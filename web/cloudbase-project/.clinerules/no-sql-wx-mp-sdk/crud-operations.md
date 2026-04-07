@@ -162,6 +162,32 @@ await db.collection('todos')
     });
 ```
 
+### Nested Field Updates (Important)
+
+When updating nested object fields, you **must use dot notation** if you want to preserve sibling fields.
+
+**WRONG: This replaces the entire object and deletes sibling fields:**
+```javascript
+// DANGER: If 'user' had an 'email' field, it is now deleted!
+await db.collection('profiles')
+    .doc('profile-123')
+    .update({
+        user: {
+            name: 'New Name'  // Replaces the ENTIRE 'user' object
+        }
+    });
+```
+
+**CORRECT: This only updates the specific nested field:**
+```javascript
+// SAFE: Only updates 'name', preserves 'email' and other fields in 'user'
+await db.collection('profiles')
+    .doc('profile-123')
+    .update({
+        'user.name': 'New Name'  // Use dot notation for nested fields
+    });
+```
+
 ### Update with Operators
 
 Use update operators for complex updates:
