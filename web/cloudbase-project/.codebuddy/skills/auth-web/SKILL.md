@@ -46,7 +46,7 @@ alwaysApply: false
 ## Core Capabilities
 
 **Use Case**: Web frontend projects using `@cloudbase/js-sdk@2.24.0+` for user authentication  
-**Key Benefits**: Compatible with `supabase-js` API, supports phone, email, anonymous, username/password, and third-party login methods
+**Key Benefits**: Supabase-like Auth API shape, supports phone, email, anonymous, username/password, and third-party login methods
 **Official `@cloudbase/js-sdk` CDN**: `https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js`
 
 Use the same CDN address as `web-development`. Prefer npm installation in modern bundler projects, and use the CDN form for static HTML, no-build demos, or low-friction examples.
@@ -58,6 +58,8 @@ Use the same CDN address as `web-development`. Prefer npm installation in modern
 
 ### Parameter map
 
+- Treat CloudBase Web Auth as **Supabase-like**, not “every `supabase-js` auth example is valid unchanged”
+- When `queryAppAuth` / `manageAppAuth` returns `sdkStyle: "supabase-like"` and `sdkHints`, follow those method and parameter hints first
 - `auth.signInWithOtp({ phone })` and `auth.signUp({ phone })` use the phone number in a `phone` field, not `phone_number`
 - `auth.signInWithOtp({ email })` and `auth.signUp({ email })` use `email`
 - `verifyOtp({ token })` expects the SMS or email code in `token`

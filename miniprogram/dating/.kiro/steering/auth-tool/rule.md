@@ -70,6 +70,29 @@ Preferred execution order for this skill:
 
 Preferred MCP tool path: `queryAppAuth(action="getLoginConfig")`
 
+Recommended MCP request:
+
+```json
+{
+  "action": "getLoginConfig"
+}
+```
+
+`queryAppAuth` uses the currently selected environment and returns a short result by default:
+
+```json
+{
+  "success": true,
+  "envId": "env-xxx",
+  "loginMethods": {
+    "usernamePassword": true,
+    "email": true,
+    "anonymous": true,
+    "phone": false
+  }
+}
+```
+
 Fallback API path: use the official login-config API. Do **not** use `lowcode/DescribeLoginStrategy` or `lowcode/ModifyLoginStrategy` as the default path.
 
 Query current login configuration:
@@ -81,7 +104,7 @@ Query current login configuration:
 }
 ```
 
-The response contains fields such as:
+The underlying login strategy contains fields such as:
 
 - `AnonymousLogin`
 - `UserNameLogin`
@@ -93,112 +116,77 @@ The response contains fields such as:
 
 Parameter mapping for downstream Web auth code:
 
+- `queryAppAuth(action="getLoginConfig")` and `manageAppAuth(action="patchLoginStrategy")` return `sdkStyle: "supabase-like"` plus `sdkHints`; treat that as the preferred frontend-auth calling guide
 - `PhoneNumberLogin` controls phone OTP flows used by `auth-web` `auth.signInWithOtp({ phone })` and `auth.signUp({ phone })`
 - `EmailLogin` controls email OTP flows used by `auth-web` `auth.signInWithOtp({ email })` and `auth.signUp({ email })`
-- `UserNameLogin` controls password login flows used by `auth-web` `auth.signInWithPassword({ username, password })`
+- `UserNameLogin` controls password login flows used by `auth-web` `auth.signInWithPassword({ username|email|phone, password })`
 - `SmsVerificationConfig.Type = "apis"` requires both `Name` and `Method`
 - `EnvId` is always the CloudBase environment ID, not the publishable key
 
-Before calling `ModifyLoginConfig`, rebuild the payload from writable keys only. Do **not** spread the full response object back into the request.
+Internal behavior of `manageAppAuth(action="patchLoginStrategy")`:
 
-```js
-const WritableLoginConfig = {
-    "PhoneNumberLogin": LoginConfig.PhoneNumberLogin,
-    "EmailLogin": LoginConfig.EmailLogin,
-    "UserNameLogin": LoginConfig.UserNameLogin,
-    "AnonymousLogin": LoginConfig.AnonymousLogin,
-    ...(LoginConfig.SmsVerificationConfig ? { "SmsVerificationConfig": LoginConfig.SmsVerificationConfig } : {}),
-    ...(LoginConfig.MfaConfig ? { "MfaConfig": LoginConfig.MfaConfig } : {}),
-    ...(LoginConfig.PwdUpdateStrategy ? { "PwdUpdateStrategy": LoginConfig.PwdUpdateStrategy } : {})
-}
-```
+1. Read the currently selected environment
+2. Query the current login strategy
+3. Merge the short `patch` into the writable strategy fields
+4. Update through Manager SDK
+5. Query again and return a short `loginMethods` result
 
 ---
 
 ### 2. Anonymous Login
 
-Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
+Preferred MCP tool path: `manageAppAuth(action="patchLoginStrategy")`
 
-1. Get `LoginConfig` (see Scenario 1)
-2. Set `LoginConfig.AnonymousLogin = true` (on) or `false` (off)
-3. Update:
-```js
+Recommended MCP request:
+
+```json
 {
-    "params": { "EnvId": `env`, ...WritableLoginConfig, "AnonymousLogin": true },
-    "service": "tcb",
-    "action": "ModifyLoginConfig"
+  "action": "patchLoginStrategy",
+  "patch": {
+    "anonymous": true
+  }
 }
 ```
+
+The tool handles read-merge-write internally. The model does not need to build a full `ModifyLoginConfig` payload.
 
 ---
 
 ### 3. Username/Password Login
 
-Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
+Preferred MCP tool path: `manageAppAuth(action="patchLoginStrategy")`
 
-1. Get `LoginConfig` (see Scenario 1)
-2. Set `LoginConfig.UserNameLogin = true` (on) or `false` (off)
-3. Update:
-```js
+Recommended MCP request:
+
+```json
 {
-    "params": { "EnvId": `env`, ...WritableLoginConfig, "UserNameLogin": true },
-    "service": "tcb",
-    "action": "ModifyLoginConfig"
+  "action": "patchLoginStrategy",
+  "patch": {
+    "usernamePassword": true
+  }
 }
 ```
+
+The tool handles read-merge-write internally. The model does not need to build a full `ModifyLoginConfig` payload.
 
 ---
 
 ### 4. SMS Login
 
-Preferred MCP tool path: `manageAppAuth(action="updateLoginConfig")`
+Preferred MCP tool path: `manageAppAuth(action="patchLoginStrategy")`
 
-1. Get `LoginConfig` (see Scenario 1)
-2. Modify:
-   - **Turn on**: `LoginConfig.PhoneNumberLogin = true`
-   - **Turn off**: `LoginConfig.PhoneNumberLogin = false`
-   - **Config** (optional):
-     ```js
-     LoginConfig.SmsVerificationConfig = {
-         Type: 'default',      // 'default' or 'apis'
-         Name: 'method_53978f9f96a35', // required when Type = 'apis'
-         Method: 'SendVerificationCode',
-         SmsDayLimit: 30       // -1 = unlimited
-     }
-     ```
-3. Update:
-```js
-{
-    "params": {
-        "EnvId": `env`,
-        ...WritableLoginConfig,
-        "PhoneNumberLogin": true,
-        "SmsVerificationConfig": {
-            "Type": "default",
-            "SmsDayLimit": 30
-        }
-    },
-    "service": "tcb",
-    "action": "ModifyLoginConfig"
-}
-```
+Use `patch.phone = true/false` for the login method itself.
 
-**Use custom apis to send SMS**:
-```js
+If SMS provider behavior also needs to change, keep using provider-side or raw API configuration for the extra fields such as `SmsVerificationConfig`.
+
+Short MCP example:
+
+```json
 {
-    "params": {
-        "EnvId": `env`,
-        ...WritableLoginConfig,
-        "PhoneNumberLogin": true,
-        "SmsVerificationConfig": {
-            "Type": "apis",
-            "Name": "method_53978f9f96a35",
-            "Method": "SendVerificationCode",
-            "SmsDayLimit": 20
-        }
-    },
-    "service": "tcb",
-    "action": "ModifyLoginConfig"
+  "action": "patchLoginStrategy",
+  "patch": {
+    "phone": true
+  }
 }
 ```
 
@@ -214,24 +202,17 @@ Email has two layers of configuration:
 
 Preferred MCP tool path:
 
-- `manageAppAuth(action="updateLoginConfig")` for `EmailLogin`
+- `manageAppAuth(action="patchLoginStrategy")` for `EmailLogin`
 - `manageAppAuth(action="updateProvider")` for provider settings
 
-**Turn on email/password login**:
-```js
-{
-    "params": { "EnvId": `env`, ...WritableLoginConfig, "EmailLogin": true },
-    "service": "tcb",
-    "action": "ModifyLoginConfig"
-}
-```
+Short MCP example:
 
-**Turn off email/password login**:
-```js
+```json
 {
-    "params": { "EnvId": `env`, ...WritableLoginConfig, "EmailLogin": false },
-    "service": "tcb",
-    "action": "ModifyLoginConfig"
+  "action": "patchLoginStrategy",
+  "patch": {
+    "email": true
+  }
 }
 ```
 
@@ -333,15 +314,15 @@ Preferred MCP tool path:
 - `queryAppAuth(action="listProviders")` or `queryAppAuth(action="getProvider")`
 - `manageAppAuth(action="updateProvider")`
 
-1. Get redirect URI:
+1. Get redirect URI (static hosting CDN domain):
 ```js
 {
     "params": { "EnvId": `env` },
-    "service": "lowcode",
-    "action": "DescribeStaticDomain"
+    "service": "tcb",
+    "action": "DescribeStaticStore"
 }
 ```
-Save `result.Data.StaticDomain` as `staticDomain`.
+Prefer MCP: `queryAppAuth(action="getStaticDomain")` — use `cdnDomain` / `staticDomain` from the tool response (first store’s `CdnDomain`). Raw rows are in `staticStores`.
 
 2. Configure at [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
    - Create OAuth 2.0 Client ID
@@ -390,6 +371,8 @@ Preferred MCP tool path:
 - `queryAppAuth(action="getClientConfig")`
 - `manageAppAuth(action="updateClientConfig")`
 
+Both tools should default to the current selected environment's default client. Only pass `clientId` when you intentionally want to inspect or modify a non-default client record.
+
 **Query client config**:
 ```js
 {
@@ -418,27 +401,29 @@ Preferred MCP tool path:
 
 Preferred MCP tool path:
 
-- `queryAppAuth(action="listApiKeyTokens")`
-- `manageAppAuth(action="createApiKeyToken")`
+- `queryAppAuth(action="getPublishableKey")`
+- `manageAppAuth(action="ensurePublishableKey")`
 
 **Query existing key**:
 ```js
 {
     "params": { "EnvId": `env`, "KeyType": "publish_key", "PageNumber": 1, "PageSize": 10 },
-    "service": "lowcode",
-    "action": "DescribeApiKeyTokens"
+    "service": "tcb",
+    "action": "DescribeApiKeyList"
 }
 ```
-Return `PublishableKey.ApiKey` if exists (filter by `Name == "publish_key"`).
+`queryAppAuth(action="getPublishableKey")` should always force `KeyType="publish_key"` and return a short payload with `publishableKey`, `keyId`, `keyName`, `expireAt`, and `createdAt`.
 
-**Create new key** (if not exists):
+**Ensure key exists**:
 ```js
 {
-    "params": { "EnvId": `env`, "KeyType": "publish_key", "KeyName": "publish_key" },
-    "service": "lowcode",
-    "action": "CreateApiKeyToken"
+    "params": { "EnvId": `env`, "KeyType": "publish_key" },
+    "service": "tcb",
+    "action": "CreateApiKey"
 }
 ```
+`manageAppAuth(action="ensurePublishableKey")` should first query the existing `publish_key`; if one already exists, return it directly; otherwise create it and return the new key. This keeps the MCP interface short and avoids requiring the model to reason about `KeyType` or whether a key already exists.
+
 If creation fails, direct user to: "https://tcb.cloud.tencent.com/dev?envId=`env`#/env/apikey"
 
 ### 10. Custom Login Keys
