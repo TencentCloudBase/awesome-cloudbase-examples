@@ -175,7 +175,6 @@ body {
 
 .form-field input[type="text"],
 .form-field input[type="password"],
-.form-field input[type="email"],
 .form-field textarea,
 .form-field select {
   width: 100%;
@@ -757,7 +756,7 @@ body {
   margin-right: 8px;
 }
 
-.toolbar-user-email {
+.toolbar-user-name {
   font-size: 13px;
   color: var(--color-slate);
   font-weight: 500;
