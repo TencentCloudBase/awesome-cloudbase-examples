@@ -12,6 +12,7 @@ import type { CurrentUser, UserRole } from "../types";
  * 用户名密码注册
  *
  * TODO: 调用后端客户端的用户名密码注册接口
+ * - 账号字段是普通用户名样式标识符，不是邮箱地址
  * - 注册成功返回 true
  * - 注册后默认角色为 editor，需在数据库中记录用户信息（uid、username、role）
  * - 注册失败抛出 Error
@@ -28,6 +29,7 @@ export async function register(
  * 用户名密码登录
  *
  * TODO: 调用后端客户端的用户名密码登录接口
+ * - 账号字段是普通用户名样式标识符，不是邮箱地址
  * - 登录成功返回 true
  * - 登录失败返回 false（不抛异常）
  */

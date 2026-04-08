@@ -4,7 +4,7 @@ import { register } from "../lib/auth";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,7 +31,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const ok = await register(email, password);
+      const ok = await register(account, password);
       if (ok) {
         setSuccess("注册成功，即将跳转到登录页...");
         setTimeout(() => {
@@ -58,16 +58,16 @@ export default function RegisterPage() {
           onSubmit={handleSubmit}
         >
           <div className="form-field">
-            <label htmlFor="register-email">邮箱</label>
+            <label htmlFor="register-account">用户名</label>
             <input
               data-testid="register-account-input"
-              id="register-email"
-              type="email"
-              placeholder="请输入邮箱"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="register-account"
+              type="text"
+              placeholder="请输入用户名"
+              value={account}
+              onChange={(e) => setAccount(e.target.value)}
               disabled={loading}
-              autoComplete="email"
+              autoComplete="username"
               required
             />
           </div>
@@ -124,7 +124,7 @@ export default function RegisterPage() {
             data-testid="register-submit"
             type="submit"
             className="btn btn-primary btn-block"
-            disabled={loading || !email || !password || !confirmPassword}
+            disabled={loading || !account || !password || !confirmPassword}
           >
             {loading ? "注册中..." : "创建账号"}
           </button>

@@ -4,7 +4,7 @@ import { login } from "../lib/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,11 +15,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const success = await login(email, password);
+      const success = await login(account, password);
       if (success) {
         navigate("/articles", { replace: true });
       } else {
-        setError("登录失败，请检查邮箱或密码");
+        setError("登录失败，请检查用户名或密码");
       }
     } catch (err: any) {
       setError(err?.message || "登录失败");
@@ -39,16 +39,16 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
         >
           <div className="form-field">
-            <label htmlFor="login-email">邮箱</label>
+            <label htmlFor="login-account">用户名</label>
             <input
               data-testid="login-account-input"
-              id="login-email"
-              type="email"
-              placeholder="请输入邮箱"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="login-account"
+              type="text"
+              placeholder="请输入用户名"
+              value={account}
+              onChange={(e) => setAccount(e.target.value)}
               disabled={loading}
-              autoComplete="email"
+              autoComplete="username"
             />
           </div>
 
@@ -82,7 +82,7 @@ export default function LoginPage() {
             data-testid="login-submit"
             type="submit"
             className="btn btn-primary btn-block"
-            disabled={loading || !email || !password}
+            disabled={loading || !account || !password}
           >
             {loading ? "登录中..." : "登录"}
           </button>
