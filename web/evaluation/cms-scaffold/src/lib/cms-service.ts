@@ -51,7 +51,7 @@ export async function getArticle(
  *
  * TODO: 向数据库插入一条新的文章记录
  * - 自动关联当前登录用户的 UID 到 authorId 字段
- * - 自动关联当前登录用户的邮箱/显示名到 authorName 字段
+ * - 自动关联当前登录用户的用户名/显示名到 authorName 字段
  * - 自动生成 createdAt 和 updatedAt 时间戳
  * - 返回新创建文章的 ID
  */

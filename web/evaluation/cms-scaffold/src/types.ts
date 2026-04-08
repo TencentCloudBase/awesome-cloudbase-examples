@@ -15,7 +15,7 @@ export type UserRole = "admin" | "editor";
  */
 export interface CurrentUser {
   uid: string;
-  displayName: string; // 邮箱或用户显示名
+  displayName: string; // 用户名或用户展示名
   role: UserRole;
 }
 

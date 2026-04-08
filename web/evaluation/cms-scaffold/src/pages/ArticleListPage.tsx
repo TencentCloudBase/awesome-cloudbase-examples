@@ -169,7 +169,7 @@ export default function ArticleListPage() {
         <div className="toolbar-right">
           {currentUser && (
             <div data-testid="toolbar-user-info" className="toolbar-user-info">
-              <span className="toolbar-user-email">{currentUser.displayName}</span>
+              <span className="toolbar-user-name">{currentUser.displayName}</span>
               <span
                 data-testid="role-badge"
                 className={`role-badge role-badge-${currentUser.role}`}
