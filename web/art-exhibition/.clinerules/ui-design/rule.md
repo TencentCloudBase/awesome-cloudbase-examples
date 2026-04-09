@@ -1,5 +1,5 @@
 ---
-name: ui-design-guide
+name: ui-design
 description: Use when users need visual direction, interface hierarchy, layout decisions, design specifications, or prototypes before implementing a Web or mini program UI.
 version: 2.16.1
 alwaysApply: false
