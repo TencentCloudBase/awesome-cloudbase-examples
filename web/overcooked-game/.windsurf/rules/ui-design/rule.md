@@ -1,9 +1,18 @@
 ---
-name: ui-design
+name: ui-design-guide
 description: Use when users need visual direction, interface hierarchy, layout decisions, design specifications, or prototypes before implementing a Web or mini program UI.
 version: 2.16.1
 alwaysApply: false
 ---
+
+## Standalone Install Note
+
+If this environment only installed the current skill, start from the CloudBase main entry and use the published `cloudbase/references/...` paths for sibling skills.
+
+- CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
+- Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/ui-design/SKILL.md`
+
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
 
 ## Activation Contract
 
@@ -19,8 +28,8 @@ alwaysApply: false
 
 ### Then also read
 
-- Web implementation -> `../web-development/SKILL.md`
-- Mini program implementation -> `../miniprogram-development/SKILL.md`
+- Web implementation -> `../web-development/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/web-development/SKILL.md`)
+- Mini program implementation -> `../miniprogram-development/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/miniprogram-development/SKILL.md`)
 
 ### Do NOT use for
 

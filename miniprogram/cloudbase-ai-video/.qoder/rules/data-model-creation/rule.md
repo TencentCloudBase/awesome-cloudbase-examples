@@ -5,6 +5,15 @@ version: 2.16.1
 alwaysApply: false
 ---
 
+## Standalone Install Note
+
+If this environment only installed the current skill, start from the CloudBase main entry and use the published `cloudbase/references/...` paths for sibling skills.
+
+- CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
+- Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/data-model-creation/SKILL.md`
+
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
+
 # Data Model Creation
 
 ## Activation Contract
@@ -22,8 +31,8 @@ alwaysApply: false
 
 ### Then also read
 
-- Direct SQL creation or schema change -> `../relational-database-tool/SKILL.md`
-- Broader feature planning before schema work -> `../spec-workflow/SKILL.md`
+- Direct SQL creation or schema change -> `../relational-database-tool/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/relational-database-tool/SKILL.md`)
+- Broader feature planning before schema work -> `../spec-workflow/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/spec-workflow/SKILL.md`)
 
 ### Do NOT use for
 

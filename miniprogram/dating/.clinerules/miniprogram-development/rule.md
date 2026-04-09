@@ -5,6 +5,15 @@ version: 2.16.1
 alwaysApply: false
 ---
 
+## Standalone Install Note
+
+If this environment only installed the current skill, start from the CloudBase main entry and use the published `cloudbase/references/...` paths for sibling skills.
+
+- CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
+- Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/miniprogram-development/SKILL.md`
+
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
+
 ## Activation Contract
 
 ### Use this first when
@@ -17,9 +26,9 @@ alwaysApply: false
 
 ### Then also read
 
-- CloudBase auth -> `../auth-wechat/SKILL.md`
-- CloudBase document DB -> `../no-sql-wx-mp-sdk/SKILL.md`
-- UI generation -> `../ui-design/SKILL.md` first
+- CloudBase auth -> `../auth-wechat/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-wechat/SKILL.md`)
+- CloudBase document DB -> `../no-sql-wx-mp-sdk/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/no-sql-wx-mp-sdk/SKILL.md`)
+- UI generation -> `../ui-design/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/ui-design/SKILL.md`) first
 
 ### Do NOT use for
 

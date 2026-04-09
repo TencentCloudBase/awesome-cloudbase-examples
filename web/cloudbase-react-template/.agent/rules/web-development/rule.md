@@ -5,6 +5,15 @@ version: 2.16.1
 alwaysApply: false
 ---
 
+## Standalone Install Note
+
+If this environment only installed the current skill, start from the CloudBase main entry and use the published `cloudbase/references/...` paths for sibling skills.
+
+- CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
+- Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/web-development/SKILL.md`
+
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
+
 # Web Development
 
 ## Activation Contract
@@ -24,7 +33,7 @@ alwaysApply: false
 
 - General React / Vue / Vite guidance -> `frameworks.md`
 - Browser flow checks or page validation -> `browser-testing.md`
-- Login flow -> `../auth-tool/SKILL.md`, then `../auth-web/SKILL.md`
+- Login flow -> `../auth-tool/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-tool/SKILL.md`), then `../auth-web/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-web/SKILL.md`)
 - CloudBase database work -> matching database skill
 
 ### Do NOT use for
