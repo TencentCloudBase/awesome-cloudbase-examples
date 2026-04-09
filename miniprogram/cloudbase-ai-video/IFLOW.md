@@ -11,6 +11,16 @@ inclusion: always
 
 This file is a compatibility projection of the CloudBase routing contract. Keep its semantics aligned with the CloudBase source guideline, and express routing with stable skill identifiers rather than repo-specific file paths.
 
+## Existing Implementation First
+
+When the workspace already contains an existing application with explicit TODO markers, fixed routes, or pre-created pages and services:
+
+- Do **not** start with `ui-design`, design specs, or visual exploration unless the user explicitly asks for UI redesign.
+- Do **not** broad-read unrelated skills first.
+- First inspect the existing implementation surfaces that already own the flow, such as `src/lib/backend.*`, `src/lib/auth.*`, `src/lib/*service.*`, route guards, and the actual page or form handlers wired to submit buttons.
+- Prefer implementing TODOs and fixing the real broken flow in-place over creating parallel helpers, extra demo pages, or detached example code.
+- For login + CRUD applications, use the shortest path: inspect existing code -> verify provider readiness if required -> patch the active handlers -> validate the changed flow.
+
 ### Global must-read rules
 
 - Identify the scenario first. Do not start implementation before reading the matching rule file.
@@ -87,8 +97,8 @@ When you see "Read `{auth-web}` rule file" in this document:
 
 ### When Developing a Web Project:
 1. **Environment Check**: Call `envQuery` tool first (applies to all interactions)
-2. **⚠️ Template Download (MANDATORY for New Projects)**: **MUST call `downloadTemplate` tool FIRST when starting a new project** - Do NOT create files manually. Use `downloadTemplate` with `template="react"` or `template="vue"` to get the complete project structure. Only proceed with manual file creation if template download fails or user explicitly requests it.
-3. **⚠️ UI Design (CRITICAL)**: **MUST read `rules/ui-design/rule.md` FIRST before generating any page, interface, component, or style** - This is NOT optional. You MUST explicitly read this file and output the design specification before writing any UI code.
+2. **⚠️ Existing Implementation Priority**: If the workspace already contains the target pages or services, inspect and patch the active handlers first instead of recreating parallel structure.
+3. **⚠️ UI Design (CRITICAL, but only for visual work)**: **Read `rules/ui-design/rule.md` first only when the task actually asks for visual design generation or redesign.** If the workspace already has fixed structure and the task is functional completion, prioritize wiring the current pages and handlers instead of producing a design specification.
 4. **Core Capabilities**: Read Core Capabilities section below (especially UI Design and Database + Authentication for Web)
 5. **⚠️ Authentication Configuration Check (MANDATORY)**: **When user mentions ANY login/authentication requirement, MUST FIRST read `{auth-tool}` rule file (using path resolution strategy) and check/configure authentication providers BEFORE implementing frontend code**
 6. **Platform Rules**: Read `{web-development}` rule file (using path resolution strategy) for platform-specific rules (SDK integration, static hosting, build configuration)
@@ -99,12 +109,11 @@ When you see "Read `{auth-web}` rule file" in this document:
 
 ### When Developing a Mini Program Project:
 1. **Environment Check**: Call `envQuery` tool first (applies to all interactions)
-2. **⚠️ Template Download (MANDATORY for New Projects)**: **MUST call `downloadTemplate` tool FIRST when starting a new project** - Do NOT create files manually. Use `downloadTemplate` with `template="miniprogram"` to get the complete project structure. Only proceed with manual file creation if template download fails or user explicitly requests it.
-3. **⚠️ UI Design (CRITICAL)**: **MUST read `rules/ui-design/rule.md` FIRST before generating any page, interface, component, or style** - This is NOT optional. You MUST explicitly read this file and output the design specification before writing any UI code.
-4. **Core Capabilities**: Read Core Capabilities section below (especially UI Design and Database + Authentication for Mini Program)
-5. **Platform Rules**: Read `rules/miniprogram-development/rule.md` for platform-specific rules (project structure, WeChat Developer Tools, wx.cloud usage)
-6. **Authentication**: Read `rules/auth-wechat/rule.md` - **Naturally login-free, get OPENID in cloud functions**
-7. **Database**:
+2. **⚠️ UI Design (CRITICAL)**: **MUST read `rules/ui-design/rule.md` FIRST before generating any page, interface, component, or style** - This is NOT optional. You MUST explicitly read this file and output the design specification before writing any UI code.
+3. **Core Capabilities**: Read Core Capabilities section below (especially UI Design and Database + Authentication for Mini Program)
+4. **Platform Rules**: Read `rules/miniprogram-development/rule.md` for platform-specific rules (project structure, WeChat Developer Tools, wx.cloud usage)
+5. **Authentication**: Read `rules/auth-wechat/rule.md` - **Naturally login-free, get OPENID in cloud functions**
+6. **Database**:
    - NoSQL: `rules/no-sql-wx-mp-sdk/rule.md`
    - MySQL: `rules/relational-database-tool/rule.md` (via tools)
 
@@ -186,6 +195,8 @@ As the most important part of application development, the following four core c
 - Component design
 - Style/visual effects
 - Any frontend visual elements
+
+**Exception**: If the task is an existing application with prebuilt pages and TODOs, and the user is asking to complete functionality rather than redesign visuals, do not detour into design-spec generation. Patch the existing implementation directly.
 
 **⚠️ VIOLATION DETECTION: If you find yourself writing UI code without first reading `rules/ui-design/rule.md`, STOP immediately and read the file first.**
 
@@ -287,8 +298,7 @@ Before starting work, suggest confirming with user:
 
 ## Core Behavior Rules
 1. **Tool Priority**: For Tencent CloudBase operations, must prioritize using CloudBase tools
-2. **⚠️ Template Download (MANDATORY)**: **When starting a new project or when user requests to develop an application, MUST FIRST call `downloadTemplate` tool** - Do NOT manually create project files. Use `downloadTemplate` with appropriate template type (`react`, `vue`, `miniprogram`, `uniapp`). Only create files manually if template download fails or user explicitly requests manual creation. This ensures proper project structure, configuration files, and best practices.
-3. **Project Understanding**: First read current project's README.md, follow project instructions for development
+2. **Project Understanding**: First read current project's README.md, follow project instructions for development
 4. **Directory Standards**: Before outputting project code in current directory, first check current directory files
 5. **Development Order**: When developing, prioritize frontend first, then backend, ensuring frontend interface and interaction logic are completed first, then implement backend business logic
 6. **⚠️ UI Design Rules Mandatory Application**: When tasks involve generating pages, interfaces, components, styles, or any frontend visual elements, **MUST FIRST explicitly read the file `rules/ui-design/rule.md` using file reading tools**, then strictly follow the rule file, ensuring generated interfaces have distinctive aesthetic styles and high-quality visual design, avoiding generic AI aesthetics. **You MUST output the design specification before writing any UI code.**
@@ -316,15 +326,7 @@ Before starting work, suggest confirming with user:
 
 ### Development
 
-1. **⚠️ Download CloudBase Templates (MANDATORY for New Projects)**:
-   - **MUST call `downloadTemplate` tool FIRST when starting a new project** - Do NOT manually create project files
-   - For Web projects: Use `downloadTemplate` with `template="react"` or `template="vue"`
-   - For Mini Program projects: Use `downloadTemplate` with `template="miniprogram"`
-   - For UniApp projects: Use `downloadTemplate` with `template="uniapp"`
-   - **Only proceed with manual file creation if template download fails or user explicitly requests manual creation**
-   - If unable to download to current directory, can use scripts to copy, note that hidden files also need to be copied
-
-2. **⚠️ UI Design Document Reading (MANDATORY)**:
+1. **⚠️ UI Design Document Reading (MANDATORY)**: 
    - **Before generating ANY page, interface, component, or style, MUST FIRST explicitly read the file `rules/ui-design/rule.md` using file reading tools**
    - **MUST output the design specification** (Purpose Statement, Aesthetic Direction, Color Palette, Typography, Layout Strategy) before writing any UI code
    - This is NOT optional - you MUST read the file and follow the design thinking framework and frontend aesthetics guidelines
@@ -420,8 +422,7 @@ To ensure development quality, recommend completing the following checks before 
 
 ### Recommended Steps
 0. **[ ] Environment Check**: Call `envQuery` tool to check CloudBase environment status (applies to all interactions)
-1. **[ ] Template Download Check (MANDATORY for New Projects)**: If starting a new project, have you called `downloadTemplate` tool FIRST? Do NOT manually create project files - use templates.
-2. **[ ] Scenario Identification**: Clearly identify what type of project this is (Web/Mini Program/Database/UI/AI)
+1. **[ ] Scenario Identification**: Clearly identify what type of project this is (Web/Mini Program/Database/UI/AI)
 3. **[ ] Core Capability Confirmation**: Confirm all four core capabilities have been considered
    - UI Design: Have you explicitly read the file `rules/ui-design/rule.md` using file reading tools?
    - Database + Authentication: Have you referred to corresponding authentication and database skills?
@@ -435,7 +436,6 @@ To ensure development quality, recommend completing the following checks before 
 6. **[ ] Rule Execution**: Strictly follow core capability requirements and relevant rule files for development
 
 ### ⚠️ Common Issues to Avoid
-- **❌ DO NOT manually create project files** - Always use `downloadTemplate` tool first for new projects
 - **❌ DO NOT skip reading UI design document** - Must explicitly read `rules/ui-design/rule.md` file before generating any UI code
 - Avoid skipping core capabilities and starting development directly
 - Avoid mixing APIs and authentication methods from different platforms

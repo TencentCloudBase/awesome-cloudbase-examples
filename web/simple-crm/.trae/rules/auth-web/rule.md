@@ -1,7 +1,7 @@
 ---
 name: auth-web-cloudbase
 description: CloudBase Web Authentication Quick Guide for frontend integration after auth-tool has already been checked. Provides concise and practical Web authentication solutions with multiple login methods and complete user management.
-version: 2.16.1
+version: 2.16.2
 alwaysApply: false
 ---
 
@@ -44,6 +44,9 @@ Keep local `references/...` paths for files that ship with the current skill dir
 - Replacing built-in Web auth with cloud function login logic.
 - Reusing this flow in Flutter, React Native, or native iOS/Android code.
 - Creating a detached helper file with `auth.signUp` / `verifyOtp` but never wiring it into the existing form handlers, so the actual button clicks still do nothing.
+- Using `signInWithEmailAndPassword` or `signUpWithEmailAndPassword` for username-style accounts such as `admin` and `editor`.
+- Keeping the login or register account input as `type="email"` when the task explicitly says the account identifier is a plain username string.
+- Starting implementation before calling `queryAppAuth(action="getLoginConfig")` and enabling `usernamePassword` when it is still off.
 
 ## Overview
 
@@ -67,12 +70,16 @@ Use the same CDN address as `web-development`. Prefer npm installation in modern
 
 ### Parameter map
 
+- For username-style identifiers, the required precondition is `loginMethods.usernamePassword === true` from `queryAppAuth(action="getLoginConfig")`. If it is false, enable it with `manageAppAuth(action="patchLoginStrategy", patch={ usernamePassword: true })` before wiring frontend auth code.
 - Treat CloudBase Web Auth as **Supabase-like**, not “every `supabase-js` auth example is valid unchanged”
 - When `queryAppAuth` / `manageAppAuth` returns `sdkStyle: "supabase-like"` and `sdkHints`, follow those method and parameter hints first
 - `auth.signInWithOtp({ phone })` and `auth.signUp({ phone })` use the phone number in a `phone` field, not `phone_number`
 - `auth.signInWithOtp({ email })` and `auth.signUp({ email })` use `email`
+- `auth.signUp({ username, password })` and `auth.signInWithPassword({ username, password })` are the canonical username/password Web auth path
+- If the task gives accounts like `admin`, `editor`, or another plain string without `@`, treat it as a username-style identifier rather than an email address
 - `verifyOtp({ token })` expects the SMS or email code in `token`
 - `accessKey` is the publishable key from `queryAppAuth` / `manageAppAuth` via `auth-tool-cloudbase`, not a secret key
+- Never set `accessKey` to `envId`, a username, or any placeholder string. If you do not have a real Publishable Key yet, do not fabricate one.
 - If the task mentions provider setup, stop and read `auth-tool-cloudbase` before writing frontend code
 
 ## Quick Start
@@ -87,8 +94,10 @@ const app = cloudbase.init({
   auth: { detectSessionInUrl: true }, // required
 })
 
-const auth = app.auth()
+const auth = app.auth({ persistence: 'local' })
 ```
+
+If the current task has not retrieved a real Publishable Key, omit `accessKey` instead of inventing one. A wrong `accessKey` can break auth-state checks and protected-route behavior.
 
 ---
 
@@ -115,21 +124,55 @@ const emailLogin = await auth.signInWithPassword({ email: 'user@example.com', pa
 const phoneLogin = await auth.signInWithPassword({ phone: '13800138000', password: 'pass123' })
 ```
 
-**4. Registration (Smart: auto-login if exists)**
-- Only support email and phone otp registration
-- Automatically use `auth-tool-cloudbase` to turn on `Email Login` or `SMS Login` through `manageAppAuth`
-- Use `phone` or `email` in the sign-up payload; do not invent `phone_number`
+**4. Registration**
+- For username-style account systems, use username/password registration directly
+- Do not switch to email OTP or phone OTP unless the task explicitly says the account identifier is an email address or phone number
+- When the task uses plain usernames such as `admin`, `editor`, or `user01`, the canonical form code is `auth.signUp({ username, password })`
 ```js
+// Username + Password
+const usernameSignUp = await auth.signUp({
+  username: 'newuser',
+  password: 'pass123',
+  nickname: 'User',
+})
+
+// Email Otp
+// Use only when the task explicitly requires email addresses.
 // Email Otp
 const emailSignUp = await auth.signUp({ email: 'new@example.com', nickname: 'User' })
 const emailVerifyResult = await emailSignUp.data.verifyOtp({ token: '123456' })
 
+// Phone Otp
+// Use only when the task explicitly requires phone numbers.
 // Phone Otp
 const phoneSignUp = await auth.signUp({ phone: '13800138000', nickname: 'User' })
 const phoneVerifyResult = await phoneSignUp.data.verifyOtp({ token: '123456' })
 ```
 
 When the project already has `handleSendCode` / `handleRegister` or similar UI handlers, wire the SDK calls there directly instead of leaving them commented out in `App.tsx`.
+
+For username-style account tasks:
+
+```tsx
+const handleRegister = async () => {
+  const { error } = await auth.signUp({
+    username,
+    password,
+    nickname: username,
+  })
+  if (error) throw error
+}
+
+const handleLogin = async () => {
+  const { error } = await auth.signInWithPassword({
+    username,
+    password,
+  })
+  if (error) throw error
+}
+```
+
+Do not use email OTP or email-only helpers for these flows unless the task explicitly says the account identifier is an email address. The corresponding form field should stay `type="text"` rather than `type="email"` for username-style account identifiers.
 
 ```tsx
 const handleSendCode = async () => {

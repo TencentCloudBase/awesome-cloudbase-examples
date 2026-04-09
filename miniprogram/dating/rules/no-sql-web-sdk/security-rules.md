@@ -285,6 +285,36 @@ await managePermissions({
 });
 ```
 
+> Warning: This owner-only pattern is not the best fit for CMS article collections that need app-level admin override. For article collections with admin override, prefer a `CUSTOM` rule that combines `get('database.user_roles.' + auth.uid).role == 'admin'` with `doc.authorId == auth.uid`, and keep frontend writes on `.doc(id).update()` / `.doc(id).remove()`.
+
+**Example 2A: Keep owner-only CUSTOM rule and switch the client write path to `where(...)`**
+
+```javascript
+await managePermissions({
+  action: "updateResourcePermission",
+  resourceType: "noSqlDatabase",
+  resourceId: "publicPosts",
+  permission: "CUSTOM",
+  securityRule: JSON.stringify({
+    "read": true,
+    "create": "auth != null",
+    "update": "doc.author_id == auth.uid",
+    "delete": "doc.author_id == auth.uid"
+  })
+});
+```
+
+And update through an explicit owner subset:
+
+```javascript
+await db.collection('publicPosts')
+  .where({
+    _id: postId,
+    author_id: '{openid}'
+  })
+  .update({ title: 'Updated Title' });
+```
+
 **Example 3: Prevent price modification on update**
 
 ```javascript
@@ -410,6 +440,59 @@ The `get()` function allows accessing other document data during permission veri
 }
 ```
 
+**Important syntax note:** put the field access **after** `get(...)`.
+
+```json
+{
+  "write": "get('database.user_roles.' + auth.uid).role == 'admin'"
+}
+```
+
+Do **not** write:
+
+```json
+{
+  "write": "get('database.user_roles.' + auth.uid + '.role') == 'admin'"
+}
+```
+
+Do **not** use JS template-literal placeholders inside the rule string either:
+
+```json
+{
+  "write": "get('database.user_roles.${auth.uid}').role == 'admin'"
+}
+```
+
+Security rules are expression strings, so use concatenation:
+
+```json
+{
+  "write": "get('database.user_roles.' + auth.uid).role == 'admin'"
+}
+```
+
+**Admin-or-owner control:**
+```json
+{
+  "update": "get('database.users.' + auth.uid).role == 'admin' || doc.authorId == auth.uid",
+  "delete": "get('database.users.' + auth.uid).role == 'admin' || doc.authorId == auth.uid"
+}
+```
+
+If this collection only needs simple owner-only writes, `READONLY` may be enough. But if the product requirement is “admin users in the app can edit/delete all articles while editors only own their own articles”, use a `CUSTOM` rule such as:
+
+```json
+{
+  "read": "auth.uid != null",
+  "create": "auth.uid != null",
+  "update": "auth.uid != null && (get('database.user_roles.' + auth.uid).role == 'admin' || doc.authorId == auth.uid)",
+  "delete": "auth.uid != null && (get('database.user_roles.' + auth.uid).role == 'admin' || doc.authorId == auth.uid)"
+}
+```
+
+For that CMS pattern, `.doc(id).update()` / `.doc(id).remove()` is a validated path, as long as article documents really store `authorId` and `user_roles` documents are keyed by `uid`.
+
 **Associated Data Permissions:**
 ```json
 {
@@ -464,12 +547,12 @@ The `get()` function allows accessing other document data during permission veri
 | Error Scenario | Symptoms | Root Cause | Correct Approach |
 |---------------|----------|------------|------------------|
 | Using `ADMINWRITE` for cart/order collections | `.add()` or `.update()` fails<br>Keeps loading or permission error | "ADMIN" in `ADMINWRITE` refers to cloud function environment<br>Frontend SDK has no admin privileges | Use `CUSTOM` rules<br>`{"read": "auth.uid != null", "write": "auth.uid != null"}` |
-| Using `PRIVATE` for product collections | Product list disappears after login | `PRIVATE` only allows creator and admin to read<br>Regular users have no permission | Use `READONLY`<br>All users can read, admin can write |
+| Using `PRIVATE` for product collections | Product list disappears after login | `PRIVATE` only allows creator and admin to read<br>Regular users have no permission | Use `READONLY`<br>All users can read, creator and admin can write |
 
 **Key Understanding**:
 - `ADMINWRITE` = Cloud functions have write access, Frontend SDK **can only read**
 - `CUSTOM` = Configurable read/write permissions for Frontend SDK
-- `READONLY` = All users (including anonymous) can read, only admin can write
+- `READONLY` = All users (including anonymous) can read, creator and admin can write
 
 ### Role-Based Access Limitations
 
@@ -506,6 +589,14 @@ For query or update operations, the input query conditions **must be a subset** 
 - Query conditions must match or be more restrictive than the security rule
 - Missing required conditions in queries will result in permission denied errors
 - The system performs **rule matching** before any database access
+
+**Critical implication for document-ID writes:**
+
+- `.doc(id).update(...)` and `.doc(id).remove()` only provide `_id` as the write condition
+- A rule that depends on another field such as `doc.authorId` or `doc.status` cannot be validated from that request alone
+- For document-ID writes, prefer one of these paths:
+  - use a simple permission such as `READONLY` when it already matches “public read, creator/admin write”, or
+  - keep `doc.field`-based CUSTOM rules and switch to `where(...)` writes that explicitly include the required owner/status fields in the query
 
 **Operation Types Affected:**
 
@@ -768,6 +859,17 @@ For non-WeChat login (Web):
   "write": "doc._openid == auth.openid"
 }
 ```
+
+## Propagation And Verification
+
+- Security rule updates may take a short time to propagate through the backend.
+- Right after changing a collection to `CUSTOM`, do not assume the first `DATABASE_PERMISSION_DENIED` means the expression is still wrong.
+- Keep the same login state, wait briefly, and retry the exact same write before changing the rule again.
+- For Web SDK writes, do not treat "no thrown exception" as success.
+- Check the returned payload:
+  - `update()` should have `updated > 0`
+  - `remove()` should have `deleted > 0`
+  - if `result.code` or `result.message` exists, especially `DATABASE_PERMISSION_DENIED`, treat it as a real backend rejection
 
 ### Pattern 8: Status-Based Permissions
 ```json
