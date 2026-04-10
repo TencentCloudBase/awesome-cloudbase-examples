@@ -1,7 +1,7 @@
 ---
 name: spec-workflow
 description: Use when medium-to-large changes need explicit requirements, technical design, and task planning before implementation, especially for multi-module work, unclear acceptance criteria, or architecture-heavy requests.
-version: 2.16.1
+version: 2.17.0-beta.1
 alwaysApply: false
 ---
 
