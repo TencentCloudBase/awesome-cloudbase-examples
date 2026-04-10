@@ -4,7 +4,8 @@
   "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
   "app": {
     "buildCommand": "npm run build",
-    "outputDir": "dist",
+    "outputDir": "out",
     "deployPath": "/"
-  }
+  },
+  "region": "ap-shanghai"
 }

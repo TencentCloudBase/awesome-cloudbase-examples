@@ -1,17 +1,15 @@
 {
   "version": "2.0",
   "envId": "your-env-id",
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "app": {
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "deployPath": "/gomoku"
+  },
   "framework": {
     "name": "gomoku-battle",
     "plugins": {
-      "client": {
-        "use": "@cloudbase/framework-plugin-website",
-        "inputs": {
-          "buildCommand": "npm run build",
-          "outputPath": "dist",
-          "cloudPath": "/gomoku"
-        }
-      },
       "server": {
         "use": "@cloudbase/framework-plugin-function",
         "inputs": {

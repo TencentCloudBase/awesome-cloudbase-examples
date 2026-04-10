@@ -3,8 +3,9 @@
   "envId": "{{env.ENV_ID}}",
   "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
   "app": {
-    "buildCommand": "npm run build",
-    "outputDir": "dist",
+    "buildCommand": "npm run generate",
+    "outputDir": ".output/public",
     "deployPath": "/"
-  }
+  },
+  "region": "ap-shanghai"
 }
