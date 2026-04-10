@@ -8,6 +8,14 @@ This document covers how to configure security rules for CloudBase NoSQL databas
 
 **General Rule:** In most cases, use **simple permissions** (READONLY, PRIVATE, ADMINWRITE, ADMINONLY). Only use CUSTOM rules when you need fine-grained control.
 
+**Scope note:** The detailed semantics in this document apply only to CloudBase **NoSQL database collections** with `resourceType: "noSqlDatabase"`. Examples such as `doc._openid`, `auth.openid`, query-condition subset validation, and `create` / `update` / `delete` JSON rule templates are **not** generic rules for `function`, `storage`, or `sqlDatabase` resources.
+
+**Official references:**
+- General security rules overview: `https://cloud.tencent.com/document/product/876/41802`
+- NoSQL database security rules: `https://docs.cloudbase.net/database/security-rules`
+- Cloud function security rules: `https://docs.cloudbase.net/cloud-function/security-rules`
+- Storage security rules: `https://docs.cloudbase.net/storage/security-rules`
+
 ### Critical Understanding: Query Condition Requirements
 
 **Security rules are validation-based, NOT filter-based.**
@@ -95,6 +103,8 @@ Compatibility note:
 - Canonical plugin name: `permissions`
 - Legacy plugin aliases `security-rule`, `security-rules`, `secret-rule`, `secret-rules`, and `access-control` still resolve to the `permissions` plugin
 - Legacy tools `readSecurityRule` and `writeSecurityRule` are removed; use `queryPermissions` and `managePermissions`
+
+**Scope reminder:** The examples below are for `resourceType: "noSqlDatabase"` only. Do not reuse NoSQL-only expressions such as `doc._openid`, `auth.openid`, query-subset validation, or `create` / `update` / `delete` rule templates as generic guidance for `function`, `storage`, or `sqlDatabase` permissions.
 
 **Basic Usage:**
 
