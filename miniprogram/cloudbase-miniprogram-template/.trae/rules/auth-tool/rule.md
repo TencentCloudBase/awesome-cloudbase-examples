@@ -375,7 +375,25 @@ Prefer MCP: `queryAppAuth(action="getStaticDomain")` — use `cdnDomain` / `stat
 }
 ```
 
-### 8. Client Configuration Boundary
+### 8. Provider Lifecycle Boundary
+
+Use provider lifecycle APIs when the identity source itself needs to be created, updated, or removed.
+
+Preferred MCP tool path:
+
+- `queryAppAuth(action="listProviders")`
+- `queryAppAuth(action="getProvider")`
+- `manageAppAuth(action="addProvider")`
+- `manageAppAuth(action="updateProvider")`
+- `manageAppAuth(action="deleteProvider")`
+
+Guidance:
+
+- Use `addProvider` when the provider record does not exist yet and you need to create it with `providerType`, optional `providerId`, `displayName`, and `config`.
+- Use `updateProvider` when the provider already exists and only its configuration or enablement state needs to change.
+- Use `deleteProvider` when the provider must be removed entirely instead of only disabling it.
+
+### 9. Client Configuration Boundary
 
 Use client APIs for client metadata and token/session settings. Do not use them as a replacement for login strategy or provider management.
 
@@ -410,14 +428,20 @@ Both tools should default to the current selected environment's default client. 
 }
 ```
 
-### 9. Get Publishable Key
+### 10. Publishable Key and API Key Boundary
 
 Preferred MCP tool path:
 
 - `queryAppAuth(action="getPublishableKey")`
 - `manageAppAuth(action="ensurePublishableKey")`
+- `queryAppAuth(action="listApiKeys")`
+- `manageAppAuth(action="createApiKey")`
+- `manageAppAuth(action="deleteApiKey")`
 
-**Query existing key**:
+Use the shortcut pair `getPublishableKey` / `ensurePublishableKey` for the most common frontend-readiness flow.
+Use the generic API key lifecycle actions when you need inventory, pagination, non-publishable keys, or explicit deletion.
+
+**Query existing publishable key**:
 ```js
 {
     "params": { "EnvId": `env`, "KeyType": "publish_key", "PageNumber": 1, "PageSize": 10 },
@@ -427,7 +451,18 @@ Preferred MCP tool path:
 ```
 `queryAppAuth(action="getPublishableKey")` should always force `KeyType="publish_key"` and return a short payload with `publishableKey`, `keyId`, `keyName`, `expireAt`, and `createdAt`.
 
-**Ensure key exists**:
+**List API keys**:
+```json
+{
+  "action": "listApiKeys",
+  "keyType": "api_key",
+  "pageNumber": 1,
+  "pageSize": 20
+}
+```
+Use `listApiKeys` for a general key inventory view. It supports optional `keyType`, `pageNumber`, and `pageSize`.
+
+**Ensure publishable key exists**:
 ```js
 {
     "params": { "EnvId": `env`, "KeyType": "publish_key" },
@@ -437,9 +472,29 @@ Preferred MCP tool path:
 ```
 `manageAppAuth(action="ensurePublishableKey")` should first query the existing `publish_key`; if one already exists, return it directly; otherwise create it and return the new key. This keeps the MCP interface short and avoids requiring the model to reason about `KeyType` or whether a key already exists.
 
+**Create a generic API key**:
+```json
+{
+  "action": "createApiKey",
+  "keyType": "api_key",
+  "keyName": "server-prod",
+  "expireIn": 86400
+}
+```
+`createApiKey` defaults to `publish_key` when `keyType` is omitted, but it can also create `api_key` for generic service-side access.
+
+**Delete an API key**:
+```json
+{
+  "action": "deleteApiKey",
+  "keyId": "api-key-id"
+}
+```
+Use `deleteApiKey` only when you intentionally want to revoke that key token.
+
 If creation fails, direct user to: "https://tcb.cloud.tencent.com/dev?envId=`env`#/env/apikey"
 
-### 10. Custom Login Keys
+### 11. Custom Login Keys
 
 Preferred MCP tool path: `manageAppAuth(action="createCustomLoginKeys")`
 
