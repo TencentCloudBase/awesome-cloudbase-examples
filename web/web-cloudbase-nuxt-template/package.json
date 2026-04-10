@@ -1,0 +1,23 @@
+{
+  "name": "cloudbase-nuxt-template",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate && node scripts/fix-paths.mjs",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@cloudbase/js-sdk": "^2.16.0",
+    "nuxt": "^3.16.2",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.2",
+    "daisyui": "^4.12.0",
+    "tailwindcss": "^3.4.17"
+  }
+}

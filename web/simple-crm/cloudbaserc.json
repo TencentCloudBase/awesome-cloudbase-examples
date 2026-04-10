@@ -1,18 +1,11 @@
 {
   "version": "2.0",
   "envId": "{{env.CLOUDBASE_ENV_ID}}",
-  "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json",
-  "framework": {
-    "name": "cloudbase-react-template",
-    "plugins": {
-      "client": {
-        "use": "@cloudbase/framework-plugin-website",
-        "inputs": {
-          "outputPath": "dist",
-          "buildCommand": "npm run build"
-        }
-      }
-    }
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "app": {
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "deployPath": "/"
   },
   "functions": [
     {
