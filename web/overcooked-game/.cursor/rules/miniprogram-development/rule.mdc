@@ -1,7 +1,7 @@
 ---
 name: miniprogram-development
-description: WeChat Mini Program development skill for building, debugging, previewing, testing, publishing, and optimizing mini program projects. This skill should be used when users ask to create, develop, modify, debug, preview, test, deploy, publish, launch, review, or optimize WeChat Mini Programs, mini program pages, components, routing, project structure, project configuration, project.config.json, appid setup, device preview, real-device validation, WeChat Developer Tools workflows, miniprogram-ci preview/upload flows, or mini program release processes. It should also be used when users explicitly mention CloudBase, wx.cloud, Tencent CloudBase, 腾讯云开发, or 云开发 in a mini program project.
-version: 2.17.1
+description: WeChat Mini Program development skill for building, debugging, previewing, testing, publishing, and optimizing mini program projects. This skill should be used when users ask to create, develop, modify, debug, preview, test, deploy, publish, launch, review, or optimize WeChat Mini Programs, mini program pages, components, `tabBar`, routing, navigation, icon assets, project structure, project configuration, `project.config.json`, `appid` setup, device preview, real-device validation, WeChat Developer Tools workflows, `miniprogram-ci` preview/upload flows, or mini program release processes. It should also be used when users explicitly mention CloudBase, `wx.cloud`, Tencent CloudBase, 腾讯云开发, or 云开发 in a mini program project.
+version: 2.17.2
 alwaysApply: false
 ---
 
@@ -72,6 +72,7 @@ Use this skill for **WeChat Mini Program development** when you need to:
 3. **Route by scenario**
    - If the task involves CloudBase, `wx.cloud`, cloud functions, CloudBase database/storage, or CloudBase identity handling, read [CloudBase integration reference](references/cloudbase-integration.md)
    - If the task involves debugging, previewing, publishing, WeChat Developer Tools, or no-DevTools workflows, read [debug and preview reference](references/devtools-debug-preview.md)
+   - If the task involves `tabBar`, icon assets, or label spacing, prefer the text-only custom `tabBar` default below unless the user explicitly requires icons
 
 4. **Use CloudBase rules only when applicable**
    - CloudBase is an important mini program integration path, but not a universal requirement
@@ -98,8 +99,31 @@ Use this skill for **WeChat Mini Program development** when you need to:
    - Confirm `miniprogramRoot` and related path settings are correct
 
 3. **Resource Handling**
-   - When generating local asset references such as icons, ensure the files are downloaded into the project
-   - Keep file paths stable and consistent with mini program config files
+   - For `tabBar`, prefer a text-only custom `tabBar` by default when the user does not explicitly need icons. This avoids icon asset handling, removes reserved icon space, and makes the label area easier to align.
+   - Only generate local icon assets and configure `iconPath` / `selectedIconPath` when the user explicitly asks for tab icons or the design requires them.
+   - When generating local asset references such as icons, ensure the files are downloaded into the project.
+   - Keep file paths stable and consistent with mini program config files.
+
+### Recommended default for simple `tabBar`
+
+Use `tabBar.custom = true`, keep only `pagePath` and `text` in `app.json`, and render text-only items in the custom component so there is no icon slot and no extra blank area above the label.
+
+`app.json`
+
+```json
+{
+  "tabBar": {
+    "custom": true,
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/travel/travel", "text": "行程" },
+      { "pagePath": "pages/my/my", "text": "我的" }
+    ]
+  }
+}
+```
+
+Keep the custom `tabBar` layout text-only, and use flex centering or matching `height` and `line-height` to remove the blank area above the label. Switch to downloaded local icons only when the user explicitly wants icon-based tabs.
 
 ## CloudBase as a Mini Program Sub-Scenario
 
