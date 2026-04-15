@@ -110,8 +110,9 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 ### Read operations
 
 - `queryCloudRun(action="list")` -> list services
-- `queryCloudRun(action="detail")` -> inspect one service
+- `queryCloudRun(action="detail")` -> inspect one service and its latest deploy status when available
 - `queryCloudRun(action="templates")` -> see available starters
+- `queryCloudRun(action="getDeployLog")` -> retrieve the latest deploy log or a specified `buildId`
 
 ### Write operations
 
