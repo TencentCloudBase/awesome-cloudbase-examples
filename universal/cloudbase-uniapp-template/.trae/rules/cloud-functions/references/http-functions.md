@@ -76,12 +76,14 @@ app.post("/users", (req, res) => {
   return res.status(201).json({ name, email });
 });
 
-app.all("*", (req, res) => {
+app.all("/{*splat}", (req, res) => {
   res.status(405).json({ error: "Method Not Allowed" });
 });
 
 app.listen(9000);
 ```
+
+Express 5 note: do not use bare `*` or `/*` here. Express 5 uses `path-to-regexp` with named wildcards, so `app.all("/{*splat}", ...)` is the safe catch-all form when you also need to match the root path `/`.
 
 ## Deployment flow
 
