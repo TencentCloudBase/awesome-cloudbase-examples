@@ -26,6 +26,8 @@ When the workspace already contains an existing application with explicit TODO m
 - Identify the scenario first. Do not start implementation before reading the matching rule file.
 - Login or registration request -> read `{auth-tool}` first, then the platform auth rule.
 - Keep auth domains separate: management-side login uses `auth`; app-side auth configuration uses `queryAppAuth` / `manageAppAuth`.
+- When writing MCP or tool results to a local file with a generic file-writing tool, pass text rather than raw objects. For JSON files, serialize first with `JSON.stringify(result, null, 2)` and write that string.
+- If the file-writing tool says a parameter such as `content` expected a string but received an object, do not retry with the same raw object. Serialize the object first, then retry once with the serialized text, and make sure the retried call actually passes the serialized string rather than the original object.
 - UI request -> read `rules/ui-design/rule.md` first and output the design specification before code.
 - Native App / Flutter / React Native request -> route to `{http-api}`, not Web SDK rules.
 - Cloud Function request -> route to `{cloud-functions}`, not `cloudrun-development`, unless the task explicitly needs container service behavior.
