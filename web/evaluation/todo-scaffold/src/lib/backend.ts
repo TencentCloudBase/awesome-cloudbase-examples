@@ -5,8 +5,7 @@
  *
  * 约束:
  * - 必须使用 npm 安装依赖,不能使用 CDN
- * - 导出的 app 实例将在 auth.ts 和 todo-service.ts 中使用
- * - 这里不要写死任何特定后端平台名称,保持模板中立
+ * - 导出的 app 实例将在 session.ts 和 todo-service.ts 中使用
  */
 
 // TODO: 在这里初始化后端客户端并导出 app 实例

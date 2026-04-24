@@ -1,19 +1,30 @@
 import { useState, useEffect, useCallback, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { logout } from "../lib/auth";
+import { ensureSession } from "../lib/session";
 import { listTodos, createTodo, toggleTodo, deleteTodo } from "../lib/todo-service";
-import { useCurrentUser } from "../components/UserContext";
-import type { TodoRecord } from "../types";
+import type { TodoRecord, SessionInfo } from "../types";
 
 export default function TodoListPage() {
-  const navigate = useNavigate();
-  const { currentUser } = useCurrentUser();
-
+  const [session, setSession] = useState<SessionInfo | null>(null);
+  const [sessionError, setSessionError] = useState("");
   const [todos, setTodos] = useState<TodoRecord[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // 初始化匿名会话
+  useEffect(() => {
+    ensureSession()
+      .then((s) => {
+        setSession(s);
+        setSessionError("");
+      })
+      .catch((err: any) => {
+        console.error("会话初始化失败:", err);
+        setSessionError(err?.message || "会话初始化失败");
+        setLoading(false);
+      });
+  }, []);
 
   const fetchTodos = useCallback(async () => {
     setLoading(true);
@@ -30,15 +41,15 @@ export default function TodoListPage() {
     }
   }, []);
 
+  // 会话就绪后加载 todos
   useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos]);
+    if (session) fetchTodos();
+  }, [session, fetchTodos]);
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
     const trimmed = newTitle.trim();
     if (!trimmed) return;
-
     setSubmitting(true);
     try {
       await createTodo(trimmed);
@@ -57,7 +68,7 @@ export default function TodoListPage() {
       await toggleTodo(todo.id, !todo.done);
       fetchTodos();
     } catch (err) {
-      console.error("切换 Todo 状态失败:", err);
+      console.error("切换状态失败:", err);
     }
   };
 
@@ -66,36 +77,29 @@ export default function TodoListPage() {
       await deleteTodo(todo.id);
       fetchTodos();
     } catch (err) {
-      console.error("删除 Todo 失败:", err);
+      console.error("删除失败:", err);
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } finally {
-      navigate("/login", { replace: true });
-    }
-  };
+  if (sessionError) {
+    return (
+      <div data-testid="todos-page" className="page todos-page">
+        <div data-testid="session-error" className="form-error">
+          会话初始化失败: {sessionError}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div data-testid="todos-page" className="page todos-page">
       <div data-testid="todos-toolbar" className="toolbar">
         <h1 className="toolbar-title">我的待办</h1>
-        <div className="toolbar-right">
-          {currentUser && (
-            <span data-testid="current-user-name" className="toolbar-user-name">
-              {currentUser.displayName}
-            </span>
-          )}
-          <button
-            data-testid="logout-button"
-            className="btn btn-text"
-            onClick={handleLogout}
-          >
-            退出登录
-          </button>
-        </div>
+        {session && (
+          <span data-testid="session-id" className="toolbar-user-name">
+            {session.sessionId.slice(0, 8)}...
+          </span>
+        )}
       </div>
 
       <form
@@ -109,13 +113,13 @@ export default function TodoListPage() {
           placeholder="输入新的待办事项"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
-          disabled={submitting}
+          disabled={submitting || !session}
         />
         <button
           data-testid="todo-new-submit"
           type="submit"
           className="btn btn-primary"
-          disabled={submitting || !newTitle.trim()}
+          disabled={submitting || !newTitle.trim() || !session}
         >
           添加
         </button>
