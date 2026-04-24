@@ -1,4 +1,4 @@
-/* 基础样式,保持极简(grader 不依赖具体样式) */
+/* 基础样式(grader 不依赖具体样式) */
 
 * { box-sizing: border-box; }
 
@@ -11,33 +11,18 @@ body {
 }
 
 .page { padding: 24px; max-width: 720px; margin: 0 auto; }
-.auth-page { padding-top: 64px; }
-.auth-container { background: #fff; padding: 32px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.auth-title { margin-top: 0; font-size: 24px; }
-.auth-form { display: flex; flex-direction: column; gap: 16px; }
-.form-field { display: flex; flex-direction: column; gap: 4px; }
-.form-field label { font-size: 14px; color: #475569; }
-.form-field input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
 
 .btn { padding: 8px 16px; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 14px; }
 .btn-primary { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-danger { background: #ef4444; border-color: #ef4444; color: #fff; }
 .btn-sm { padding: 4px 8px; font-size: 12px; }
-.btn-text { background: transparent; border: none; color: #64748b; }
-.btn-block { width: 100%; }
 
-.form-error { color: #ef4444; font-size: 14px; }
-.form-success { color: #10b981; font-size: 14px; }
-.form-loading { color: #64748b; font-size: 14px; }
-
-.auth-switch-link { margin-top: 16px; font-size: 14px; text-align: center; color: #64748b; }
-.auth-switch-link a { color: #0ea5e9; margin-left: 4px; }
+.form-error { color: #ef4444; font-size: 14px; padding: 12px; }
 
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .toolbar-title { margin: 0; font-size: 20px; }
-.toolbar-right { display: flex; gap: 12px; align-items: center; }
-.toolbar-user-name { font-weight: 500; }
+.toolbar-user-name { font-size: 12px; color: #94a3b8; font-family: monospace; }
 
 .todo-create-form { display: flex; gap: 8px; margin-bottom: 24px; }
 .todo-create-form input { flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 4px; }
