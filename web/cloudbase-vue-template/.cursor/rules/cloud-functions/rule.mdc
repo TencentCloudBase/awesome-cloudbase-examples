@@ -118,7 +118,7 @@ Use these rules whenever you are writing the function code itself:
 3. **Write code and deploy, do not stop at local files**
    - Use `manageFunctions(action="createFunction")` for creation
    - Use `manageFunctions(action="updateFunctionCode")` for code updates
-   - Keep `functionRootPath` as the parent directory of the function folder
+   - Keep `functionRootPath` as the directory that directly contains function folders (e.g., `cloudfunctions/` or `functions/`), NOT the project root and NOT the function subdirectory itself
    - Use CLI only as a fallback when MCP tools are unavailable
 
 4. **Prefer doc-first fallbacks**
