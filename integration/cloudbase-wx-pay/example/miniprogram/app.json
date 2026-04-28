@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "pages/pay/pay"
+  ],
+  "window": {
+    "navigationBarTitleText": "支付测试",
+    "navigationBarBackgroundColor": "#07c160",
+    "navigationBarTextStyle": "white"
+  },
+  "sitemapLocation": "sitemap.json"
+}
