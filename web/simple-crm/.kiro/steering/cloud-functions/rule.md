@@ -186,11 +186,26 @@ function sendJson(res, statusCode, data) {
   res.end(JSON.stringify(data));
 }
 
-const server = http.createServer((req, res) => {
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let raw = "";
+    req.on("data", (chunk) => { raw += chunk; });
+    req.on("end", () => {
+      if (!raw) { resolve({}); return; }
+      try { resolve(JSON.parse(raw)); } catch { resolve({}); }
+    });
+    req.on("error", reject);
+  });
+}
+
+const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || "/", "http://127.0.0.1");
 
   if (req.method === "GET" && url.pathname === "/") {
     sendJson(res, 200, { ok: true, message: "hello from http function" });
+  } else if (req.method === "POST" && url.pathname === "/") {
+    const body = await readJsonBody(req);
+    sendJson(res, 200, { received: body });
   } else {
     sendJson(res, 404, { error: "Not Found" });
   }
@@ -198,6 +213,8 @@ const server = http.createServer((req, res) => {
 
 server.listen(9000);
 ```
+
+For a more complete example with routing, method checks, and error handling, see `./references/http-functions.md`.
 
 `cloudfunctions/hello-http/scf_bootstrap`
 
