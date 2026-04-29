@@ -233,6 +233,69 @@ Compatibility note:
 5. **Cross-Collection Operations**:
    - If user has no special requirements, operations involving cross-database collections must be implemented via cloud functions
 
+## Role Management (MCP)
+
+CloudBase MCP provides role management capabilities through the `queryPermissions` and `managePermissions` tools. These are equivalent to the CLI `tcb role` commands.
+
+**⚠️ CRITICAL: Role policies and resource permissions are two independent systems with NO automatic synchronization.**
+
+- Resource permissions (security rules) control access to specific resources (tables, collections, functions, storage)
+- Roles (identity dimension) control policy bundles and member assignments
+
+### Available Actions
+
+**Query Operations** (via `queryPermissions`):
+| Action | Description |
+|--------|-------------|
+| `listRoles` | List all roles (system and custom) |
+| `getRole` | Get detailed role information by roleId/roleIdentity/roleName |
+
+**Management Operations** (via `managePermissions`):
+| Action | Description |
+|--------|-------------|
+| `createRole` | Create a new custom role |
+| `updateRole` | Update an existing role (add/remove policies or members) |
+| `deleteRoles` | Delete one or more custom roles |
+| `addRoleMembers` | Add members to a role |
+| `removeRoleMembers` | Remove members from a role |
+| `addRolePolicies` | Add policies to a role |
+| `removeRolePolicies` | Remove policies from a role |
+
+### Usage Examples
+
+**List all roles:**
+```
+queryPermissions(action="listRoles")
+```
+
+**Get specific role details:**
+```
+queryPermissions(action="getRole", roleId="role-xxx")
+# or by identity
+queryPermissions(action="getRole", roleIdentity="dev_role")
+# or by name
+queryPermissions(action="getRole", roleName="Developer")
+```
+
+**Delete a custom role:**
+```
+managePermissions(action="deleteRoles", roleIds=["role-xxx"])
+```
+
+**Create a custom role:**
+```
+managePermissions(action="createRole", roleName="Developer", roleIdentity="developer", policies=["FunctionsAccess"], memberUids=["user-uid-1"])
+```
+
+**Update a role (add policies):**
+```
+managePermissions(action="updateRole", roleId="role-xxx", addPolicies=["StoragesAccess"])
+```
+
+> ⚠️ Note: Only custom roles can be deleted. System roles are read-only.
+
+See also: CLI equivalent commands in `cloudbase-cli/references/permission.md`
+
 3. **Cloud Function Optimization**:
    - If involving cloud functions, while ensuring security, can minimize the number of cloud functions as much as possible
    - For example: implement one cloud function for client-side requests, implement one cloud function for data initialization
