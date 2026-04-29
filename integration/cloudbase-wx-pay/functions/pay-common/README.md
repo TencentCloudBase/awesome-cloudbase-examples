@@ -58,6 +58,16 @@ cp .env.example .env
 
 #### SDK 模式（自行签名验签）
 
+> ⚠️ **SDK 模式的回调必须走 HTTP 访问服务**，有 3 个硬性约束：
+>
+> | # | 约束 | 说明 |
+> |---|------|------|
+> | 1 | **回调必须走 HTTP 访问服务**，不能走云 API 网关 | 微信支付服务器直接 POST 回调到你的服务，云 API 网关会加鉴权层/修改请求格式，导致微信回调无法到达或验签失败 |
+> | 2 | **HTTP 访问服务的回调路由不能开启身份认证** | 微信服务器发来的回调请求不带任何鉴权信息，开了身份认证会被 401/403 拦截，导致回调收不到 |
+> | 3 | **回调 URL 必须带完整路径** | HTTP 访问服务的域名带有子路径（如 `/xxx-env/wx-pay/`），环境变量中的 `notifyURL*` 必须包含该完整路径，否则回调 404 |
+>
+> **简单总结**：SDK 模式 = 开 HTTP 访问服务 → 关掉回调路由的身份认证 → 回调 URL 写完整路径。
+
 ```env
 signMode=sdk
 
@@ -75,6 +85,16 @@ wxPayPublicKey=-----BEGIN PUBLIC KEY-----\nMIIBIjANBg...\n-----END PUBLIC KEY---
 wxPayPublicKeyId=PUB_KEY_ID_0114232134912410000000000000
 
 # 回调地址（部署后获得的公网 URL + 回调路径）
+#
+# ⚠️ 重要：如果使用 HTTP 访问服务部署，必须将控制台显示的完整路径包含进去！
+# 例如 HTTP 访问服务域名为 https://xxx.cloudbaseasms.com/xxx-env/，
+# 则回调 URL 应写为：
+#   notifyURLPayURL=https://xxx.cloudbaseasms.com/xxx-env/wx-pay/unifiedOrderTrigger
+#                                                ^^^^^^^^
+#                              这部分是环境路径，不填会导致回调 404！
+#
+# ⚠️ 注意：SDK 模式下回调只能走 HTTP 访问服务，不能走云 API 网关。
+#   （前端主动调后端接口可以走云 API 网关，但微信服务器回调你的服务必须走 HTTP 访问服务）
 notifyURLPayURL=https://你的域名/wx-pay/unifiedOrderTrigger
 notifyURLRefundsURL=https://你的域名/wx-pay/refundTrigger
 transferNotifyUrl=https://你的域名/wx-pay/transferTrigger
@@ -99,6 +119,10 @@ wxPayPublicKey=-----BEGIN PUBLIC KEY-----\nMIIBIjANBg...\n-----END PUBLIC KEY---
 wxPayPublicKeyId=PUB_KEY_ID_0114232134912410000000000000
 
 # 回调地址（指向集成中心，由集成中心解密后转发明文）
+#
+# ⚠️ 这些 URL 是在微信支付集成中心（CloudBase 控制台 → 微信支付 → 集成中心）
+#   配置/启用后自动生成的，直接复制填入即可，无需手动拼装路径。
+#   与 SDK 模式不同，网关模式不需要自己处理回调 URL 的 path 问题。
 notifyURLPayURL=https://integration-xxx.tcloudbase.com/wechatpay/order
 notifyURLRefundsURL=https://integration-xxx.tcloudbase.com/wechatpay/refund
 transferNotifyUrl=https://integration-xxx.tcloudbase.com/wechatpay/transfer
@@ -140,6 +164,13 @@ tcb fn list
    - 开启「HTTP 访问服务」或「创建域名关联」
    - 获得公网访问域名，格式为 `https://{envId}.{region}.app.tcloudbase.com`
    - 具体地址请以**控制台显示的完整域名**为准（不同环境格式可能略有差异）
+
+   > ⚠️ **HTTP 访问服务的 URL 带有环境路径**：
+   > 控制台显示的域名实际访问时会在后面带上环境标识（如 `/xxx-env/` 或类似子路径）。
+   > 这意味着：
+   > - 前端调用后端接口时，baseUrl 必须使用**完整路径**
+   > - 环境变量中的回调 URL（`notifyURLPayURL` 等）也必须包含这个路径
+   > - 否则请求和回调都会返回 404
 
 5. 测试访问：
 
@@ -208,6 +239,13 @@ npm start
 
 部署成功后，在前端代码中调用对应接口。
 
+> **完整可运行示例**：
+>
+> | 示例 | 调用方式 | 路径 |
+> |------|---------|------|
+> | 小程序（云函数版） | 云 API 网关 / HTTP 访问服务 | [`example/miniprogram/`](../example/miniprogram/) |
+> | 小程序（云托管版） | 云托管 callContainer | [`example/miniprogram-cloudrun/`](../example/miniprogram-cloudrun/) |
+
 #### 小程序调用
 
 > 完整示例代码见各调用方式章节下方（小程序/H5/Web/Native 均有示例）。
@@ -217,6 +255,8 @@ npm start
 > 通过 CloudBase **API 网关**调用 HTTP 云函数，无需开启 HTTP 访问服务。
 > 适合小程序场景：使用 CloudBase Auth 获取 `accessToken` 后即可调用。
 > 官方文档：https://docs.cloudbase.net/cloud-function/function-calls/
+>
+> 完整可运行示例代码见 [`example/miniprogram/`](../example/miniprogram/)（云函数版小程序模板）。
 
 **调用格式**：
 
@@ -366,9 +406,14 @@ const res = await new Promise((resolve, reject) => {
 > - 使用 HTTP 访问服务时，需要将**控制台显示的完整域名**加入小程序管理后台的 request 合法域名
 > - **测试阶段**：可在控制台 HTTP 访问服务配置中关闭身份认证，无需 accessToken 即可快速验证接口
 > - **生产环境**：务必开启身份认证，否则任何人都能直接调用你的支付接口
-> - **SDK 验签模式下**：支付回调（`/v1/wechatpay/pay`）和转账回调（`/v1/wechatpay/transfer`）两个接口**不能开启身份认证**，否则微信服务器回调时无法通过身份校验，导致回调收不到
+> - **SDK 验签模式下（重要！）**：
+>   - 支付/退款/转账的**回调路由必须走 HTTP 访问服务**，不能走云 API 网关
+>   - HTTP 访问服务的**回调路由（`unifiedOrderTrigger`、`refundTrigger`、`transferTrigger`）不能开启身份认证**
+>   - 原因：微信支付服务器直接 POST 回调请求到你的服务，不带任何鉴权 Token；云 API 网关会拦截或篡改请求格式，导致验签失败或回调收不到
 
 **方式三：云托管 callContainer**
+
+> 完整可运行示例代码见 [`example/miniprogram-cloudrun/`](../example/miniprogram-cloudrun/)（云托管版小程序模板）。
 
 ```javascript
 // 下单
@@ -470,6 +515,12 @@ if (data.code === 0) {
    - 进入 [公众平台](https://mp.weixin.qq.com) → 设置与开发 → 公众号设置 → 功能设置 → 网页授权域名
    - 将你的业务域名加入白名单（格式：`your-domain.com`，不含协议和端口）
    - ⚠️ 此域名必须**已在 ICP 备案**且通过微信验证（文件校验或 DNS 校验）
+   - ⚠️ OAuth2 授权链接中的 `redirect_uri` 域名必须在此白名单内，**局域网 IP 不行**
+   - 本地开发时需用公网域名（如绑定自定义域名的 CloudBase 环境）或 ngrok/内网穿透工具
+5. **配置 JS接口安全域名**
+   - 同上入口：公众平台 → 设置与开发 → 公众号设置 → 功能设置 → **JS接口安全域名**
+   - 将你的业务域名加入白名单
+   - ⚠️ JSAPI 支付调起 `wx.requestPayment()` 时会校验此域名，未配置会导致调起失败
 
 ##### ⚠️ 支付授权目录（重要！必配！）
 
@@ -946,6 +997,25 @@ class OrderService {
 > - **JSAPI**：用户在**微信内置浏览器**中，直接唤起收银台。需要服务号 + OAuth2 openid + 配置支付授权目录。
 > - **H5**：用户在**微信外浏览器**（如手机 Safari），点击后跳转到微信中间页再拉起微信。不需要 openid 但必须传 `scene_info`（IP + h5_info）。
 
+### ⚠️ 支付授权目录（H5 和 Native 必配！）
+
+> **JSAPI、H5、Native 三种方式都需要配置支付授权目录**，这是最容易被遗漏的步骤！
+>
+> 配置入口：**[微信支付商户平台](https://pay.weixin.qq.com)** → 产品中心 → 开发配置 → **支付授权目录**
+>
+> | 支付方式 | 是否必须配置 | 配置内容 | 常见报错 |
+> |---------|:-----------:|---------|---------|
+> | **JSAPI** | ✅ 是 | 公众号域名路径 | 「当前页面 URL 的域不在以下支付授权目录中」 |
+> | **H5** | ✅ **是** | 你的业务域名路径 | 同上 |
+> | **Native 扫码** | ✅ **是** | 展示二维码的页面域名 | 二维码无法正常拉起微信 |
+>
+> 规则：
+> - 格式：`https://域名/路径/`（末尾必须有 `/`，支持精确到二级/三级目录）
+> - 每个商户号最多可配置 **5 个**
+> - 如果使用 CloudBase HTTP 访问服务的临时域名，需将完整 URL（含 path）添加进去
+>
+> 详见 §Step 5 中各支付方式的「⚠️ 支付授权目录」详细说明。
+
 ### 有效期
 
 | 参数 | 有效期 | 说明 |
@@ -997,14 +1067,14 @@ class OrderService {
 
 通过环境变量 `signMode` 切换（仅影响回调处理方式，主动请求均走 SDK 自签名直连微信）：
 
-| 模式 | 主动请求（下单/退款/转账） | 回调处理 | 适用场景 |
-|------|---------|---------|---------|
-| `sdk` | SDK 自签名 → 直连微信 | 自己验签 + AES-GCM 解密 | 独立部署，回调直接打到自己的服务 |
-| `gateway` | SDK 自签名 → 直连微信 | 集成中心已解密，读取明文（x-tcb-wechatpay-decrypted） | 回调经集成中心解密转发 |
+| 模式 | 主动请求（下单/退款/转账） | 回调处理 | 适用场景 | 部署要求 |
+|------|---------|---------|---------|---------|
+| `sdk` | SDK 自签名 → 直连微信 | 自己验签 + AES-GCM 解密 | 需要完整控制回调数据 | **必须开 HTTP 访问服务 + 关闭回调路由身份认证** |
+| `gateway` | SDK 自签名 → 直连微信 | 集成中心已解密，读取明文（x-tcb-wechatpay-decrypted） | 快速接入，无需自处理验签 | 回调走集成中心，前端调用可走云 API 网关 |
 
-两种模式的凭证配置完全相同（都需要私钥/公钥/证书序列号），区别仅在于回调地址：
-- SDK 模式：回调地址指向自己的服务
-- 网关模式：回调地址指向集成中心，集成中心解密后转发明文到你的服务
+两种模式的凭证配置完全相同（都需要私钥/公钥/证书序列号），区别仅在于回调地址和部署方式：
+- **SDK 模式**：回调地址指向自己的服务（HTTP 访问服务域名，含完整路径）；回调路由不能开身份认证
+- **网关模式**：回调地址指向集成中心，集成中心解密后转发明文到你的服务；无特殊部署约束
 
 ---
 
