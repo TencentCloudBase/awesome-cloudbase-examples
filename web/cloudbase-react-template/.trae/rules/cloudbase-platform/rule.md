@@ -48,6 +48,9 @@ Keep local `references/...` paths for files that ship with the current skill dir
 - Staying here after the correct implementation skill is already clear.
 - Mixing platform overview with platform-specific API shapes or SDK details.
 - Using this overview skill as a detour in an existing application where the active auth, storage, and data files are already obvious.
+- **Confusing security domains with custom domains**: These are two completely different tools for different purposes:
+  - `envDomainManagement` (action: create/delete) = Security domains (安全域名) for CORS/request source validation - used for browser upload whitelisting. Does NOT accept certificateId.
+  - `manageGateway(action="bindCustomDomain")` = Custom domains (自定义域名) for public HTTPS access with SSL certificates - requires domain and certificateId parameters.
 
 ## When to use this skill
 
@@ -92,6 +95,45 @@ Use this skill for **CloudBase platform knowledge** when you need to:
 ---
 
 # CloudBase Platform Knowledge
+
+### Domain Management Tools: Clear Distinction
+
+When working with domain-related tasks, use the correct tool based on the requirement:
+
+| Requirement | Tool | Parameters | Purpose |
+|-------------|------|------------|---------|
+| **Security Domain (安全域名)** | `envDomainManagement` | `action`, `domains` (array of host:port strings) | CORS/request source validation for browser uploads. No certificate involved. |
+| **Custom Domain (自定义域名)** | `manageGateway(action="bindCustomDomain")` | `domain` (string), `certificateId` (string) | Public HTTPS access with SSL certificate. Requires certId from SSL console. |
+| **Delete Custom Domain** | `manageGateway(action="deleteCustomDomain")` | `domain` (string) | Remove custom domain binding. |
+
+**Key indicators for choosing the right tool:**
+- Task mentions "certificate ID" or "SSL" → Use `manageGateway(action="bindCustomDomain")`
+- Task mentions "浏览器上传" or "CORS" or "安全域名" → Use `envDomainManagement`
+- Task mentions "public access" or "HTTPS" with domain → Use `manageGateway`
+
+### Recording Operation Results
+
+When a task explicitly requires recording operation steps or results to a file (e.g., `RESULT.json`):
+
+1. Perform the tool calls first to get actual results
+2. Collect all operation steps with their success/failure status
+3. Write the complete record to the specified file in the required format
+4. Include both successful operations and failed attempts with error messages
+
+Example structure for operation recording:
+```json
+{
+  "steps": [
+    {"action": "listDomains", "success": true, "message": "Found 3 domains"},
+    {"action": "bindDomain", "success": false, "message": "Certificate not found"}
+  ],
+  "summary": {
+    "totalAttempted": 2,
+    "succeeded": 1,
+    "failed": 1
+  }
+}
+```
 
 ## Storage and Hosting
 
