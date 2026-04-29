@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>匿名登录 Gateway 测试</title>
+  <style>
+    body { font-family: monospace; padding: 24px; max-width: 700px; margin: 0 auto; background: #f5f5f5; }
+    input { width: 100%; box-sizing: border-box; padding: 8px; margin: 4px 0 12px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; }
+    button { padding: 10px 24px; background: #07c160; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+    pre { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 12px; white-space: pre-wrap; word-break: break-all; font-size: 13px; min-height: 40px; }
+    .step { margin: 6px 0; font-size: 13px; }
+    .ok { color: #07c160; } .err { color: #e53e3e; } .info { color: #666; }
+  </style>
+</head>
+<body>
+  <h2>匿名登录 → Gateway 调用测试</h2>
+
+  <div id="sdk-warning" style="display:none; background:#fff3cd; border:1px solid #ffc107; border-radius:4px; padding:12px; margin-bottom:16px; color:#856404;">
+    ⚠️ <strong>CloudBase SDK 加载失败</strong>（file:// 协议下 CDN 请求被浏览器阻止）<br>
+    请用本地 HTTP 服务器打开此文件：<br><br>
+    <code>cd /Users/lucyqzhang/Documents/zq-workspace/pay-common/examples/react &amp;&amp; npx serve .</code><br>
+    然后访问 <strong>http://localhost:3000/test-anon-login.html</strong><br><br>
+    或者：<code>python3 -m http.server 8080</code> → <strong>http://localhost:8080/test-anon-login.html</strong>
+  </div>
+
+  <label>CloudBase EnvID</label>
+  <input id="envId" placeholder="例如：your-env-id-xxxxxxxx" />
+
+  <label>云函数名</label>
+  <input id="fnName" value="pay-common" />
+
+  <label>调用路径（云函数内路由）</label>
+  <input id="fnPath" value="/wxpay_query_order_by_out_trade_no" />
+
+  <label>请求 body（JSON）</label>
+  <input id="fnBody" value='{"out_trade_no":"test_order_not_exist"}' />
+
+  <button id="btn" onclick="runTest()">开始测试</button>
+
+  <h3>日志</h3>
+  <div id="log"></div>
+
+  <h3>响应</h3>
+  <pre id="result">（等待测试）</pre>
+
+  <!-- cloudbase js-sdk 本地文件（已下载，避免 CDN 加载失败） -->
+  <script src="./cloudbase.full.js"></script>
+  <script>
+    // 检测 SDK 是否加载成功
+    window.addEventListener('load', function() {
+      if (typeof cloudbase === 'undefined') {
+        document.getElementById('sdk-warning').style.display = 'block'
+        document.getElementById('btn').disabled = true
+      }
+    })
+
+    function log(msg, type = 'info') {
+      const div = document.createElement('div')
+      div.className = 'step ' + type
+      div.textContent = (type === 'ok' ? '✅ ' : type === 'err' ? '❌ ' : '⏳ ') + msg
+      document.getElementById('log').appendChild(div)
+      console.log(msg)
+    }
+
+    async function runTest() {
+      document.getElementById('log').innerHTML = ''
+      document.getElementById('result').textContent = '...'
+      document.getElementById('btn').disabled = true
+
+      if (typeof cloudbase === 'undefined') {
+        log('CloudBase SDK 未加载！请通过 HTTP 服务器打开此文件（见上方提示）', 'err')
+        document.getElementById('btn').disabled = false
+        return
+      }
+
+      const envId = document.getElementById('envId').value.trim()
+      const fnName = document.getElementById('fnName').value.trim()
+      const fnPath = document.getElementById('fnPath').value.trim()
+      let fnBody
+      try { fnBody = JSON.parse(document.getElementById('fnBody').value) } catch { fnBody = {} }
+
+      if (!envId) { log('请填写 EnvID', 'err'); document.getElementById('btn').disabled = false; return }
+
+      try {
+        // 1. init SDK
+        log('初始化 CloudBase SDK...')
+        const app = cloudbase.init({ env: envId })
+
+        // 2. 匿名登录
+        log('匿名登录中...')
+        const auth = app.auth({ persistence: 'local' })
+        const signInRes = await auth.signInAnonymously()
+
+        // 安全提取关键字段打印
+        const safeRes = {
+          error: signInRes?.error,
+          user: signInRes?.data?.user,
+          session_keys: signInRes?.data?.session ? Object.keys(signInRes.data.session) : null,
+          access_token_prefix: signInRes?.data?.session?.access_token?.slice?.(0, 20),
+        }
+        log('signInAnonymously 返回: ' + JSON.stringify(safeRes))
+
+        if (signInRes?.error) throw new Error('匿名登录失败: ' + JSON.stringify(signInRes.error))
+        log('匿名登录完成', 'ok')
+
+        // 3. 获取 access_token（新版 SDK 从 signInRes.data.session 取，旧版从 getLoginState 取）
+        log('获取 access_token...')
+        let token = signInRes?.data?.session?.access_token
+
+        if (!token) {
+          // 旧版 SDK 兜底
+          const loginState = await auth.getLoginState()
+          const safeLS = {
+            keys: loginState ? Object.keys(loginState) : null,
+            credentialKeys: loginState?.credential ? Object.keys(loginState.credential) : null,
+            accessToken_prefix: (loginState?.credential?.accessToken || loginState?.accessToken || loginState?.token)?.slice?.(0, 20),
+          }
+          log('getLoginState 返回: ' + JSON.stringify(safeLS))
+          token = loginState?.credential?.accessToken || loginState?.accessToken || loginState?.token
+        }
+
+        if (!token) throw new Error('未获取到 access_token')
+        log('access_token 获取成功: ' + token.slice(0, 20) + '...', 'ok')
+
+        // 4. 调 Gateway
+        const url = `https://${envId}.api.tcloudbasegateway.com/v1/functions/${fnName}?webfn=true`
+        const reqBody = { path: fnPath, method: 'POST', data: fnBody }
+        log(`调用 Gateway: ${url}`)
+        log('body: ' + JSON.stringify(reqBody))
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+          },
+          body: JSON.stringify(reqBody),
+        })
+
+        log(`HTTP 状态: ${res.status}`, res.ok ? 'ok' : 'err')
+        const json = await res.json()
+        document.getElementById('result').textContent = JSON.stringify(json, null, 2)
+
+        if (res.status === 401 || res.status === 403) {
+          log('返回 ' + res.status + '，匿名身份无权限调用此云函数', 'err')
+        } else if (res.ok) {
+          log('调用成功！匿名登录可以访问此 Gateway', 'ok')
+        } else {
+          log('调用返回 ' + res.status, 'err')
+        }
+      } catch (err) {
+        log('异常: ' + err.message, 'err')
+        document.getElementById('result').textContent = err.stack || err.message
+      }
+
+      document.getElementById('btn').disabled = false
+    }
+  </script>
+</body>
+</html>
