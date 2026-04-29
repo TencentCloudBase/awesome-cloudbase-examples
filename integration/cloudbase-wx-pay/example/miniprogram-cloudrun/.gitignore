@@ -1,0 +1,12 @@
+# 微信开发者工具生成文件
+miniprogram_npm/
+node_modules/
+
+# 调试文件
+.DS_Store
+
+# lock 文件（示例项目不需要锁定版本）
+package-lock.json
+
+# 本地配置（包含密钥）
+# 如果需要覆盖配置，请在 app.js 中修改对应变量

@@ -1,0 +1,94 @@
+<view class="container">
+  <view class="header">
+    <text class="title">微信支付测试</text>
+    <text class="subtitle">pay-common 云托管直连版</text>
+  </view>
+
+  <!-- Tab 栏 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 0 ? 'tab-active' : ''}}" bindtap="onTabChange" data-tab="0">
+      <text>下单支付</text>
+    </view>
+    <view class="tab-item {{activeTab === 1 ? 'tab-active' : ''}}" bindtap="onTabChange" data-tab="1">
+      <text>商家转账</text>
+    </view>
+  </view>
+
+  <!-- ========== Tab 1: 下单支付 ========== -->
+  <view wx:if="{{activeTab === 0}}">
+    <view class="section">
+      <text class="section-title">商品信息</text>
+      <view class="form-item">
+        <text class="label">用户 OpenID</text>
+        <text class="input openid-text" user-select wx:if="{{openid}}">{{openid}}</text>
+        <text class="input openid-text" wx:else style="color:#999">登录中...</text>
+      </view>
+      <view class="form-item">
+        <text class="label">商品描述</text>
+        <input class="input" value="{{description}}" bindinput="onDescInput" placeholder="输入商品描述" />
+      </view>
+      <view class="form-item">
+        <text class="label">金额（分）</text>
+        <input class="input" type="number" value="{{totalFee}}" bindinput="onAmountInput" placeholder="单位：分" />
+      </view>
+    </view>
+
+    <view class="section">
+      <button class="btn btn-primary" bindtap="handlePay" loading="{{loading}}">下单并支付</button>
+      <button class="btn btn-blue" bindtap="handleQuery" disabled="{{!outTradeNo}}">查询订单</button>
+      <button class="btn btn-red" bindtap="handleClose" disabled="{{!outTradeNo}}">关闭订单</button>
+      <button class="btn btn-refund" bindtap="showRefundDialog" disabled="{{!outTradeNo}}">申请退款</button>
+      <button class="btn btn-blue" bindtap="handleQueryRefund" disabled="{{!outRefundNo}}">查询退款</button>
+    </view>
+
+    <view class="section" wx:if="{{outTradeNo}}">
+      <text class="section-title">订单信息</text>
+      <view class="order-info">
+        <text class="order-label">订单号：</text>
+        <text class="order-no" user-select bindtap="handleCopyOrder">{{outTradeNo}}</text>
+      </view>
+      <view class="order-info" wx:if="{{outRefundNo}}">
+        <text class="order-label">退款单：</text>
+        <text class="order-no refund-no" user-select bindtap="handleCopyRefund">{{outRefundNo}}</text>
+      </view>
+    </view>
+
+    <!-- 下单支付 - 返回结果 -->
+    <view class="section" wx:if="{{payResult}}">
+      <text class="section-title">返回结果</text>
+      <scroll-view scroll-y class="result-box">
+        <text class="result-text" user-select>{{payResult}}</text>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- ========== Tab 2: 商家转账 ========== -->
+  <view wx:if="{{activeTab === 1}}">
+    <view class="section">
+      <text class="section-title">商家转账（0.3 – 2000 元免密）</text>
+      <view class="form-item">
+        <text class="label">用户 OpenID</text>
+        <text class="input openid-text" user-select wx:if="{{openid}}">{{openid}}</text>
+        <text class="input openid-text" wx:else style="color:#999">登录中...</text>
+      </view>
+      <view class="form-item">
+        <text class="label">转账金额（分）</text>
+        <input class="input" type="number" value="{{transferAmount}}" bindinput="onTransferAmountInput" placeholder="最低 30 分（0.3 元）" />
+      </view>
+      <view class="form-item">
+        <text class="label">转账备注</text>
+        <input class="input" value="{{transferRemark}}" bindinput="onTransferRemarkInput" placeholder="转账备注说明" />
+      </view>
+      <button class="btn btn-transfer" bindtap="handleTransfer" loading="{{transferLoading}}" disabled="{{!openid}}">发起转账</button>
+      <button class="btn btn-blue" bindtap="handleQueryTransferBill" disabled="{{!outBillNo}}">查询转账单</button>
+    </view>
+
+    <!-- 商家转账 - 返回结果 -->
+    <view class="section" wx:if="{{transferResult}}">
+      <text class="section-title">返回结果</text>
+      <scroll-view scroll-y class="result-box">
+        <text class="result-text" user-select>{{transferResult}}</text>
+      </scroll-view>
+    </view>
+  </view>
+</view>

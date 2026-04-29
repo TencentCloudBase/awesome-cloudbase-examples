@@ -1,0 +1,7 @@
+node_modules/
+.env
+apiclient_key.pem
+apiclient_cert.pem
+pub_key.pem
+*.pem
+.DS_Store
