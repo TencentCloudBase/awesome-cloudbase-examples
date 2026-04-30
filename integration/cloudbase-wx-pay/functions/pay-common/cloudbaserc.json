@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
-  "envId": "test-wxpay-5gy4ugzreef15cfe",
+  "envId": "your-env-id",
   "functions": [
     {
       "name": "pay-common",

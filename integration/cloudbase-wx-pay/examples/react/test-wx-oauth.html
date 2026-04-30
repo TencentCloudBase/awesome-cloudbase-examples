@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>微信公众号 OAuth 登录测试（CloudBase SDK）</title>
+  <style>
+    body { font-family: monospace; padding: 20px; max-width: 600px; margin: 0 auto; background: #f5f5f5; }
+    button { padding: 12px 28px; background: #07c160; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; width: 100%; margin: 8px 0; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+    pre { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 12px; white-space: pre-wrap; word-break: break-all; font-size: 12px; min-height: 40px; }
+    .step { margin: 5px 0; font-size: 13px; }
+    .ok { color: #07c160; } .err { color: #e53e3e; } .info { color: #555; }
+    .warn { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 10px; margin: 12px 0; font-size: 13px; }
+    h3 { margin: 16px 0 6px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>微信公众号 OAuth 登录测试</h2>
+
+  <div id="env-warn" class="warn" style="display:none">
+    ⚠️ 请在<strong>微信内置浏览器</strong>中打开此页面，PC 浏览器无法完成 OAuth 跳转。
+  </div>
+
+  <button id="btnLogin" onclick="startLogin()" disabled>微信授权登录</button>
+
+  <h3>日志</h3>
+  <div id="log"></div>
+
+  <h3>结果</h3>
+  <pre id="result">（等待测试）</pre>
+
+  <script src="./cloudbase.full.js"></script>
+  <script>
+    const ENV_ID = 'your-env-id'
+
+    function log(msg, type = 'info') {
+      const div = document.createElement('div')
+      div.className = 'step ' + type
+      div.textContent = (type === 'ok' ? '✅ ' : type === 'err' ? '❌ ' : '⏳ ') + msg
+      document.getElementById('log').appendChild(div)
+      console.log(msg)
+    }
+
+    window.onload = async function () {
+      // 检测是否在微信内
+      if (!navigator.userAgent.toLowerCase().includes('micromessenger')) {
+        document.getElementById('env-warn').style.display = 'block'
+      }
+
+      if (typeof cloudbase === 'undefined') {
+        log('CloudBase SDK 未加载，请通过 HTTP 服务器打开此页面', 'err')
+        return
+      }
+
+      const app = cloudbase.init({ env: ENV_ID })
+      const auth = app.auth({ persistence: 'local' })
+
+      // 页面加载时先检查是否是 OAuth 回调（URL 带 code）
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('code')) {
+        log('检测到 OAuth 回调，处理中...')
+        try {
+          const { data, error } = await auth.verifyOAuth({ createUser: true })
+          if (error) throw new Error(JSON.stringify(error))
+          const user = data?.user
+          log('登录成功！', 'ok')
+          log('uid: ' + user?.uid, 'ok')
+          log('openid: ' + (user?.openid || '(见结果)'), 'ok')
+          document.getElementById('result').textContent = JSON.stringify({
+            uid: user?.uid,
+            openid: user?.openid,
+            unionid: user?.unionid,
+          }, null, 2)
+        } catch (e) {
+          log('处理回调失败: ' + e.message, 'err')
+          document.getElementById('result').textContent = e.stack || e.message
+        }
+      } else {
+        // 非回调，正常显示登录按钮
+        document.getElementById('btnLogin').disabled = false
+        document.getElementById('btnLogin').onclick = async function () {
+          document.getElementById('btnLogin').disabled = true
+          log('发起微信授权跳转...')
+          try {
+            const redirectTo = window.location.origin + window.location.pathname
+            const { data, error } = await auth.signInWithOAuth({
+              provider: 'weixin-mp',
+              options: { redirectTo },
+            })
+            if (error) throw new Error(JSON.stringify(error))
+            // signInWithOAuth 返回授权 URL，跳转过去
+            if (data?.url) {
+              log('跳转: ' + data.url.slice(0, 60) + '...')
+              window.location.href = data.url
+            }
+          } catch (e) {
+            log('跳转失败: ' + e.message, 'err')
+            document.getElementById('btnLogin').disabled = false
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

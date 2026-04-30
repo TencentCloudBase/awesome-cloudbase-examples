@@ -37,7 +37,6 @@ npm install
 **`app.js`**：
 ```javascript
 const ENV_ID = 'your-env-id'           // 替换为你的云开发环境 ID
-const PUBLISHABLE_KEY = 'your-key'     // 控制台 → 身份认证 → API Key 管理
 ```
 
 **`project.config.json`**：

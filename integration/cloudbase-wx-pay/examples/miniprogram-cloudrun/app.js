@@ -4,12 +4,7 @@
 // TODO: ⚠️ 部署前请替换为你自己的云开发环境 ID
 const ENV_ID = 'YOUR_ENV_ID'
 
-// 2. Publishable Key（控制台 → 身份认证 → API Key 管理 获取）
-// TODO: ⚠️ 如果使用 signInWithOpenId 报错需要 accessKey，请填入
-// 如果小程序已开启微信云开发模式，可留空
-const PUBLISHABLE_KEY = ''
-
-// 3. 云托管服务域名
+// 2. 云托管服务域名
 // 部署 pay-common 到云托管后，从控制台获取访问域名
 // TODO: ⚠️ 部署前请替换为你的云托管服务域名
 // 示例：https://pay-common-xxx-1234567890.ap-shanghai.app.tcloudbase.com
@@ -48,13 +43,13 @@ App({
 
   /**
    * 静默登录流程（CloudBase Auth + 微信小程序）
-   * 
+   *
    * 流程：
    * 1. CloudBase SDK signInWithOpenId() 一步完成登录
    * 2. 自动获取 openid + accessToken（JWT）
    * 3. accessToken 用于调用云托管接口时的 Authorization header
    * 4. 云托管服务端自动从 JWT 解码 openid，无需前端传入
-   * 
+   *
    * 前置条件：
    * - 控制台开启微信小程序身份源
    * - npm install @cloudbase/js-sdk + 微信开发者工具构建 npm
@@ -63,12 +58,8 @@ App({
     try {
       wx.showLoading({ title: '登录中...', mask: true })
 
-      // 初始化 CloudBase JS SDK
-      const initOptions = { env: ENV_ID }
-      if (PUBLISHABLE_KEY) {
-        initOptions.accessKey = PUBLISHABLE_KEY
-      }
-      const cbApp = cloudbase.init(initOptions)
+      // 初始化 CloudBase JS SDK 并执行静默登录
+      const cbApp = cloudbase.init({ env: ENV_ID })
 
       console.log('[登录] 开始 signInWithOpenId...')
 
