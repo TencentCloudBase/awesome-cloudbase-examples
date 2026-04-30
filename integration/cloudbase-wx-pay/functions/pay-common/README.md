@@ -72,17 +72,17 @@ cp .env.example .env
 signMode=sdk
 
 # 基础信息
-appId=wxd678efh567hg6787
-merchantId=1900007361
-merchantSerialNumber=36048B7D5F3B5D4C3FA2C5AFDE6CE0D1XXXX
-apiV3Key=K7m2n3N4p5Q6r7s8T9u0V1w2X3y4Z5a6
+appId=YOUR_APP_ID
+merchantId=YOUR_MERCHANT_ID
+apiV3Key=YOUR_API_V3_KEY
 
-# 私钥（PEM 格式字符串，注意换行用 \n 表示）
-privateKey=-----BEGIN PRIVATE KEY-----\nMIIEvgIBADA...\n-----END PRIVATE KEY-----
-
+# 凭证（两种模式共用，主动请求均需自签名）
+merchantSerialNumber=YOUR_SERIAL_NUMBER
+# 私钥（PEM 格式字符串，换行用 \n 表示）
+privateKey=-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_PEM_CONTENT\n-----END PRIVATE KEY-----
 # 微信支付公钥（用于验签，不是商户公钥）
-wxPayPublicKey=-----BEGIN PUBLIC KEY-----\nMIIBIjANBg...\n-----END PUBLIC KEY-----
-wxPayPublicKeyId=PUB_KEY_ID_0114232134912410000000000000
+wxPayPublicKey=-----BEGIN PUBLIC KEY-----\nYOUR_WX_PAY_PUBLIC_KEY_PEM_CONTENT\n-----END PUBLIC KEY-----
+wxPayPublicKeyId=YOUR_WX_PAY_PUBLIC_KEY_ID
 
 # 回调地址（部署后获得的公网 URL + 回调路径）
 #
@@ -108,15 +108,18 @@ corsAllowOrigin=https://your-frontend-domain.com
 ```env
 signMode=gateway
 
-appId=wxd678efh567hg6787
-merchantId=1900007361
-apiV3Key=K7m2n3N4p5Q6r7s8T9u0V1w2X3y4Z5a6
+# 基础信息
+appId=YOUR_APP_ID
+merchantId=YOUR_MERCHANT_ID
+apiV3Key=YOUR_API_V3_KEY
 
-# 凭证（与 SDK 模式相同，主动请求需要自签名）
-merchantSerialNumber=36048B7D5F3B5D4C3FA2C5AFDE6CE0D1XXXX
-privateKey=-----BEGIN PRIVATE KEY-----\nMIIEvgIBADA...\n-----END PRIVATE KEY-----
-wxPayPublicKey=-----BEGIN PUBLIC KEY-----\nMIIBIjANBg...\n-----END PUBLIC KEY-----
-wxPayPublicKeyId=PUB_KEY_ID_0114232134912410000000000000
+# 凭证（两种模式共用，主动请求均需自签名）
+merchantSerialNumber=YOUR_SERIAL_NUMBER
+# 私钥（PEM 格式字符串，换行用 \n 表示）
+privateKey=-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_PEM_CONTENT\n-----END PRIVATE KEY-----
+# 微信支付公钥（用于验签，不是商户公钥）
+wxPayPublicKey=-----BEGIN PUBLIC KEY-----\nYOUR_WX_PAY_PUBLIC_KEY_PEM_CONTENT\n-----END PUBLIC KEY-----
+wxPayPublicKeyId=YOUR_WX_PAY_PUBLIC_KEY_ID
 
 # 回调地址（指向集成中心，由集成中心解密后转发明文）
 #

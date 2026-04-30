@@ -40,7 +40,7 @@
 ### 1. 安装依赖
 
 ```bash
-cd examples/miniprogram-cloudrun
+cd example/miniprogram-cloudrun
 npm install
 ```
 

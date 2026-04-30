@@ -101,7 +101,7 @@ npm run dev        # http://localhost:5173
 ```bash
 # 确保 cloudbaserc.json 中 serviceName 正确
 npm run build          # 构建产物输出到 dist/
- tcb app deploy web-pay    # 部署到静态托管
+tcb app deploy web-pay    # 部署到静态托管
 ```
 
 ---
