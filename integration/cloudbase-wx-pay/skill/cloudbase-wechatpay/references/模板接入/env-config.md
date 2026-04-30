@@ -22,7 +22,7 @@ cp .env.example .env
 
 | 变量名 | 必填 | 示例值 | 说明 |
 |--------|:----:|--------|------|
-| `signMode` | 是 | `sdk` \| `gateway` | 签名模式。`sdk`=SDK 自验签；`gateway`=集成中心代签 |
+| `signMode` | 是 | `sdk` \| `gateway` | 签名模式。`sdk`=SDK 自验签（自己部署时用）；`gateway`=集成中心代签（控制台创建时用，**也是代码级默认值**）。详见 [sign-mode.md](sign-mode.md) |
 | `appId` | 是 | `YOUR_APP_ID` | 小程序/公众号 AppID，需已在商户平台绑定 |
 | `merchantId` | 是 | `YOUR_MERCHANT_ID` | 微信支付商户号（10 位数字） |
 
