@@ -30,8 +30,8 @@ compatibility: Requires Node.js 16+ for pay-common template.
 2. **确认支付方式**：仅下单和前端集成需要确认（JSAPI/H5/Native）
 3. **API 问题引流**：涉及签名算法、API 错误码、退款规则 → 推荐 `wechatpay-basic-payment`
 4. **Demo 优先**：回答前端集成问题时，优先引用以下 Demo：
-   - 小程序：[GitHub 官方示例](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/example/miniprogram)
-   - Web 测试页：本地 `example/react/`（React + Vite）
+   - 小程序：[GitHub 官方示例](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram)
+   - Web 测试页：本地 `examples/react/`（React + Vite）
    - 各支付方式代码示例见 `pay-common/README.md` §Step 5
 5. **脚本优先**：排查配置问题时，优先使用 `scripts/` 下的诊断脚本
 6. **安全优先**：私钥、证书等敏感信息必须用环境变量注入，禁止硬编码
@@ -215,8 +215,8 @@ graph TD
 
 | Demo | 来源 | 调用方式 | 适用部署 | 说明 |
 |------|------|---------|---------|------|
-| **小程序** | [GitHub 官方](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/example/miniprogram) | `signInWithOpenId()` + Bearer Token（云 API 网关） | HTTP 云函数 | **官方示例**，支持下单/查单/关单/退款/转账 |
-| **React Web** | 本地 `example/react/` | React + Vite，HTTP 访问服务直连（无鉴权） | 静态托管 + HTTP 访问服务 | Web 测试页，JSAPI/H5/Native 三合一 |
+| **小程序** | [GitHub 官方](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram) | `signInWithOpenId()` + Bearer Token（云 API 网关） | HTTP 云函数 | **官方示例**，支持下单/查单/关单/退款/转账 |
+| **React Web** | 本地 `examples/react/` | React + Vite，HTTP 访问服务直连（无鉴权） | 静态托管 + HTTP 访问服务 | Web 测试页，JSAPI/H5/Native 三合一 |
 
 > 小程序 Demo 前置条件：
 > 1. 已开通 CloudBase 环境 + 开启微信小程序身份源

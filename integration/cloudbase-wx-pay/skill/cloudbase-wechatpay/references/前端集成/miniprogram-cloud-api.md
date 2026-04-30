@@ -1,6 +1,6 @@
 # 小程序接入 - 云 API 网关（推荐）
 
-> 基于 `example/miniprogram/` Demo + `pay-common/README.md` Step 5 整理。
+> 基于 `examples/miniprogram/` Demo + `pay-common/README.md` Step 5 整理。
 > **推荐方式**：通过 CloudBase 云 API 网关调用 HTTP 云函数。
 
 ---
@@ -43,7 +43,7 @@
 ## Step 1：安装依赖
 
 ```bash
-cd example/miniprogram
+cd examples/miniprogram
 npm install
 ```
 

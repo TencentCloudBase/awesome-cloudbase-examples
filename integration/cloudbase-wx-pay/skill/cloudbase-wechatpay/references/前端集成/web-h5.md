@@ -1,6 +1,6 @@
 # H5 页面支付接入
 
-> 基于 `pay-common/README.md` Step 5 H5 章节 + `example/react/` 整理。
+> 基于 `pay-common/README.md` Step 5 H5 章节 + `examples/react/` 整理。
 
 ---
 

@@ -1,6 +1,6 @@
 # PC 扫码支付（Native）接入
 
-> 基于 `pay-common/README.md` Step 5 Native 章节 + `example/react/` 整理。
+> 基于 `pay-common/README.md` Step 5 Native 章节 + `examples/react/` 整理。
 
 ---
 
@@ -177,9 +177,9 @@ pollForPayment(
 )
 ```
 
-### 4. 完整页面示例（参考 example/react/test-wx-pay.html）
+### 4. 完整页面示例（参考 examples/react/test-wx-pay.html）
 
-`example/react/test-wx-pay.html` 是一个三合一测试页，包含 JSAPI、H5、Native 三种支付方式的入口和二维码展示。
+`examples/react/test-wx-pay.html` 是一个三合一测试页，包含 JSAPI、H5、Native 三种支付方式的入口和二维码展示。
 
 ---
 

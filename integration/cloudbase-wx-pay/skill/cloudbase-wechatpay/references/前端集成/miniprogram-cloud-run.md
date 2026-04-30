@@ -1,6 +1,6 @@
 # 小程序接入 - 云托管直连
 
-> 基于 `example/miniprogram-cloudrun/` Demo + cloudrun README 整理。
+> 基于 `examples/miniprogram-cloudrun/` Demo + cloudrun README 整理。
 > 适用于将 pay-common 部署到 **CloudBase 云托管**的场景。
 
 ---
@@ -57,7 +57,7 @@
 ## Step 1：安装依赖 & 配置
 
 ```bash
-cd example/miniprogram-cloudrun
+cd examples/miniprogram-cloudrun
 npm install
 ```
 

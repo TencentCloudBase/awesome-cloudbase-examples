@@ -188,15 +188,15 @@ L3: scripts/ 脚本执行                      ← 排障时按需调用
 |------|------|
 | **触发 prompt** | "小程序怎么调起支付" / "H5 怎么接" / "PC 扫码" |
 | **加载文档** | 按场景加载对应文档 |
-| **内容来源** | `pay-common/README.md` Step 5（小程序、H5、Native、APP） + `example/miniprogram/` + `example/miniprogram-cloudrun/` + `example/react/` + `微信支付三种方式对比报告.md` |
+| **内容来源** | `pay-common/README.md` Step 5（小程序、H5、Native、APP） + `examples/miniprogram/` + `examples/miniprogram-cloudrun/` + `examples/react/` + `微信支付三种方式对比报告.md` |
 
 **Demo 索引**（写入 SKILL.md + 每篇前端文档末尾）：
 
 | Demo | 路径 | 调用方式 | 说明 |
 |------|------|---------|------|
-| 小程序-云API版 | `example/miniprogram/` | `signInWithOpenId` + Bearer Token | 推荐，通过云API网关调用 |
-| 小程序-云托管版 | `example/miniprogram-cloudrun/` | `wx.request` 直连云托管 | 适合云托管部署 |
-| Web 测试页 | `example/react/`（test-wx-pay.html） | JSAPI + H5 + Native 三合一 | 浏览器端测试 |
+| 小程序-云API版 | `examples/miniprogram/` | `signInWithOpenId` + Bearer Token | 推荐，通过云API网关调用 |
+| 小程序-云托管版 | `examples/miniprogram-cloudrun/` | `wx.request` 直连云托管 | 适合云托管部署 |
+| Web 测试页 | `examples/react/`（test-wx-pay.html） | JSAPI + H5 + Native 三合一 | 浏览器端测试 |
 
 **每篇前端文档必须包含**：
 1. 前端完整调用链路（登录 → 下单 → 调起支付 → 查单 → 退款）
@@ -338,9 +338,9 @@ description: >
 | 三种方式对比 | `notes/wechat-pay/微信支付三种方式对比报告.md` | - | JSAPI/H5/Native 对比 |
 | 商家转账分析 | `notes/wechat-pay/merchant-transfer-analysis.md` | - | 商家转账专项 |
 | 改动分析 | `notes/wechat-pay/pay-common-changelog.md` | - | 版本变更记录 |
-| 小程序 Demo | `example/miniprogram/` | - | 前端集成示例 |
-| 云托管 Demo | `example/miniprogram-cloudrun/` | - | 云托管调用示例 |
-| Web Demo | `example/react/` | - | H5/Native 测试页 |
+| 小程序 Demo | `examples/miniprogram/` | - | 前端集成示例 |
+| 云托管 Demo | `examples/miniprogram-cloudrun/` | - | 云托管调用示例 |
+| Web Demo | `examples/react/` | - | H5/Native 测试页 |
 
 ### 6.2 材料 → 文档映射
 
@@ -353,10 +353,10 @@ description: >
 | `deploy-cloud-function.md` | README Step 4 方式一 | cloudbaserc.json |
 | `deploy-cloud-run.md` | README Step 4 方式二 + cloudrun Demo README | Dockerfile |
 | `deploy-local.md` | README 本地开发 | - |
-| `miniprogram-cloud-api.md` | README Step 5 小程序 + `example/miniprogram/` | 架构设计笔记 |
-| `miniprogram-cloud-run.md` | cloudrun Demo README + `example/miniprogram-cloudrun/` | - |
-| `web-h5.md` | README + `example/react/` | 三种方式对比 |
-| `web-native.md` | README + `example/react/` | 三种方式对比 |
+| `miniprogram-cloud-api.md` | README Step 5 小程序 + `examples/miniprogram/` | 架构设计笔记 |
+| `miniprogram-cloud-run.md` | cloudrun Demo README + `examples/miniprogram-cloudrun/` | - |
+| `web-h5.md` | README + `examples/react/` | 三种方式对比 |
+| `web-native.md` | README + `examples/react/` | 三种方式对比 |
 | `app.md` | README APP 支付章节 | wechatpay-basic-payment 引用 |
 | `order-service.md` | README Step 6 + 方案对比分析（数据库设计） | - |
 | `transfer.md` | README 商家转账 + 商家转账分析 + 开发注意事项 §2.5 | - |

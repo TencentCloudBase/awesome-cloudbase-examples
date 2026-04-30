@@ -35,7 +35,7 @@ cd your-project-name/pay-common
 npm install
 ```
 
-> 小程序前端 Demo 在同一仓库的 `example/miniprogram/` 目录。
+> 小程序前端 Demo 在同一仓库的 `examples/miniprogram/` 目录。
 
 ## Step 2：配置环境变量
 
@@ -721,8 +721,8 @@ Page({
 })
 ```
 
-> 完整小程序 Demo 见 [GitHub 官方示例](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/example/miniprogram)。
-> Web 测试页（React）见本地 `example/react/`。
+> 完整小程序 Demo 见 [GitHub 官方示例](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram)。
+> Web 测试页（React）见本地 `examples/react/`。
 > H5 / Native 端接入见 `references/前端集成/` 对应文档。
 
 ## Step 6：接入业务逻辑（可选）
