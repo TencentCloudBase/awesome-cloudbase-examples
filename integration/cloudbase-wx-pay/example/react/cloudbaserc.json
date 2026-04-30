@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "envId": "test-wxpay-5gy4ugzreef15cfe",
+  "envId": "your-env-id",
   "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json",
   "app": {
     "serviceName": "web-pay-07",
