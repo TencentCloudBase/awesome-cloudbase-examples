@@ -242,7 +242,7 @@ pay-common/
 │   ├── check_deploy_config.py
 │   └── test_callback_url.sh
 │
-└── example/                📱 前端 Demo
+└── examples/               📱 前端 Demo
     ├── miniprogram/         小程序-云 API 版
     ├── miniprogram-cloudrun/ 小程序-云托管版
     └── web/                 Web 测试页（JSAPI+H5+Native 三合一）

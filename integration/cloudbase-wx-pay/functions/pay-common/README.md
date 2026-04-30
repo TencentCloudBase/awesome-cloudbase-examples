@@ -287,18 +287,15 @@ Body:    { _action: "路由名", ...业务参数 }
 // --- app.js：登录获取 accessToken ---
 const cloudbase = require('@cloudbase/js-sdk')  // npm install @cloudbase/js-sdk
 const ENV_ID = 'your-env-id'
-const PUBLISHABLE_KEY = ''  // 控制台 → 身份认证 → API Key 管理 获取
 
 App({
   globalData: { accessToken: '', openid: '', loginReady: false },
   _cbApp: null,
 
   async onLaunch() {
-    // 初始化 SDK 并静默登录
+    // 初始化 SDK 并静默登录（signInWithOpenId 无需额外配置，只需开启小程序身份源）
     if (!this._cbApp) {
-      const initOptions = { env: ENV_ID }
-      if (PUBLISHABLE_KEY) initOptions.accessKey = PUBLISHABLE_KEY
-      this._cbApp = cloudbase.init(initOptions)
+      this._cbApp = cloudbase.init({ env: ENV_ID })
     }
     const { data, error } = await this._cbApp.auth.signInWithOpenId()
     if (!error && data) {

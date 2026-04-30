@@ -222,7 +222,7 @@ graph TD
 > 1. 已开通 CloudBase 环境 + 开启微信小程序身份源
 > 2. 已将 pay-common 部署为 HTTP 云函数
 > 3. 已完成商户号进件 + 后端环境变量配置
-> 4. 修改 `app.js` 填入 ENV_ID 和 PUBLISHABLE_KEY，`project.config.json` 填入 appid
+> 4. 修改 `app.js` 填入 ENV_ID，`project.config.json` 填入 appid
 
 完整代码示例见各前端集成文档。
 

@@ -50,7 +50,6 @@
 | pay-common 已部署到云托管 | 见 [deploy-cloud-run.md](../部署/deploy-cloud-run.md) |
 | 云托管访问域名 | 如 `https://xxx.ap-shanghai.app.tcloudbase.com` |
 | CloudBase 身份认证 | 控制台已开启微信小程序身份源 |
-| Publishable Key | 控制台 → 身份认证 → API Key 管理 |
 
 ---
 
@@ -67,7 +66,6 @@ npm install
 const cloudbase = require('@cloudbase/js-sdk')
 
 const ENV_ID = 'your-env-id'
-const PUBLISHABLE_KEY = 'your-publishable-key'
 const CLOUDRUN_BASE_URL = 'https://your-env-id-your-uin.ap-shanghai.app.tcloudbase.com'
 
 App({
@@ -81,10 +79,9 @@ App({
   _cbApp: null,
 
   async onLaunch() {
+    // signInWithOpenId 无需额外配置，只需开启小程序身份源即可
     if (!this._cbApp) {
-      const opts = { env: ENV_ID }
-      if (PUBLISHABLE_KEY) opts.accessKey = PUBLISHABLE_KEY
-      this._cbApp = cloudbase.init(opts)
+      this._cbApp = cloudbase.init({ env: ENV_ID })
     }
 
     const { data, error } = await this._cbApp.auth.signInWithOpenId()

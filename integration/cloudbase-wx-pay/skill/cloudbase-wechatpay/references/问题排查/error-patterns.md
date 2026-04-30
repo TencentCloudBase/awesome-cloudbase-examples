@@ -222,9 +222,6 @@ bash scripts/test_callback_url.sh https://your-domain/cloudrun/v1/pay/unifiedOrd
 ├── ENV_ID 未替换或写错
 │   └── 控制台显示 your-env-id → 未修改默认值
 │
-├── PUBLISHABLE_KEY 未配置
-│   └── 控制台 → 身份认证 → API Key 管理 → 创建
-│
 ├── 身份源未开启
 │   └── 控制台 → 身份认证 → 开启「微信小程序」
 │

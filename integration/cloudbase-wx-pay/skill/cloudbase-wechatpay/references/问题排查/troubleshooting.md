@@ -55,10 +55,10 @@
 
 | # | 问题 | 原因 | 解决方案 |
 |---|------|------|---------|
-| 17 | **登录失败** | `ENV_ID` 或 `PUBLISHABLE_KEY` 未替换/填错 | 检查前端 `app.js` 配置；确认控制台已开启小程序身份源 |
+| 17 | **登录失败** | `ENV_ID` 未替换或小程序身份源未开启 | 检查前端 `app.js` 配置；确认控制台已开启小程序身份源 |
 | 18 | **openid 缺失** | 未使用 `signInWithOpenId()` 登录 | 必须通过 `signInWithOpenId()` 获取，不能用 `wx.login()` 的 code 换取 |
 | 19 | **`requestPayment` 签名错误** | 后端返回的 `paySign` 签名串有问题 | 确认下单与调起使用同一私钥；检查 `package` 字段格式（需 `prepay_id=xxx`） |
-| 20 | **云 API 调用 401/403** | accessToken 过期或无效 | 检查 token 刷新机制；确认 `PUBLISHABLE_KEY` 正确 |
+| 20 | **云 API 调用 401/403** | accessToken 过期或无效 | 检查 token 刷新机制，调用 `reLogin()` 重新登录 |
 | 21 | **request 合法域名未配置** | `wx.request` 被拦截 | 小程序后台 → 开发设置 → 服务器域名 → 添加 `tcloudbasegateway.com` |
 
 ### 3.2 H5

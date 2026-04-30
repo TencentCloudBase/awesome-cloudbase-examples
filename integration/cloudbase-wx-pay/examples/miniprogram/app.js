@@ -3,10 +3,6 @@
 const ENV_ID = 'YOUR_ENV_ID'
 const API_GATEWAY = `https://${ENV_ID}.api.tcloudbasegateway.com`
 
-// Publishable Key（控制台 → 身份认证 → API Key 管理 获取）
-// TODO: ⚠️ 部署前替换为你的 Publishable Key
-const PUBLISHABLE_KEY = ''
-
 // 引入 CloudBase JS SDK（npm install @cloudbase/js-sdk）
 const cloudbase = require('@cloudbase/js-sdk')
 
@@ -39,21 +35,14 @@ App({
    *
    * 前置条件：
    * - 控制台开启微信小程序身份源
-   * - 控制台获取 Publishable Key（身份认证 → API Key 管理）
    * - npm install @cloudbase/js-sdk + 微信开发者工具构建 npm
    */
   async login() {
     try {
       wx.showLoading({ title: '登录中...', mask: true })
 
-      // 初始化 CloudBase JS SDK
-      // signInWithOpenId 默认走微信云开发模式（useWxCloud: true）
-      // 如果报错需要 accessKey，请在控制台获取 Publishable Key 填入
-      const initOptions = { env: ENV_ID }
-      if (PUBLISHABLE_KEY) {
-        initOptions.accessKey = PUBLISHABLE_KEY
-      }
-      const cbApp = cloudbase.init(initOptions)
+      // 初始化 CloudBase JS SDK 并执行静默登录
+      const cbApp = cloudbase.init({ env: ENV_ID })
 
       // 静默登录：自动获取 openid，用户无感知
       const { data, error } = await cbApp.auth.signInWithOpenId()

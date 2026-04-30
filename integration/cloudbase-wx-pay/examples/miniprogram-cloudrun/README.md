@@ -32,7 +32,6 @@
 - ✅ 已将 pay-common 部署到 CloudBase 云托管
 - ✅ 获取云托管访问域名（如 `https://pay-common-xxx.app.tcloudbase.com`）
 - ✅ CloudBase 控制台已开启微信小程序身份源
-- ✅ 获取 Publishable Key（控制台 → 身份认证 → API Key 管理）
 - ✅ 已完成微信支付商户进件并配置到 pay-common
 
 ## 快速开始
@@ -40,7 +39,7 @@
 ### 1. 安装依赖
 
 ```bash
-cd example/miniprogram-cloudrun
+cd examples/miniprogram-cloudrun
 npm install
 ```
 
@@ -49,7 +48,6 @@ npm install
 **`app.js`**：
 ```javascript
 const ENV_ID = 'your-env-id'                          // 云开发环境 ID
-const PUBLISHABLE_KEY = 'your-publishable-key'         // API Key（如需要）
 const CLOUDRUN_BASE_URL = 'https://your-env-id-your-uin.ap-shanghai.app.tcloudbase.com'
 ```
 

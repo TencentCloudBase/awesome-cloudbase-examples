@@ -34,7 +34,6 @@
 |------|------|
 | CloudBase 环境 | 已开通，记录 ENV_ID |
 | 小程序身份源 | 控制台 → 身份认证 → 开启微信小程序身份源 |
-| Publishable Key | 控制台 → 身份认证 → API Key 管理 |
 | pay-common 已部署 | 部署为 HTTP 云函数（见 [deploy-cloud-function.md](../部署/deploy-cloud-function.md)）|
 | 微信开发者工具 | 最新稳定版 |
 
@@ -66,18 +65,15 @@ npm install
 const cloudbase = require('@cloudbase/js-sdk')
 
 const ENV_ID = 'your-env-id'           // ⚠️ 替换为你的云开发环境 ID
-const PUBLISHABLE_KEY = 'your-key'     // 控制台 → 身份认证 → API Key 管理
 
 App({
   globalData: { accessToken: '', openid: '', loginReady: false },
   _cbApp: null,
 
   async onLaunch() {
-    // 初始化 CloudBase
+    // 初始化 CloudBase 并静默登录（signInWithOpenId 无需额外配置）
     if (!this._cbApp) {
-      const initOptions = { env: ENV_ID }
-      if (PUBLISHABLE_KEY) initOptions.accessKey = PUBLISHABLE_KEY
-      this._cbApp = cloudbase.init(initOptions)
+      this._cbApp = cloudbase.init({ env: ENV_ID })
     }
 
     // 静默登录获取 accessToken + openid
@@ -122,7 +118,6 @@ App({
 | 要点 | 说明 |
 |------|------|
 | `signInWithOpenId()` | 必须使用此方法获取 openid，不能用 `wx.login()` 的 code 换取 |
-| PUBLISHABLE_KEY | 生产环境必须配置，否则无法静默登录 |
 | 登录时机 | 在 `onLaunch` 中执行，确保支付前已完成 |
 
 ---
@@ -326,7 +321,7 @@ await callPayCommon('wxpay_transfer', {
 
 | # | 问题 | 原因 | 解决方案 |
 |---|------|------|---------|
-| 1 | 登录失败 | ENV_ID 或 PUBLISHABLE_KEY 错误 | 检查 app.js 配置；确认控制台已开启小程序身份源 |
+| 1 | 登录失败 | ENV_ID 未替换或小程序身份源未开启 | 检查 app.js 配置；确认控制台已开启小程序身份源 |
 | 2 | openid 为空 | 未使用 `signInWithOpenId()` | 必须用此方法，不能用 wx.login 的 code |
 | 3 | `requestPayment` 签名错误 | 下单与调起用了不同私钥 | 确保同一套凭证 |
 | 4 | 401 Unauthorized | Token 过期或无效 | pay.js 中已有自动重试逻辑 |

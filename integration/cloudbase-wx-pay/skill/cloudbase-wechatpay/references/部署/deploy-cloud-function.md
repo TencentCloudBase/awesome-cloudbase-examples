@@ -177,7 +177,7 @@ pay-common/                          # 项目根目录
 │   ├── validator.js                 # 参数校验
 │   └── cloudbaseAuth.js             # CloudBase 鉴权
 ├── scripts/                         # 诊断脚本
-├── example/                        # 前端 Demo
+├── examples/                       # 前端 Demo
 └── scf_bootstrap                    # SCF 启动文件（可选）
 ```
 

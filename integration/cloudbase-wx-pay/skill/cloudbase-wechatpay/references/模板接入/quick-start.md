@@ -613,17 +613,15 @@ python3 scripts/check_deploy_config.py /path/to/pay-common
 // app.js
 const cloudbase = require('@cloudbase/js-sdk')
 const ENV_ID = 'your-env-id'
-const PUBLISHABLE_KEY = ''  // 控制台 → 身份认证 → API Key 管理
 
 App({
   globalData: { accessToken: '', openid: '', loginReady: false },
   _cbApp: null,
 
   async onLaunch() {
+    // signInWithOpenId 无需额外配置，只需开启小程序身份源即可
     if (!this._cbApp) {
-      const initOptions = { env: ENV_ID }
-      if (PUBLISHABLE_KEY) initOptions.accessKey = PUBLISHABLE_KEY
-      this._cbApp = cloudbase.init(initOptions)
+      this._cbApp = cloudbase.init({ env: ENV_ID })
     }
     // 静默登录获取 accessToken 和 openid
     const { data, error } = await this._cbApp.auth.signInWithOpenId()

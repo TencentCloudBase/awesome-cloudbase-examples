@@ -222,7 +222,7 @@ L3: scripts/ 脚本执行                      ← 排障时按需调用
 | 回调收不到 | URL 不通 / 未开 HTTP 访问服务 | `scripts/test_callback_url.sh` | deploy-*.md |
 | 回调收不到 | signMode 与回调地址不匹配 | 检查 signMode + notifyURL | sign-mode.md |
 | 商户号错误 | mchId 未从后端返回 | 检查转账流程 mchId 透传 | transfer.md |
-| 登录失败 | ENV_ID 或 PUBLISHABLE_KEY 配错 | 检查前端 app.js 配置 | miniprogram-*.md |
+| 登录失败 | ENV_ID 未替换或身份源未开启 | 检查前端 app.js 配置；确认控制台已开启小程序身份源 | miniprogram-*.md |
 | openid 缺失 | JWT 中未包含 openid | 确认使用 signInWithOpenId | miniprogram-*.md |
 | 部署 502 | 云函数冷启动超时 / 环境变量缺失 | `scripts/validate_env.sh` | deploy-*.md |
 
@@ -294,7 +294,7 @@ description: >
 1. **确认部署方式**：任何能力使用前须先确认——云函数 / 云托管 / 本地开发
 2. **确认支付方式**：仅下单和前端集成需要确认（JSAPI/H5/Native/APP）
 3. **API 层面问题引流**：涉及签名算法、API 错误码、退款规则等→ 推荐 wechatpay-basic-payment
-4. **Demo 优先**：回答前端集成问题时，优先引用 example/ 下的参考代码
+4. **Demo 优先**：回答前端集成问题时，优先引用 examples/ 下的参考代码
 5. **脚本优先**：排查配置问题时，优先使用 scripts/ 下的诊断脚本
 6. **安全优先**：涉及私钥、证书等敏感信息时，提醒用户使用环境变量而非硬编码
 ```
