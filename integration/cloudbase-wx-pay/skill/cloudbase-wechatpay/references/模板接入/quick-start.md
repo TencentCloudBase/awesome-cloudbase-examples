@@ -39,12 +39,32 @@ npm install
 
 ## Step 2：配置环境变量
 
-```bash
-# 复制环境变量模板
-cp .env.example .env
-```
+> ⚠️ **代码只读 `process.env`，没有 `dotenv`，不会自动加载 `.env` 文件！**
+>
+> | 创建方式 | 环境变量写入位置 |
+> |---------|----------------|
+> | **控制台 → 集成中心创建** | 集成中心自动填写 + 自动部署（**跳过本步骤**） |
+> | **自己 CLI 部署到云函数** | `cloudbaserc.json` → `envVariables` 字段 |
+> | **云托管部署** | 控制台 → 服务配置 → 环境变量 |
+> | **本地调试** | 手动 `export` 或启动脚本注入 |
+>
+> **集成中心用户直接跳到 Step 3；CLI 部署的填 cloudbaserc；本地调试看下方参考。**
 
-编辑 `.env`，填入你的商户参数。**根据部署方式选择签名模式**：
+---
+
+#### 集成中心用户：跳过以下内容，直接到 Step 3
+
+集成中心会自动填写所有环境变量并部署。
+
+#### CLI 部署 / 本地测试：变量列表参考
+
+`.env.example` 是**参考模板**（告诉你需要哪些变量、格式是什么），实际写入位置取决于你的部署方式：
+
+- **CLI 部署** → 填入 `cloudbaserc.json` 的 `envVariables`
+- **本地测试** → `export` 或启动脚本注入
+- **控制台部署** → 按此列表逐项填写
+
+**根据你的签名模式选择配置：**
 
 ### 方式 A：SDK 模式（自行验签解密）
 
@@ -133,10 +153,11 @@ curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_order \
 {"code": 0, "msg": "success", "data": {"prepay_id": "wx201410272009395522657a690389285100", ...}}
 ```
 
-如果返回 `code: -1`，检查 `.env` 配置是否正确。可运行诊断脚本：
+如果返回 `code: -1`，检查环境变量是否正确。可运行诊断脚本：
 
 ```bash
-bash scripts/validate_env.sh .env
+# 用 .env 格式文件作为输入验证变量完整性（仅本地调试用）
+bash scripts/validate_env.sh /path/to/.env
 ```
 
 ## Step 3.5：理解 CloudBase 云函数的三种调用方式 ⭐
@@ -309,7 +330,7 @@ SDK 验签模式下，小程序 Demo 的请求走 **两个完全不同的通道*
 | **目标域名** | 云 API 网关域名 | **HTTP 访问服务域名** |
 | **鉴权方式** | Bearer Token（登录后获取） | **无鉴权**（微信不带 Token） |
 | **路由路径** | `/v1/functions/pay-common` | `/{你的路径}/unifiedOrderTrigger` |
-| **配置位置** | 前端代码写死 | **环境变量 `.env` 的 `notifyURL*`** |
+| **配置位置** | 前端代码写死 | **环境变量的 `notifyURL*`（写入位置见 Step 2）** |
 
 ### 4.1 配置 cloudbaserc.json 并部署云函数 ⭐
 
@@ -449,7 +470,7 @@ tcb routes list -e your-env-id --filter "Path=/pay/wx-pay"
 
 #### 4.3 填写回调 URL（基于上面获得的真实地址）
 
-拿到 HTTP 访问服务域名 + 路由路径后，拼装回调 URL 并填入 `.env`：
+拿到 HTTP 访问服务域名 + 路由路径后，拼装回调 URL 并写入环境变量（CLI 部署 → `cloudbaserc.json` 的 `envVariables`；控制台 → 逐项填写）：
 
 ```env
 # ============================================================
@@ -486,7 +507,7 @@ transferNotifyUrl=https://test-wxpay-5gy4ugzreef15cfe-1326375956.ap-shanghai.app
 
 ### 4.4 同步环境变量到线上 ⭐⭐
 
-> **`.env` 改了 ≠ 线上生效！** 必须显式同步到 CloudBase 控制台或重新部署。
+> **本地改了 ≠ 线上生效！** 必须显式同步到 CloudBase 控制台或重新部署。
 
 #### 环境变量配置的两种方式
 
@@ -507,7 +528,7 @@ transferNotifyUrl=https://test-wxpay-5gy4ugzreef15cfe-1326375956.ap-shanghai.app
 4. 点击顶部标签 → **函数配置**（或「编辑」按钮）
 5. 在 **环境变量** 区域 → 点击 **编辑** → 逐条添加/修改变量
 
-**从 `.env` 映射到控制台的对照表**：
+**变量名与值对照表**（以下 `.env` 格式仅作展示，实际写入位置见 Step 2）：
 
 ```
 .env 文件格式（key=value）          控制台界面
@@ -545,11 +566,11 @@ curl -X POST https://your-http-domain/wx-pay/wxpay_order \
 
 # 如果返回 "appId 不能为空" / "merchantId 格式错误" → 环境变量没生效！
 
-# 方法二：运行一致性检查脚本（对比 .env 与线上）
+# 方法二：运行一致性检查脚本（对比本地配置与线上）
 python3 scripts/check_deploy_config.py /path/to/pay-common
 ```
 
-> ⚠️ **每次修改 .env 后都必须同步到线上，否则线上用的是旧配置！这是新手最容易踩的坑！**
+> ⚠️ **每次本地修改环境变量后都必须同步到线上（控制台或重新部署），否则线上用的是旧配置！这是新手最容易踩的坑！**
 
 ### 4.5 回调处理注意事项 ⭐⭐⭐
 
@@ -601,7 +622,7 @@ python3 scripts/check_deploy_config.py /path/to/pay-common
 | 2 | HTTP 访问服务已开启 | 控制台 → 环境管理 → HTTP 访问服务 | 未开启 = 域名不存在 |
 | 3 | 路由 Path 已创建且指向 pay-common | `tcb routes list -e your-env-id` | 路径错误 = 404 |
 | 4 | 身份认证已关闭 | 控制台路由管理查看 / CLI list 结果 | 未关 = 401/403 |
-| 5 | 回调 URL 含完整路径 | `.env` 中 notifyURL* 值 | 缺 path = 404 |
+| 5 | 回调 URL 含完整路径 | 环境变量 `notifyURL*` 值 | 缺 path = 404 |
 | 6 | 安全组放行微信 IP | 云服务器安全组配置 | IP 白名单未开放 |
 | 7 | 应答时间 < 5 秒 | 日志查看 handler 执行耗时 | 超时 = 重试风暴 |
 

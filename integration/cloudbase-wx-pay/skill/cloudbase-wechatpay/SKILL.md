@@ -194,15 +194,16 @@ graph TD
 | `merchantSerialNumber` | 必填 | 必填 | API 证书序列号 |
 | `apiV3Key` | 必填 | 必填 | APIv3 密钥（32 字节） |
 | `privateKey` | 必填 | 必填 | 商户 API 私钥（PEM，换行用 `\n`） |
-| `wxPayPublicKey` | 必填 | 必填 | 微信支付公钥（非商户公钥！） |
-| `wxPayPublicKeyId` | 必填 | 必填 | 微信支付公钥 ID |
+| `wxPayPublicKey` | 条件必填* | 不需要 | 微信支付公钥（非商户公钥！）。配了→公钥验签模式；不配→证书自动下载模式。详见 [verify-mode.md](references/模板接入/verify-mode.md) |
+| `wxPayPublicKeyId` | 条件必填* | 不需要 | 微信支付公钥 ID（与 wxPayPublicKey 成对使用） |
 | `notifyURLPayURL` | 自己的域名（含完整 path） | **集成中心自动生成**，直接复制填入 | 支付回调地址 |
 | `notifyURLRefundsURL` | 自己的域名（含完整 path） | **集成中心自动生成**，直接复制填入 | 退款回调地址 |
 | `transferNotifyUrl` | 自己的域名（含完整 path） | **集成中心自动生成**，直接复制填入 | 转账回调地址 |
 | `corsAllowOrigin` | 选填 | 选填 | CORS 允许来源（多域逗号分隔） |
 
 > **关键差异**：
-> - **凭证完全相同**：两种模式需要相同的私钥/公钥/证书等，区别仅在于 **回调 URL 和部署要求**
+> - **凭证基本相同**，但 SDK 模式下 `wxPayPublicKey` / `wxPayPublicKeyId` 可选（不配则自动走证书验签模式，详见 [verify-mode.md](references/模板接入/verify-mode.md)）
+> - 区别主要在于 **回调 URL 和部署要求**
 > - **SDK 模式**：回调指向自己的服务（HTTP 访问服务域名，**必须包含路由 Path**）；回调路由不能开身份认证；**回调不能走云 API 网关**
 >   - URL 组装公式：`{HTTP访问服务域名}/{路由Path}/{API路径}`
 >   - 真实示例：`https://test-wxpay-xxx.ap-shanghai.app.tcloudbase.com/pay/wx-pay/unifiedOrderTrigger`

@@ -50,11 +50,43 @@ npm install
 
 ### Step 3：配置环境变量
 
+> ⚠️ **代码只读 `process.env`，不会自动加载 `.env` 文件！**
+>
+> | 创建方式 | 环境变量写入位置 | `.env` 文件？ |
+> |---------|----------------|:---:|
+> | **CloudBase 控制台 → 集成中心创建** | 集成中心自动填写 + 自动部署 | ❌ 不需要 |
+> | **自己 CLI 部署到云函数** | `cloudbaserc.json` → `envVariables` 字段 → `tcb fn deploy` 写入运行时 | ❌ 不需要 |
+> | **云托管部署** | 控制台 → 服务配置 → 环境变量（Dockerfile 注释已说明） | ❌ 不需要 |
+> | **本地开发 / 调试** | 手动 `export` 或启动脚本注入 `process.env` | 📄 **`.env.example` 仅作参考模板** |
+>
+> **总结：集成中心用户直接跳过本步骤；CLI 部署的填 `cloudbaserc.json` 的 `envVariables`；只有本地调试才需要看下面的变量列表。**
+
+---
+
+#### 如果你使用集成中心（控制台创建），跳过以下内容
+
+集成中心会自动为你填写所有环境变量并部署云函数，无需手动操作。
+
+#### 如果你是本地测试或自部署
+
+`.env.example` 是**参考模板**（告诉你需要哪些变量、格式是什么），但代码不会自动读取它。本地测试时你需要把值注入 `process.env`：
+
 ```bash
-cp .env.example .env
+# 方式一：直接 export 后启动
+export appId=YOUR_APP_ID
+export merchantId=YOUR_MERCHANT_ID
+# ... 其他变量
+npm start
+
+# 方式二：一行搞定
+signMode=sdk appId=YOUR_APP_ID merchantId=YOUR_MERCHANT_ID npm start
+
+# 方式三：用 envfile 工具（可选安装）
+# npm install -g envfile
+# envfile .env npm start
 ```
 
-编辑 `.env` 文件，填入你的商户参数。**根据你的签名模式选择配置项：**
+下面是完整的变量列表和格式说明，**根据你的签名模式选择：**
 
 #### SDK 模式（自行签名验签）
 
