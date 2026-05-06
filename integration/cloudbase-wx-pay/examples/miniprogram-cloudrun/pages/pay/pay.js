@@ -47,10 +47,10 @@ function getRefundStateDesc(refundStatus) {
  * 
  * 与云函数版的区别：
  * - 云函数版：经云 API 网关 → /v1/functions/pay-common?webfn=true，通过 body._action 分发路由
- * - 云托管版：直连云托管域名 → /cloudrun/v1/pay/<action> 路径，Express 标准路由分发
+ * - 云托管版：直连云托管域名 → /wx-pay/<action> 路径，Express 标准路由分发
  * 
  * 云托管的优势：
- * - 标准 RESTful 路径（/cloudrun/v1/pay/wxpay_order 等）
+ * - 标准 RESTful 路径（/wx-pay/wxpay_order 等）
  * - 无需 _action 中间层分发，Express 原生路由处理
  * - 支持更灵活的部署配置（自定义域名、多实例、弹性伸缩）
  * 
@@ -74,7 +74,7 @@ function callCloudRun(action, data, _isRetry = false) {
   return new Promise((resolve, reject) => {
     wx.request({
       // 云托管直连：走完整的路由路径
-      url: `${cloudRunBaseUrl}/cloudrun/v1/pay/${action}`,
+      url: `${cloudRunBaseUrl}/wx-pay/${action}`,
       method: 'POST',
       header: {
         'Content-Type': 'application/json',

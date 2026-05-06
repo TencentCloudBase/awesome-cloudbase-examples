@@ -52,7 +52,7 @@ function getRefundStateDesc(refundStatus) {
  * @param {boolean} _isRetry - 内部参数，是否为重试请求
  */
 function callPayCommon(action, data, _isRetry = false) {
-  const { apiGateway, accessToken } = app.globalData
+  const { apiGateway, functionName, accessToken } = app.globalData
 
   if (!accessToken) {
     return Promise.reject({ code: -1, msg: 'accessToken 未获取，请等待登录完成' })
@@ -60,7 +60,7 @@ function callPayCommon(action, data, _isRetry = false) {
 
   return new Promise((resolve, reject) => {
     wx.request({
-      url: `${apiGateway}/v1/functions/pay-common?webfn=true`,
+      url: `${apiGateway}/v1/functions/${functionName}?webfn=true`,
       method: 'POST',
       header: {
         'Content-Type': 'application/json',

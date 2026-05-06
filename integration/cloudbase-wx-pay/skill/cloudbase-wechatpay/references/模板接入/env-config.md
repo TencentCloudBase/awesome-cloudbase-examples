@@ -185,8 +185,8 @@ apiV3Key=YOUR_API_V3_KEY
 privateKey=-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_PEM_CONTENT\n-----END PRIVATE KEY-----
 wxPayPublicKey=-----BEGIN PUBLIC KEY-----\nYOUR_WX_PAY_PUBLIC_KEY_PEM_CONTENT\n-----END PUBLIC KEY-----
 wxPayPublicKeyId=YOUR_WX_PAY_PUBLIC_KEY_ID
-notifyURLPayURL=https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/unifiedOrderTrigger
-notifyURLRefundsURL=https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/refundTrigger
+notifyURLPayURL=https://<YOUR_HTTP_DOMAIN>/wx-pay/unifiedOrderTrigger
+notifyURLRefundsURL=https://<YOUR_HTTP_DOMAIN>/wx-pay/refundTrigger
 ```
 
 ### 含转账功能的完整配置
@@ -194,7 +194,7 @@ notifyURLRefundsURL=https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/refundTrigger
 在上面基础上增加：
 
 ```env
-transferNotifyUrl=https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/transferTrigger
+transferNotifyUrl=https://<YOUR_HTTP_DOMAIN>/wx-pay/transferTrigger
 corsAllowOrigin=https://your-mini-program-domain.com
 ```
 

@@ -138,7 +138,7 @@ npm start
 # 服务启动在 http://localhost:3000
 
 # 测试下单（JSAPI）
-curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_order \
+curl -X POST http://localhost:3000/wx-pay/wxpay_order \
   -H "Content-Type: application/json" \
   -d '{
     "description": "测试商品",

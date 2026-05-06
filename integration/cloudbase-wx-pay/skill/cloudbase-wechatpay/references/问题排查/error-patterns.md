@@ -153,7 +153,7 @@ bash scripts/validate_env.sh .env
 
 ```bash
 # 测试回调 URL 连通性
-bash scripts/test_callback_url.sh https://your-domain/cloudrun/v1/pay/unifiedOrderTrigger
+bash scripts/test_callback_url.sh https://your-domain/wx-pay/unifiedOrderTrigger
 
 # 预期输出:
 # ✅ HTTPS 连接正常

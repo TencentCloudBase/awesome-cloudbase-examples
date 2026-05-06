@@ -89,14 +89,14 @@ https://<env-id>-<uin>.<region>.app.tcloudbase.com
 
 完整的 API 地址为：
 ```
-https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/cloudrun/v1/pay/<action>
+https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/wx-pay/<action>
 ```
 
 ### Step 6：验证部署
 
 ```bash
 curl -X POST \
-  "https://<domain>/cloudrun/v1/pay/wxpay_order" \
+  "https://<domain>/wx-pay/wxpay_order" \
   -H "Content-Type: application/json" \
   -d '{
     "description": "测试商品",
@@ -131,9 +131,9 @@ curl -X POST \
 
 ```env
 # .env 中三个回调指向云托管自己的域名
-notifyURLPayURL=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/cloudrun/v1/pay/unifiedOrderTrigger
-notifyURLRefundsURL=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/cloudrun/v1/pay/refundTrigger
-transferNotifyUrl=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/cloudrun/v1/pay/transferTrigger
+notifyURLPayURL=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/wx-pay/unifiedOrderTrigger
+notifyURLRefundsURL=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/wx-pay/refundTrigger
+transferNotifyUrl=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/wx-pay/transferTrigger
 ```
 
 ### 商户平台回调地址

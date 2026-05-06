@@ -1,6 +1,16 @@
-// ========== 云开发环境配置 ==========
-// TODO: ⚠️ 部署前请替换为你自己的云开发环境 ID
+// ========== 部署相关配置（每次部署可能变化，统一在此处修改）==========
+//
+// ⚠️ 部署前请按实际情况替换以下三个变量：
+//
+//   1. ENV_ID         —— 你的云开发环境 ID（控制台 → 环境概览 可查）
+//   2. FUNCTION_NAME  —— 部署的 HTTP 云函数名称（默认 pay-common，
+//                       如果你部署时改了名字，这里要同步改）
+//   3. project.config.json 中的 appid —— 你的小程序 AppID
+//
 const ENV_ID = 'YOUR_ENV_ID'
+const FUNCTION_NAME = 'pay-common'
+
+// 以下为派生配置，一般不需要改动
 const API_GATEWAY = `https://${ENV_ID}.api.tcloudbasegateway.com`
 
 // 引入 CloudBase JS SDK（npm install @cloudbase/js-sdk）
@@ -9,6 +19,7 @@ const cloudbase = require('@cloudbase/js-sdk')
 App({
   globalData: {
     envId: ENV_ID,
+    functionName: FUNCTION_NAME,
     apiGateway: API_GATEWAY,
     accessToken: '',
     openid: '',

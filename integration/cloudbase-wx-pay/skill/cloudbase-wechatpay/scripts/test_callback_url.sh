@@ -32,7 +32,7 @@ usage() {
     echo "  --json  JSON 格式输出"
     echo ""
     echo "示例:"
-    echo "  $0 https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/unifiedOrderTrigger"
+    echo "  $0 https://<YOUR_HTTP_DOMAIN>/wx-pay/unifiedOrderTrigger"
     echo "  $0 https://integration-xxx.tcloudbase.com/wechatpay/order --json"
     exit 2
 }

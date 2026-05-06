@@ -57,7 +57,7 @@
 
 ```javascript
 // 后端调用 /wxpay_order_app
-const res = await fetch(`${PAY_COMMON_URL}/cloudrun/v1/pay/wxpay_order_app`, {
+const res = await fetch(`${PAY_COMMON_URL}/wx-pay/wxpay_order_app`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({

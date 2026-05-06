@@ -37,7 +37,7 @@ graph TB
 
     %% 客户端调用
     MP -->|"Bearer Token"| Auth
-    MP -->|"POST /cloudrun/v1/pay/*"| Router
+    MP -->|"POST /wx-pay/*"| Router
     H5 -->|"POST /wxpay_order_h5"| Router
     NATIVE -->|"POST /wxpay_order_native"| Router
     APP -->|"POST /wxpay_order_app"| Router

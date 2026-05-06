@@ -30,7 +30,7 @@ pay-common 内置**商家转账（免密小额）**能力，适用于：
 ### 发起转账
 
 ```bash
-curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_transfer \
+curl -X POST http://localhost:3000/wx-pay/wxpay_transfer \
   -H "Content-Type: application/json" \
   -d '{
     "out_bill_no": "BILL'"$(date +%Y%m%d%H%M%S)"'",
@@ -199,7 +199,7 @@ wx.requestMerchantTransfer({
 
 | 路由 | 方法 | 说明 |
 |------|------|------|
-| `/cloudrun/v1/pay/transferTrigger` | POST | 转账结果通知（SDK 模式） |
+| `/wx-pay/transferTrigger` | POST | 转账结果通知（SDK 模式） |
 
 > SDK 模式下回调走 HTTP 访问服务，Gateway 模式回调地址指向集成中心（控制台自动生成）。
 

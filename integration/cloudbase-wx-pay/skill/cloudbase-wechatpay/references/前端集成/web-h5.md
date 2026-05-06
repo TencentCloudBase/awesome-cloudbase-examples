@@ -58,7 +58,7 @@ async function h5Pay(description, amountFen) {
   // 获取用户真实 IP（关键风控字段！）
   const clientIp = await fetchClientIp()  // 需要一个后端接口返回客户端 IP
 
-  const res = await fetch(`${BACKEND_URL}/cloudrun/v1/pay/wxpay_order_h5`, {
+  const res = await fetch(`${BACKEND_URL}/wx-pay/wxpay_order_h5`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -84,7 +84,7 @@ async function h5Pay(description, amountFen) {
 
 // 获取客户端 IP 的辅助接口
 async function fetchClientIp() {
-  const res = await fetch(`${BACKEND_URL}/cloudrun/v1/pay/client_ip`, {
+  const res = await fetch(`${BACKEND_URL}/wx-pay/client_ip`, {
     method: 'GET',
   }).then(r => r.json())
   return res.ip
@@ -116,7 +116,7 @@ async function handleH5Pay() {
 ```javascript
 async function pollOrderStatus(outTradeNo, maxAttempts = 20) {
   for (let i = 0; i < maxAttempts; i++) {
-    const res = await fetch(`${BACKEND_URL}/cloudrun/v1/pay/wxpay_query_order_by_out_trade_no`, {
+    const res = await fetch(`${BACKEND_URL}/wx-pay/wxpay_query_order_by_out_trade_no`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ out_trade_no: outTradeNo }),
