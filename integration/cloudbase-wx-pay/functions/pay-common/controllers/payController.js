@@ -163,13 +163,21 @@ async function _handleCallback(req, res, handlerFn, triggerName) {
         console.log(`[Controller] ${triggerName} 回调:`, {
             timestamp: headers['wechatpay-timestamp'],
             serial: headers['wechatpay-serial'],
-            event_type: req.body?.event_type,
+            event_type: req.body?.event_type || req.body?.ParsedNotify?.event_type,
             has_ciphertext: !!req.body?.resource?.ciphertext,
+            is_integration: !!req.body?.ParsedContent,
         });
 
-        // 集成中心网关模式：解密后的明文设置在 header 中
+        // 集成中心网关模式解密数据提取（兼容两种格式）：
+        //   旧格式：解密后明文在 header x-tcb-wechatpay-decrypted（JSON string）
+        //   新格式（系统内置回调）：解密后明文直接在 body.ParsedContent / body.Plaintext
         let decryptedData = null;
-        if (headers['x-tcb-wechatpay-decrypted']) {
+        if (req.body?.ParsedContent) {
+            // 新格式：集成中心系统内置回调，body 直接含解密结果
+            decryptedData = req.body.ParsedContent;
+            console.info('[Controller] 集成中心新格式：从 body.ParsedContent 读取解密数据');
+        } else if (headers['x-tcb-wechatpay-decrypted']) {
+            // 旧格式：解密结果在 header
             try {
                 decryptedData = JSON.parse(headers['x-tcb-wechatpay-decrypted']);
             } catch (e) {

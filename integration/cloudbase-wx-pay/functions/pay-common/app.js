@@ -70,37 +70,35 @@ const ALLOWED_ACTIONS = new Set([
   'unifiedOrderTrigger', 'refundTrigger', 'transferTrigger'
 ]);
 
-// 集成中心系统内置回调的路径映射（/wechatpay/<type> → 内部路由名）
-const INTEGRATION_PATH_MAP = {
-  '/wechatpay/order':    'unifiedOrderTrigger',
-  '/wechatpay/refund':   'refundTrigger',
-  '/wechatpay/transfer': 'transferTrigger',
+// 集成中心系统内置回调的 event_type 映射（body.ParsedNotify.event_type → 内部路由名）
+const INTEGRATION_EVENT_MAP = {
+  'TRANSACTION.SUCCESS': 'unifiedOrderTrigger',
+  'TRANSACTION.FAIL':    'unifiedOrderTrigger',
+  'REFUND.SUCCESS':      'refundTrigger',
+  'REFUND.ABNORMAL':     'refundTrigger',
+  'REFUND.CLOSED':       'refundTrigger',
+  'MCHTRANSFER.TRANSFER.SUCCESS': 'transferTrigger',
+  'MCHTRANSFER.TRANSFER.FAIL':    'transferTrigger',
 };
 
 app.use((req, res, next) => {
-  // 从 body 中提取路由路径（三种方式兼容）
-  const action = req.body?._action;                    // 方式1: { _action: 'wxpay_order' } 或完整路径
-  const bodyPath = req.body?.path;                      // 方式2: 文档标准 { path: '/wx-pay/wxpay_order' }
-                                                        // 方式3: 集成中心系统内置 { path: '/wechatpay/order' }
+  // 从 body 中提取路由（四种方式兼容）
+  const action = req.body?._action;       // 方式1: { _action: 'wxpay_order' }
+  const bodyPath = req.body?.path;         // 方式2: { path: '/wx-pay/wxpay_order' }
+  const eventType = req.body?.ParsedNotify?.event_type; // 方式3: 集成中心系统内置回调
 
   let actionName = null;
   if (action) {
-    // 兼容两种格式：'wxpay_order' 或 '/wx-pay/wxpay_order'
     actionName = action.includes('/wx-pay/') ? action.split('/wx-pay/').pop() : action;
     delete req.body._action;
-  } else if (bodyPath) {
-    if (bodyPath.includes('/wx-pay/')) {
-      // 标准路径格式
-      actionName = bodyPath.split('/wx-pay/').pop();
-      delete req.body.path;
-      delete req.body.method;
-    } else if (INTEGRATION_PATH_MAP[bodyPath]) {
-      // 集成中心系统内置回调路径
-      actionName = INTEGRATION_PATH_MAP[bodyPath];
-      console.info('[集成中心] 回调路径映射:', bodyPath, '→', actionName);
-      delete req.body.path;
-      delete req.body.method;
-    }
+  } else if (bodyPath && bodyPath.includes('/wx-pay/')) {
+    actionName = bodyPath.split('/wx-pay/').pop();
+    delete req.body.path;
+    delete req.body.method;
+  } else if (eventType && INTEGRATION_EVENT_MAP[eventType]) {
+    // 集成中心系统内置回调：通过 event_type 判断路由
+    actionName = INTEGRATION_EVENT_MAP[eventType];
+    console.info('[集成中心] event_type 路由映射:', eventType, '→', actionName);
   }
 
   if (actionName) {
