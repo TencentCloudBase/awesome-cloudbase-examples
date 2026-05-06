@@ -69,30 +69,46 @@ const ALLOWED_ACTIONS = new Set([
   'wxpay_transfer_batch_query',
   'unifiedOrderTrigger', 'refundTrigger', 'transferTrigger'
 ]);
+
+// 集成中心系统内置回调的路径映射（/wechatpay/<type> → 内部路由名）
+const INTEGRATION_PATH_MAP = {
+  '/wechatpay/order':    'unifiedOrderTrigger',
+  '/wechatpay/refund':   'refundTrigger',
+  '/wechatpay/transfer': 'transferTrigger',
+};
+
 app.use((req, res, next) => {
   // 从 body 中提取路由路径（三种方式兼容）
   const action = req.body?._action;                    // 方式1: { _action: 'wxpay_order' } 或完整路径
   const bodyPath = req.body?.path;                      // 方式2: 文档标准 { path: '/wx-pay/wxpay_order' }
+                                                        // 方式3: 集成中心系统内置 { path: '/wechatpay/order' }
 
-  let routePath = null;
   let actionName = null;
   if (action) {
     // 兼容两种格式：'wxpay_order' 或 '/wx-pay/wxpay_order'
     actionName = action.includes('/wx-pay/') ? action.split('/wx-pay/').pop() : action;
     delete req.body._action;
-  } else if (bodyPath && bodyPath.includes('/wx-pay/')) {
-    actionName = bodyPath.split('/wx-pay/').pop();
-    delete req.body.path;
-    delete req.body.method;
+  } else if (bodyPath) {
+    if (bodyPath.includes('/wx-pay/')) {
+      // 标准路径格式
+      actionName = bodyPath.split('/wx-pay/').pop();
+      delete req.body.path;
+      delete req.body.method;
+    } else if (INTEGRATION_PATH_MAP[bodyPath]) {
+      // 集成中心系统内置回调路径
+      actionName = INTEGRATION_PATH_MAP[bodyPath];
+      console.info('[集成中心] 回调路径映射:', bodyPath, '→', actionName);
+      delete req.body.path;
+      delete req.body.method;
+    }
   }
 
   if (actionName) {
     if (!ALLOWED_ACTIONS.has(actionName)) {
       return res.status(400).json({ code: -1, msg: '不支持的操作: ' + actionName });
     }
-    routePath = '/' + actionName;
-    console.info('[云API适配] 路由分发:', routePath);
-    req.url = routePath;
+    console.info('[云API适配] 路由分发:', '/' + actionName);
+    req.url = '/' + actionName;
     req.method = 'POST';
     return payRouter(req, res, next);
   }
