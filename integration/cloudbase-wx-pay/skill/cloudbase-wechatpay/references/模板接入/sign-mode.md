@@ -146,15 +146,17 @@ transferNotifyUrl=https://你的域名/wx-pay/transferTrigger
         ↓
         ② 集成中心用自己的密钥解密
         ↓
-        ③ 将明文通过 HTTP POST 转发到你的服务
-        ↓     Header 中带 x-tcb-wechatpay-decrypted 标记
+        ③ 将明文通过云函数调用传给你的服务
+        ↓     body 中含 { ParsedContent, ParsedNotify, Plaintext, rawData }
         你的服务（pay-common）
         ↓
-        ④ 直接读明文（无需验签和解密）
+        ④ 根据 ParsedNotify.event_type 自动路由到对应 Trigger
         ↓
-        ⑤ 业务处理
+        ⑤ 直接读 body.ParsedContent 明文（无需验签和解密）
         ↓
-        ⑥ 返回 { code: "SUCCESS" }
+        ⑥ 业务处理
+        ↓
+        ⑦ 返回 { code: "SUCCESS" }
 ```
 
 ### 配置要点
@@ -216,7 +218,7 @@ sed -i '' 's/signMode=sdk/signMode=gateway/' .env
 | 查看 `.env` 的 `signMode` 值 | 最直接 |
 | 查看启动日志 | 会打印当前签名模式 |
 | 看回调 URL | 指向自己 = SDK；指向 integration-* = Gateway |
-| 看回调处理代码路径 | `sdkStrategy.js` 的 handleNotification = SDK；直接读 req.body = Gateway |
+| 看回调处理代码路径 | `sdkStrategy.js` 的 `verifySign/decryptResource` = SDK；`payController._handleCallback` 读 `body.ParsedContent` = Gateway |
 
 ---
 

@@ -158,6 +158,16 @@ wxPayPublicKeyId=YOUR_WX_PAY_PUBLIC_KEY_ID
 # ⚠️ 这些 URL 是在微信支付集成中心（CloudBase 控制台 → 微信支付 → 集成中心）
 #   配置/启用后自动生成的，直接复制填入即可，无需手动拼装路径。
 #   与 SDK 模式不同，网关模式不需要自己处理回调 URL 的 path 问题。
+#
+# 💡 集成中心的工作流（无需用户配置，pay-common 已内置适配）：
+#   1. 微信支付 POST → 上述 integration-callback 域名（集成中心接收）
+#   2. 集成中心验签 + AES-GCM 解密
+#   3. 集成中心通过云函数调用（非 HTTP 转发）传给本服务
+#      请求体含字段：{ ParsedContent, ParsedNotify: { event_type }, Plaintext, rawData }
+#   4. pay-common 根据 ParsedNotify.event_type 自动路由：
+#      - TRANSACTION.* → unifiedOrderTrigger
+#      - REFUND.*      → refundTrigger
+#      - MCHTRANSFER.* → transferTrigger
 notifyURLPayURL=https://integration-xxx.tcloudbase.com/wechatpay/order
 notifyURLRefundsURL=https://integration-xxx.tcloudbase.com/wechatpay/refund
 transferNotifyUrl=https://integration-xxx.tcloudbase.com/wechatpay/transfer
@@ -1102,11 +1112,11 @@ class OrderService {
 | 模式 | 主动请求（下单/退款/转账） | 回调处理 | 适用场景 | 部署要求 |
 |------|---------|---------|---------|---------|
 | `sdk` | SDK 自签名 → 直连微信 | 自己验签 + AES-GCM 解密 | 需要完整控制回调数据 | **必须开 HTTP 访问服务 + 关闭回调路由身份认证** |
-| `gateway` | SDK 自签名 → 直连微信 | 集成中心已解密，读取明文（x-tcb-wechatpay-decrypted） | 快速接入，无需自处理验签 | 回调走集成中心，前端调用可走云 API 网关 |
+| `gateway` | SDK 自签名 → 直连微信 | 集成中心已解密，从 `body.ParsedContent` 读取明文 | 快速接入，无需自处理验签 | 回调由集成中心调用云函数，前端调用可走云 API 网关 |
 
 两种模式的凭证配置完全相同（都需要私钥/公钥/证书序列号），区别仅在于回调地址和部署方式：
 - **SDK 模式**：回调地址指向自己的服务（HTTP 访问服务域名，含完整路径）；回调路由不能开身份认证
-- **网关模式**：回调地址指向集成中心，集成中心解密后转发明文到你的服务；无特殊部署约束
+- **网关模式**：回调地址指向集成中心，集成中心解密后通过云函数调用把明文（`body.ParsedContent`）传给你的服务；无特殊部署约束
 
 ---
 

@@ -144,7 +144,7 @@ python3 scripts/check_pem_format.py '你的privateKey值'
 | signMode | notifyURLPayURL 指向 | 谁来验签/解密 |
 |----------|-------------------|-------------|
 | `sdk` | 你自己的服务域名（从控制台「HTTP 访问服务」获取，替换 `<YOUR_HTTP_DOMAIN>`） | 你的服务自行验签 + AES-GCM 解密 |
-| `gateway` | 集成中心域名（如 `https://integration-xxx.tcloudbase.com/wechatpay/order`） | 集成中心验签解密后转发明文给你 |
+| `gateway` | 集成中心域名（如 `https://integration-xxx.tcloudbase.com/wechatpay/order`） | 集成中心验签解密后，通过云函数调用把明文放到 `body.ParsedContent` 传给你的服务 |
 
 ---
 

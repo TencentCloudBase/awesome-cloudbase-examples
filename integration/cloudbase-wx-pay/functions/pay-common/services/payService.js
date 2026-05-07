@@ -77,7 +77,7 @@ class PayService {
     /**
      * 支付回调处理
      * SDK 模式：验签 → 解密 → 处理业务
-     * 网关模式：集成中心已解密，明文在 header 中（x-tcb-wechatpay-decrypted）
+     * 网关模式：集成中心已解密，明文在 body.ParsedContent 中
      * @param {Object} callbackParams - 回调参数
      * @returns {Object} 解密后的支付结果
      */

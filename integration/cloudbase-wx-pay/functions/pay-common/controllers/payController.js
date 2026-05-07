@@ -149,7 +149,7 @@ exports.queryRefund = async (req, res) => {
 
 /**
  * 回调通知公共处理
- * 解析网关解密 header → 构造 callbackParams → 调用对应 service 方法 → 统一应答
+ * 解析 body.ParsedContent（集成中心解密明文）→ 构造 callbackParams → 调用对应 service 方法 → 统一应答
  * @param {Object} req
  * @param {Object} res
  * @param {Function} handlerFn - payService 上的回调处理方法
@@ -163,27 +163,16 @@ async function _handleCallback(req, res, handlerFn, triggerName) {
         console.log(`[Controller] ${triggerName} 回调:`, {
             timestamp: headers['wechatpay-timestamp'],
             serial: headers['wechatpay-serial'],
-            event_type: req.body?.event_type || req.body?.ParsedNotify?.event_type,
+            event_type: req.body?.event_type
+                     || req.body?.rawData?.event_type
+                     || req.body?.ParsedNotify?.event_type,
             has_ciphertext: !!req.body?.resource?.ciphertext,
             is_integration: !!req.body?.ParsedContent,
         });
 
-        // 集成中心网关模式解密数据提取（兼容两种格式）：
-        //   旧格式：解密后明文在 header x-tcb-wechatpay-decrypted（JSON string）
-        //   新格式（系统内置回调）：解密后明文直接在 body.ParsedContent / body.Plaintext
-        let decryptedData = null;
-        if (req.body?.ParsedContent) {
-            // 新格式：集成中心系统内置回调，body 直接含解密结果
-            decryptedData = req.body.ParsedContent;
-            console.info('[Controller] 集成中心新格式：从 body.ParsedContent 读取解密数据');
-        } else if (headers['x-tcb-wechatpay-decrypted']) {
-            // 旧格式：解密结果在 header
-            try {
-                decryptedData = JSON.parse(headers['x-tcb-wechatpay-decrypted']);
-            } catch (e) {
-                console.warn('[Controller] 解析网关解密 header 失败:', e.message);
-            }
-        }
+        // 集成中心网关模式：解密后明文在 body.ParsedContent
+        // SDK 模式：body 不含 ParsedContent，decryptedData 为 null，下游会走自验签 + 解密
+        const decryptedData = req.body?.ParsedContent || null;
 
         const callbackParams = {
             body: req.body,

@@ -85,7 +85,11 @@ app.use((req, res, next) => {
   // 从 body 中提取路由（四种方式兼容）
   const action = req.body?._action;       // 方式1: { _action: 'wxpay_order' }
   const bodyPath = req.body?.path;         // 方式2: { path: '/wx-pay/wxpay_order' }
-  const eventType = req.body?.ParsedNotify?.event_type; // 方式3: 集成中心系统内置回调
+  // 方式3: 集成中心系统内置回调
+  //   优先用 rawData.event_type（微信原始字段），fallback 到 ParsedNotify.event_type（集成中心解析字段）
+  //   两者值一致，双来源保证兼容性
+  const eventType = req.body?.rawData?.event_type
+                 || req.body?.ParsedNotify?.event_type;
 
   let actionName = null;
   if (action) {
