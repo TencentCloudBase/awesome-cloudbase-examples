@@ -278,12 +278,17 @@ describe('Controller - refund & queryRefund', () => {
 
 describe('Controller - _handleCallback', () => {
 
-    it('网关模式有 decrypted header → SUCCESS', async () => {
+    it('网关模式有 ParsedContent → SUCCESS', async () => {
         // 通过 overrides 参数设置 signMode=gateway，让回调走网关分支
+        // 集成中心系统内置回调：解密结果在 body.ParsedContent
         const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway' });
         const { req, res } = mockReqRes(
-            { event_type: 'TRANSACTION.SUCCESS' },
-            { 'x-tcb-wechatpay-decrypted': JSON.stringify({ out_trade_no: 'ORD002', trade_state: 'SUCCESS' }) },
+            {
+                event_type: 'TRANSACTION.SUCCESS',
+                ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' },
+                ParsedNotify: { event_type: 'TRANSACTION.SUCCESS' },
+            },
+            {},
         );
         await ctrl.unifiedOrderTrigger(req, res);
         assert.strictEqual(res._getStatusCode(), 200);

@@ -54,7 +54,7 @@ node app.js
 [pay-common] 服务启动于 http://localhost:3000
 [Config Debug] signMode: sdk
 [Config Debug] privateKey 包含真换行: false  ← 正确！应为 false
-[Config Debug] 回调 URL: http://localhost:3000/cloudrun/v1/pay/unifiedOrderTrigger
+[Config Debug] 回调 URL: http://localhost:3000/wx-pay/unifiedOrderTrigger
 [Router] 注册 18 个路由
 ```
 
@@ -62,7 +62,7 @@ node app.js
 
 ```bash
 # JSAPI 下单测试
-curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_order \
+curl -X POST http://localhost:3000/wx-pay/wxpay_order \
   -H "Content-Type: application/json" \
   -d '{
     "description": "测试商品",
@@ -114,9 +114,9 @@ sed -i '' 's|localhost:3000|xxxx.ngrok-free.app|g' .env
 **方式 B：启动时覆盖（推荐）**
 
 ```bash
-notifyURLPayURL="https://xxxx.ngrok-free.app/cloudrun/v1/pay/unifiedOrderTrigger" \
-notifyURLRefundsURL="https://xxxx.ngrok-free.app/cloudrun/v1/pay/refundTrigger" \
-transferNotifyUrl="https://xxxx.ngrok-free.app/cloudrun/v1/pay/transferTrigger" \
+notifyURLPayURL="https://xxxx.ngrok-free.app/wx-pay/unifiedOrderTrigger" \
+notifyURLRefundsURL="https://xxxx.ngrok-free.app/wx-pay/refundTrigger" \
+transferNotifyUrl="https://xxxx.ngrok-free.app/wx-pay/transferTrigger" \
 npm start
 ```
 
@@ -143,17 +143,17 @@ DEBUG=* npm start
 
 ```bash
 # 查单
-curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_query_order_by_out_trade_no \
+curl -X POST http://localhost:3000/wx-pay/wxpay_query_order_by_out_trade_no \
   -H "Content-Type: application/json" \
   -d '{"out_trade_no": "TEST20260424001"}'
 
 # 关闭订单
-curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_close_order \
+curl -X POST http://localhost:3000/wx-pay/wxpay_close_order \
   -H "Content-Type: application/json" \
   -d '{"out_trade_no": "TEST20260424001"}'
 
 # 退款
-curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_refund \
+curl -X POST http://localhost:3000/wx-pay/wxpay_refund \
   -H "Content-Type: application/json" \
   -d '{
     "out_trade_no": "TEST20260424001",
@@ -164,7 +164,7 @@ curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_refund \
   }'
 
 # 商家转账
-curl -X POST http://localhost:3000/cloudrun/v1/pay/wxpay_transfer \
+curl -X POST http://localhost:3000/wx-pay/wxpay_transfer \
   -H "Content-Type: application/json" \
   -d '{
     "out_bill_no": "BILL'$(date +%Y%m%d%H%M%S)'",
@@ -189,7 +189,7 @@ python3 scripts/check_pem_format.py "$(< .env grep privateKey | cut -d= -f2)"
 
 ```bash
 # 模拟支付回调（仅测试路由是否可达，不含真实签名）
-curl -X POST http://localhost:3000/cloudrun/v1/pay/unifiedOrderTrigger \
+curl -X POST http://localhost:3000/wx-pay/unifiedOrderTrigger \
   -H "Content-Type: application/json" \
   -d '{"resource": {"ciphertext": "fake"}}'
 ```

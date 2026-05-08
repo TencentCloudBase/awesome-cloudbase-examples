@@ -6,7 +6,7 @@
 
 | 特性 | 云函数版 (`miniprogram/`) | 云托管版（本模板）|
 |------|--------------------------|------------------|
-| **调用地址** | 云 API 网关 `/v1/functions/pay-common?webfn=true` | 云托管域名 `/cloudrun/v1/pay/<action>` |
+| **调用地址** | 云 API 网关 `/v1/functions/pay-common?webfn=true` | 云托管域名 `/wx-pay/<action>` |
 | **路由分发** | `body._action` 中间层 | Express 标准 RESTful 路径 |
 | **响应格式** | 需解开 webfn 双层信封 | 直接返回 `{ code, msg, data }` |
 | **性能** | 冷启动较慢 | 常驻容器，响应快 |
@@ -104,7 +104,7 @@ miniprogram-cloudrun/
 
 ## API 接口
 
-**基础路径**：`https://<your-cloudrun-domain>/cloudrun/v1/pay`
+**基础路径**：`https://<your-cloudrun-domain>/wx-pay`
 
 | 路径 | 方法 | 说明 |
 |------|------|------|
@@ -127,7 +127,7 @@ miniprogram-cloudrun/
 ```javascript
 // 前端只需携带 accessToken，无需传 openid
 wx.request({
-  url: `${CLOUDRUN_BASE_URL}/cloudrun/v1/pay/wxpay_order`,
+  url: `${CLOUDRUN_BASE_URL}/wx-pay/wxpay_order`,
   header: { 'Authorization': `Bearer ${accessToken}` },
   data: {
     description: '测试商品',

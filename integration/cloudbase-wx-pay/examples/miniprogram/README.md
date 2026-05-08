@@ -34,17 +34,26 @@ npm install
 
 ### 2. 修改配置
 
+所有"每次部署可能变化"的配置都集中在 **`app.js` 顶部**，照着改即可，无需到处搜索替换：
+
 **`app.js`**：
 ```javascript
-const ENV_ID = 'your-env-id'           // 替换为你的云开发环境 ID
+const ENV_ID = 'YOUR_ENV_ID'        // ① 替换为你的云开发环境 ID
+const FUNCTION_NAME = 'pay-common'  // ② 你部署的 HTTP 云函数名称（默认 pay-common，
+                                    //    如果 cloudbaserc.json 里改了名字，这里也要改）
 ```
 
 **`project.config.json`**：
 ```json
 {
-  "appid": "your-appid"               // 替换为你的小程序 AppID
+  "appid": "your-appid"               // ③ 替换为你的小程序 AppID
 }
 ```
+
+> 配置项说明：
+> - `ENV_ID`：CloudBase 控制台 → 环境概览 → 环境 ID
+> - `FUNCTION_NAME`：与 `pay-common/cloudbaserc.json` 里 `functions[].name` 保持一致
+> - 小程序 AppID：微信公众平台 → 开发管理 → 开发设置
 
 ### 3. 构建 npm
 

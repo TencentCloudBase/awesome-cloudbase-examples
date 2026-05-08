@@ -6,7 +6,7 @@
 const config = {
     // 回调处理模式: 'sdk' | 'gateway'
     // sdk: 回调自己验签 + AES-GCM 解密
-    // gateway: 回调由集成中心解密，转发明文（x-tcb-wechatpay-decrypted header）
+    // gateway: 回调由集成中心解密，转发明文（body.ParsedContent）
     // 注意：两种模式下，主动请求（下单/退款/转账）都走 SDK 自签名直连微信
     signMode: process.env.signMode || 'gateway',
 

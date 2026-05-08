@@ -37,7 +37,7 @@ graph TB
 
     %% 客户端调用
     MP -->|"Bearer Token"| Auth
-    MP -->|"POST /cloudrun/v1/pay/*"| Router
+    MP -->|"POST /wx-pay/*"| Router
     H5 -->|"POST /wxpay_order_h5"| Router
     NATIVE -->|"POST /wxpay_order_native"| Router
     APP -->|"POST /wxpay_order_app"| Router
@@ -108,8 +108,8 @@ graph TB
         direction TB
         GW_REQ["主动请求<br/>SDK 自签 → 直连微信"] --> WXG
         WXG["微信服务器"] -->|"加密回调"| IC
-        IC["集成中心"] -->|"①集成中心验签解密<br/>②转发明文 POST"| GW_CB
-        GW_CB["你的服务 pay-common"] -->|"直接读明文"| GW_BIZ
+        IC["集成中心"] -->|"①验签解密<br/>②云函数调用传明文<br/>body.ParsedContent"| GW_CB
+        GW_CB["你的服务 pay-common"] -->|"按 event_type 路由<br/>直接读 body.ParsedContent"| GW_BIZ
         GW_BIZ["业务处理"] -->|"返回 SUCCESS"| IC
     end
 ```

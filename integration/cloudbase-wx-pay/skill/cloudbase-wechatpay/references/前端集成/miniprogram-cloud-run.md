@@ -9,7 +9,7 @@
 
 | 特性 | 云 API 版 (`miniprogram-cloud-api`) | 云托管版（本文） |
 |------|:-------------------------------------:|:---------------:|
-| **调用地址** | `/v1/functions/pay-common?webfn=true` | `/cloudrun/v1/pay/<action>` |
+| **调用地址** | `/v1/functions/pay-common?webfn=true` | `/wx-pay/<action>` |
 | **路由分发** | `body._action` 字段 | 标准 RESTful URL path |
 | **响应格式** | 需解开 webfn 双层信封 | 直接 `{ code, msg, data }` |
 | **性能** | 冷启动较慢 | 常驻容器，响应快 |
@@ -107,7 +107,7 @@ const app = getApp()
 
 /**
  * 调用 pay-common 后端（云托管版）
- * @param {string} urlPath - 路由路径（如 '/cloudrun/v1/pay/wxpay_order'）
+ * @param {string} urlPath - 路由路径（如 '/wx-pay/wxpay_order'）
  * @param {object} data - 请求体
  */
 function callCloudRun(urlPath, data) {
@@ -138,7 +138,7 @@ function callCloudRun(urlPath, data) {
 
 // 便捷方法映射
 function callPayCommon(action, data) {
-  return callCloudRun(`/cloudrun/v1/pay/${action}`, data)
+  return callCloudRun(`/wx-pay/${action}`, data)
 }
 
 module.exports = { callCloudRun, callPayCommon }
@@ -148,7 +148,7 @@ module.exports = { callCloudRun, callPayCommon }
 
 | 差异点 | 云 API 版 | 云托管版 |
 |--------|----------|---------|
-| URL 拼接 | 固定的 `/v1/functions/pay-common?webfn=true` | 动态拼接 `/cloudrun/v1/pay/<action>` |
+| URL 拼接 | 固定的 `/v1/functions/pay-common?webfn=true` | 动态拼接 `/wx-pay/<action>` |
 | 路由参数 | 用 `_action` 字段放在 body 里 | 放在 URL path 中 |
 | 响应处理 | 需要解包 webfn 双层结构 | 直接使用 `res.data` |
 
@@ -228,18 +228,18 @@ callPayCommon('wxpay_order', {
 
 | 操作 | URL Path | 说明 |
 |------|----------|------|
-| JSAPI 下单 | `/cloudrun/v1/pay/wxpay_order` | 小程序/公众号支付 |
-| H5 下单 | `/cloudrun/v1/pay/wxpay_order_h5` | 手机浏览器支付 |
-| Native 下单 | `/cloudrun/v1/pay/wxpay_order_native` | PC 扫码支付 |
-| APP 下单 | `/cloudrun/v1/pay/wxpay_order_app` | APP 支付 |
-| 查单（商户号） | `/cloudrun/v1/pay/wxpay_query_order_by_out_trade_no` | 按 out_trade_no 查 |
-| 查单（微信号） | `/cloudrun/v1/pay/wxpay_query_order_by_transaction_id` | 按 transaction_id 查 |
-| 关闭订单 | `/cloudrun/v1/pay/wxpay_close_order` | 关闭未支付订单 |
-| 退款 | `/cloudrun/v1/pay/wxpay_refund` | 申请退款 |
-| 查退款 | `/cloudrun/v1/pay/wxpay_refund_query` | 查退款进度 |
-| 转账 | `/cloudrun/v1/pay/wxpay_transfer` | 商家转账 |
-| 查转账（商户号） | `/cloudrun/v1/pay/wxpay_transfer_bill_query` | 按商户单号查 |
-| 查转账（微信号） | `/cloudrun/v1/pay/wxpay_transfer_bill_query_by_no` | 按微信单号查 |
+| JSAPI 下单 | `/wx-pay/wxpay_order` | 小程序/公众号支付 |
+| H5 下单 | `/wx-pay/wxpay_order_h5` | 手机浏览器支付 |
+| Native 下单 | `/wx-pay/wxpay_order_native` | PC 扫码支付 |
+| APP 下单 | `/wx-pay/wxpay_order_app` | APP 支付 |
+| 查单（商户号） | `/wx-pay/wxpay_query_order_by_out_trade_no` | 按 out_trade_no 查 |
+| 查单（微信号） | `/wx-pay/wxpay_query_order_by_transaction_id` | 按 transaction_id 查 |
+| 关闭订单 | `/wx-pay/wxpay_close_order` | 关闭未支付订单 |
+| 退款 | `/wx-pay/wxpay_refund` | 申请退款 |
+| 查退款 | `/wx-pay/wxpay_refund_query` | 查退款进度 |
+| 转账 | `/wx-pay/wxpay_transfer` | 商家转账 |
+| 查转账（商户号） | `/wx-pay/wxpay_transfer_bill_query` | 按商户单号查 |
+| 查转账（微信号） | `/wx-pay/wxpay_transfer_bill_query_by_no` | 按微信单号查 |
 
 ---
 

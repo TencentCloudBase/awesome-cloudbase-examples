@@ -6,13 +6,40 @@
 
 ## 配置文件位置
 
-`.env` 文件位于 `pay-common` 项目根目录。首次使用时从模板复制：
+> ⚠️ **代码只读 `process.env`，没有 `dotenv`，不会自动加载 `.env` 文件！**
+>
+> | 创建方式 | 环境变量写入位置 | `.env` 的作用 |
+> |---------|----------------|:---:|
+> | **控制台 → 集成中心创建** | 集成中心自动填写 + 自动部署 | ❌ 不需要 |
+> | **自己 CLI 部署到云函数** | `cloudbaserc.json` → `envVariables` 字段 → 部署时写入运行时 | ❌ 不需要 |
+> | **自己部署到云托管** | 控制台 → 服务配置 → 环境变量（Dockerfile 注释已说明） | ❌ 不需要 |
+> | **本地开发 / 调试** | 手动注入 `process.env`（`export` 或启动脚本） | 📄 `.env.example` 仅作**参考模板** |
+>
+> **集成中心用户可直接跳过本篇文档；CLI 部署的填 cloudbaserc；只有本地调试才看下面的变量列表。**
+
+---
+
+### 本地测试：环境变量怎么注入
+
+`.env.example` 是**参考模板**（告诉你需要哪些变量、格式是什么），但代码不会自动读取它。本地测试时有 3 种方式：
 
 ```bash
-cp .env.example .env
+# 方式一：export 后启动
+export signMode=sdk
+export appId=YOUR_APP_ID
+export merchantId=YOUR_MERCHANT_ID
+# ... 其他必填变量
+npm start
+
+# 方式二：一行搞定
+signMode=sdk appId=YOUR_APP_ID merchantId=YOUR_MERCHANT_ID npm start
+
+# 方式三：用 envfile 工具加载 .env 文件（可选安装）
+# npm install -g envfile
+# envfile .env npm start
 ```
 
-**重要**：`.env` 包含敏感信息（私钥、密钥），务必加入 `.gitignore`。
+**重要**：任何包含私钥、密钥的文件都应加入 `.gitignore`，切勿提交到代码仓库。
 
 ---
 
@@ -23,6 +50,7 @@ cp .env.example .env
 | 变量名 | 必填 | 示例值 | 说明 |
 |--------|:----:|--------|------|
 | `signMode` | 是 | `sdk` \| `gateway` | 签名模式。`sdk`=SDK 自验签（自己部署时用）；`gateway`=集成中心代签（控制台创建时用，**也是代码级默认值**）。详见 [sign-mode.md](sign-mode.md) |
+| **`verifyMode`** | **否**（自动推断） | **`publickey`** \| **`certificate`** | **验签方式。配了 `wxPayPublicKey` → 公钥验签；未配 → 证书自动下载验签。详见 [verify-mode.md](verify-mode.md)** |
 | `appId` | 是 | `YOUR_APP_ID` | 小程序/公众号 AppID，需已在商户平台绑定 |
 | `merchantId` | 是 | `YOUR_MERCHANT_ID` | 微信支付商户号（10 位数字） |
 
@@ -33,8 +61,8 @@ cp .env.example .env
 | `merchantSerialNumber` | 是 | `YOUR_SERIAL_NUMBER` | API 证书序列号，40 位十六进制 |
 | `apiV3Key` | 是 | `YOUR_API_V3_KEY`（32 字节） | APIv3 密钥，用于回调解密 |
 | `privateKey` | 是 | PEM 字符串，换行用 `\n` 表示 | **最易出错项**，详见下方格式说明 |
-| `wxPayPublicKey` | 是 | PEM 字符串，换行用 `\n` 表示 | 微信支付公钥（不是商户公钥！）|
-| `wxPayPublicKeyId` | 是 | `YOUR_WX_PAY_PUBLIC_KEY_ID` | 微信支付公钥 ID |
+| `wxPayPublicKey` | 条件必填* | PEM 字符串，换行用 `\n` 表示 | 微信支付公钥（不是商户公钥！）。**配了此项 → 自动启用公钥验签模式；不配 → 自动走证书模式。详见 [verify-mode.md](verify-mode.md)** |
+| `wxPayPublicKeyId` | 条件必填* | `YOUR_WX_PAY_PUBLIC_KEY_ID` | 微信支付公钥 ID（与 wxPayPublicKey 成对使用，配了公钥时必填） |
 
 ### 回调地址
 
@@ -116,7 +144,7 @@ python3 scripts/check_pem_format.py '你的privateKey值'
 | signMode | notifyURLPayURL 指向 | 谁来验签/解密 |
 |----------|-------------------|-------------|
 | `sdk` | 你自己的服务域名（从控制台「HTTP 访问服务」获取，替换 `<YOUR_HTTP_DOMAIN>`） | 你的服务自行验签 + AES-GCM 解密 |
-| `gateway` | 集成中心域名（如 `https://integration-xxx.tcloudbase.com/wechatpay/order`） | 集成中心验签解密后转发明文给你 |
+| `gateway` | 集成中心域名（如 `https://integration-xxx.tcloudbase.com/wechatpay/order`） | 集成中心验签解密后，通过云函数调用把明文放到 `body.ParsedContent` 传给你的服务 |
 
 ---
 
@@ -133,13 +161,18 @@ python3 scripts/check_pem_format.py '你的privateKey值'
 | `signMode` | `sdk` | `gateway` |
 | 回调 URL | 指向自己的服务 | 指向集成中心 |
 | 回调处理 | 自己验签 + AES-GCM 解密 | 读集成中心转发过来的明文 |
-| 适用场景 | 云托管直连、自建服务器 | CloudBase 集成中心 |
+| 适用场景 | 自己部署云函数 / 云托管 / 自建服务器 | **控制台 → 集成中心创建（主流）** |
 
 > 详细对比见 [sign-mode.md](sign-mode.md)。
 
 ---
 
-## 完整配置示例（复制即用）
+## 完整配置示例（变量名 + 格式参考）
+
+> 以下用 `.env` 格式展示**需要哪些变量、值应该长什么样**。实际使用时：
+> - CLI 部署 → 复制到 `cloudbaserc.json` 的 `envVariables`
+> - 控制台部署 → 按此列表逐项填写
+> - 本地调试 → `export` 这些变量或写入 `.env` 后用 `envfile` 加载
 
 ### 最小可用配置（SDK 模式，仅支付功能）
 
@@ -152,8 +185,8 @@ apiV3Key=YOUR_API_V3_KEY
 privateKey=-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_PEM_CONTENT\n-----END PRIVATE KEY-----
 wxPayPublicKey=-----BEGIN PUBLIC KEY-----\nYOUR_WX_PAY_PUBLIC_KEY_PEM_CONTENT\n-----END PUBLIC KEY-----
 wxPayPublicKeyId=YOUR_WX_PAY_PUBLIC_KEY_ID
-notifyURLPayURL=https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/unifiedOrderTrigger
-notifyURLRefundsURL=https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/refundTrigger
+notifyURLPayURL=https://<YOUR_HTTP_DOMAIN>/wx-pay/unifiedOrderTrigger
+notifyURLRefundsURL=https://<YOUR_HTTP_DOMAIN>/wx-pay/refundTrigger
 ```
 
 ### 含转账功能的完整配置
@@ -161,18 +194,21 @@ notifyURLRefundsURL=https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/refundTrigger
 在上面基础上增加：
 
 ```env
-transferNotifyUrl=https://<YOUR_HTTP_DOMAIN>/cloudrun/v1/pay/transferTrigger
+transferNotifyUrl=https://<YOUR_HTTP_DOMAIN>/wx-pay/transferTrigger
 corsAllowOrigin=https://your-mini-program-domain.com
 ```
 
 ---
 
-## 配置校验
+## 配置校验（本地测试用）
 
-完成 `.env` 编写后，运行校验脚本检查完整性：
+本地调试时，运行校验脚本检查环境变量是否完整（脚本接受 `.env` 格式文件作为输入，也可用于验证 `cloudbaserc.json` 中的值是否齐全）：
 
 ```bash
+# 验证一个 env 格式文件
 bash scripts/validate_env.sh /path/to/your/.env
+
+# 或直接验证 cloudbaserc.json 的 envVariables 是否包含所有必填项
 ```
 
 脚本会检查：

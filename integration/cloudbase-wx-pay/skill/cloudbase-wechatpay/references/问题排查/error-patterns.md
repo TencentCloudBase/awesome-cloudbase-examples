@@ -31,6 +31,14 @@
 │   ├── 用了商户 API 公钥（而非微信支付公钥）
 │   ├── wxPayPublicKey 填的是 API 证书配对公钥
 │   └── 排查：重新从商户平台→API安全→微信支付公钥复制
+│       详见 [verify-mode.md](../模板接入/verify-mode.md) §「问题 2：公钥模式下签名验证始终失败」
+│
+├── ②⑤ 证书模式下载失败（仅证书验签模式）
+│   ├── apiV3Key 错误 / privateKey 与 serial 不匹配 / 网络不通
+│   ├── wechatpay-node-v3 SDK 缓存 bug 导致下载的证书未被正确缓存
+│   └── 排查：查看启动日志 `[SdkStrategy] 下载平台证书失败`
+│       详见 [verify-mode.md](../模板接入/verify-mode.md) §「问题 1：证书模式下下载平台证书失败」
+│       建议：反复失败可切换到公钥模式（加两个环境变量即可）
 │
 ├── ③ 证书序列号错误（占比 ~15%）
 │   ├── 复制时漏掉字符
@@ -76,7 +84,14 @@ bash scripts/validate_env.sh .env
 
 ```
 验签不通过（回调场景）
-├── wxPayPublicKey 填错了（同模式 A-②）
+├── wxPayPublicKey 填错了（同模式 A-②，公钥模式特有）
+│   → 详见 [verify-mode.md](../模板接入/verify-mode.md) §「问题 2」
+│
+├── 证书下载/匹配失败（证书模式特有）
+│   ├── apiV3Key 错误导致无法解密下载的平台证书
+│   ├── 平台证书 serial 与回调 Wechatpay-Serial 不匹配
+│   └── 排查：查看日志 `[SdkStrategy] 证书验签结果: false`
+│       详见 [verify-mode.md](../模板接入/verify-mode.md) §「问题 1」+ §「问题 3」
 │
 ├── 回调数据被中间件修改
 │   ├── 反向代理改了 body
@@ -138,7 +153,7 @@ bash scripts/validate_env.sh .env
 
 ```bash
 # 测试回调 URL 连通性
-bash scripts/test_callback_url.sh https://your-domain/cloudrun/v1/pay/unifiedOrderTrigger
+bash scripts/test_callback_url.sh https://your-domain/wx-pay/unifiedOrderTrigger
 
 # 预期输出:
 # ✅ HTTPS 连接正常

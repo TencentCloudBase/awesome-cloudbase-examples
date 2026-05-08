@@ -69,30 +69,48 @@ const ALLOWED_ACTIONS = new Set([
   'wxpay_transfer_batch_query',
   'unifiedOrderTrigger', 'refundTrigger', 'transferTrigger'
 ]);
-app.use((req, res, next) => {
-  // 从 body 中提取路由路径（三种方式兼容）
-  const action = req.body?._action;                    // 方式1: { _action: 'wxpay_order' } 或完整路径
-  const bodyPath = req.body?.path;                      // 方式2: 文档标准 { path: '/wx-pay/wxpay_order' }
 
-  let routePath = null;
+// 集成中心系统内置回调的 event_type 映射（body.ParsedNotify.event_type → 内部路由名）
+const INTEGRATION_EVENT_MAP = {
+  'TRANSACTION.SUCCESS': 'unifiedOrderTrigger',
+  'TRANSACTION.FAIL':    'unifiedOrderTrigger',
+  'REFUND.SUCCESS':      'refundTrigger',
+  'REFUND.ABNORMAL':     'refundTrigger',
+  'REFUND.CLOSED':       'refundTrigger',
+  'MCHTRANSFER.TRANSFER.SUCCESS': 'transferTrigger',
+  'MCHTRANSFER.TRANSFER.FAIL':    'transferTrigger',
+};
+
+app.use((req, res, next) => {
+  // 从 body 中提取路由（四种方式兼容）
+  const action = req.body?._action;       // 方式1: { _action: 'wxpay_order' }
+  const bodyPath = req.body?.path;         // 方式2: { path: '/wx-pay/wxpay_order' }
+  // 方式3: 集成中心系统内置回调
+  //   优先用 rawData.event_type（微信原始字段），fallback 到 ParsedNotify.event_type（集成中心解析字段）
+  //   两者值一致，双来源保证兼容性
+  const eventType = req.body?.rawData?.event_type
+                 || req.body?.ParsedNotify?.event_type;
+
   let actionName = null;
   if (action) {
-    // 兼容两种格式：'wxpay_order' 或 '/wx-pay/wxpay_order'
     actionName = action.includes('/wx-pay/') ? action.split('/wx-pay/').pop() : action;
     delete req.body._action;
   } else if (bodyPath && bodyPath.includes('/wx-pay/')) {
     actionName = bodyPath.split('/wx-pay/').pop();
     delete req.body.path;
     delete req.body.method;
+  } else if (eventType && INTEGRATION_EVENT_MAP[eventType]) {
+    // 集成中心系统内置回调：通过 event_type 判断路由
+    actionName = INTEGRATION_EVENT_MAP[eventType];
+    console.info('[集成中心] event_type 路由映射:', eventType, '→', actionName);
   }
 
   if (actionName) {
     if (!ALLOWED_ACTIONS.has(actionName)) {
       return res.status(400).json({ code: -1, msg: '不支持的操作: ' + actionName });
     }
-    routePath = '/' + actionName;
-    console.info('[云API适配] 路由分发:', routePath);
-    req.url = routePath;
+    console.info('[云API适配] 路由分发:', '/' + actionName);
+    req.url = '/' + actionName;
     req.method = 'POST';
     return payRouter(req, res, next);
   }

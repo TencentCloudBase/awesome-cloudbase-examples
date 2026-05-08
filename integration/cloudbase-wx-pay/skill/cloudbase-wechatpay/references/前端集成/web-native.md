@@ -52,7 +52,7 @@ PC 浏览器
 
 ```javascript
 async function nativePay(description, amountFen) {
-  const res = await fetch(`${PAY_COMMON_URL}/cloudrun/v1/pay/wxpay_order_native`, {
+  const res = await fetch(`${PAY_COMMON_URL}/wx-pay/wxpay_order_native`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -123,7 +123,7 @@ async function pollForPayment(outTradeNo, onPaid, onTimeout, onError) {
     }
 
     try {
-      const res = await fetch(`${PAY_COMMON_URL}/cloudrun/v1/pay/wxpay_query_order_by_out_trade_no`, {
+      const res = await fetch(`${PAY_COMMON_URL}/wx-pay/wxpay_query_order_by_out_trade_no`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ out_trade_no: outTradeNo }),
