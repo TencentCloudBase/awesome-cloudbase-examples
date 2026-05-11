@@ -5,9 +5,9 @@ describe('wxApi', () => {
     let originalFetch, envBackup;
 
     beforeEach(() => {
-        envBackup = { OA_APPID: process.env.OA_APPID, OA_APPSECRET: process.env.OA_APPSECRET };
-        process.env.OA_APPID = 'wx_test';
-        process.env.OA_APPSECRET = 'secret';
+        envBackup = { appId: process.env.appId, appSecret: process.env.appSecret };
+        process.env.appId = 'wx_test';
+        process.env.appSecret = 'secret';
         originalFetch = globalThis.fetch;
         ['../utils/wxApi', '../utils/tokenCache', '../config/config']
             .forEach(p => { try { delete require.cache[require.resolve(p)]; } catch {} });

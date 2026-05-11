@@ -16,9 +16,9 @@ describe('oauthController', () => {
     let originalFetch, envBackup;
 
     beforeEach(() => {
-        envBackup = { OA_APPID: process.env.OA_APPID, OA_APPSECRET: process.env.OA_APPSECRET };
-        process.env.OA_APPID = 'wx_test';
-        process.env.OA_APPSECRET = 'secret';
+        envBackup = { appId: process.env.appId, appSecret: process.env.appSecret };
+        process.env.appId = 'wx_test';
+        process.env.appSecret = 'secret';
         originalFetch = globalThis.fetch;
         ['../controllers/oauthController', '../config/config']
             .forEach(p => { try { delete require.cache[require.resolve(p)]; } catch {} });
@@ -42,7 +42,7 @@ describe('oauthController', () => {
     });
 
     it('getInfo 缺 APPID→fail', async () => {
-        delete process.env.OA_APPID;
+        delete process.env.appId;
         try { delete require.cache[require.resolve('../controllers/oauthController')]; } catch {}
         try { delete require.cache[require.resolve('../config/config')]; } catch {}
         const ctrl = require('../controllers/oauthController');

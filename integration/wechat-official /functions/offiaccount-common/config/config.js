@@ -2,13 +2,13 @@
  * 微信公众号通用配置
  *
  * 环境变量：
- *   OA_APPID     - 公众号 AppID
- *   OA_APPSECRET - 公众号 AppSecret
+ *   appId     - 公众号 AppID
+ *   appSecret - 公众号 AppSecret
  */
 
 const config = {
-  appId: process.env.OA_APPID || '',
-  appSecret: (process.env.OA_APPSECRET || '').replace(/\\n/g, '\n'),
+  appId: process.env.appId || '',
+  appSecret: (process.env.appSecret || '').replace(/\\n/g, '\n'),
 };
 
 /**
@@ -18,8 +18,8 @@ const config = {
 function validateConfig() {
   const errors = [];
 
-  if (!config.appId) errors.push('OA_APPID（公众号 AppID）未配置');
-  if (!config.appSecret) errors.push('OA_APPSECRET（公众号 AppSecret）未配置');
+  if (!config.appId) errors.push('appId（公众号 AppID）未配置');
+  if (!config.appSecret) errors.push('appSecret（公众号 AppSecret）未配置');
 
   if (errors.length > 0) {
     console.warn('⚠️  配置校验警告（共 ' + errors.length + ' 项）:');

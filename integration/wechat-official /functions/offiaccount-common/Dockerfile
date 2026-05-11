@@ -9,9 +9,9 @@ WORKDIR /app
 EXPOSE 80
 ENV PORT=80
 
-# ⚠️ 请勿在此处硬编码凭据（OA_APPSECRET 等）。
+# ⚠️ 请勿在此处硬编码凭据（appSecret 等）。
 # 请在云托管控制台 → 服务配置 → 环境变量 中配置：
-#   OA_APPID, OA_APPSECRET
+#   appId, appSecret
 
 COPY package*.json /app/
 

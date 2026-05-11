@@ -18,7 +18,7 @@ const { success, fail } = require('../utils/response');
  */
 exports.getConfig = async (req, res) => {
   try {
-    if (!appId) return fail(res, '未配置 OA_APPID，请在环境变量中设置');
+    if (!appId) return fail(res, '未配置 appId，请在环境变量中设置');
     success(res, { appId });
   } catch (err) {
     console.error('[oauth/config]', err);
@@ -36,7 +36,7 @@ exports.exchangeCode = async (req, res) => {
   try {
     const { code } = req.body;
     if (!code) return fail(res, '缺少 code 参数');
-    if (!appId || !appSecret) return fail(res, '未配置 OA_APPID / OA_APPSECRET');
+    if (!appId || !appSecret) return fail(res, '未配置 appId / appSecret');
 
     const url = `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${appId}&secret=${appSecret}&code=${code}&grant_type=authorization_code`;
     const r = await fetch(url);
@@ -70,7 +70,7 @@ exports.refreshToken = async (req, res) => {
   try {
     const { refresh_token } = req.body;
     if (!refresh_token) return fail(res, '缺少 refresh_token 参数');
-    if (!appId) return fail(res, '未配置 OA_APPID');
+    if (!appId) return fail(res, '未配置 appId');
 
     const url = `https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=${appId}&grant_type=refresh_token&refresh_token=${refresh_token}`;
     const r = await fetch(url);

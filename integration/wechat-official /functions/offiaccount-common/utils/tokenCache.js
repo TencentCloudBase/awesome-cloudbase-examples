@@ -23,7 +23,7 @@ async function getAccessToken() {
   }
 
   if (!appId || !appSecret) {
-    throw new Error('OA_APPID / OA_APPSECRET 未配置');
+    throw new Error('appId / appSecret 未配置');
   }
 
   const url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appId}&secret=${appSecret}`;
@@ -50,7 +50,7 @@ async function getStableAccessToken(forceRefresh = false) {
   }
 
   if (!appId || !appSecret) {
-    throw new Error('OA_APPID / OA_APPSECRET 未配置');
+    throw new Error('appId / appSecret 未配置');
   }
 
   const url = 'https://api.weixin.qq.com/cgi-bin/stable_token';

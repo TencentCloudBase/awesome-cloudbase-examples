@@ -9,9 +9,9 @@ describe('tokenCache', () => {
     let originalFetch, envBackup;
 
     beforeEach(() => {
-        envBackup = { OA_APPID: process.env.OA_APPID, OA_APPSECRET: process.env.OA_APPSECRET };
-        process.env.OA_APPID = 'wx_test_appid';
-        process.env.OA_APPSECRET = 'test_secret';
+        envBackup = { appId: process.env.appId, appSecret: process.env.appSecret };
+        process.env.appId = 'wx_test_appid';
+        process.env.appSecret = 'test_secret';
         originalFetch = globalThis.fetch;
         // 清缓存
         try { delete require.cache[require.resolve('../utils/tokenCache')]; } catch {}
@@ -62,11 +62,11 @@ describe('tokenCache', () => {
     });
 
     it('getAccessToken 配置缺失→抛异常', async () => {
-        delete process.env.OA_APPID;
+        delete process.env.appId;
         try { delete require.cache[require.resolve('../utils/tokenCache')]; } catch {}
         try { delete require.cache[require.resolve('../config/config')]; } catch {}
         const { getAccessToken } = require('../utils/tokenCache');
-        await assert.rejects(getAccessToken(), /OA_APPID/);
+        await assert.rejects(getAccessToken(), /appId/);
     });
 
     it('getStableAccessToken 首次→POST 拉取', async () => {

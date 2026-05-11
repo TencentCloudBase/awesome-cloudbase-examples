@@ -24,7 +24,7 @@ exports.getConfig = async (req, res) => {
   try {
     const { url } = req.body;
     if (!url) return fail(res, '缺少 url 参数（当前页面完整 URL）');
-    if (!appId) return fail(res, '未配置 OA_APPID');
+    if (!appId) return fail(res, '未配置 appId');
 
     const ticket = await getJsapiTicket();
     const timestamp = Math.floor(Date.now() / 1000);

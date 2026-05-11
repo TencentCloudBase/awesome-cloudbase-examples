@@ -110,7 +110,7 @@ offiaccount-common 云函数
 
 ```bash
 cd ../../functions/offiaccount-common
-OA_APPID=wxXXXXXX OA_APPSECRET=YYYYYY node bin/www
+appId=wxXXXXXX appSecret=YYYYYY node bin/www
 # 默认端口 3000
 ```
 

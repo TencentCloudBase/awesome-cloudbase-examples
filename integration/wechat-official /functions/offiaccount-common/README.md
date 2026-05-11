@@ -29,8 +29,8 @@
 
 ```json
 {
-  "OA_APPID":     "wx开头的公众号AppID",
-  "OA_APPSECRET": "公众号AppSecret"
+  "appId":     "wx开头的公众号AppID",
+  "appSecret": "公众号AppSecret"
 }
 ```
 
@@ -45,7 +45,7 @@ npm install
 
 ```bash
 # 设置环境变量后启动
-OA_APPID=wxXXXXXX OA_APPSECRET=YYYYYY node bin/www
+appId=wxXXXXXX appSecret=YYYYYY node bin/www
 # 默认端口 3000，CloudBase 部署用 PORT=9000
 ```
 
@@ -66,8 +66,8 @@ tcb fn deploy --dir .
 
 | 变量名 | 必填 | 说明 |
 |--------|------|------|
-| `OA_APPID` | ✅ | 公众号 AppID（wx 开头） |
-| `OA_APPSECRET` | ✅ | 公众号 AppSecret |
+| `appId` | ✅ | 公众号 AppID（wx 开头） |
+| `appSecret` | ✅ | 公众号 AppSecret |
 | `corsAllowOrigin` | 可选 | 允许跨域的来源，多个用逗号分隔，例如 `https://example.com` |
 
 ---
@@ -444,7 +444,7 @@ async function getAccessToken() {
 
 ```bash
 # 启动本地服务
-OA_APPID=wxXXXXXX OA_APPSECRET=YYYYYY node bin/www
+appId=wxXXXXXX appSecret=YYYYYY node bin/www
 
 # 获取全局 access_token
 curl -X POST http://localhost:3000/token/get
@@ -478,7 +478,7 @@ offiaccount-common/
 ├── cloudbaserc.json
 ├── .env.example          # 环境变量模板
 ├── config/
-│   └── config.js         # OA_APPID / OA_APPSECRET + validateConfig()
+│   └── config.js         # appId / appSecret + validateConfig()
 ├── utils/
 │   ├── wxApi.js          # 统一微信 API 请求封装（wxGet / wxPost）
 │   ├── tokenCache.js     # AccessToken + jsapi_ticket 内存缓存

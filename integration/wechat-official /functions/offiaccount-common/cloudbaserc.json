@@ -11,8 +11,8 @@
       "memorySize": 128,
       "installDependency": true,
       "environmentVariables": {
-        "OA_APPID": "YOUR_APPID",
-        "OA_APPSECRET": "YOUR_APPSECRET"
+        "appId": "YOUR_APPID",
+        "appSecret": "YOUR_APPSECRET"
       },
       "ignore": [
         "node_modules",
