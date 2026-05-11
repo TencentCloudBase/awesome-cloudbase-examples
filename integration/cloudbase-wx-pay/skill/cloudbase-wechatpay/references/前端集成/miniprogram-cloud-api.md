@@ -65,51 +65,100 @@ npm install
 const cloudbase = require('@cloudbase/js-sdk')
 
 const ENV_ID = 'your-env-id'           // ⚠️ 替换为你的云开发环境 ID
+const FUNCTION_NAME = 'pay-common'     // HTTP 云函数名称（如部署时改了名字，这里同步改）
+const API_GATEWAY = `https://${ENV_ID}.api.tcloudbasegateway.com`
 
 App({
-  globalData: { accessToken: '', openid: '', loginReady: false },
-  _cbApp: null,
+  globalData: {
+    envId: ENV_ID,
+    functionName: FUNCTION_NAME,
+    apiGateway: API_GATEWAY,
+    accessToken: '',
+    openid: '',
+    loginReady: false,
+  },
 
-  async onLaunch() {
-    // 初始化 CloudBase 并静默登录（signInWithOpenId 无需额外配置）
-    if (!this._cbApp) {
-      this._cbApp = cloudbase.init({ env: ENV_ID })
+  onLaunch() {
+    // 启动时检查环境配置
+    if (ENV_ID === 'your-env-id') {
+      wx.showModal({
+        title: '配置未完成',
+        content: '请先在 app.js 中将 ENV_ID 替换为你的云开发环境 ID',
+        showCancel: false,
+      })
+      return
     }
+    this.login()
+  },
 
-    // 静默登录获取 accessToken + openid
+  /**
+   * 静默登录流程（用户无感知）：
+   * 1. @cloudbase/js-sdk signInWithOpenId() 一步完成登录
+   * 2. 自动获取 openid + accessToken
+   */
+  async login() {
     try {
-      const { data, error } = await this._cbApp.auth.signInWithOpenId()
-      if (!error && data) {
-        this.globalData.accessToken = data.session?.access_token || ''
-        this.globalData.openid = data.user?.identities?.[0]?.identity_data?.provider_user_id || ''
+      const cbApp = cloudbase.init({ env: ENV_ID })
+      const { data, error } = await cbApp.auth.signInWithOpenId()
+
+      if (error) {
+        console.error('[登录失败]', error.code, error.message)
+        this._notifyLoginReady()
+        return
       }
+
+      if (data.session?.access_token) {
+        this.globalData.accessToken = data.session.access_token
+      }
+      if (data.user) {
+        this.globalData.openid =
+          data.user.identities?.[0]?.identity_data?.provider_user_id || ''
+      }
+
+      this._notifyLoginReady()
     } catch (e) {
       console.error('CloudBase 登录失败:', e)
+      this._notifyLoginReady()
     }
+  },
 
+  /**
+   * 通知所有等待登录的调用方（支持多页面并发调用）
+   */
+  _notifyLoginReady() {
     this.globalData.loginReady = true
-  },
-
-  // 获取 accessToken（支持刷新）
-  getAccessToken() {
-    return new Promise((resolve, reject) => {
-      const check = () => {
-        if (this.globalData.accessToken) resolve(this.globalData.accessToken)
-        else setTimeout(check, 100)
-      }
-      check()
-    })
-  },
-
-  // 重新登录（token 过期时）
-  async reLogin() {
-    const { data, error } = await this._cbApp.auth.signInWithOpenId()
-    if (!error && data) {
-      this.globalData.accessToken = data.session?.access_token || ''
-      this.globalData.openid = data.user?.identities?.[0]?.identity_data?.provider_user_id || ''
+    if (this._loginCallbacks) {
+      this._loginCallbacks.forEach(cb => cb())
+      this._loginCallbacks = null
     }
-    return this.globalData.accessToken
-  }
+  },
+
+  /**
+   * 等待登录完成（页面 onLoad 中调用）
+   * 比轮询更健壮：登录完成时会立即回调，不会死循环
+   */
+  waitForLogin() {
+    if (this.globalData.loginReady) return Promise.resolve()
+    if (!this._loginPromise) {
+      this._loginPromise = new Promise((resolve) => {
+        if (!this._loginCallbacks) this._loginCallbacks = []
+        this._loginCallbacks.push(resolve)
+      })
+    }
+    return this._loginPromise
+  },
+
+  /**
+   * 手动重新登录（Token 过期兜底）
+   * 注意：SDK 内置方法（如 callFunction）会自动刷新 Token，但本方案使用
+   * wx.request 手动调用 API 网关，SDK 无法自动介入刷新。
+   * 当 401 重试仍失败（Refresh Token 也过期，30 天未活跃）时触发完整重登录。
+   */
+  async reLogin() {
+    this.globalData.loginReady = false
+    this._loginPromise = null
+    await this.login()
+  },
 })
 ```
 
@@ -118,70 +167,80 @@ App({
 | 要点 | 说明 |
 |------|------|
 | `signInWithOpenId()` | 必须使用此方法获取 openid，不能用 `wx.login()` 的 code 换取 |
+| `waitForLogin()` | 页面中使用回调通知机制等待登录完成，避免轮询死循环 |
 | 登录时机 | 在 `onLaunch` 中执行，确保支付前已完成 |
+| Token 有效期 | Access Token 有效期 **2 小时**，Refresh Token 有效期 **30 天** |
+| Token 过期处理 | SDK 内置方法（如 `callFunction`）会自动刷新 Token；但本方案使用 `wx.request` 手动调 API 网关，需自行处理过期——代码已通过 **401 检测 + `reLogin()` 重试**实现 |
+
+> **参考文档**：
+> - [CloudBase 身份认证介绍](https://docs.cloudbase.net/authentication-v2/auth/introduce)
+> - [登录态 Refresh Token 说明](https://docs.cloudbase.net/faq/knowledge/tcb-login-state-refresh-token)
 
 ---
 
 ## Step 3：封装 API 调用
 
 ```javascript
-// utils/pay.js
+// pages/pay/pay.js（也可抽到 utils/pay.js 中）
 const app = getApp()
-
-// 云 API 网关地址
-const API_GATEWAY = `https://${app.globalData.envId}.api.tcloudbasegateway.com`
 
 /**
  * 调用 pay-common 后端（云函数版）
- * @param {string} action - 路由名（如 'wxpay_order'）
+ * 云 API 网关会将路径截断为 /，所以通过 body._action 传递实际路由
+ * 支持 401/403 自动重试：token 过期时自动 reLogin 后重试一次
+ *
+ * @param {string} action - 路由动作名，如 'wxpay_order'
  * @param {object} data - 请求参数
+ * @param {boolean} _isRetry - 内部参数，是否为重试请求
  */
-function callPayCommon(action, data) {
-  return app.getAccessToken().then((accessToken) => {
-    return new Promise((resolve, reject) => {
-      wx.request({
-        url: `${API_GATEWAY}/v1/functions/pay-common?webfn=true`,
-        method: 'POST',
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        data: { _action: action, ...data },
-        success(res) {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            let payload = res.data
-            // 解包 webfn 双层响应结构
-            const inner = payload?.data
-            if (inner && typeof inner === 'object' && 'status' in inner && 'data' in inner) {
-              payload = { ...payload, data: inner.data }
-            }
-            resolve(payload)
-          } else if (res.statusCode === 401) {
-            // Token 过期，重试一次
-            app.reLogin().then(newToken => {
-              wx.request({
-                url: `${API_GATEWAY}/v1/functions/pay-common?webfn=true`,
-                method: 'POST',
-                header: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${newToken}` },
-                data: { _action: action, ...data },
-                success(res2) {
-                  if (res2.statusCode >= 200 && res2.statusCode < 300) resolve(res2.data)
-                  else reject({ code: -1, msg: `HTTP ${res2.statusCode}` })
-                },
-                fail: reject,
-              })
-            })
-          } else {
-            reject({ code: -1, msg: `HTTP ${res.statusCode}: ${res.data?.msg || ''}` })
+function callPayCommon(action, data, _isRetry = false) {
+  const { apiGateway, functionName, accessToken } = app.globalData
+
+  if (!accessToken) {
+    return Promise.reject({ code: -1, msg: 'accessToken 未获取，请等待登录完成' })
+  }
+
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${apiGateway}/v1/functions/${functionName}?webfn=true`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      // 把 action 放进 body，Express 根据 _action 分发路由
+      data: { _action: action, ...data },
+      success(res) {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          // 云 API 调用 HTTP 云函数（webfn=true）时，返回结构为：
+          //   { code, msg, data: { status: 200, data: <云函数真正返回> } }
+          // 这里把内层的 HTTP 信封解开：
+          let payload = res.data
+          const inner = payload && payload.data
+          if (inner && typeof inner === 'object'
+              && Object.prototype.hasOwnProperty.call(inner, 'status')
+              && Object.prototype.hasOwnProperty.call(inner, 'data')) {
+            payload = { ...payload, data: inner.data }
           }
-        },
-        fail: reject,
-      })
+          resolve(payload)
+        } else if ((res.statusCode === 401 || res.statusCode === 403) && !_isRetry) {
+          // Token 过期，自动 reLogin 并重试一次
+          console.warn('[鉴权] Token 可能过期，尝试重新登录...')
+          app.reLogin().then(() => {
+            callPayCommon(action, data, true).then(resolve).catch(reject)
+          }).catch(() => {
+            reject({ code: -1, msg: `鉴权失败 HTTP ${res.statusCode}`, data: res.data })
+          })
+        } else {
+          reject({ code: -1, msg: `HTTP ${res.statusCode}`, data: res.data })
+        }
+      },
+      fail(err) {
+        reject(err)
+      },
     })
   })
 }
-
-module.exports = { callPayCommon }
 ```
 
 ### 关键点
@@ -189,8 +248,9 @@ module.exports = { callPayCommon }
 | 要点 | 说明 |
 |------|------|
 | `_action` 字段 | 用于路由分发，对应后端路由名 |
-| webfn 解包 | 云函数网关返回双层结构，需提取内层数据 |
-| 401 重试 | Token 过期时自动重新登录并重试 |
+| `apiGateway` / `functionName` | 从 `app.globalData` 获取，统一在 app.js 配置 |
+| webfn 解包 | 云函数网关返回双层结构 `{ data: { status, data } }`，需提取内层数据 |
+| 401/403 重试 | Token 过期时自动 `reLogin` 后递归重试一次（`_isRetry` 防无限循环） |
 | Bearer Token | 放在 Authorization 头中 |
 
 ---
@@ -199,11 +259,16 @@ module.exports = { callPayCommon }
 
 ```javascript
 // pages/pay/index.js
-const { callPayCommon } = require('../../utils/pay')
 const app = getApp()
 
 Page({
-  data: { loading: false },
+  data: { loading: false, openid: '' },
+
+  async onLoad() {
+    // 等待 app.js 登录完成（回调通知机制，不会死循环）
+    await app.waitForLogin()
+    this.setData({ openid: app.globalData.openid })
+  },
 
   // 下单 + 调起支付（完整流程）
   async handlePay() {
@@ -216,7 +281,7 @@ Page({
         description: '商品名称',                          // 商品描述
         out_trade_no: 'ORDER' + Date.now(),               // 全局唯一订单号 ⚠️
         amount: { total: 100, currency: 'CNY' },          // 金额单位=分！⚠️
-        payer: { openid: app.globalData.openid },          // 从登录获取的 openid
+        payer: { openid: this.data.openid },              // 从登录获取的 openid
       })
 
       if (res.code !== 0) {
@@ -240,7 +305,6 @@ Page({
       wx.showToast({ title: '支付成功', icon: 'success' })
 
       // ⚠️ 建议：支付成功后主动查单确认状态，不要仅依赖前端回调
-      this.queryOrder('ORDER' + Date.now()) // 示例，实际用保存的订单号
 
     } catch (err) {
       console.error('支付失败:', err)

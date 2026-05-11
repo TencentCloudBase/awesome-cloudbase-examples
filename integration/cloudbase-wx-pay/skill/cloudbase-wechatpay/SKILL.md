@@ -57,6 +57,7 @@ graph TD
     D --> D1[云函数 - 推荐]
     D --> D2[云托管 - Docker]
     D --> D3[本地开发 - 调试]
+    B -->|商户凭证怎么配| M[加载 references/模板接入/merchant-credentials.md]
     B -->|已决定用 pay-common| E[进入模板接入]
     E --> F{需要做什么?}
     F -->|快速上手| G[加载 references/模板接入/quick-start.md]
@@ -64,6 +65,7 @@ graph TD
     F -->|SDK vs Gateway 签名模式| I[加载 references/模板接入/sign-mode.md]
     F -->|部署到云端| J[加载 references/部署/deploy-*.md]
     F -->|前端调起支付| K[加载 references/前端集成/*.md]
+    F -->|微搭低码接入| W[加载 references/前端集成/weda-miniprogram.md]
     F -->|报错排查| L[加载 references/问题排查/troubleshooting.md]
 ```
 
@@ -75,9 +77,11 @@ graph TD
 |---|------|-----------|---------|
 | 1 | **方案选型** | 支付方案怎么选 / pay-common 和云调用区别 / CloudBase 部署方案 | `references/方案选型/cloudbase-pay-overview.md` |
 | 2 | **模板接入** | 怎么用 pay-common / 环境变量怎么配 / SDK Gateway 区别 / cloudbaserc.json 配置 | `references/模板接入/{quick-start,env-config,sign-mode}.md` |
-| 3 | **部署** | 怎么部署到云函数 / 用云托管 / 本地调试 / HTTP 访问服务配置 / 环境变量同步 | `references/部署/deploy-{cloud-function,cloud-run,local}.md` |
-| 4 | **前端集成** | 小程序怎么调起支付 / H5 怎么接 / PC 扫码 / React Web 测试页 | `references/前端集成/{miniprogram-*,web-*}.md` |
-| 5 | **问题排查** | 签名失败 / 回调收不到 / 部署后 502 / 转账报错 | `references/问题排查/{troubleshooting,error-patterns}.md` |
+| 3 | **商户凭证准备** | 商户号怎么配 / 证书怎么下载 / APIv3 密钥 / 公钥 / 集成中心创建 | `references/模板接入/merchant-credentials.md` |
+| 4 | **部署** | 怎么部署到云函数 / 用云托管 / 本地调试 / HTTP 访问服务配置 / 环境变量同步 | `references/部署/deploy-{cloud-function,cloud-run,local}.md` |
+| 5 | **前端集成** | 小程序怎么调起支付 / H5 怎么接 / PC 扫码 / React Web 测试页 / 微搭接入 | `references/前端集成/{miniprogram-*,web-*,weda-*}.md` |
+| 6 | **微搭低码接入** | 微搭支付 / WeDa 支付 / 低码接入 / $w.auth / 页面方法 | `references/前端集成/weda-miniprogram.md` |
+| 7 | **问题排查** | 签名失败 / 回调收不到 / 部署后 502 / 转账报错 / 限额 / 模拟器 / NOT_ENOUGH | `references/问题排查/{troubleshooting,error-patterns}.md` |
 
 > **部署关键步骤速查**（新手必看）：
 > - **cloudbaserc.json 完整示例 + type:HTTP 字段说明** → `quick-start.md` Step 4.1
@@ -267,6 +271,8 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 | **三种调用方式区别** | ①**事件型（普通型）** `callFunction`（SDK 内部通道，自动带 openId，无公网地址，cloudbaserc.json 无 type 字段）②HTTP 云API网关（需 Bearer Token，`?webfn=true`）③HTTP 访问服务（公网域名，无内置鉴权，**唯一可收微信回调的方式**）。详见 `quick-start.md` Step 3.5 |
 | **JSAPI 公众号后台配置** | JSAPI 支付需配置 3 个域名：①网页授权域名（OAuth2 redirect_uri 白名单，不能用 IP）②JS接口安全域名（wx.requestPayment 校验）③支付授权目录（商户平台）。三者缺一不可 |
 | **匿名登录不能用于支付** | 匿名登录没有 openid，无法完成任何支付操作（下单/调起/退款都依赖 openid） |
+| **模拟器 vs 真机测试** | 模拟器仅用于验证登录链路和下单接口（返回 `prepay_id`）；**真实支付必须在真机完成**（`wx.requestPayment` 需要输入支付密码）。使用微信开发者工具「真机调试」扫码测试 |
+| **真机限额/风控** | 支付弹窗已调起但提示限额 = 技术链路已通，属微信风控。常见诱因：测试金额过小（建议 0.1-1 元）、单用户单日笔数超限（换号/次日）、新商户号风控期、类目不匹配。详见 troubleshooting.md §3.6 |
 | **Vite/SPA 部署 base 配置** | 使用 CloudBase 静态托管且 serviceName 非空时，`vite.config.js` 必须设置 `base: './'`（相对路径），否则打包后 JS/CSS 引用为绝对路径导致 404 |
 
 ---
@@ -278,15 +284,18 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 | 文档 | 内容 | 何时加载 |
 |------|------|---------|
 | 方案选型 | CloudBase 支付全景 + 选型决策 | 用户问方案对比时 |
+| 模板接入/merchant-credentials | **商户凭证准备全流程**（APIv3 密钥/API 证书/微信支付公钥的详细操作路径 + 集成中心创建流程） | 新手首次接入、凭证报错排查 |
 | 模板接入/quick-start | **5 分钟快速开始（含三种调用方式详解 + cloudbaserc.json 完整示例 + type:HTTP 说明 + HTTP 访问服务配置 + 路由管理 CLI 命令 + 回调 URL 组装 + 环境变量同步流程 + 5 秒超时规则）** | **新手首次接入必读，覆盖部署全链路** |
 | 模板接入/env-config | 环境变量完整配置指南（各字段含义、格式要求） | 配置 .env 时 |
 | 模板接入/sign-mode | SDK vs Gateway 签名模式详解 | 选签名模式或回调不通时 |
 | 部署/* | 三种部署方式详解 | 部署时 |
-| 前端集成/* | 各端调用代码示例 | 接入前端时 |
+| 前端集成/miniprogram-* | 小程序调用代码示例（云 API 网关 / 云托管） | 接入小程序前端时 |
+| 前端集成/weda-miniprogram | **微搭低码小程序接入**（$w.auth + 页面方法完整示例） | 微搭/WeDa/低码接入支付 |
+| 前端集成/web-* | H5/Native/APP 接入 | 非小程序前端时 |
 | 业务开发/order-service | orderService 数据库集成 | 对接业务系统时 |
 | 业务开发/transfer | 商家转账注意事项 | 接转账功能时 |
 | 业务开发/security-checklist | 安全红线 + 上线清单 | 上线前检查 |
-| 问题排查/troubleshooting | 常见问题速查表（20+ 条目） | 出问题时 |
+| 问题排查/troubleshooting | 常见问题速查表（30+ 条目，含模拟器限制、风控限额、NOT_ENOUGH 等） | 出问题时 |
 | 问题排查/error-patterns | 错误模式详解 | 深度排查时 |
 
 ---

@@ -628,66 +628,146 @@ python3 scripts/check_deploy_config.py /path/to/pay-common
 
 ## Step 5：接入前端（小程序示例）
 
+> 完整版代码见 [miniprogram-cloud-api.md](../前端集成/miniprogram-cloud-api.md)，以下为关键摘要。
+
 ### 5.1 安装 SDK 并配置登录
 
 ```javascript
 // app.js
 const cloudbase = require('@cloudbase/js-sdk')
-const ENV_ID = 'your-env-id'
+
+const ENV_ID = 'your-env-id'           // ⚠️ 替换为你的云开发环境 ID
+const FUNCTION_NAME = 'pay-common'     // HTTP 云函数名称
+const API_GATEWAY = `https://${ENV_ID}.api.tcloudbasegateway.com`
 
 App({
-  globalData: { accessToken: '', openid: '', loginReady: false },
-  _cbApp: null,
+  globalData: {
+    envId: ENV_ID,
+    functionName: FUNCTION_NAME,
+    apiGateway: API_GATEWAY,
+    accessToken: '',
+    openid: '',
+    loginReady: false,
+  },
 
-  async onLaunch() {
-    // signInWithOpenId 无需额外配置，只需开启小程序身份源即可
-    if (!this._cbApp) {
-      this._cbApp = cloudbase.init({ env: ENV_ID })
+  onLaunch() {
+    if (ENV_ID === 'your-env-id') {
+      wx.showModal({
+        title: '配置未完成',
+        content: '请先在 app.js 中将 ENV_ID 替换为你的云开发环境 ID',
+        showCancel: false,
+      })
+      return
     }
-    // 静默登录获取 accessToken 和 openid
-    const { data, error } = await this._cbApp.auth.signInWithOpenId()
-    if (!error && data) {
-      this.globalData.accessToken = data.session?.access_token || ''
-      this.globalData.openid = data.user?.identities?.[0]?.identity_data?.provider_user_id || ''
+    this.login()
+  },
+
+  /** 静默登录：signInWithOpenId 一步完成 */
+  async login() {
+    try {
+      const cbApp = cloudbase.init({ env: ENV_ID })
+      const { data, error } = await cbApp.auth.signInWithOpenId()
+
+      if (error) {
+        console.error('[登录失败]', error.code, error.message)
+        this._notifyLoginReady()
+        return
+      }
+
+      if (data.session?.access_token) {
+        this.globalData.accessToken = data.session.access_token
+      }
+      if (data.user) {
+        this.globalData.openid =
+          data.user.identities?.[0]?.identity_data?.provider_user_id || ''
+      }
+
+      this._notifyLoginReady()
+    } catch (e) {
+      console.error('CloudBase 登录失败:', e)
+      this._notifyLoginReady()
     }
+  },
+
+  /** 通知所有等待登录的调用方 */
+  _notifyLoginReady() {
     this.globalData.loginReady = true
-  }
+    if (this._loginCallbacks) {
+      this._loginCallbacks.forEach(cb => cb())
+      this._loginCallbacks = null
+    }
+  },
+
+  /** 等待登录完成（页面 onLoad 中调用），比轮询更健壮 */
+  waitForLogin() {
+    if (this.globalData.loginReady) return Promise.resolve()
+    if (!this._loginPromise) {
+      this._loginPromise = new Promise((resolve) => {
+        if (!this._loginCallbacks) this._loginCallbacks = []
+        this._loginCallbacks.push(resolve)
+      })
+    }
+    return this._loginPromise
+  },
+
+  /** 手动重新登录（仅在 Refresh Token 也过期时才需要） */
+  async reLogin() {
+    this.globalData.loginReady = false
+    this._loginPromise = null
+    await this.login()
+  },
 })
 ```
 
 ### 5.2 封装调用函数
 
 ```javascript
-// utils/pay.js
+// utils/pay.js（或 pages/pay/pay.js）
 const app = getApp()
-const API_GATEWAY = `https://${app.globalData.envId}.api.tcloudbasegateway.com`
 
-function callPayCommon(action, data) {
-  return app.getAccessToken().then((accessToken) => {
-    return new Promise((resolve, reject) => {
-      wx.request({
-        url: `${API_GATEWAY}/v1/functions/pay-common?webfn=true`,
-        method: 'POST',
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        data: { _action: action, ...data },
-        success(res) {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            let payload = res.data
-            // 解包双层响应结构
-            const inner = payload?.data
-            if (inner && typeof inner === 'object' && 'status' in inner && 'data' in inner) {
-              payload = { ...payload, data: inner.data }
-            }
-            resolve(payload)
-          } else {
-            reject({ code: -1, msg: `HTTP ${res.statusCode}` })
+/**
+ * 调用 pay-common（支持 401/403 自动重试一次）
+ */
+function callPayCommon(action, data, _isRetry = false) {
+  const { apiGateway, functionName, accessToken } = app.globalData
+
+  if (!accessToken) {
+    return Promise.reject({ code: -1, msg: 'accessToken 未获取，请等待登录完成' })
+  }
+
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${apiGateway}/v1/functions/${functionName}?webfn=true`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      data: { _action: action, ...data },
+      success(res) {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          let payload = res.data
+          // 解包双层响应结构（webfn 信封）
+          const inner = payload && payload.data
+          if (inner && typeof inner === 'object'
+              && Object.prototype.hasOwnProperty.call(inner, 'status')
+              && Object.prototype.hasOwnProperty.call(inner, 'data')) {
+            payload = { ...payload, data: inner.data }
           }
-        },
-        fail: reject,
-      })
+          resolve(payload)
+        } else if ((res.statusCode === 401 || res.statusCode === 403) && !_isRetry) {
+          // Token 过期，自动 reLogin 并重试一次
+          console.warn('[鉴权] Token 可能过期，尝试重新登录...')
+          app.reLogin().then(() => {
+            callPayCommon(action, data, true).then(resolve).catch(reject)
+          }).catch(() => {
+            reject({ code: -1, msg: `鉴权失败 HTTP ${res.statusCode}`, data: res.data })
+          })
+        } else {
+          reject({ code: -1, msg: `HTTP ${res.statusCode}`, data: res.data })
+        }
+      },
+      fail: reject,
     })
   })
 }
@@ -703,13 +783,24 @@ const { callPayCommon } = require('../../utils/pay')
 const app = getApp()
 
 Page({
+  data: { loading: false, openid: '' },
+
+  async onLoad() {
+    // 等待 app.js 登录完成（回调通知机制，不会死循环）
+    await app.waitForLogin()
+    this.setData({ openid: app.globalData.openid })
+  },
+
   async handlePay() {
+    if (this.data.loading) return
+    this.setData({ loading: true })
+
     try {
       const res = await callPayCommon('wxpay_order', {
         description: '商品名称',
         out_trade_no: 'ORDER' + Date.now(),
         amount: { total: 100, currency: 'CNY' },  // ⚠️ 单位是分！
-        payer: { openid: app.globalData.openid },
+        payer: { openid: this.data.openid },
       })
 
       if (res.code !== 0) {
@@ -720,7 +811,7 @@ Page({
       // 提取调起支付的参数
       const payData = res.data?.data || res.data
       await wx.requestPayment({
-        timeStamp: payData.timeStamp,
+        timeStamp: String(payData.timeStamp),   // 必须为字符串
         nonceStr: payData.nonceStr,
         package: payData.package || ('prepay_id=' + payData.prepay_id),
         signType: 'RSA',
@@ -735,6 +826,8 @@ Page({
       } else {
         wx.showToast({ title: err.msg || '支付失败', icon: 'none' })
       }
+    } finally {
+      this.setData({ loading: false })
     }
   }
 })
