@@ -6,22 +6,49 @@
 
 ## ⚠️ 部署方式说明
 
-### 当前：CloudBase 静态托管 + HTTP 访问服务（快速测试用）
+### 本 Demo：HTTP 访问服务（快速体验）
 
-本模版通过 **CloudBase 静态托管**部署，使用** HTTP 访问服务**直接调用后端接口：
+本 Demo 默认使用 **CloudBase HTTP 访问服务**直接调用后端接口，目的是让你**最快跑通支付全流程**：
 
 - ✅ 无需 accessToken 鉴权，开箱即用
+- ✅ **无跨域问题** — HTTP 访问服务的静态托管与云函数共享同一域名，天然同源
 - ✅ 适合快速验证支付流程是否跑通
 - ⚠️ **不适合生产环境**（无登录态、无 Token 管理）
 
 ```
 浏览器 → CloudBase 静态托管（本 React 页面）
-       → HTTP 访问服务 → pay-common 后端（无鉴权）
+       → HTTP 访问服务（同域名）→ pay-common 后端（无鉴权）
+       ↑ 同源，无 CORS 问题
 ```
 
 ### 生产环境：HTTP 云 API 调用（推荐）
 
-正式上线时，前端应通过 **CloudBase API 网关**调用后端云函数，需要自行接入：
+正式上线时，前端应通过 **CloudBase HTTP 云 API（API 网关）** 调用后端云函数。与 HTTP 访问服务的关键区别：
+
+| 对比项 | HTTP 访问服务（本 Demo） | HTTP 云 API（生产推荐） |
+|--------|------------------------|----------------------|
+| **鉴权** | 无 | Bearer Token（accessToken） |
+| **跨域（CORS）** | ✅ 同域名，无需处理 | ⚠️ **需手动配置** |
+| **安全性** | 低（公网直接访问） | 高（登录态 + Token 校验） |
+| **适用场景** | 快速体验 / Demo | 正式上线 |
+
+#### 跨域配置（CORS）
+
+使用 HTTP 云 API 时，前端域名与 API 网关域名不同源，浏览器会拦截跨域请求。需要在 **CloudBase 控制台**配置 CORS：
+
+1. 进入 [云开发控制台](https://tcb.cloud.tencent.com) → 你的环境 → **访问服务** → **HTTP 云 API**
+2. 找到对应的云函数路由，点击 **编辑**
+3. 在「自定义域名」或「CORS 配置」中，添加你的前端域名到允许列表：
+   - 开发环境：`http://localhost:5173`
+   - 生产环境：你的正式域名，如 `https://your-domain.com`
+4. 允许的 Headers 至少包含：`Content-Type, Authorization`
+5. 允许的 Methods 至少包含：`GET, POST, OPTIONS`
+
+> 💡 **为什么 HTTP 访问服务不需要配 CORS？**
+> 因为 HTTP 访问服务的静态托管和云函数路由都挂在同一个域名下（如 `xxx.app.tcloudbase.com`），
+> 前端页面和后端 API 是同源的，浏览器不会触发 CORS 预检。
+
+#### 接入要点
 
 | 项目 | 说明 |
 |------|------|
@@ -32,7 +59,8 @@
 
 ```
 小程序/网页 → CloudBase Auth 登录 → 获取 accessToken
-           → CloudBase API 网关（带 Bearer Token）→ pay-common 后端（有鉴权）
+           → CloudBase HTTP 云 API（带 Bearer Token）→ pay-common 后端（有鉴权）
+           ↑ 跨域，需配置 CORS
 ```
 
 完整接入文档见 `pay-common/README.md` §**Step 5：接入前端**。
@@ -41,31 +69,50 @@
 
 ## 本地开发
 
-```bash
-npm install
-npm run dev        # http://localhost:5173
-```
+1. **复制环境变量配置**
 
-修改 `src/App.jsx` 中的 `baseUrl` 为你的后端地址。
+   ```bash
+   cp .env.example .env
+   ```
+
+   编辑 `.env` 文件，填入你的实际配置：
+
+   ```bash
+   VITE_TCB_ENV_ID=your-env-id          # CloudBase 环境 ID
+   VITE_TCB_UIN=your-uin                 # 腾讯云 UIN（网关域名需要）
+   VITE_ROUTE_PREFIX=pay                 # 支付云函数 HTTP 触发路径
+   VITE_OAUTH_PREFIX=oauth               # OAuth 云函数 HTTP 触发路径
+   ```
+
+2. **启动开发服务器**
+
+   ```bash
+   npm install
+   npm run dev        # http://localhost:5173
+   ```
+
+   > 启动后页面会根据 `.env` 中的配置自动拼接后端地址，也可在页面「服务配置」卡片中手动修改。
 
 ---
 
-## 部署到 CloudBase 静态托管
+## 部署到 CloudBase 静态托管（快速体验）
+
+> 💡 本章节对应上述「HTTP 访问服务」方式，用于快速体验。生产环境请参考「HTTP 云 API 调用」章节。
 
 ### 前置步骤
 
 1. **开启 HTTP 访问服务**
    - 进入云开发控制台 → 环境 → **HTTP 访问服务**
    - 点击「开启」或「创建域名关联」
-   - 获得公网访问域名（格式如 `https://{envId}.{region}.app.tcloudbase.com`）
+   - 获得公网访问域名（格式如 `https://{envId}-{uin}.ap-shanghai.app.tcloudbase.com`）
 
    > ⚠️ **请求路径说明**：
    > 开启 HTTP 访问服务后，你的公网域名会带上 `serviceName` 作为子路径。
-   > 例如 `serviceName: web-pay-07`，则实际访问地址为：
+   > 例如 `serviceName: web-pay`，则实际访问地址为：
    > ```
-   > https://xxx.cloudbaseasms.com/web-pay-07/
-   >                              ^^^^^^^^^^
-   >                              这是 path 部分
+   > https://xxx.ap-shanghai.app.tcloudbase.com/web-pay/
+   >                                           ^^^^^^^^
+   >                                           这是 path 部分
    > ```
    > Vite 打包需配置 `base: './'`（已在本项目 `vite.config.js` 中配置），
    > 否则 JS/CSS 资源会因路径不匹配返回 **404**。
@@ -90,17 +137,18 @@ npm run dev        # http://localhost:5173
    > - 「当前页面 URL 的域不在以下支付授权目录中」→ 支付授权目录未配置
    > - `wx.requestPayment` 无反应 → JS接口安全域名未配置
 
-3. **修改 `src/App.jsx` 中的 baseUrl**  
-   将 `baseUrl` 改为你的 HTTP 访问服务完整域名 + 后端路径：
-   ```js
-   const [baseUrl, setBaseUrl] = useState('https://你的环境ID.区域.app.tcloudbase.com/pay/wx-pay')
+3. **配置环境变量**
+
+   确保 `.env` 文件中的配置正确（参考 `.env.example`），页面会自动拼接后端地址：
+   ```
+   https://{VITE_TCB_ENV_ID}-{VITE_TCB_UIN}.ap-shanghai.app.tcloudbase.com/{VITE_ROUTE_PREFIX}
    ```
 
 ### 部署命令
 
 ```bash
-# 确保 cloudbaserc.json 中 serviceName 正确
-npm run build          # 构建产物输出到 dist/
+# 确保 cloudbaserc.json 中 envId 和 serviceName 正确
+npm run build             # 构建产物输出到 dist/
 tcb app deploy web-pay    # 部署到静态托管
 ```
 
@@ -119,23 +167,27 @@ tcb app deploy web-pay    # 部署到静态托管
 ## 文件结构
 
 ```
+.env.example                 # 环境变量模板（复制为 .env 使用）
+cloudbaserc.json             # CloudBase 部署配置
 src/
-├── App.jsx              # 主应用（状态管理 + 业务逻辑）
-├── main.jsx             # 入口
-├── index.css            # 全局样式
-├── components/          # UI 组件
-│   ├── ActionBar.jsx         # 操作按钮栏
-│   ├── ConfigCard.jsx        # 服务配置卡片
-│   ├── OrderParamsCard.jsx   # 下单参数卡片
-│   ├── PayActionCard.jsx     # 支付操作区（JSAPI/H5/Native）
-│   ├── ResultCard.jsx        # 结果展示
+├── App.jsx                  # 主应用（状态管理 + 业务逻辑）
+├── main.jsx                 # 入口
+├── index.css                # 全局样式
+├── components/              # UI 组件
+│   ├── ActionBar.jsx             # 操作按钮栏
+│   ├── ConfigCard.jsx            # 服务配置卡片
+│   ├── OrderParamsCard.jsx       # 下单参数卡片
+│   ├── PayActionCard.jsx         # 支付操作区（JSAPI/H5/Native）
+│   ├── ResultCard.jsx            # 结果展示
 │   └── ...
-├── services/payService.js # OAuth/OpenID 服务调用
-├── utils/api.js          # 请求封装 + 工具函数
-├── hooks/usePayState.js  # UI 状态管理 Hook
+├── services/payService.js   # OAuth 登录 / OpenID 获取 / Token 刷新
+├── utils/api.js             # 请求封装 + 工具函数
+├── hooks/usePayState.js     # UI 状态管理 Hook
 └── constants/tradeState.js  # 交易状态映射
 ```
 
 ---
 
-*最后更新：2026-04-29*
+*最后更新：2026-05-11*
+
+<!-- TODO: 后续可新增「HTTP 云 API 部署」章节，提供完整的生产环境部署示例 -->

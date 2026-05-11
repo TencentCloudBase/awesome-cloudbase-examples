@@ -9,7 +9,7 @@ export default function ConfigCard({ baseUrl, oauthUrl, onChange }) {
           className="config-input"
           value={baseUrl}
           onChange={e => onChange('baseUrl', e.target.value)}
-          placeholder="https://your-domain.com/wx-pay"
+          placeholder="https://{envId}-{uin}.ap-shanghai.app.tcloudbase.com/pay"
         />
       </div>
       <div className="form-group">

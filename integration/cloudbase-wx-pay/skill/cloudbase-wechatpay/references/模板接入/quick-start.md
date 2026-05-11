@@ -427,7 +427,7 @@ tcb cloudrun deploy pay-common --path .
    ```
    例如：
    ```
-   https://test-wxpay-5gy4ugzreef15cfe-1326375956.ap-shanghai.app.tcloudbase.com
+   https://your-env-id-your-uin.ap-shanghai.app.tcloudbase.com
    ```
 4. 在下方「**路由管理**」→ 「**添加路由**」：
 
@@ -450,7 +450,7 @@ tcb routes list -e your-env-id
 
 # 创建路由（指向 pay-common 云函数，不开启身份认证）
 tcb routes add -e your-env-id --data '{
-  "domain": "test-wxpay-5gy4ugzreef15cfe-1326375956.ap-shanghai.app.tcloudbase.com",
+  "domain": "your-env-id-your-uin.ap-shanghai.app.tcloudbase.com",
   "routes": [{
     "path": "/pay/wx-pay",
     "upstreamResourceType": "SCF",
@@ -489,9 +489,9 @@ tcb routes list -e your-env-id --filter "Path=/pay/wx-pay"
 #
 # ============================================================
 
-notifyURLPayURL=https://test-wxpay-5gy4ugzreef15cfe-1326375956.ap-shanghai.app.tcloudbase.com/pay/wx-pay/unifiedOrderTrigger
-notifyURLRefundsURL=https://test-wxpay-5gy4ugzreef15cfe-1326375956.ap-shanghai.app.tcloudbase.com/pay/wx-pay/refundTrigger
-transferNotifyUrl=https://test-wxpay-5gy4ugzreef15cfe-1326375956.ap-shanghai.app.tcloudbase.com/pay/wx-pay/transferTrigger
+notifyURLPayURL=https://your-env-id-your-uin.ap-shanghai.app.tcloudbase.com/pay/wx-pay/unifiedOrderTrigger
+notifyURLRefundsURL=https://your-env-id-your-uin.ap-shanghai.app.tcloudbase.com/pay/wx-pay/refundTrigger
+transferNotifyUrl=https://your-env-id-your-uin.ap-shanghai.app.tcloudbase.com/pay/wx-pay/transferTrigger
 ```
 
 > **验证回调 URL 是否正确**：
