@@ -1,10 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import devErrors from "./vite-plugin-dev-errors";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), devErrors()],
   base: "./", // 使用相对路径，解决静态托管部署时的资源加载问题
   resolve: {
     alias: {

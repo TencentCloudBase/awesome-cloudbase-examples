@@ -23,3 +23,7 @@ dist-ssr
 *.sw?
 .env.local
 .env.local
+
+# Local dev-only scaffolding for testing ErrorReporter — do not commit
+public/parent-harness.html
+src/components/ErrorTrigger.tsx
