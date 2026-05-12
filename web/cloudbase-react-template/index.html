@@ -10,5 +10,25 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!--
+      Dev-only error overlay. Loaded as a separate ESM entry so it can
+      mount independently of /src/main.tsx — even if main.tsx's import
+      chain blows up (syntax error in App.tsx, missing module, …) the
+      overlay still appears and surfaces the failure.
+
+      Vite strips the line below in production builds because
+      `import.meta.env.DEV` becomes the literal false during transform
+      and the surrounding `if` block is constant-folded out — see
+      `vite-plugin-dev-errors.ts` for the gating, and
+      `src/bootstrap-error-reporter.tsx` for the mount logic.
+    -->
+    <script type="module">
+      if (import.meta.env.DEV) {
+        import("/src/bootstrap-error-reporter.tsx").catch((err) => {
+          // Don't let a failure in the safety net itself break the page.
+          console.error("[ErrorReporter] failed to bootstrap:", err);
+        });
+      }
+    </script>
   </body>
 </html>

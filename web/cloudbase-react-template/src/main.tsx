@@ -2,27 +2,23 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import ErrorReporter from "./components/ErrorReporter";
+import AppErrorBoundary from "./components/AppErrorBoundary";
 
-// ErrorReporter ships in the dev bundle but only renders when running
-// `vite` (dev server). In a production `vite build`, `import.meta.env.DEV`
-// is the literal `false`; Rollup folds the conditional and the unused
-// import — so the component is dead-code eliminated from prod assets.
+// ErrorReporter intentionally is NOT mounted from here. It's bootstrapped
+// from index.html into its own React root (`#error-reporter-root`) so that
+// when this file's import chain fails — for example a syntax error in App,
+// or any module along its transitive imports failing to load — the dev
+// overlay still appears. See `src/bootstrap-error-reporter.tsx` and the
+// inline <script> in `index.html`.
 //
-// We deliberately don't lazy()-load it: a dynamic import going through a
-// preview proxy / iframe gateway can quietly fail (network 404 on the
-// chunk URL) and leave Suspense hung on `fallback={null}`, i.e. nothing
-// visible. Direct import is more boring and more reliable.
-const root = (
+// AppErrorBoundary, on the other hand, is part of the prod bundle: it's the
+// last-line-of-defence against a render-time crash leaving the user with a
+// blank `<div id="root">`. It only catches React render errors (not module
+// load failures, not async throws); the rest is covered by the dev overlay.
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {import.meta.env.DEV ? (
-      <ErrorReporter>
-        <App />
-      </ErrorReporter>
-    ) : (
+    <AppErrorBoundary>
       <App />
-    )}
-  </StrictMode>
+    </AppErrorBoundary>
+  </StrictMode>,
 );
-
-createRoot(document.getElementById("root")!).render(root);

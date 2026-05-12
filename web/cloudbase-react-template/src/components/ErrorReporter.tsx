@@ -259,7 +259,14 @@ class ReactErrorBoundary extends Component<BoundaryProps, BoundaryState> {
 /* -------------------------------------------------------------------------- */
 
 interface ErrorReporterProps {
-  children: ReactNode;
+  /**
+   * Children rendered inside an ErrorBoundary. Optional: when ErrorReporter
+   * is mounted into its own root (see `bootstrap-error-reporter.tsx`) it
+   * has no app tree to wrap — it's just the floating panel observing
+   * window-level errors. Pass children only when you want it to also
+   * catch React render errors in the wrapped subtree.
+   */
+  children?: ReactNode;
 }
 
 export default function ErrorReporter({ children }: ErrorReporterProps) {
@@ -372,6 +379,37 @@ export default function ErrorReporter({ children }: ErrorReporterProps) {
   };
 
   useEffect(() => {
+    // Hydrate from the dev server's snapshot. vite:error is a one-shot push
+    // — if the offending file was already transformed (and failed) before
+    // our listener attached, we'd miss it on every page load after the
+    // first. The plugin keeps a persistent buildError map keyed by file,
+    // so we just GET it on mount and seed our local state. The endpoint is
+    // mounted under whatever Vite base is configured AND at the bare path,
+    // so a relative URL just works whether or not we're behind a proxy.
+    let cancelled = false;
+    if (import.meta.hot) {
+      const base = import.meta.env.BASE_URL || "/";
+      // Trim trailing slash before joining so we don't end up with `//`.
+      const url = `${base.replace(/\/$/, "")}/__dev_errors`;
+      fetch(url, { headers: { Accept: "application/json" } })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: { buildErrors?: Array<{ message: string; stack?: string; file?: string; loc?: { line?: number; column?: number }; timestamp?: number }> } | null) => {
+          if (cancelled || !data?.buildErrors?.length) return;
+          for (const be of data.buildErrors) {
+            record({
+              source: "vite-hmr",
+              message: be.message,
+              stack: be.stack,
+              raw: { file: be.file, loc: be.loc },
+              timestamp: typeof be.timestamp === "number" ? be.timestamp : Date.now(),
+            });
+          }
+        })
+        .catch(() => {
+          /* silent — endpoint not reachable, nothing to do */
+        });
+    }
+
     const onError = (e: ErrorEvent) => {
       record({
         source: "window-error",
@@ -447,6 +485,7 @@ export default function ErrorReporter({ children }: ErrorReporterProps) {
     }
 
     return () => {
+      cancelled = true;
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
       offViteError?.();
@@ -481,15 +520,25 @@ export default function ErrorReporter({ children }: ErrorReporterProps) {
     setErrors((prev) => prev.filter((e) => e.id !== id));
   };
 
+  // Wrap children in an ErrorBoundary only when there are children to wrap.
+  // The standalone-mount variant (no children) just runs as a side-effect
+  // listener + floating UI.
+  const wrapChildren = (node: ReactNode): ReactNode =>
+    children !== undefined ? (
+      <ReactErrorBoundary onError={record}>{node}</ReactErrorBoundary>
+    ) : (
+      node
+    );
+
   if (errors.length === 0) {
-    return <ReactErrorBoundary onError={record}>{children}</ReactErrorBoundary>;
+    return <>{wrapChildren(children)}</>;
   }
 
   // Collapsed view: just a small red badge with the error count. Click to expand.
   if (collapsed) {
     return (
       <>
-        <ReactErrorBoundary onError={record}>{children}</ReactErrorBoundary>
+        {wrapChildren(children)}
         <button
           type="button"
           data-drag-root
@@ -540,7 +589,7 @@ export default function ErrorReporter({ children }: ErrorReporterProps) {
 
   return (
     <>
-      <ReactErrorBoundary onError={record}>{children}</ReactErrorBoundary>
+      {wrapChildren(children)}
       <div
         role="alert"
         aria-live="polite"
