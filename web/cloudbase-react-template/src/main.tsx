@@ -1,21 +1,28 @@
-import { StrictMode, lazy, Suspense, type ReactNode } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
+import ErrorReporter from "./components/ErrorReporter";
 
-// ErrorReporter is only loaded in dev. In production builds
-// `import.meta.env.DEV` is the constant `false`, so the lazy() call and the
-// dynamic import below are dead code and Rollup will drop the chunk entirely.
-const Wrapper = import.meta.env.DEV
-  ? lazy(() => import("./components/ErrorReporter"))
-  : ({ children }: { children: ReactNode }) => <>{children}</>;
-
-createRoot(document.getElementById("root")!).render(
+// ErrorReporter ships in the dev bundle but only renders when running
+// `vite` (dev server). In a production `vite build`, `import.meta.env.DEV`
+// is the literal `false`; Rollup folds the conditional and the unused
+// import — so the component is dead-code eliminated from prod assets.
+//
+// We deliberately don't lazy()-load it: a dynamic import going through a
+// preview proxy / iframe gateway can quietly fail (network 404 on the
+// chunk URL) and leave Suspense hung on `fallback={null}`, i.e. nothing
+// visible. Direct import is more boring and more reliable.
+const root = (
   <StrictMode>
-    <Suspense fallback={null}>
-      <Wrapper>
+    {import.meta.env.DEV ? (
+      <ErrorReporter>
         <App />
-      </Wrapper>
-    </Suspense>
-  </StrictMode>,
+      </ErrorReporter>
+    ) : (
+      <App />
+    )}
+  </StrictMode>
 );
+
+createRoot(document.getElementById("root")!).render(root);

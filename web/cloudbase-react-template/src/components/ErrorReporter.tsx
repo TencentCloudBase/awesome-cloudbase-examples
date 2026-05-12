@@ -427,15 +427,18 @@ export default function ErrorReporter({ children }: ErrorReporterProps) {
       import.meta.hot.on("vite:error", handler);
       offViteError = () => import.meta.hot?.off("vite:error", handler);
 
-      // A successful HMR update means the app is now running fresh code.
-      // Any previously captured errors are from the old code and likely no
-      // longer reproduce — clear the whole list (both the local UI and the
-      // dev-server mirror) so the state reflects "current code health", not
-      // accumulated history. This includes the cold-start vite:afterUpdate
-      // that fires once on first client connect; that's fine — there are
-      // no errors to lose at that point anyway.
+      // A successful HMR update means the app is now running fresh code, so
+      // the dev-server's mirror of runtime errors is likely stale — tell it
+      // to clear. We deliberately DO NOT touch the local `errors` list:
+      //   - `vite:error` and `vite:afterUpdate` can fire in the same tick
+      //     (a partially-failing update still emits afterUpdate when at
+      //     least one module applied), and a blind setErrors([]) would
+      //     immediately swallow the error we just captured. Keeping the
+      //     list around lets the user actually see what broke.
+      //   - Stale entries in the local list are bounded (MAX_ERRORS) and
+      //     can be dismissed manually; that's preferable to silently
+      //     hiding a real, current failure.
       const afterUpdateHandler = () => {
-        setErrors((prev) => (prev.length === 0 ? prev : []));
         clearDevServerRuntimeErrors();
       };
       import.meta.hot.on("vite:afterUpdate", afterUpdateHandler);
