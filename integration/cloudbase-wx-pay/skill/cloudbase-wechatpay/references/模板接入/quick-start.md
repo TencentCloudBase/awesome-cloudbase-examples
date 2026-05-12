@@ -209,26 +209,27 @@ const res = await app.callFunction({ name: 'myFunc', data: { a: 1 } })
 将 HTTP 函数作为标准 REST API 调用，走 CloudBase 内部网关：
 
 ```bash
-# cURL 调用示例
+# cURL 调用示例（Web 端或服务端调用）
 curl -L 'https://{envId}.api.tcloudbasegateway.com/v1/functions/pay-common?webfn=true' \
   -H "Authorization: Bearer {access_token}" \
   -H "Content-Type: application/json" \
   -d '{"_action": "wxpay_order", ...}'
 ```
 
-```javascript
-// 小程序端封装（见 Step 5.2）
-const API_GATEWAY = `https://${envId}.api.tcloudbasegateway.com`
-wx.request({
-  url: `${API_GATEWAY}/v1/functions/pay-common?webfn=true`,
-  method: 'POST',
-  header: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${accessToken}`  // 必须手动携带
-  },
-  data: { _action: 'wxpay_order', ... }
-})
-```
+> 💡 **小程序端推荐**：使用 `wx.cloud.callHTTPFunction` 替代直接调 API 网关，
+> 平台自动注入 `x-wx-openid`，无需手动管理 Token。见 Step 5.2。
+>
+> ```javascript
+> // 小程序端推荐写法（callHTTPFunction，平台自动鉴权）
+> wx.cloud.callHTTPFunction({
+>   name: 'pay-common',
+>   config: { env: envId },
+>   path: '/wx-pay/wxpay_order',
+>   method: 'POST',
+>   header: { 'Content-Type': 'application/json' },
+>   data: { description: '商品名称', amount: { total: 100, currency: 'CNY' } },
+> })
+> ```
 
 **关键点**：
 - URL 中**必须带 `?webfn=true` 参数**，否则网关会按事件型格式解析请求体，导致参数丢失
@@ -302,12 +303,11 @@ SDK 验签模式下，小程序 Demo 的请求走 **两个完全不同的通道*
 │                                                                     │
 │  通道一：前端 → 后端（主动请求）                                        │
 │  ─────────────────────────────                                      │
-│  小程序 wx.request                                                  │
+│  小程序 wx.cloud.callHTTPFunction / callContainer                    │
 │       ↓                                                             │
-│  云 API 网关（鉴权层：Bearer Token）                                   │
-│  https://{envId}.api.tcloudbasegateway.com                          │
+│  平台自动注入 x-wx-openid（无需登录、无需 Token）                        │
 │       ↓                                                             │
-│  pay-common 云函数                                                   │
+│  pay-common 云函数 / 云托管容器                                       │
 │       ↓                                                             │
 │  微信支付 API（下单 / 查单 / 退款 / 转账）                             │
 │                                                                     │
@@ -320,17 +320,17 @@ SDK 验签模式下，小程序 Demo 的请求走 **两个完全不同的通道*
 │       ↓                                                             │
 │  pay-common 云函数（验签 + 解密 + 业务处理）                            │
 │                                                                     │
-│  ⚠️ 两个通道的域名不同、鉴权方式不同、配置位置不同！                       │
+│  ⚠️ 两个通道的入口不同、鉴权方式不同、配置位置不同！                       │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 | | **通道一（前端主动请求）** | **通道二（微信回调）** |
 |---|---|---|
 | **发起方** | 小程序 / Web 前端 | 微信支付服务器 |
-| **目标域名** | 云 API 网关域名 | **HTTP 访问服务域名** |
-| **鉴权方式** | Bearer Token（登录后获取） | **无鉴权**（微信不带 Token） |
-| **路由路径** | `/v1/functions/pay-common` | `/{你的路径}/unifiedOrderTrigger` |
-| **配置位置** | 前端代码写死 | **环境变量的 `notifyURL*`（写入位置见 Step 2）** |
+| **调用方式** | `callHTTPFunction` / `callContainer`（平台内部通道） | HTTP 访问服务域名（公网） |
+| **鉴权方式** | 平台自动注入 `x-wx-openid` | **无鉴权**（微信不带 Token） |
+| **路由路径** | `path: '/wx-pay/<action>'` | `/{你的路径}/unifiedOrderTrigger` |
+| **配置位置** | 前端代码 `app.js` | **环境变量的 `notifyURL*`（写入位置见 Step 2）** |
 
 ### 4.1 配置 cloudbaserc.json 并部署云函数 ⭐
 
@@ -630,28 +630,21 @@ python3 scripts/check_deploy_config.py /path/to/pay-common
 
 > 完整版代码见 [miniprogram-cloud-api.md](../前端集成/miniprogram-cloud-api.md)，以下为关键摘要。
 
-### 5.1 安装 SDK 并配置登录
+### 5.1 配置 app.js（无需安装 SDK）
 
 ```javascript
-// app.js
-const cloudbase = require('@cloudbase/js-sdk')
-
-const ENV_ID = 'your-env-id'           // ⚠️ 替换为你的云开发环境 ID
+// app.js —— 极简配置，无需 @cloudbase/js-sdk
+const ENV_ID = 'YOUR_ENV_ID'           // ⚠️ 替换为你的云开发环境 ID
 const FUNCTION_NAME = 'pay-common'     // HTTP 云函数名称
-const API_GATEWAY = `https://${ENV_ID}.api.tcloudbasegateway.com`
 
 App({
   globalData: {
     envId: ENV_ID,
     functionName: FUNCTION_NAME,
-    apiGateway: API_GATEWAY,
-    accessToken: '',
-    openid: '',
-    loginReady: false,
   },
 
   onLaunch() {
-    if (ENV_ID === 'your-env-id') {
+    if (ENV_ID === 'YOUR_ENV_ID') {
       wx.showModal({
         title: '配置未完成',
         content: '请先在 app.js 中将 ENV_ID 替换为你的云开发环境 ID',
@@ -659,110 +652,50 @@ App({
       })
       return
     }
-    this.login()
-  },
 
-  /** 静默登录：signInWithOpenId 一步完成 */
-  async login() {
-    try {
-      const cbApp = cloudbase.init({ env: ENV_ID })
-      const { data, error } = await cbApp.auth.signInWithOpenId()
+    // 初始化微信云开发（callHTTPFunction 需要先 init）
+    wx.cloud.init({
+      env: ENV_ID,
+      traceUser: true,
+    })
 
-      if (error) {
-        console.error('[登录失败]', error.code, error.message)
-        this._notifyLoginReady()
-        return
-      }
-
-      if (data.session?.access_token) {
-        this.globalData.accessToken = data.session.access_token
-      }
-      if (data.user) {
-        this.globalData.openid =
-          data.user.identities?.[0]?.identity_data?.provider_user_id || ''
-      }
-
-      this._notifyLoginReady()
-    } catch (e) {
-      console.error('CloudBase 登录失败:', e)
-      this._notifyLoginReady()
-    }
-  },
-
-  /** 通知所有等待登录的调用方 */
-  _notifyLoginReady() {
-    this.globalData.loginReady = true
-    if (this._loginCallbacks) {
-      this._loginCallbacks.forEach(cb => cb())
-      this._loginCallbacks = null
-    }
-  },
-
-  /** 等待登录完成（页面 onLoad 中调用），比轮询更健壮 */
-  waitForLogin() {
-    if (this.globalData.loginReady) return Promise.resolve()
-    if (!this._loginPromise) {
-      this._loginPromise = new Promise((resolve) => {
-        if (!this._loginCallbacks) this._loginCallbacks = []
-        this._loginCallbacks.push(resolve)
-      })
-    }
-    return this._loginPromise
-  },
-
-  /** 手动重新登录（仅在 Refresh Token 也过期时才需要） */
-  async reLogin() {
-    this.globalData.loginReady = false
-    this._loginPromise = null
-    await this.login()
+    console.log('[App] 云开发初始化完成, env:', ENV_ID)
   },
 })
 ```
 
+> 💡 **与旧方案的区别**：不需要 `@cloudbase/js-sdk`、不需要 `signInWithOpenId()`、不需要管理 `accessToken`。
+> 只需 `wx.cloud.init()` 即可，平台自动处理鉴权和 openid 注入。
+
 ### 5.2 封装调用函数
 
 ```javascript
-// utils/pay.js（或 pages/pay/pay.js）
+// utils/pay.js（或 pages/pay/pay.js 顶部）
 const app = getApp()
 
 /**
- * 调用 pay-common（支持 401/403 自动重试一次）
+ * 通过 wx.cloud.callHTTPFunction 调用 pay-common
+ *
+ * 优势：
+ * - 无需 accessToken / Bearer 鉴权，平台自动鉴权
+ * - 平台自动注入 x-wx-openid header
+ * - 无需手动登录流程，开箱即用
  */
-function callPayCommon(action, data, _isRetry = false) {
-  const { apiGateway, functionName, accessToken } = app.globalData
-
-  if (!accessToken) {
-    return Promise.reject({ code: -1, msg: 'accessToken 未获取，请等待登录完成' })
-  }
+function callPayCommon(action, data) {
+  const { functionName, envId } = app.globalData
 
   return new Promise((resolve, reject) => {
-    wx.request({
-      url: `${apiGateway}/v1/functions/${functionName}?webfn=true`,
+    wx.cloud.callHTTPFunction({
+      name: functionName,
+      config: { env: envId },
       method: 'POST',
-      header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-      },
-      data: { _action: action, ...data },
+      header: { 'Content-Type': 'application/json' },
+      path: `/wx-pay/${action}`,  // 直接走 Express 路由
+      data,
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          let payload = res.data
-          // 解包双层响应结构（webfn 信封）
-          const inner = payload && payload.data
-          if (inner && typeof inner === 'object'
-              && Object.prototype.hasOwnProperty.call(inner, 'status')
-              && Object.prototype.hasOwnProperty.call(inner, 'data')) {
-            payload = { ...payload, data: inner.data }
-          }
-          resolve(payload)
-        } else if ((res.statusCode === 401 || res.statusCode === 403) && !_isRetry) {
-          // Token 过期，自动 reLogin 并重试一次
-          console.warn('[鉴权] Token 可能过期，尝试重新登录...')
-          app.reLogin().then(() => {
-            callPayCommon(action, data, true).then(resolve).catch(reject)
-          }).catch(() => {
-            reject({ code: -1, msg: `鉴权失败 HTTP ${res.statusCode}`, data: res.data })
-          })
+          // 响应直接是 { code, msg, data }，无需解包
+          resolve(res.data)
         } else {
           reject({ code: -1, msg: `HTTP ${res.statusCode}`, data: res.data })
         }
@@ -778,18 +711,11 @@ module.exports = { callPayCommon }
 ### 5.3 下单并调起支付
 
 ```javascript
-// pages/pay/index.js
+// pages/pay/pay.js
 const { callPayCommon } = require('../../utils/pay')
-const app = getApp()
 
 Page({
-  data: { loading: false, openid: '' },
-
-  async onLoad() {
-    // 等待 app.js 登录完成（回调通知机制，不会死循环）
-    await app.waitForLogin()
-    this.setData({ openid: app.globalData.openid })
-  },
+  data: { loading: false },
 
   async handlePay() {
     if (this.data.loading) return
@@ -800,7 +726,7 @@ Page({
         description: '商品名称',
         out_trade_no: 'ORDER' + Date.now(),
         amount: { total: 100, currency: 'CNY' },  // ⚠️ 单位是分！
-        payer: { openid: this.data.openid },
+        // ❌ 不需要传 payer.openid，后端自动从 x-wx-openid header 获取
       })
 
       if (res.code !== 0) {
@@ -834,6 +760,7 @@ Page({
 ```
 
 > 完整小程序 Demo 见 [GitHub 官方示例](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram)。
+> 云托管版 Demo 见 `examples/miniprogram-cloudrun/`（使用 `wx.cloud.callContainer`，同样无需 SDK 和登录流程）。
 > Web 测试页（React）见本地 `examples/react/`。
 > H5 / Native 端接入见 `references/前端集成/` 对应文档。
 

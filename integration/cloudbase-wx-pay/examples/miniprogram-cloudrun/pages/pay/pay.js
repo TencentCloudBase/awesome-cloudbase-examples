@@ -43,63 +43,48 @@ function getRefundStateDesc(refundStatus) {
 }
 
 /**
- * 通过云托管域名直连调用（AccessToken 鉴权）
- * 
+ * 通过 wx.cloud.callContainer 调用云托管服务
+ *
+ * 使用 callContainer 的优势（相比 wx.request + Bearer token）：
+ * - 无需 CloudBase Auth 登录，无需 accessToken / Bearer 鉴权
+ * - 平台自动注入 x-wx-openid header，后端可直接获取用户身份（安全可信，客户端无法伪造）
+ * - 无需手动登录流程，开箱即用
+ * - 无需配置服务器域名白名单（走 SDK 内部通道）
+ *
  * 与云函数版的区别：
- * - 云函数版：经云 API 网关 → /v1/functions/pay-common?webfn=true，通过 body._action 分发路由
- * - 云托管版：直连云托管域名 → /wx-pay/<action> 路径，Express 标准路由分发
- * 
- * 云托管的优势：
- * - 标准 RESTful 路径（/wx-pay/wxpay_order 等）
- * - 无需 _action 中间层分发，Express 原生路由处理
- * - 支持更灵活的部署配置（自定义域名、多实例、弹性伸缩）
- * 
- * 支持 401 自动重试：token 过期时自动 reLogin 后重试一次
+ * - 云函数版：wx.cloud.callHTTPFunction → HTTP 云函数
+ * - 云托管版：wx.cloud.callContainer → 云托管容器（常驻进程，响应快）
  *
  * @param {string} action - 路由路径名，如 'wxpay_order'
  * @param {object} data - 请求参数
- * @param {boolean} _isRetry - 内部参数，是否为重试请求
  */
-function callCloudRun(action, data, _isRetry = false) {
-  const { cloudRunBaseUrl, accessToken } = app.globalData
-
-  if (!accessToken) {
-    return Promise.reject({ code: -1, msg: 'accessToken 未获取，请等待登录完成' })
-  }
-
-  if (!cloudRunBaseUrl || cloudRunBaseUrl.includes('YOUR_')) {
-    return Promise.reject({ code: -1, msg: '请先在 app.js 中配置 CLOUDRUN_BASE_URL（云托管域名）' })
-  }
+function callCloudRun(action, data) {
+  const { envId, serviceName } = app.globalData
 
   return new Promise((resolve, reject) => {
-    wx.request({
-      // 云托管直连：走完整的路由路径
-      url: `${cloudRunBaseUrl}/wx-pay/${action}`,
+    wx.cloud.callContainer({
+      config: {
+        env: envId,
+      },
+      path: `/wx-pay/${action}`,
       method: 'POST',
       header: {
+        'X-WX-SERVICE': serviceName,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
       },
-      // 直接传业务参数，无需 _action 中间层
       data,
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data)
-        } else if ((res.statusCode === 401 || res.statusCode === 403) && !_isRetry) {
-          // Token 过期，自动 reLogin 并重试一次
-          console.warn('[鉴权] Token 可能过期，尝试重新登录...')
-          app.reLogin().then(() => {
-            callCloudRun(action, data, true).then(resolve).catch(reject)
-          }).catch(() => {
-            reject({ code: -1, msg: `鉴权失败 HTTP ${res.statusCode}`, data: res.data })
-          })
-        } else if (res.statusCode === 401 || res.statusCode === 403) {
-          reject({ code: -1, msg: `鉴权失败 HTTP ${res.statusCode}`, data: res.data })
         } else {
+          console.error('callContainer 请求失败:', res.statusCode, res.data)
           reject({ code: -1, msg: `HTTP ${res.statusCode}`, data: res.data })
         }
       },
-      fail: reject,
+      fail(err) {
+        console.error('callContainer 网络请求失败:', err)
+        reject(err)
+      },
     })
   })
 }
@@ -129,16 +114,6 @@ Page({
     payResult: '',         // 下单支付的返回结果
     transferResult: '',    // 商家转账的返回结果
     loading: false,
-    openid: '',
-    cloudbaseUid: '',
-  },
-
-  async onLoad() {
-    await app.waitForLogin()
-    this.setData({
-      openid: app.globalData.openid,
-      cloudbaseUid: app.globalData.cloudbaseUid,
-    })
   },
 
   onDescInput(e) { this.setData({ description: e.detail.value }) },
@@ -151,8 +126,7 @@ Page({
 
   // ========== 统一调用入口 ==========
   async _call(action, data) {
-    // 云托管直连：响应直接来自 Express，格式为 { code, msg, data }
-    // 无需像云函数版那样解开 webfn 的双层信封
+    // callContainer 调用：响应直接来自 Express，格式为 { code, msg, data }
     const res = await callCloudRun(action, data)
 
     // 响应结构规范化：兼容 {status, data} 和 {code, data} 两种格式
@@ -168,11 +142,6 @@ Page({
 
   // ========== 下单 + 支付 ==========
   async handlePay() {
-    if (!this.data.openid) {
-      wx.showToast({ title: 'openid 未获取', icon: 'error' })
-      return
-    }
-
     this.setData({ loading: true, payResult: '' })
     try {
       const outTradeNo = generateOutTradeNo()
@@ -182,11 +151,13 @@ Page({
       // ⚠️ 安全警告：以下金额取自前端输入，仅用于示例演示。
       // 🚨 生产环境中，订单金额必须从后端数据库查询，严禁使用前端传值！
       // 攻击者可通过篡改请求将金额改为 1 分完成支付。
+      //
+      // 💡 callContainer 模式下，后端自动从 x-wx-openid header 获取 openid，
+      //    无需前端传入 payer.openid（更安全，避免前端伪造）
       const res = await this._call('wxpay_order', {
         description: this.data.description,
         out_trade_no: outTradeNo,
         amount: { total: this.data.totalFee, currency: 'CNY' },
-        payer: { openid: this.data.openid },
       })
 
       console.log('下单结果:', res)
@@ -708,11 +679,6 @@ Page({
    * 发起商家转账（0.3 - 2000 元免密）
    */
   async handleTransfer() {
-    if (!this.data.openid) {
-      wx.showToast({ title: 'openid 未获取', icon: 'error' })
-      return
-    }
-
     const amount = this.data.transferAmount
     if (!amount || amount < 30) {
       wx.showModal({
@@ -753,10 +719,10 @@ Page({
 
       console.log('[转账] 发起, out_bill_no:', outBillNo, 'amount:', amount)
 
+      // 💡 callContainer 模式下，后端自动从 x-wx-openid header 获取 openid
       const res = await this._call('wxpay_transfer', {
         out_bill_no: outBillNo,
         transfer_scene_id: this.data.transferSceneId || '1000',
-        openid: this.data.openid,
         transfer_amount: amount,
         transfer_remark: this.data.transferRemark || '模板测试转账',
         transfer_scene_report_infos: [

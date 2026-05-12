@@ -41,7 +41,7 @@ function parseCloudBaseAuth(req) {
  * @returns {string|null}
  */
 function getOpenId(req) {
-    // 1. 尝试从 JWT 解析
+    // 1. 尝试从 JWT 解析（云 API 网关模式：Bearer token）
     const authInfo = parseCloudBaseAuth(req);
     if (authInfo) {
         // CloudBase Auth JWT 结构（已验证）：
@@ -54,7 +54,15 @@ function getOpenId(req) {
         }
     }
 
-    // 2. 回退到请求体中的 payer.openid（HTTP 访问服务直接调用方式）
+    // 2. HTTP 云函数模式（wx.cloud.callHTTPFunction / callContainer）
+    //    平台会自动在请求头注入 x-wx-openid，安全可信（由平台注入，客户端无法伪造）
+    const wxOpenId = req.headers['x-wx-openid'];
+    if (wxOpenId) {
+        console.info('[CloudBaseAuth] 从 x-wx-openid header 获取 openid:', wxOpenId);
+        return wxOpenId;
+    }
+
+    // 3. 回退到请求体中的 payer.openid（HTTP 访问服务直接调用方式）
     if (req.body?.payer?.openid) {
         return req.body.payer.openid;
     }
