@@ -10,7 +10,7 @@ export async function refreshAccessToken(oauthBaseUrl) {
   if (!refreshToken) return null
 
   try {
-    const res = await fetch(`${oauthBaseUrl}/refresh`, {
+    const res = await fetch(`${oauthBaseUrl}/oauth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refreshToken }),
@@ -40,7 +40,7 @@ export async function exchangeCodeForOpenId(oauthBaseUrl, code, returnedState) {
   }
   sessionStorage.removeItem('wx_oauth_state')
 
-  const res = await fetch(`${oauthBaseUrl}/token`, {
+  const res = await fetch(`${oauthBaseUrl}/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code, state: returnedState }),
@@ -79,7 +79,7 @@ export async function startWxOAuth(baseUrl, oauthUrl) {
   const oauthBaseUrl = deriveOAuthUrl(baseUrl, oauthUrl)
 
   // 从后端获取 AppID
-  const infoRes = await fetch(`${oauthBaseUrl}/info`, {
+  const infoRes = await fetch(`${oauthBaseUrl}/oauth/config`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   })

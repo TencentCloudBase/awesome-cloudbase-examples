@@ -15,10 +15,18 @@ import ActionBar from './components/ActionBar'
 import PayActionCard from './components/PayActionCard'
 import ResultCard from './components/ResultCard'
 
+// 从环境变量或 .env 文件读取配置（参考 .env.example）
+const DEFAULT_ENV_ID = import.meta.env.VITE_TCB_ENV_ID || 'YOUR_ENV_ID'
+const DEFAULT_ROUTE_PREFIX = import.meta.env.VITE_ROUTE_PREFIX || 'YOUR_ROUTE_PREFIX'
+const DEFAULT_OAUTH_PREFIX = import.meta.env.VITE_OAUTH_PREFIX || 'YOUR_OAUTH_PREFIX'
+const DEFAULT_UIN = import.meta.env.VITE_TCB_UIN || 'YOUR_UIN'
+const DEFAULT_BASE_URL = `https://${DEFAULT_ENV_ID}-${DEFAULT_UIN}.ap-shanghai.app.tcloudbase.com/${DEFAULT_ROUTE_PREFIX}`
+const DEFAULT_OAUTH_URL = `https://${DEFAULT_ENV_ID}-${DEFAULT_UIN}.ap-shanghai.app.tcloudbase.com/${DEFAULT_OAUTH_PREFIX}`
+
 export default function App() {
   // ===== 服务配置 =====
-  const [baseUrl, setBaseUrl] = useState('https://{envId}.ap-shanghai.app.tcloudbase.com/{routePrefix}')
-  const [oauthUrl, setOauthUrl] = useState('https://{envId}.ap-shanghai.app.tcloudbase.com/oauth')
+  const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL)
+  const [oauthUrl, setOauthUrl] = useState(DEFAULT_OAUTH_URL)
 
   // ===== 下单参数 =====
   const [payType, setPayType] = useState('jsapi')
