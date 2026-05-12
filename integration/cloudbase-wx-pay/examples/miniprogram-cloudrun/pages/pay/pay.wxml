@@ -1,7 +1,7 @@
 <view class="container">
   <view class="header">
     <text class="title">微信支付测试</text>
-    <text class="subtitle">pay-common 云托管直连版</text>
+    <text class="subtitle">pay-common 云托管 callContainer 版</text>
   </view>
 
   <!-- Tab 栏 -->
@@ -19,9 +19,8 @@
     <view class="section">
       <text class="section-title">商品信息</text>
       <view class="form-item">
-        <text class="label">用户 OpenID</text>
-        <text class="input openid-text" user-select wx:if="{{openid}}">{{openid}}</text>
-        <text class="input openid-text" wx:else style="color:#999">登录中...</text>
+        <text class="label">用户身份</text>
+        <text class="input" style="color:#07c160;font-size:24rpx">✅ callContainer 自动注入 openid</text>
       </view>
       <view class="form-item">
         <text class="label">商品描述</text>
@@ -67,9 +66,8 @@
     <view class="section">
       <text class="section-title">商家转账（0.3 – 2000 元免密）</text>
       <view class="form-item">
-        <text class="label">用户 OpenID</text>
-        <text class="input openid-text" user-select wx:if="{{openid}}">{{openid}}</text>
-        <text class="input openid-text" wx:else style="color:#999">登录中...</text>
+        <text class="label">用户身份</text>
+        <text class="input" style="color:#07c160;font-size:24rpx">✅ callContainer 自动注入 openid</text>
       </view>
       <view class="form-item">
         <text class="label">转账金额（分）</text>
@@ -79,7 +77,7 @@
         <text class="label">转账备注</text>
         <input class="input" value="{{transferRemark}}" bindinput="onTransferRemarkInput" placeholder="转账备注说明" />
       </view>
-      <button class="btn btn-transfer" bindtap="handleTransfer" loading="{{transferLoading}}" disabled="{{!openid}}">发起转账</button>
+      <button class="btn btn-transfer" bindtap="handleTransfer" loading="{{transferLoading}}">发起转账</button>
       <button class="btn btn-blue" bindtap="handleQueryTransferBill" disabled="{{!outBillNo}}">查询转账单</button>
     </view>
 

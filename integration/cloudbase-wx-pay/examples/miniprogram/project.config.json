@@ -9,13 +9,7 @@
         "compileWorklet": false,
         "uglifyFileName": false,
         "uploadWithSourceMap": true,
-        "packNpmManually": true,
-        "packNpmRelationList": [
-            {
-                "packageJsonPath": "./package.json",
-                "miniprogramNpmDistDir": "./"
-            }
-        ],
+        "packNpmManually": false,
         "minifyWXSS": true,
         "minifyWXML": true,
         "localPlugins": false,
@@ -31,13 +25,14 @@
         }
     },
     "compileType": "miniprogram",
-  "appid": "YOUR_APPID",
-  "projectname": "pay-common-test",
+    "appid": "YOUR_APPID",
+    "projectname": "pay-common-test",
     "condition": {},
     "simulatorPluginLibVersion": {},
     "packOptions": {
         "ignore": [],
         "include": []
     },
-    "editorSetting": {}
+    "editorSetting": {},
+    "libVersion": "3.15.2"
 }

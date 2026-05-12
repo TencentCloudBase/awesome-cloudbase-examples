@@ -43,56 +43,38 @@ function getRefundStateDesc(refundStatus) {
 }
 
 /**
- * 通过云 API 调用 HTTP 云函数（pay-common）
- * 云 API 网关会将路径截断为 /，所以通过 body._action 传递实际路由
- * 支持 401 自动重试：token 过期时自动 reLogin 后重试一次
+ * 通过 wx.cloud.callHTTPFunction 调用 HTTP 云函数（pay-common）
  *
- * @param {string} action - 路由动作名，如 'wxpay_order'
+ * 使用 callHTTPFunction 的优势：
+ * - 无需 accessToken / Bearer 鉴权，平台自动鉴权
+ * - 平台自动注入 x-wx-openid header，后端可直接获取用户身份
+ * - 无需手动登录流程，开箱即用
+ *
+ * @param {string} action - 路由路径名，如 'wxpay_order'
  * @param {object} data - 请求参数
- * @param {boolean} _isRetry - 内部参数，是否为重试请求
  */
-function callPayCommon(action, data, _isRetry = false) {
-  const { apiGateway, functionName, accessToken } = app.globalData
-
-  if (!accessToken) {
-    return Promise.reject({ code: -1, msg: 'accessToken 未获取，请等待登录完成' })
-  }
+function callPayCommon(action, data) {
+  const { functionName, envId } = app.globalData
 
   return new Promise((resolve, reject) => {
-    wx.request({
-      url: `${apiGateway}/v1/functions/${functionName}?webfn=true`,
+    wx.cloud.callHTTPFunction({
+      name: functionName,
+      config: {
+        env: envId,
+      },
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
       },
-      // 把 action 放进 body，Express 根据 _action 分发路由
-      data: { _action: action, ...data },
+      // 直接走 Express 路由，path 与后端 app.use('/wx-pay', payRouter) 对应
+      // 无需通过 data._action 走兜底适配逻辑
+      path: `/wx-pay/${action}`,
+      data,
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          // 云 API 调用 HTTP 云函数（webfn=true）时，返回结构为：
-          //   { code, msg, data: { status: 200, data: <云函数真正返回> } }
-          // 这里把内层的 HTTP 信封解开，让上层拿到的 payload 直接是云函数返回：
-          //   { code, msg, data: <业务数据> }
-          let payload = res.data
-          const inner = payload && payload.data
-          if (inner && typeof inner === 'object'
-              && Object.prototype.hasOwnProperty.call(inner, 'status')
-              && Object.prototype.hasOwnProperty.call(inner, 'data')) {
-            payload = { ...payload, data: inner.data }
-          }
-          resolve(payload)
-        } else if ((res.statusCode === 401 || res.statusCode === 403) && !_isRetry) {
-          // Token 过期，自动 reLogin 并重试一次
-          console.warn('[鉴权] Token 可能过期，尝试重新登录...')
-          app.reLogin().then(() => {
-            callPayCommon(action, data, true).then(resolve).catch(reject)
-          }).catch(() => {
-            reject({ code: -1, msg: `鉴权失败 HTTP ${res.statusCode}`, data: res.data })
-          })
-        } else if (res.statusCode === 401 || res.statusCode === 403) {
-          console.error('鉴权失败（401/403）:', res.data)
-          reject({ code: -1, msg: `鉴权失败 HTTP ${res.statusCode}`, data: res.data })
+          // callHTTPFunction 返回的 res.data 直接是云函数的 HTTP 响应体
+          // pay-common 返回格式为 { code, msg, data }，无需额外解包
+          resolve(res.data)
         } else {
           console.error('HTTP 请求失败:', res.statusCode, res.data)
           reject({ code: -1, msg: `HTTP ${res.statusCode}`, data: res.data })
@@ -131,13 +113,6 @@ Page({
     payResult: '',         // 下单支付的返回结果
     transferResult: '',    // 商家转账的返回结果
     loading: false,
-    openid: '',
-  },
-
-  async onLoad() {
-    // 等待 app.js 登录完成
-    await app.waitForLogin()
-    this.setData({ openid: app.globalData.openid })
   },
 
   onDescInput(e) { this.setData({ description: e.detail.value }) },
@@ -165,11 +140,6 @@ Page({
 
   // ========== 下单 + 支付 ==========
   async handlePay() {
-    if (!this.data.openid) {
-      wx.showToast({ title: 'openid 未获取', icon: 'error' })
-      return
-    }
-
     this.setData({ loading: true, payResult: '' })
     try {
       const outTradeNo = generateOutTradeNo()
@@ -183,7 +153,7 @@ Page({
         description: this.data.description,
         out_trade_no: outTradeNo,
         amount: { total: this.data.totalFee, currency: 'CNY' },
-        payer: { openid: this.data.openid },
+        // payer.openid 不需要传：后端自动从 x-wx-openid header 获取
       })
 
       console.log('下单结果:', res)
@@ -718,13 +688,9 @@ Page({
   /**
    * 发起商家转账
    * 模板仅支持免密小额转账（0.3 - 2000 元）
+   * openid 由后端自动从 x-wx-openid header 获取
    */
   async handleTransfer() {
-    if (!this.data.openid) {
-      wx.showToast({ title: 'openid 未获取', icon: 'error' })
-      return
-    }
-
     const amount = this.data.transferAmount
     if (!amount || amount < 30) {
       wx.showModal({
@@ -766,10 +732,10 @@ Page({
 
       console.log('[转账] 发起, out_bill_no:', outBillNo, 'amount:', amount)
 
+      // openid 不需要传：后端自动从 x-wx-openid header 获取
       const res = await this._call('wxpay_transfer', {
         out_bill_no: outBillNo,
         transfer_scene_id: this.data.transferSceneId || '1000',
-        openid: this.data.openid,
         transfer_amount: amount,
         transfer_remark: this.data.transferRemark || '模板测试转账',
         transfer_scene_report_infos: [

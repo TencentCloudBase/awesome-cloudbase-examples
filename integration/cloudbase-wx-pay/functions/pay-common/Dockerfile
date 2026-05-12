@@ -12,11 +12,22 @@ WORKDIR /app
 EXPOSE 80
 ENV PORT=80
 
-# ⚠️ 请勿在此处硬编码支付凭据（privateKey、apiV3Key 等）。
-# 请在云托管控制台 → 服务配置 → 环境变量中配置以下变量：
-#   signMode, appId, merchantId, merchantSerialNumber,
-#   apiV3Key, privateKey, wxPayPublicKey, wxPayPublicKeyId,
-#   notifyURLPayURL, notifyURLRefundsURL, transferNotifyUrl
+# ⚠️ 环境变量说明：
+# 正式环境请在云托管控制台 → 服务设置 → 环境变量中配置，不要把密钥写在 Dockerfile 里。
+# 本地开发请复制 .env.example 为 .env 并填入实际值。
+# 以下仅为占位声明，实际值通过运行时注入。
+ENV signMode=sdk
+ENV corsAllowOrigin=""
+ENV appId=""
+ENV merchantId=""
+ENV merchantSerialNumber=""
+ENV apiV3Key=""
+ENV privateKey=""
+ENV wxPayPublicKey=""
+ENV wxPayPublicKeyId=""
+ENV notifyURLPayURL=""
+ENV notifyURLRefundsURL=""
+ENV transferNotifyUrl=""
 
 # 拷贝包管理文件
 COPY package*.json /app/

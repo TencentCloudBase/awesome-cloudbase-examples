@@ -5,6 +5,7 @@
 const PayService = require('../services/payService');
 const config = require('../config/config');
 const { validateOrderParams, validateRefundParams, validateTransferParams } = require('../utils/validator');
+const { getOpenId } = require('../utils/cloudbaseAuth');
 const payService = new PayService();
 
 // ========== 统一响应格式 ==========
@@ -24,6 +25,15 @@ function fail(res, msg, statusCode = 400) {
  */
 exports.unifiedOrder = async (req, res) => {
     try {
+        // 自动注入 payer.openid（如果前端没传，从 JWT / x-wx-openid header 中解析）
+        if (!req.body.payer?.openid) {
+            const openid = getOpenId(req);
+            if (openid) {
+                req.body.payer = { ...req.body.payer, openid };
+                console.info('[Controller] 自动注入 payer.openid:', openid);
+            }
+        }
+
         const errors = validateOrderParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
@@ -224,6 +234,15 @@ exports.refundTrigger = (req, res) => _handleCallback(req, res, payService.handl
  */
 exports.transfer = async (req, res) => {
     try {
+        // 自动注入 openid（如果前端没传，从 JWT / x-wx-openid header 中解析）
+        if (!req.body.openid) {
+            const openid = getOpenId(req);
+            if (openid) {
+                req.body.openid = openid;
+                console.info('[Controller] 转账自动注入 openid:', openid);
+            }
+        }
+
         const errors = validateTransferParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 

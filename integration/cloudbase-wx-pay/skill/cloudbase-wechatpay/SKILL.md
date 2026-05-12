@@ -80,7 +80,7 @@ graph TD
 | 3 | **商户凭证准备** | 商户号怎么配 / 证书怎么下载 / APIv3 密钥 / 公钥 / 集成中心创建 | `references/模板接入/merchant-credentials.md` |
 | 4 | **部署** | 怎么部署到云函数 / 用云托管 / 本地调试 / HTTP 访问服务配置 / 环境变量同步 | `references/部署/deploy-{cloud-function,cloud-run,local}.md` |
 | 5 | **前端集成** | 小程序怎么调起支付 / H5 怎么接 / PC 扫码 / React Web 测试页 / 微搭接入 | `references/前端集成/{miniprogram-*,web-*,weda-*}.md` |
-| 6 | **微搭低码接入** | 微搭支付 / WeDa 支付 / 低码接入 / $w.auth / 页面方法 | `references/前端集成/weda-miniprogram.md` |
+| 6 | **微搭低码接入** | 微搭支付 / WeDa 支付 / 低码接入 / callHTTPFunction / 页面方法 | `references/前端集成/weda-miniprogram.md` |
 | 7 | **问题排查** | 签名失败 / 回调收不到 / 部署后 502 / 转账报错 / 限额 / 模拟器 / NOT_ENOUGH | `references/问题排查/{troubleshooting,error-patterns}.md` |
 
 > **部署关键步骤速查**（新手必看）：
@@ -220,14 +220,17 @@ graph TD
 
 | Demo | 来源 | 调用方式 | 适用部署 | 说明 |
 |------|------|---------|---------|------|
-| **小程序** | [GitHub 官方](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram) | `signInWithOpenId()` + Bearer Token（云 API 网关） | HTTP 云函数 | **官方示例**，支持下单/查单/关单/退款/转账 |
+| **小程序（云函数版）** | [GitHub 官方](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram) | `wx.cloud.callHTTPFunction`（平台自动注入 openid） | HTTP 云函数 | **官方示例**，支持下单/查单/关单/退款/转账 |
+| **小程序（云托管版）** | [GitHub 官方](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram-cloudrun) | `wx.cloud.callContainer`（平台自动注入 openid） | 云托管 | 常驻容器，适合高频/生产环境 |
 | **React Web** | 本地 `examples/react/` | React + Vite，HTTP 访问服务直连（无鉴权） | 静态托管 + HTTP 访问服务 | Web 测试页，JSAPI/H5/Native 三合一 |
 
 > 小程序 Demo 前置条件：
-> 1. 已开通 CloudBase 环境 + 开启微信小程序身份源
-> 2. 已将 pay-common 部署为 HTTP 云函数
+> 1. 已开通 CloudBase 环境
+> 2. 已将 pay-common 部署为 HTTP 云函数（或云托管）
 > 3. 已完成商户号进件 + 后端环境变量配置
 > 4. 修改 `app.js` 填入 ENV_ID，`project.config.json` 填入 appid
+> 5. 微信小程序基础库版本 ≥ 3.15.2
+> 6. 无需安装 npm 依赖、无需构建 npm、无需开启 CloudBase Auth 身份源
 
 完整代码示例见各前端集成文档。
 
@@ -267,10 +270,11 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 | **APIv3 密钥的双重角色** | 不仅用于请求签名，更是接收回调通知的前提条件！未设置 = 所有回调丢失。详见 `quick-start.md` Step 2 注释区 |
 | **签名探测请求（SIGNTEST）** | 微信会发送 `WECHATPAY/SIGNTEST/` 前缀的探测请求验证验签能力。收到后返回错误码即可，属正常行为，无需处理。详见 `quick-start.md` Step 4.5 |
 | **回调 IP 白名单** | 需在防火墙/安全组放行微信回调 IP 段（上海/深圳/广州腾讯云） |
-| **SDK 模式双通道架构** | 小程序 Demo 走两条通道：①前端→云API网关（主动请求，带Token）②微信→HTTP访问服务（回调通知，无鉴权）。两者域名不同、鉴权方式不同，必须分别配置。详见 `quick-start.md` Step 4.0 架构图 |
+| **SDK 模式双通道架构** | 小程序 Demo 走两条通道：①前端→`callHTTPFunction`/`callContainer`（主动请求，平台自动注入 openid）②微信→HTTP访问服务（回调通知，无鉴权）。两者域名不同、鉴权方式不同，必须分别配置。详见 `quick-start.md` Step 4.0 架构图 |
 | **三种调用方式区别** | ①**事件型（普通型）** `callFunction`（SDK 内部通道，自动带 openId，无公网地址，cloudbaserc.json 无 type 字段）②HTTP 云API网关（需 Bearer Token，`?webfn=true`）③HTTP 访问服务（公网域名，无内置鉴权，**唯一可收微信回调的方式**）。详见 `quick-start.md` Step 3.5 |
+| **小程序简化调用** | 小程序端推荐使用 ④`wx.cloud.callHTTPFunction`（云函数）或 ⑤`wx.cloud.callContainer`（云托管），平台自动注入 `x-wx-openid`，无需 SDK 依赖、无需登录流程、无需 Token 管理。详见 Demo `examples/miniprogram/` 和 `examples/miniprogram-cloudrun/` |
 | **JSAPI 公众号后台配置** | JSAPI 支付需配置 3 个域名：①网页授权域名（OAuth2 redirect_uri 白名单，不能用 IP）②JS接口安全域名（wx.requestPayment 校验）③支付授权目录（商户平台）。三者缺一不可 |
-| **匿名登录不能用于支付** | 匿名登录没有 openid，无法完成任何支付操作（下单/调起/退款都依赖 openid） |
+| **匿名登录不能用于支付** | 匿名登录没有 openid，无法完成任何支付操作。小程序端推荐使用 `callHTTPFunction` / `callContainer`，平台自动注入 openid，无需手动登录 |
 | **模拟器 vs 真机测试** | 模拟器仅用于验证登录链路和下单接口（返回 `prepay_id`）；**真实支付必须在真机完成**（`wx.requestPayment` 需要输入支付密码）。使用微信开发者工具「真机调试」扫码测试 |
 | **真机限额/风控** | 支付弹窗已调起但提示限额 = 技术链路已通，属微信风控。常见诱因：测试金额过小（建议 0.1-1 元）、单用户单日笔数超限（换号/次日）、新商户号风控期、类目不匹配。详见 troubleshooting.md §3.6 |
 | **Vite/SPA 部署 base 配置** | 使用 CloudBase 静态托管且 serviceName 非空时，`vite.config.js` 必须设置 `base: './'`（相对路径），否则打包后 JS/CSS 引用为绝对路径导致 404 |
@@ -290,7 +294,7 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 | 模板接入/sign-mode | SDK vs Gateway 签名模式详解 | 选签名模式或回调不通时 |
 | 部署/* | 三种部署方式详解 | 部署时 |
 | 前端集成/miniprogram-* | 小程序调用代码示例（云 API 网关 / 云托管） | 接入小程序前端时 |
-| 前端集成/weda-miniprogram | **微搭低码小程序接入**（$w.auth + 页面方法完整示例） | 微搭/WeDa/低码接入支付 |
+| 前端集成/weda-miniprogram | **微搭低码小程序接入**（callHTTPFunction + 页面方法完整示例） | 微搭/WeDa/低码接入支付 |
 | 前端集成/web-* | H5/Native/APP 接入 | 非小程序前端时 |
 | 业务开发/order-service | orderService 数据库集成 | 对接业务系统时 |
 | 业务开发/transfer | 商家转账注意事项 | 接转账功能时 |
