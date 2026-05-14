@@ -23,21 +23,18 @@ function App() {
     initAuth();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
-        <p className="mt-4 text-sm text-gray-500">加载中...</p>
-      </div>
-    );
-  }
-
-  return (
+  return loading ? (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+      <p className="mt-4 text-sm text-gray-500">加载中...</p>
+    </div>
+  ) : (
     <Router>
       <div className="flex min-h-screen flex-col bg-gray-50 text-gray-900">
         <Navbar />
         <main className="grow">
           <Routes>
+            {/* default dmeo need to rewrite */}
             <Route path="/" element={<HomePage />} />
             <Route path="*" element={<HomePage />} />
           </Routes>

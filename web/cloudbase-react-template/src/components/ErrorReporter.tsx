@@ -15,19 +15,43 @@ import { Component, type ErrorInfo, type ReactNode, useEffect, useRef, useState 
  *   3. Unhandled promise rejections    → window.addEventListener("unhandledrejection")
  *   4. Vite HMR / compile errors       → import.meta.hot.on("vite:error")
  *
- * postMessage payload shape (subject to change — the protocol is intentionally
- * loose for now so the parent side can iterate):
- *   {
- *     type: "preview-error",
- *     source: "react" | "window-error" | "unhandled-rejection" | "vite-hmr",
- *     message: string,
- *     stack?: string,
- *     componentStack?: string,
- *     url?: string,
- *     timestamp: number,
- *     // raw payload from the originating event, if any
- *     raw?: unknown,
- *   }
+ * postMessage protocol (iframe → parent)
+ * ─────────────────────────────────────
+ * All messages share a common envelope:
+ *   { type: PreviewMessageType, timestamp: number, ...payload }
+ *
+ * Types emitted:
+ *   "preview:error"             — runtime / compile error (manual Send button OR
+ *                                 auto-sent for build errors)
+ *   "preview:build:error"       — compile error, sent automatically without user interaction
+ *   "preview:build:cleared"     — previously-reported build error was resolved
+ *   "preview:hmr:connected"     — HMR WebSocket established
+ *   "preview:hmr:disconnected"  — HMR WebSocket closed / errored
+ *   "preview:hmr:reconnecting"  — HMR client is attempting to reconnect the socket
+ *   "preview:hmr:update-start"  — HMR patch application began
+ *   "preview:hmr:update-done"   — HMR patch applied successfully
+ *   "preview:ready"             — React tree mounted for the first time
+ *   "preview:url-changed"       — in-page route change (pushState / popstate)
+ *   "preview:pong"              — response to a "platform:ping" heartbeat
+ *
+ * postMessage protocol (parent → iframe)
+ * ─────────────────────────────────────
+ * Fire-and-forget actions (no response):
+ *   "platform:reload"            — force a full page reload
+ *   "platform:navigate"          — { path: string } push a client-side route
+ *   "platform:navigate-back"     — history.back()
+ *   "platform:navigate-forward"  — history.forward()
+ *
+ * RPC actions (expect a "preview:call-result" response):
+ *   "platform:ping" — { requestId: string } heartbeat; iframe replies with
+ *       { type: "preview:call-result", requestId, ok: true, value: null }
+ *   "platform:call" — { requestId: string, command: "eval", args: [code: string] }
+ *     Evaluates `code` in the iframe's global scope via new Function() and replies:
+ *       { type: "preview:call-result", requestId, ok: true,  value: <serialized> }
+ *       { type: "preview:call-result", requestId, ok: false, error: <message> }
+ *     The caller should associate requestId with a pending Promise and apply a
+ *     timeout, e.g.:
+ *       const result = await Promise.race([rpc("eval", "document.title"), timeout(3000)])
  */
 
 export type CapturedErrorSource =
@@ -48,7 +72,29 @@ export interface CapturedError {
   count: number;
 }
 
-const POST_MESSAGE_TYPE = "preview-error";
+// ─── postMessage type registry ───────────────────────────────────────────────
+
+export type PreviewMessageType =
+  | "preview:error"
+  | "preview:build:error"
+  | "preview:build:cleared"
+  | "preview:hmr:connected"
+  | "preview:hmr:disconnected"
+  | "preview:hmr:reconnecting"
+  | "preview:hmr:update-start"
+  | "preview:hmr:update-done"
+  | "preview:ready"
+  | "preview:url-changed"
+  | "preview:call-result";
+
+export type PlatformMessageType =
+  | "platform:ping"
+  | "platform:reload"
+  | "platform:navigate"
+  | "platform:navigate-back"
+  | "platform:navigate-forward"
+  | "platform:call";
+
 // "*" for now — the parent window is the CloudBase preview gateway and the
 // exact origin isn't pinned down yet. Tighten this later when the protocol is
 // finalized.
@@ -57,6 +103,90 @@ const MAX_ERRORS = 5;
 
 let errorIdSeq = 0;
 const nextErrorId = () => `err-${Date.now().toString(36)}-${(++errorIdSeq).toString(36)}`;
+
+/**
+ * Send a typed event message to the parent window.
+ * No-op when running outside an iframe (window.parent === window).
+ */
+function postToParent(type: PreviewMessageType, payload?: Record<string, unknown>): void {
+  if (typeof window === "undefined" || window.parent === window) return;
+  try {
+    window.parent.postMessage(
+      { type, timestamp: Date.now(), ...payload },
+      POST_MESSAGE_TARGET_ORIGIN,
+    );
+  } catch {
+    // Structured-clone failure — omit non-cloneable fields and retry once.
+    try {
+      window.parent.postMessage({ type, timestamp: Date.now() }, POST_MESSAGE_TARGET_ORIGIN);
+    } catch {
+      /* silent */
+    }
+  }
+}
+
+/**
+ * Send a "preview:call-result" RPC response back to the platform.
+ * Always includes the original requestId so the caller can resolve its Promise.
+ */
+function replyCallResult(
+  requestId: string,
+  result: { ok: true; value: unknown } | { ok: false; error: string },
+): void {
+  if (typeof window === "undefined" || window.parent === window) return;
+  try {
+    window.parent.postMessage(
+      { type: "preview:call-result", requestId, timestamp: Date.now(), ...result },
+      POST_MESSAGE_TARGET_ORIGIN,
+    );
+  } catch {
+    // value may not be structured-cloneable (e.g. a DOM node, a function).
+    // Fall back to a stringified version so the caller still gets something useful.
+    const fallbackValue = result.ok
+      ? (() => { try { return JSON.stringify(result.value); } catch { return String(result.value); } })()
+      : undefined;
+    try {
+      window.parent.postMessage(
+        {
+          type: "preview:call-result",
+          requestId,
+          timestamp: Date.now(),
+          ok: result.ok,
+          ...(result.ok ? { value: fallbackValue } : { error: result.error }),
+        },
+        POST_MESSAGE_TARGET_ORIGIN,
+      );
+    } catch {
+      /* silent */
+    }
+  }
+}
+
+/**
+ * Execute arbitrary JS code in the iframe's global scope and return the result.
+ * Uses `new Function()` rather than `eval` so the code runs in non-strict mode
+ * by default and has access to the global `window`. Both are equivalent from a
+ * CSP perspective — `unsafe-eval` is required for either to work.
+ *
+ * The return value is whatever the last expression evaluates to. Async code is
+ * supported: if the function returns a Promise, the caller awaits it.
+ *
+ * Errors (syntax errors, runtime throws, rejected promises) are caught and
+ * reported as { ok: false, error: message } so the platform always gets a
+ * structured response rather than a hanging Promise.
+ */
+async function execCode(code: string): Promise<{ ok: true; value: unknown } | { ok: false; error: string }> {
+  try {
+    // Wrap in an async IIFE so top-level await works and the return value is
+    // always a Promise regardless of whether the code itself is async.
+    // eslint-disable-next-line no-new-func
+    const fn = new Function(`return (async () => { ${code} })()`);
+    const value = await fn();
+    return { ok: true, value };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
 
 /**
  * Fingerprint intentionally omits `source` so the React→window-error rethrow
@@ -71,37 +201,14 @@ function fingerprint(err: Pick<CapturedError, "message" | "stack">): string {
 }
 
 function postErrorToParent(err: CapturedError) {
-  if (typeof window === "undefined" || window.parent === window) return;
-  try {
-    window.parent.postMessage(
-      {
-        type: POST_MESSAGE_TYPE,
-        source: err.source,
-        message: err.message,
-        stack: err.stack,
-        componentStack: err.componentStack,
-        url: typeof location !== "undefined" ? location.href : undefined,
-        timestamp: err.timestamp,
-        raw: err.raw,
-      },
-      POST_MESSAGE_TARGET_ORIGIN,
-    );
-  } catch {
-    // postMessage can throw if the payload isn't structured-cloneable.
-    // Fall back to a stringified version so the parent at least gets the message.
-    window.parent.postMessage(
-      {
-        type: POST_MESSAGE_TYPE,
-        source: err.source,
-        message: err.message,
-        stack: err.stack,
-        componentStack: err.componentStack,
-        url: typeof location !== "undefined" ? location.href : undefined,
-        timestamp: err.timestamp,
-      },
-      POST_MESSAGE_TARGET_ORIGIN,
-    );
-  }
+  postToParent("preview:error", {
+    source: err.source,
+    message: err.message,
+    stack: err.stack,
+    componentStack: err.componentStack,
+    url: typeof location !== "undefined" ? location.href : undefined,
+    raw: err.raw,
+  });
 }
 
 /**
@@ -379,13 +486,17 @@ export default function ErrorReporter({ children }: ErrorReporterProps) {
   };
 
   useEffect(() => {
-    // Hydrate from the dev server's snapshot. vite:error is a one-shot push
-    // — if the offending file was already transformed (and failed) before
-    // our listener attached, we'd miss it on every page load after the
-    // first. The plugin keeps a persistent buildError map keyed by file,
-    // so we just GET it on mount and seed our local state. The endpoint is
-    // mounted under whatever Vite base is configured AND at the bare path,
-    // so a relative URL just works whether or not we're behind a proxy.
+    // ── preview:ready: signal parent that the React tree is up ─────────────
+    postToParent("preview:ready", {
+      url: typeof location !== "undefined" ? location.href : undefined,
+    });
+
+    // ── Hydrate from dev server snapshot ────────────────────────────────────
+    // vite:error is a one-shot push — if the offending file was already
+    // transformed (and failed) before our listener attached, we'd miss it
+    // on every page load after the first. The plugin keeps a persistent
+    // buildError map keyed by file, so we just GET it on mount and seed our
+    // local state.
     let cancelled = false;
     if (import.meta.hot) {
       const base = import.meta.env.BASE_URL || "/";
@@ -449,47 +560,198 @@ export default function ErrorReporter({ children }: ErrorReporterProps) {
     window.addEventListener("error", onError);
     window.addEventListener("unhandledrejection", onRejection);
 
-    // Vite HMR error stream — only available in dev with HMR enabled.
+    // ── Vite HMR events ─────────────────────────────────────────────────────
     let offViteError: (() => void) | undefined;
     let offViteAfterUpdate: (() => void) | undefined;
+    let offViteBeforeUpdate: (() => void) | undefined;
+    let offWsConnect: (() => void) | undefined;
+    let offWsDisconnect: (() => void) | undefined;
+
     if (import.meta.hot) {
-      const handler = (payload: { err?: { message?: string; stack?: string } }) => {
-        record({
-          source: "vite-hmr",
+      // Compile errors → record locally AND auto-post to parent immediately
+      // (no user interaction required for build errors).
+      const viteErrorHandler = (payload: { err?: { message?: string; stack?: string } }) => {
+        const err = {
+          source: "vite-hmr" as CapturedErrorSource,
           message: payload?.err?.message || "Vite compile error",
           stack: payload?.err?.stack,
           raw: payload,
           timestamp: Date.now(),
+        };
+        record(err);
+        // Auto-forward build errors to the parent — the platform can show
+        // an inline error banner without waiting for the user to click Send.
+        postToParent("preview:build:error", {
+          message: err.message,
+          stack: err.stack,
         });
       };
-      import.meta.hot.on("vite:error", handler);
-      offViteError = () => import.meta.hot?.off("vite:error", handler);
+      import.meta.hot.on("vite:error", viteErrorHandler);
+      offViteError = () => import.meta.hot?.off("vite:error", viteErrorHandler);
 
-      // A successful HMR update means the app is now running fresh code, so
-      // the dev-server's mirror of runtime errors is likely stale — tell it
-      // to clear. We deliberately DO NOT touch the local `errors` list:
-      //   - `vite:error` and `vite:afterUpdate` can fire in the same tick
-      //     (a partially-failing update still emits afterUpdate when at
-      //     least one module applied), and a blind setErrors([]) would
-      //     immediately swallow the error we just captured. Keeping the
-      //     list around lets the user actually see what broke.
-      //   - Stale entries in the local list are bounded (MAX_ERRORS) and
-      //     can be dismissed manually; that's preferable to silently
-      //     hiding a real, current failure.
+      // A successful HMR update means the app is now running fresh code.
       const afterUpdateHandler = () => {
         clearDevServerRuntimeErrors();
+        postToParent("preview:hmr:update-done");
+        // Notify parent that any previously-reported build errors are resolved.
+        postToParent("preview:build:cleared");
       };
       import.meta.hot.on("vite:afterUpdate", afterUpdateHandler);
       offViteAfterUpdate = () =>
         import.meta.hot?.off("vite:afterUpdate", afterUpdateHandler);
+
+      // HMR patch is about to be applied — let the platform show a progress indicator.
+      const beforeUpdateHandler = () => {
+        postToParent("preview:hmr:update-start");
+      };
+      import.meta.hot.on("vite:beforeUpdate", beforeUpdateHandler);
+      offViteBeforeUpdate = () =>
+        import.meta.hot?.off("vite:beforeUpdate", beforeUpdateHandler);
+
+      // WebSocket connection state — Vite 5.1+ emits these events.
+      // We guard with optional chaining for older Vite versions.
+      const wsConnectHandler = () => {
+        postToParent("preview:hmr:connected");
+      };
+      const wsDisconnectHandler = () => {
+        postToParent("preview:hmr:disconnected");
+      };
+      // "vite:ws:connect" / "vite:ws:disconnect" were introduced in Vite 5.1.
+      // The hot.on call is safe on earlier versions — Vite simply never fires
+      // the event — so no version guard is needed here.
+      import.meta.hot.on("vite:ws:connect", wsConnectHandler);
+      import.meta.hot.on("vite:ws:disconnect", wsDisconnectHandler);
+      offWsConnect = () => import.meta.hot?.off("vite:ws:connect", wsConnectHandler);
+      offWsDisconnect = () => import.meta.hot?.off("vite:ws:disconnect", wsDisconnectHandler);
     }
+
+    // ── Route change tracking ────────────────────────────────────────────────
+    // Fires on both History API navigation (pushState/replaceState wrapped
+    // by frameworks) and the browser's native popstate.
+    const onPopState = () => {
+      postToParent("preview:url-changed", {
+        url: typeof location !== "undefined" ? location.href : undefined,
+        path: typeof location !== "undefined" ? location.pathname + location.search + location.hash : undefined,
+      });
+    };
+    window.addEventListener("popstate", onPopState);
+
+    // Patch history.pushState / replaceState so SPA navigations are caught.
+    // We restore the originals on cleanup.
+    const origPushState = history.pushState.bind(history);
+    const origReplaceState = history.replaceState.bind(history);
+    history.pushState = (...args: Parameters<typeof history.pushState>) => {
+      origPushState(...args);
+      postToParent("preview:url-changed", {
+        url: typeof location !== "undefined" ? location.href : undefined,
+        path: typeof location !== "undefined" ? location.pathname + location.search + location.hash : undefined,
+      });
+    };
+    history.replaceState = (...args: Parameters<typeof history.replaceState>) => {
+      origReplaceState(...args);
+      // replaceState doesn't change the visible route in a meaningful way for
+      // the platform (it's often used for scroll restoration or minor state
+      // updates), but we still emit so the parent has a complete picture.
+      postToParent("preview:url-changed", {
+        url: typeof location !== "undefined" ? location.href : undefined,
+        path: typeof location !== "undefined" ? location.pathname + location.search + location.hash : undefined,
+      });
+    };
+
+    // ── Inbound platform messages ────────────────────────────────────────────
+    const onPlatformMessage = (e: MessageEvent) => {
+      // Accept messages from any origin while the protocol is being defined.
+      // Tighten to a specific origin once it is stable.
+      const data = e.data as {
+        type?: PlatformMessageType;
+        path?: string;
+        requestId?: string;
+        command?: string;
+        args?: unknown[];
+      } | null;
+      if (!data || typeof data.type !== "string") return;
+
+      switch (data.type) {
+        case "platform:ping": {
+          // Heartbeat RPC — reply with requestId so the platform can measure
+          // RTT and match concurrent pings.
+          const requestId = data.requestId;
+          if (typeof requestId === "string") {
+            replyCallResult(requestId, { ok: true, value: null });
+          }
+          break;
+        }
+
+        case "platform:reload":
+          // Platform wants a full page reload (e.g. after an env var change).
+          if (typeof window !== "undefined") window.location.reload();
+          break;
+
+        case "platform:navigate":
+          // Platform wants to drive the iframe to a specific client-side route.
+          // We use history.pushState (the original, pre-patched version) so
+          // that we don't re-emit "preview:url-changed" back to the platform and
+          // create a loop.
+          if (typeof data.path === "string" && data.path) {
+            origPushState(null, "", data.path);
+            // Dispatch a popstate so React Router / TanStack Router / etc. picks
+            // up the navigation.
+            window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
+          }
+          break;
+
+        case "platform:navigate-back":
+          history.back();
+          break;
+
+        case "platform:navigate-forward":
+          history.forward();
+          break;
+
+        case "platform:call": {
+          // RPC: execute code and reply with the result.
+          // Only "eval" command is supported for now; the command field is kept
+          // for future extensibility (e.g. "screenshot", "getState", etc.).
+          const requestId = data.requestId;
+          if (typeof requestId !== "string") break; // malformed — no way to reply
+          if (data.command !== "eval") {
+            replyCallResult(requestId, { ok: false, error: `Unknown command: ${data.command}` });
+            break;
+          }
+          const code = Array.isArray(data.args) && typeof data.args[0] === "string"
+            ? data.args[0]
+            : "";
+          if (!code) {
+            replyCallResult(requestId, { ok: false, error: "platform:call eval requires args[0] to be a non-empty string" });
+            break;
+          }
+          // execCode is async; we fire-and-forget the Promise here because
+          // onPlatformMessage itself is synchronous. The reply arrives whenever
+          // the code finishes (or rejects).
+          execCode(code).then((result) => replyCallResult(requestId, result));
+          break;
+        }
+
+        default:
+          break;
+      }
+    };
+    window.addEventListener("message", onPlatformMessage);
 
     return () => {
       cancelled = true;
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
+      window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("message", onPlatformMessage);
+      // Restore original history methods.
+      history.pushState = origPushState;
+      history.replaceState = origReplaceState;
       offViteError?.();
       offViteAfterUpdate?.();
+      offViteBeforeUpdate?.();
+      offWsConnect?.();
+      offWsDisconnect?.();
     };
   }, []);
 
