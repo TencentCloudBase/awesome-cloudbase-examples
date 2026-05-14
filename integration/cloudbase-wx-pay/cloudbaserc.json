@@ -40,5 +40,13 @@
         "*.pem"
       ]
     }
-  ]
+  ],
+  "app": {
+    "serviceName": "web-pay",
+    "framework": "vite",
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "root": "./examples/react"
+  }
 }
