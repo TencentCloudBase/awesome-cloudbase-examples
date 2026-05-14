@@ -2,6 +2,8 @@
 
 微信回调接收云函数 — 仅打印 headers + body，方便观察集成中心推送的实际消息格式。
 
+> 💡 本示例**只做打印和返回 `success`**，不做任何业务处理。如需被动回复用户消息等场景，请参考微信官方文档自行接入。
+
 ## 接口
 
 | 方法 | 路径 | 说明 |
@@ -26,14 +28,24 @@ wechat-notify/
 
 ```
 微信服务器
-    ↓ 推送事件
+    ↓ 推送事件（消息 / 关注 / 菜单点击等）
 微信集成中心网关（平台侧）
     ↓ 验签、解密、转换
     ↓ POST /wechat/notify
 wechat-notify
     ↓ console.log(headers, body)
-    → 返回 success
+    → 返回 "success"
 ```
+
+## 回调回包说明
+
+微信服务器推送消息/事件后，要求在 **5 秒内**返回响应，否则断开连接并**重试 3 次**。
+
+本示例统一返回 `"success"`，表示消息已收到，微信不再重试。
+
+如需处理更多场景（被动回复用户消息、消息排重等），请参考微信官方文档：
+
+> 📖 [接收普通消息](https://developers.weixin.qq.com/doc/service/guide/product/message/Receiving_standard_messages.html) · [被动回复用户消息](https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Passive_user_reply_message.html)
 
 ## 本地开发
 
@@ -49,7 +61,14 @@ npm start
 ```bash
 curl -X POST http://localhost:3000/wechat/notify \
   -H "Content-Type: application/json" \
-  -d '{"MsgType":"event","Event":"authorized","AppId":"wx123"}'
+  -d '{
+    "MsgType": "text",
+    "Content": "你好",
+    "FromUserName": "oXXXX_user_openid",
+    "ToUserName": "gh_xxxx",
+    "CreateTime": 1700000000,
+    "MsgId": "1234567890"
+  }'
 ```
 
 ## 部署
