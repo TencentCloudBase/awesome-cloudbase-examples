@@ -27,6 +27,7 @@
     "framework": "static",
     "installCommand": "",
     "buildCommand": "",
-    "outputDir": "."
+    "outputDir": ".",
+    "root": "./examples/web"
   }
 }
