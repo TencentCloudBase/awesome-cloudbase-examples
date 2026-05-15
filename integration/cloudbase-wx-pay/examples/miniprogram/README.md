@@ -166,6 +166,5 @@ const openid = req.headers['x-wx-openid']
 
 ## 相关文档
 
-- [wx.cloud.callHTTPFunction 文档](https://developers.weixin.qq.com/miniprogram/dev/wxcloudservice/wxcloud/reference-sdk-api/functions/Cloud.callFunction.html)
 - [CloudBase 云函数文档](https://docs.cloudbase.net/cloud-function/introduce.html)
 - [微信支付 API v3](https://pay.weixin.qq.com/wiki/doc/apiv3/index.shtml)

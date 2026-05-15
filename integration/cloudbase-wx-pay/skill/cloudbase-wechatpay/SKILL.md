@@ -57,6 +57,7 @@ graph TD
     D --> D1[云函数 - 推荐]
     D --> D2[云托管 - Docker]
     D --> D3[本地开发 - 调试]
+    B -->|集成中心一键创建| IC[加载 references/模板接入/integration-center.md]
     B -->|商户凭证怎么配| M[加载 references/模板接入/merchant-credentials.md]
     B -->|已决定用 pay-common| E[进入模板接入]
     E --> F{需要做什么?}
@@ -76,12 +77,13 @@ graph TD
 | # | 能力 | 触发关键词 | 加载文档 |
 |---|------|-----------|---------|
 | 1 | **方案选型** | 支付方案怎么选 / pay-common 和云调用区别 / CloudBase 部署方案 | `references/方案选型/cloudbase-pay-overview.md` |
-| 2 | **模板接入** | 怎么用 pay-common / 环境变量怎么配 / SDK Gateway 区别 / cloudbaserc.json 配置 | `references/模板接入/{quick-start,env-config,sign-mode}.md` |
-| 3 | **商户凭证准备** | 商户号怎么配 / 证书怎么下载 / APIv3 密钥 / 公钥 / 集成中心创建 | `references/模板接入/merchant-credentials.md` |
-| 4 | **部署** | 怎么部署到云函数 / 用云托管 / 本地调试 / HTTP 访问服务配置 / 环境变量同步 | `references/部署/deploy-{cloud-function,cloud-run,local}.md` |
-| 5 | **前端集成** | 小程序怎么调起支付 / H5 怎么接 / PC 扫码 / React Web 测试页 / 微搭接入 | `references/前端集成/{miniprogram-*,web-*,weda-*}.md` |
-| 6 | **微搭低码接入** | 微搭支付 / WeDa 支付 / 低码接入 / callHTTPFunction / 页面方法 | `references/前端集成/weda-miniprogram.md` |
-| 7 | **问题排查** | 签名失败 / 回调收不到 / 部署后 502 / 转账报错 / 限额 / 模拟器 / NOT_ENOUGH | `references/问题排查/{troubleshooting,error-patterns}.md` |
+| 2 | **集成中心接入** | 集成中心 / 一键创建 / 控制台创建集成 / gateway 模式 / 自动注入 / 回调域名 / MISSING_CREDENTIALS | `references/模板接入/integration-center.md` |
+| 3 | **模板接入** | 怎么用 pay-common / 环境变量怎么配 / SDK Gateway 区别 / cloudbaserc.json 配置 | `references/模板接入/{quick-start,env-config,sign-mode}.md` |
+| 4 | **商户凭证准备** | 商户号怎么配 / 证书怎么下载 / APIv3 密钥 / 公钥 / 集成中心创建 | `references/模板接入/merchant-credentials.md` |
+| 5 | **部署** | 怎么部署到云函数 / 用云托管 / 本地调试 / HTTP 访问服务配置 / 环境变量同步 | `references/部署/deploy-{cloud-function,cloud-run,local}.md` |
+| 6 | **前端集成** | 小程序怎么调起支付 / H5 怎么接 / PC 扫码 / React Web 测试页 / 微搭接入 | `references/前端集成/{miniprogram-*,web-*,weda-*}.md` |
+| 7 | **微搭低码接入** | 微搭支付 / WeDa 支付 / 低码接入 / callHTTPFunction / 页面方法 | `references/前端集成/weda-miniprogram.md` |
+| 8 | **问题排查** | 签名失败 / 回调收不到 / 部署后 502 / 转账报错 / 限额 / 模拟器 / NOT_ENOUGH / MISSING_CREDENTIALS | `references/问题排查/{troubleshooting,error-patterns}.md` |
 
 > **部署关键步骤速查**（新手必看）：
 > - **cloudbaserc.json 完整示例 + type:HTTP 字段说明** → `quick-start.md` Step 4.1
@@ -288,6 +290,7 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 | 文档 | 内容 | 何时加载 |
 |------|------|---------|
 | 方案选型 | CloudBase 支付全景 + 选型决策 | 用户问方案对比时 |
+| **模板接入/integration-center** | **集成中心一键创建全流程**（创建集成→自动生成云函数→回调域名→环境变量自动注入→signMode=gateway 行为→集成中心专属 FAQ） | **集成中心模式接入、gateway 模式排查** |
 | 模板接入/merchant-credentials | **商户凭证准备全流程**（APIv3 密钥/API 证书/微信支付公钥的详细操作路径 + 集成中心创建流程） | 新手首次接入、凭证报错排查 |
 | 模板接入/quick-start | **5 分钟快速开始（含三种调用方式详解 + cloudbaserc.json 完整示例 + type:HTTP 说明 + HTTP 访问服务配置 + 路由管理 CLI 命令 + 回调 URL 组装 + 环境变量同步流程 + 5 秒超时规则）** | **新手首次接入必读，覆盖部署全链路** |
 | 模板接入/env-config | 环境变量完整配置指南（各字段含义、格式要求） | 配置 .env 时 |
@@ -299,9 +302,9 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 | 业务开发/order-service | orderService 数据库集成 | 对接业务系统时 |
 | 业务开发/transfer | 商家转账注意事项 | 接转账功能时 |
 | 业务开发/security-checklist | 安全红线 + 上线清单 | 上线前检查 |
-| 问题排查/troubleshooting | 常见问题速查表（30+ 条目，含模拟器限制、风控限额、NOT_ENOUGH 等） | 出问题时 |
+| 问题排查/troubleshooting | 常见问题速查表（40+ 条目，含集成中心凭证问题、MISSING_CREDENTIALS、DECODER routines、模拟器限制、风控限额、NOT_ENOUGH、匿名登录等） | 出问题时 |
 | 问题排查/error-patterns | 错误模式详解 | 深度排查时 |
 
 ---
 
-*最后更新：2026-04-29*
+*最后更新：2026-05-15*

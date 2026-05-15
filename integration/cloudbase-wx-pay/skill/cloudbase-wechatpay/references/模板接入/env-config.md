@@ -72,6 +72,20 @@ signMode=sdk appId=YOUR_APP_ID merchantId=YOUR_MERCHANT_ID npm start
 | `notifyURLRefundsURL` | 是 | 退款回调通知 URL | 同上 |
 | `transferNotifyUrl` | 是 | 转账回调通知 URL | 同上 |
 
+> **集成中心模式特别说明**：
+>
+> 通过控制台「集成中心」创建集成时，以上回调 URL **由平台自动生成并注入**，用户无需手动填写。
+> 回调 URL 格式为：`https://<集成标识>.integration-callback.tcloudbase.com/wechatpay/<type>`
+>
+> | 变量 | 自动注入值示例 |
+> |------|-------------|
+> | `notifyURLPayURL` | `https://miniapp-wxpay.integration-callback.tcloudbase.com/wechatpay/order` |
+> | `notifyURLRefundsURL` | `https://miniapp-wxpay.integration-callback.tcloudbase.com/wechatpay/refund` |
+> | `transferNotifyUrl` | 当前版本暂不支持转账回调代处理，留空 |
+>
+> 支付回调 URL 仍需手动填入微信支付商户平台的「支付结果通知 URL」。
+> 详见 [integration-center.md](integration-center.md)
+
 ### 可选配置
 
 | 变量名 | 必填 | 默认值 | 说明 |
