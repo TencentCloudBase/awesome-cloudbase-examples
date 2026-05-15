@@ -294,4 +294,39 @@ await callPayCommon('wxpay_transfer', {
 
 ---
 
+## 使用官方示例工程
+
+> 适合不想自行搭脚手架、想快速跑通完整链路的场景。
+
+官方仓库提供完整的小程序示例：[awesome-cloudbase-examples/integration/cloudbase-wx-pay/examples/miniprogram](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram)
+
+### 一次性配置
+
+1. **导入工程**：微信开发者工具 → 右上角「导入项目」→ 选择 `examples/miniprogram/` 目录
+2. **填写关键参数**（⚠️ 缺一不可，否则调用 404）：
+   - `app.js` 顶部 `ENV_ID` → 实际云开发环境 ID
+   - `app.js` 顶部 `FUNCTION_NAME` → **必须改为集成创建后生成的真实函数名**（在控制台 → 集成中心 → 对应集成详情页中查看，形如 `miniapp-wxpay-rwmx67sc`，而非默认的 `pay-common`）
+   - `project.config.json` 中的 `appid` → 实际小程序 AppID
+   - `project.config.json` 中的 `libVersion` → 确认 ≥ `3.15.2`
+
+> 💡 示例工程使用 `wx.cloud.callHTTPFunction`，**无需** `npm install`、无需构建 npm、无需安装任何依赖。
+
+### 模拟器自检
+
+点击左上角「编译」。Console 中能看到云开发初始化成功即说明配置正常。
+
+模拟器可用于验证：
+- 云开发初始化是否成功
+- 下单是否返回 `prepay_id`
+- 页面交互是否正常
+
+**但模拟器无法完成真实支付**——`callHTTPFunction` 在模拟器中注入的 openid 可能为测试值，下单会被微信拒绝；即便绕过该限制，`wx.requestPayment` 也需要在手机微信中输入支付密码，模拟器不具备此能力。
+
+### 真机支付测试
+
+1. 右上角「真机调试」→ 手机微信扫码打开
+2. 在手机端点击「微信支付」按钮 → 微信弹出密码界面 → 输入密码完成支付
+
+---
+
 *小程序云托管版见 [miniprogram-cloud-run.md](miniprogram-cloud-run.md) | H5 见 [web-h5.md](web-h5.md)*
