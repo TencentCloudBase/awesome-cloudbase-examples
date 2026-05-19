@@ -1,26 +1,33 @@
 ---
 name: cloudbase-wechatpay
-description: >
-  CloudBase 云开发平台微信支付接入指南，基于 pay-common 模板。
-  Use when user mentions "CloudBase 支付", "云开发支付", "pay-common",
-  "支付模板", "云函数支付", "云托管支付", "支付回调配不通", or asks
-  "如何在 CloudBase 上接微信支付", "pay-common 怎么部署",
-  "pay-common 环境变量", "签名失败 PEM", even if they just say
-  "帮我接个支付" in a CloudBase project context.
-  For WeChat Pay API-level questions (signing algorithm, error codes, refund rules),
+description: |
+  Guide CloudBase WeChat Pay integration using the pay-common template.
+  Trigger when user mentions: "CloudBase 支付", "云开发支付", "pay-common",
+  "支付模板", "云函数支付", "云托管支付", "支付回调配不通", "帮我接个支付",
+  "pay-common 怎么部署", "pay-common 环境变量", "签名失败 PEM",
+  "集成中心", "MISSING_CREDENTIALS", "微信支付接入".
+  For WeChat Pay API-level questions (signing, error codes, refund rules),
   defer to wechatpay-basic-payment skill.
-  For coupon/券相关, defer to wechatpay-product-coupon skill.
-license: MIT
-metadata:
-  author: cloudbase-pay-team
-  version: "1.0.0"
-compatibility: Requires Node.js 16+ for pay-common template.
+  For coupon/券, defer to wechatpay-product-coupon skill.
 ---
 
-# CloudBase 微信支付接入指南（pay-common 模板）
+# CloudBase 微信支付接入（pay-common 模板）
 
 基于 `pay-common` Express 模板的 **CloudBase 平台微信支付全流程指引**——
 从选型、配置、部署、前端集成到问题排查。
+
+---
+
+## Setup（首次使用引导）
+
+首次被调用时，按顺序确认：
+
+1. **定位项目**：确认用户的 pay-common 项目路径
+2. **检查配置**：查找 `.env` / `cloudbaserc.json` 是否存在
+3. **选择模式**：
+   - 有集成中心 → 加载 `references/模板接入/integration-center.md`
+   - 无集成中心 → 加载 `references/模板接入/quick-start.md`
+4. **验证配置**：引导运行 `scripts/validate_env.sh`
 
 ---
 
@@ -29,10 +36,9 @@ compatibility: Requires Node.js 16+ for pay-common template.
 1. **确认部署方式**：任何能力使用前须先确认——HTTP 云函数 / 云托管 / 本地开发
 2. **确认支付方式**：仅下单和前端集成需要确认（JSAPI/H5/Native）
 3. **API 问题引流**：涉及签名算法、API 错误码、退款规则 → 推荐 `wechatpay-basic-payment`
-4. **Demo 优先**：回答前端集成问题时，优先引用以下 Demo：
+4. **Demo 优先**：回答前端集成问题时，优先引用 Demo：
    - 小程序：[GitHub 官方示例](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram)
-   - Web 测试页：本地 `examples/react/`（React + Vite）
-   - 各支付方式代码示例见 `pay-common/README.md` §Step 5
+   - Web 测试页：本地 `examples/react/`
 5. **脚本优先**：排查配置问题时，优先使用 `scripts/` 下的诊断脚本
 6. **安全优先**：私钥、证书等敏感信息必须用环境变量注入，禁止硬编码
 
@@ -47,194 +53,63 @@ compatibility: Requires Node.js 16+ for pay-common template.
 
 ---
 
+## Gotchas（踩坑清单）
+
+> 以下来自实际用户反馈和 GitHub Issues，按"翻车概率 × 后果严重度"排序。
+
+| # | 陷阱 | 正确做法 | 后果 |
+|---|------|---------|------|
+| 1 | `amount.total` 单位以为是元 | **单位是分！** 传 1 = ¥0.01 | 金额错误，用户付错价 |
+| 2 | `privateKey` 换行用真换行 | 必须用字面 `\n`（两个字符），代码会 `.replace(/\\n/g, '\n')` | PEM 解析失败 → 签名失败 |
+| 3 | `wxPayPublicKey` 填了商户公钥 | 必须是**微信支付公钥**（商户平台→API安全→微信支付公钥），不是商户 API 公钥 | 验签永远失败 |
+| 4 | 回调 URL 漏写路由 Path | SDK 模式 URL 必须含完整路径：`{域名}/{路由Path}/{API路径}` | 回调 404，收不到通知 |
+| 5 | APIv3 密钥没设 | 必须在商户平台设置 32 字节 APIv3 密钥 | **所有回调丢失**（不会报错，只是收不到） |
+| 6 | 回调路由开了身份认证 | SDK 模式回调路由**不能开鉴权**，微信回调不带 Token | 回调被 401/403 拦截 |
+| 7 | 退款重试换了 `out_refund_no` | 重试必须复用同一个 `out_refund_no` | 换新号 = 多退钱 |
+| 8 | 模拟器测试真实支付 | `wx.requestPayment` 必须真机测试（需要输密码） | 模拟器无法完成支付 |
+| 9 | `callHTTPFunction` 基础库版本低 | 需基础库 ≥ 3.15.2 | 报 `is not a function` |
+| 10 | 回调处理超过 5 秒 | 收到回调 → 立即返回 `{ code: "SUCCESS" }` → 异步处理业务 | 微信重试 ~15 次，可能导致重复发货 |
+| 11 | 匿名登录用于支付 | 匿名登录没有 openid，用 `callHTTPFunction` 自动注入 | 无法完成支付 |
+| 12 | Vite 部署 base 用了默认 `/` | 静态托管 serviceName 非空时必须 `base: './'` | JS/CSS 404 |
+
+---
+
 ## 快速决策树
 
 ```mermaid
 graph TD
     A{用户要接微信支付} --> B{想了解什么?}
     B -->|JSAPI/H5/Native 区别| C[→ wechatpay-basic-payment]
-    B -->|CloudBase 部署方案选择| D[加载 references/方案选型/cloudbase-pay-overview.md]
-    D --> D1[云函数 - 推荐]
-    D --> D2[云托管 - Docker]
-    D --> D3[本地开发 - 调试]
-    B -->|集成中心一键创建| IC[加载 references/模板接入/integration-center.md]
-    B -->|商户凭证怎么配| M[加载 references/模板接入/merchant-credentials.md]
+    B -->|CloudBase 部署方案选择| D[→ references/方案选型/cloudbase-pay-overview.md]
+    B -->|集成中心一键创建| IC[→ references/模板接入/integration-center.md]
+    B -->|商户凭证怎么配| M[→ references/模板接入/merchant-credentials.md]
     B -->|已决定用 pay-common| E[进入模板接入]
     E --> F{需要做什么?}
-    F -->|快速上手| G[加载 references/模板接入/quick-start.md]
-    F -->|环境变量配置| H[加载 references/模板接入/env-config.md]
-    F -->|SDK vs Gateway 签名模式| I[加载 references/模板接入/sign-mode.md]
-    F -->|部署到云端| J[加载 references/部署/deploy-*.md]
-    F -->|前端调起支付| K[加载 references/前端集成/*.md]
-    F -->|微搭低码接入| W[加载 references/前端集成/weda-miniprogram.md]
-    F -->|报错排查| L[加载 references/问题排查/troubleshooting.md]
+    F -->|快速上手| G[→ references/模板接入/quick-start.md]
+    F -->|环境变量配置| H[→ references/模板接入/env-config.md]
+    F -->|SDK vs Gateway 签名| I[→ references/模板接入/sign-mode.md]
+    F -->|部署到云端| J[→ references/部署/deploy-*.md]
+    F -->|前端调起支付| K[→ references/前端集成/*.md]
+    F -->|微搭低码接入| W[→ references/前端集成/weda-miniprogram.md]
+    F -->|报错排查| L[→ references/问题排查/troubleshooting.md]
 ```
-
----
 
 ## 能力路由表
 
 | # | 能力 | 触发关键词 | 加载文档 |
 |---|------|-----------|---------|
-| 1 | **方案选型** | 支付方案怎么选 / pay-common 和云调用区别 / CloudBase 部署方案 | `references/方案选型/cloudbase-pay-overview.md` |
-| 2 | **集成中心接入** | 集成中心 / 一键创建 / 控制台创建集成 / gateway 模式 / 自动注入 / 回调域名 / MISSING_CREDENTIALS | `references/模板接入/integration-center.md` |
-| 3 | **模板接入** | 怎么用 pay-common / 环境变量怎么配 / SDK Gateway 区别 / cloudbaserc.json 配置 | `references/模板接入/{quick-start,env-config,sign-mode}.md` |
-| 4 | **商户凭证准备** | 商户号怎么配 / 证书怎么下载 / APIv3 密钥 / 公钥 / 集成中心创建 | `references/模板接入/merchant-credentials.md` |
-| 5 | **部署** | 怎么部署到云函数 / 用云托管 / 本地调试 / HTTP 访问服务配置 / 环境变量同步 | `references/部署/deploy-{cloud-function,cloud-run,local}.md` |
-| 6 | **前端集成** | 小程序怎么调起支付 / H5 怎么接 / PC 扫码 / React Web 测试页 / 微搭接入 | `references/前端集成/{miniprogram-*,web-*,weda-*}.md` |
-| 7 | **微搭低码接入** | 微搭支付 / WeDa 支付 / 低码接入 / callHTTPFunction / 页面方法 | `references/前端集成/weda-miniprogram.md` |
-| 8 | **问题排查** | 签名失败 / 回调收不到 / 部署后 502 / 转账报错 / 限额 / 模拟器 / NOT_ENOUGH / MISSING_CREDENTIALS | `references/问题排查/{troubleshooting,error-patterns}.md` |
+| 1 | 方案选型 | 支付方案怎么选 / pay-common 和云调用区别 | `references/方案选型/cloudbase-pay-overview.md` |
+| 2 | 集成中心接入 | 集成中心 / 一键创建 / gateway 模式 / MISSING_CREDENTIALS | `references/模板接入/integration-center.md` |
+| 3 | 模板接入 | 怎么用 pay-common / 环境变量 / SDK Gateway 区别 | `references/模板接入/{quick-start,env-config,sign-mode}.md` |
+| 4 | 商户凭证准备 | 商户号怎么配 / 证书下载 / APIv3 密钥 / 公钥 | `references/模板接入/merchant-credentials.md` |
+| 5 | 部署 | 云函数 / 云托管 / 本地调试 / HTTP 访问服务 / 环境变量同步 | `references/部署/deploy-{cloud-function,cloud-run,local}.md` |
+| 6 | 前端集成 | 小程序调起支付 / H5 / PC 扫码 / React Web / 微搭 | `references/前端集成/{miniprogram-*,web-*,weda-*}.md` |
+| 7 | API 路由速查 | 下单/查单/退款/转账路由 / 请求响应格式 | `references/api-routes.md` |
+| 8 | 环境变量速查 | SDK vs Gateway 配置对比 / 变量列表 | `references/核心速查/env-quick-ref.md` |
+| 9 | 核心概念速查 | prepay_id 有效期 / 三种调用方式 / 双通道架构 | `references/核心速查/concepts.md` |
+| 10 | 问题排查 | 签名失败 / 回调收不到 / 502 / 转账报错 / NOT_ENOUGH | `references/问题排查/{troubleshooting,error-patterns}.md` |
 
-> **部署关键步骤速查**（新手必看）：
-> - **cloudbaserc.json 完整示例 + type:HTTP 字段说明** → `quick-start.md` Step 4.1
-> - **HTTP 访问服务开启 + 路由配置（控制台/CLI）** → `quick-start.md` Step 4.2
-> - **回调 URL 组装公式 + 真实范例** → `quick-start.md` Step 4.3
-> - **环境变量同步到线上（控制台操作路径）** → `quick-start.md` Step 4.4
-
-每次只加载用户当前场景需要的 **1-2 篇**参考文档，不要全部加载。
-
----
-
-## API 路由速查表
-
-> 基于 `pay-common/README.md` §路由表。下单/查询/退款/转账路由前缀为 `/wxpay_*`，回调路由为 `/*Trigger`。
-
-### 下单路由
-
-| 路由 | 方法 | 说明 | 必传字段 |
-|------|------|------|---------|
-| `/wxpay_order` | POST | JSAPI/小程序下单 | description, out_trade_no, amount.total(CNY分), payer.openid |
-| `/wxpay_order_h5` | POST | H5 下单 | 同上 + scene_info(payer_client_ip, h5_info) |
-| `/wxpay_order_native` | POST | Native 扫码下单 | 同上 + scene_info(payer_client_ip)，无需 openid |
-
-### 查询路由
-
-| 路由 | 方法 | 说明 |
-|------|------|------|
-| `/wxpay_query_order_by_out_trade_no` | POST | 商户订单号查单 |
-| `/wxpay_query_order_by_transaction_id` | POST | 微信订单号查单 |
-| `/wxpay_close_order` | POST | 关闭订单 |
-
-### 退款路由
-
-| 路由 | 方法 | 说明 | 注意事项 |
-|------|------|------|---------|
-| `/wxpay_refund` | POST | 申请退款 | 同一订单最多 50 次部分退款；重试必须复用 out_refund_no |
-| `/wxpay_refund_query` | POST | 查询退款 | - |
-
-### 商家转账路由（升级版-单笔模式）
-
-| 路由 | 方法 | 说明 | 注意事项 |
-|------|------|------|---------|
-| `/wxpay_transfer` | POST | 发起商家转账 | 0.3 元 ≤ 金额 < 2000 元；不填 user_name；ACCEPTED ≠ 成功 |
-| `/wxpay_transfer_bill_query` | POST | 商户单号查转账 | - |
-| `/wxpay_transfer_bill_query_by_no` | POST | 微信单号查转账 | - |
-
-### 回调路由（无鉴权）
-
-| 路由 | 方法 | 说明 |
-|------|------|------|
-| `/unifiedOrderTrigger` | POST | 支付回调通知（SDK 模式） |
-| `/refundTrigger` | POST | 退款回调通知（SDK 模式） |
-| `/transferTrigger` | POST | 转账回调通知（SDK 模式） |
-
-> **⚠️ SDK 验签模式的硬性约束（5 条）**：
->
-> | # | 约束 | 违反后果 |
-> |---|------|---------|
-> | 1 | **回调必须走 HTTP 访问服务，不能走云 API 网关** | 微信服务器直连你的服务；云 API 网关会加鉴权层/篡改请求格式导致验签失败 |
-> | 2 | **HTTP 访问服务的回调路由不能开启身份认证** | 微信服务器回调不带任何 Token，开了身份认证会被 401/403 拦截 |
-> | 3 | **回调 URL 必须带完整路径（含路由 Path）** | 域名后带自定义路径前缀（如 `/pay/wx-pay/`），漏写则回调 404 |
-> | 4 | **必须在商户平台设置 APIv3 密钥** | **未设置 = 收不到任何回调通知！**（支付结果、退款、转账全部丢失） |
-> | 5 | **回调处理必须在 5 秒内返回应答** | 超时触发重试（最多约 15 次 / 最长 24h），可能导致重复扣款或发货 |
->
-> **简单总结：SDK 模式 = 开 HTTP 访问服务 → 关掉回调路由身份认证 → 设 APIv3 密钥 → 回调 URL 写完整 → 5 秒内返回**
->
-> **详细操作步骤见 `references/模板接入/quick-start.md` Step 4.2-4.5**
->
-> 对比 **Gateway 模式**：回调地址由集成中心自动生成（在 CloudBase 控制台 → 微信支付 → 集成中心配置后获得），直接复制填入即可，无需处理 path 问题，也无特殊部署约束。
-
-### 请求/响应格式
-
-```json
-// 成功请求示例（JSAPI）
-{"description": "商品名称", "out_trade_no": "ORDER20260424001", "amount": {"total": 100, "currency": "CNY"}, "payer": {"openid": "oUpF8xxx"}}
-
-// 成功响应
-{"code": 0, "msg": "success", "data": {"prepay_id": "wx201410272009395522657a690389285100"}}
-
-// 失败响应
-{"code": -1, "msg": "amount.total 必须为正整数（单位：分）", "data": null}
-
-// 回调应答（必须 5 秒内返回）
-{"code": "SUCCESS", "message": "成功"}
-```
-
----
-
-## 安全红线速查
-
-以下规则来自 `pay-common/README.md` 的铁律和注意事项：
-
-| # | 规则 | 违反后果 | 来源 |
-|---|------|---------|------|
-| 1 | **金额单位 = 分** | `amount.total` 传入元为单位或浮点数会导致金额错误 | README 铁律 |
-| 2 | **订单号全局唯一** | `out_trade_no` 重复导致"订单号重复"错误；`out_refund_no` 重试换新号 = 多退钱 | README 铁律 |
-| 3 | **下单与调起使用同一私钥** | 混用不同证书/私钥导致调起支付签名失败 | README 铁律 |
-| 4 | **回调先应答后处理** | 超时 5 秒未返回导致微信重试（最多约 15 次 / 最长约 24 小时）。正确模式：收到回调 → 立即返回 200 → 异步执行业务逻辑。详见 `quick-start.md` Step 4.5 |
-| 5 | **回调必须幂等** | 不做幂等检查会重复发货/重复扣款 | 开发注意事项 §2.4 + README |
-| 6 | **openid 不可信** | 前端传入的 openid 可被篡改，生产环境用服务端 JWT 获取 | 开发注意事项 §六 |
-| 7 | **APIv3 密钥不可缺** | 未在商户平台设置 = 收不到任何回调（支付结果/退款/转账通知全部丢失） | 微信支付官方规范 + `quick-start.md` Step 2 |
-
----
-
-## 环境变量速查表
-
-> 完整配置说明见 `references/模板接入/env-config.md`。
-
-| 变量 | SDK 模式 | Gateway 模式 | 说明 |
-|------|---------|-------------|------|
-| `signMode` | `sdk` | `gateway` | 签名模式切换 |
-| `appId` | 必填 | 必填 | 小程序/公众号 AppID |
-| `merchantId` | 必填 | 必填 | 商户号（10 位数字） |
-| `merchantSerialNumber` | 必填 | 必填 | API 证书序列号 |
-| `apiV3Key` | 必填 | 必填 | APIv3 密钥（32 字节） |
-| `privateKey` | 必填 | 必填 | 商户 API 私钥（PEM，换行用 `\n`） |
-| `wxPayPublicKey` | 条件必填* | 不需要 | 微信支付公钥（非商户公钥！）。配了→公钥验签模式；不配→证书自动下载模式。详见 [verify-mode.md](references/模板接入/verify-mode.md) |
-| `wxPayPublicKeyId` | 条件必填* | 不需要 | 微信支付公钥 ID（与 wxPayPublicKey 成对使用） |
-| `notifyURLPayURL` | 自己的域名（含完整 path） | **集成中心自动生成**，直接复制填入 | 支付回调地址 |
-| `notifyURLRefundsURL` | 自己的域名（含完整 path） | **集成中心自动生成**，直接复制填入 | 退款回调地址 |
-| `transferNotifyUrl` | 自己的域名（含完整 path） | **集成中心自动生成**，直接复制填入 | 转账回调地址 |
-| `corsAllowOrigin` | 选填 | 选填 | CORS 允许来源（多域逗号分隔） |
-
-> **关键差异**：
-> - **凭证基本相同**，但 SDK 模式下 `wxPayPublicKey` / `wxPayPublicKeyId` 可选（不配则自动走证书验签模式，详见 [verify-mode.md](references/模板接入/verify-mode.md)）
-> - 区别主要在于 **回调 URL 和部署要求**
-> - **SDK 模式**：回调指向自己的服务（HTTP 访问服务域名，**必须包含路由 Path**）；回调路由不能开身份认证；**回调不能走云 API 网关**
->   - URL 组装公式：`{HTTP访问服务域名}/{路由Path}/{API路径}`
->   - 真实示例：`https://test-wxpay-xxx.ap-shanghai.app.tcloudbase.com/pay/wx-pay/unifiedOrderTrigger`
->   - 详见 `quick-start.md` Step 4.2-4.3
-> - **Gateway 模式**：回调地址指向集成中心，由控制台自动生成，**直接复制填入即可**；无特殊部署约束；前端可走云 API 网关
-
----
-
-## Demo 索引表
-
-| Demo | 来源 | 调用方式 | 适用部署 | 说明 |
-|------|------|---------|---------|------|
-| **小程序（云函数版）** | [GitHub 官方](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram) | `wx.cloud.callHTTPFunction`（平台自动注入 openid） | HTTP 云函数 | **官方示例**，支持下单/查单/关单/退款/转账 |
-| **小程序（云托管版）** | [GitHub 官方](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram-cloudrun) | `wx.cloud.callContainer`（平台自动注入 openid） | 云托管 | 常驻容器，适合高频/生产环境 |
-| **React Web** | 本地 `examples/react/` | React + Vite，HTTP 访问服务直连（无鉴权） | 静态托管 + HTTP 访问服务 | Web 测试页，JSAPI/H5/Native 三合一 |
-
-> 小程序 Demo 前置条件：
-> 1. 已开通 CloudBase 环境
-> 2. 已将 pay-common 部署为 HTTP 云函数（或云托管）
-> 3. 已完成商户号进件 + 后端环境变量配置
-> 4. 修改 `app.js` 填入 ENV_ID，`project.config.json` 填入 appid
-> 5. 微信小程序基础库版本 ≥ 3.15.2
-> 6. 无需安装 npm 依赖、无需构建 npm、无需开启 CloudBase Auth 身份源
-
-完整代码示例见各前端集成文档。
+> 每次只加载用户当前场景需要的 **1-2 篇**参考文档，不要全部加载。
 
 ---
 
@@ -247,64 +122,52 @@ graph TD
 | `scripts/check_deploy_config.py` | cloudbaserc.json 与 .env 一致性 | 部署前检查 |
 | `scripts/test_callback_url.sh` | 回调 URL 连通性测试 | 回调收不到时排查 |
 
-### 脚本调用方式
-
 ```bash
-# 通过 skill_run 执行（沙箱隔离）
+# 调用方式
 skill_run(skill="cloudbase-wechatpay", command="bash scripts/validate_env.sh /path/to/.env")
 skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format.py 'PRIVATE_KEY_STRING'")
 ```
 
-所有脚本遵循：无交互、结构化 JSON 输出（stdout）、退出码 0=正常/1=有问题/2=参数错误、不输出密钥原文。
+所有脚本：无交互、JSON 输出（stdout）、退出码 0=正常/1=有问题/2=参数错误、不输出密钥原文。
 
 ---
 
-## 重要概念速查
+## Memory
 
-| 概念 | 说明 |
-|------|------|
-| **AppID 类型对应关系** | JSAPI/H5 → 公众号 AppID；小程序 → 小程序 AppID；Native → 公众号或小程序 AppID |
-| **有效期** | `prepay_id` = 2 小时；`h5_url` = 5 分钟；`code_url`(扫码) ≈ 2 小时 |
-| **H5 支付授权目录** | 必须在商户平台配置，格式如 `https://domain.com/`，末尾 `/` |
-| **H5 场景信息** | `scene_info.payer_client_ip` 必填（风控），`h5_info.type` 必填（如 `Wap`） |
-| **转账受理 ≠ 成功** | 受理成功（`ACCEPTED`）仅表示请求被接受，必须查单/等回调确认最终状态 |
-| **回调重试机制** | 15s×2 → 30s → 3min → 10min×... → 最长约 24h，共 ~15 次；**必须 5 秒内返回应答** |
-| **APIv3 密钥的双重角色** | 不仅用于请求签名，更是接收回调通知的前提条件！未设置 = 所有回调丢失。详见 `quick-start.md` Step 2 注释区 |
-| **签名探测请求（SIGNTEST）** | 微信会发送 `WECHATPAY/SIGNTEST/` 前缀的探测请求验证验签能力。收到后返回错误码即可，属正常行为，无需处理。详见 `quick-start.md` Step 4.5 |
-| **回调 IP 白名单** | 需在防火墙/安全组放行微信回调 IP 段（上海/深圳/广州腾讯云） |
-| **SDK 模式双通道架构** | 小程序 Demo 走两条通道：①前端→`callHTTPFunction`/`callContainer`（主动请求，平台自动注入 openid）②微信→HTTP访问服务（回调通知，无鉴权）。两者域名不同、鉴权方式不同，必须分别配置。详见 `quick-start.md` Step 4.0 架构图 |
-| **三种调用方式区别** | ①**事件型（普通型）** `callFunction`（SDK 内部通道，自动带 openId，无公网地址，cloudbaserc.json 无 type 字段）②HTTP 云API网关（需 Bearer Token，`?webfn=true`）③HTTP 访问服务（公网域名，无内置鉴权，**唯一可收微信回调的方式**）。详见 `quick-start.md` Step 3.5 |
-| **小程序简化调用** | 小程序端推荐使用 ④`wx.cloud.callHTTPFunction`（云函数）或 ⑤`wx.cloud.callContainer`（云托管），平台自动注入 `x-wx-openid`，无需 SDK 依赖、无需登录流程、无需 Token 管理。详见 Demo `examples/miniprogram/` 和 `examples/miniprogram-cloudrun/` |
-| **JSAPI 公众号后台配置** | JSAPI 支付需配置 3 个域名：①网页授权域名（OAuth2 redirect_uri 白名单，不能用 IP）②JS接口安全域名（wx.requestPayment 校验）③支付授权目录（商户平台）。三者缺一不可 |
-| **匿名登录不能用于支付** | 匿名登录没有 openid，无法完成任何支付操作。小程序端推荐使用 `callHTTPFunction` / `callContainer`，平台自动注入 openid，无需手动登录 |
-| **模拟器 vs 真机测试** | 模拟器仅用于验证登录链路和下单接口（返回 `prepay_id`）；**真实支付必须在真机完成**（`wx.requestPayment` 需要输入支付密码）。使用微信开发者工具「真机调试」扫码测试 |
-| **真机限额/风控** | 支付弹窗已调起但提示限额 = 技术链路已通，属微信风控。常见诱因：测试金额过小（建议 0.1-1 元）、单用户单日笔数超限（换号/次日）、新商户号风控期、类目不匹配。详见 troubleshooting.md §3.6 |
-| **Vite/SPA 部署 base 配置** | 使用 CloudBase 静态托管且 serviceName 非空时，`vite.config.js` 必须设置 `base: './'`（相对路径），否则打包后 JS/CSS 引用为绝对路径导致 404 |
+帮助用户成功解决支付问题后，存储摘要记忆：
+
+- 用户的部署方式（云函数/云托管/集成中心）
+- 签名模式（sdk/gateway）
+- 已踩过的坑（避免重复排查）
+
+下次加载时读取最近记忆，跳过已确认的步骤。
 
 ---
 
-## 详细参考文档
+## 参考文档索引
 
-按需加载，位于 `references/` 目录：
-
-| 文档 | 内容 | 何时加载 |
-|------|------|---------|
-| 方案选型 | CloudBase 支付全景 + 选型决策 | 用户问方案对比时 |
-| **模板接入/integration-center** | **集成中心一键创建全流程**（创建集成→自动生成云函数→回调域名→环境变量自动注入→signMode=gateway 行为→集成中心专属 FAQ） | **集成中心模式接入、gateway 模式排查** |
-| 模板接入/merchant-credentials | **商户凭证准备全流程**（APIv3 密钥/API 证书/微信支付公钥的详细操作路径 + 集成中心创建流程） | 新手首次接入、凭证报错排查 |
-| 模板接入/quick-start | **5 分钟快速开始（含三种调用方式详解 + cloudbaserc.json 完整示例 + type:HTTP 说明 + HTTP 访问服务配置 + 路由管理 CLI 命令 + 回调 URL 组装 + 环境变量同步流程 + 5 秒超时规则）** | **新手首次接入必读，覆盖部署全链路** |
-| 模板接入/env-config | 环境变量完整配置指南（各字段含义、格式要求） | 配置 .env 时 |
-| 模板接入/sign-mode | SDK vs Gateway 签名模式详解 | 选签名模式或回调不通时 |
-| 部署/* | 三种部署方式详解 | 部署时 |
-| 前端集成/miniprogram-* | 小程序调用代码示例（云 API 网关 / 云托管） | 接入小程序前端时 |
-| 前端集成/weda-miniprogram | **微搭低码小程序接入**（callHTTPFunction + 页面方法完整示例） | 微搭/WeDa/低码接入支付 |
-| 前端集成/web-* | H5/Native/APP 接入 | 非小程序前端时 |
-| 业务开发/order-service | orderService 数据库集成 | 对接业务系统时 |
-| 业务开发/transfer | 商家转账注意事项 | 接转账功能时 |
-| 业务开发/security-checklist | 安全红线 + 上线清单 | 上线前检查 |
-| 问题排查/troubleshooting | 常见问题速查表（40+ 条目，含集成中心凭证问题、MISSING_CREDENTIALS、DECODER routines、模拟器限制、风控限额、NOT_ENOUGH、匿名登录等） | 出问题时 |
-| 问题排查/error-patterns | 错误模式详解 | 深度排查时 |
+| 文档 | 何时加载 |
+|------|---------|
+| 方案选型/cloudbase-pay-overview | 用户问方案对比 |
+| 模板接入/integration-center | 集成中心模式接入/排查 |
+| 模板接入/merchant-credentials | 新手首次接入/凭证报错 |
+| 模板接入/quick-start | **新手必读**，覆盖部署全链路 |
+| 模板接入/env-config | 配置 .env 时 |
+| 模板接入/sign-mode | 选签名模式/回调不通 |
+| 模板接入/verify-mode | 公钥验签 vs 证书验签 |
+| 部署/deploy-* | 部署到云端 |
+| 前端集成/miniprogram-* | 接入小程序前端 |
+| 前端集成/weda-miniprogram | 微搭/低码接入 |
+| 前端集成/web-* | H5/Native/APP |
+| 业务开发/order-service | 对接业务系统 |
+| 业务开发/transfer | 商家转账 |
+| 业务开发/security-checklist | 上线前检查 |
+| 问题排查/troubleshooting | 出问题时 |
+| 问题排查/error-patterns | 深度排查 |
+| **api-routes** | 查路由/请求格式 |
+| **核心速查/env-quick-ref** | 查环境变量配置 |
+| **核心速查/concepts** | 查核心概念 |
 
 ---
 
-*最后更新：2026-05-15*
+*最后更新：2026-05-19*
