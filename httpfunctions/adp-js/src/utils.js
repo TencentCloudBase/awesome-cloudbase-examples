@@ -23,7 +23,7 @@ export class DetectCloudbaseUserMiddleware extends Middleware {
     let jwtToken = {};
     try {
       // 获取 Authorization header
-      const user = this._req.headers.get("Authorization");
+      const user = this._req.headers.Authorization || this._req.headers.get?.("Authorization");
       if (user) {
         // 提取 Bearer token 中的 JWT 部分
         const jwt = user.split(" ")[1];

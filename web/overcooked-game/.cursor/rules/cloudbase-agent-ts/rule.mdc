@@ -28,34 +28,40 @@ Use this skill for **AI agent development** when you need to:
 
 ## How to use this skill (for a coding agent)
 
-1. **Choose the right adapter**
-   - Use LangGraph adapter for stateful, graph-based workflows
-   - Use LangChain adapter for chain-based agent patterns
-   - Build custom adapter for specialized agent logic
+### MUST READ: Read ALL docs that match your task
 
-2. **Deploy the agent server**
-   - Use `@cloudbase/agent-server` to expose HTTP endpoints
-   - Configure CORS, logging, and observability as needed
-   - Deploy to CloudRun or any Node.js hosting environment
+**Before writing any code**, identify which docs you need and read ALL of them. Reading only a subset leads to incomplete implementations (missing CORS, wrong adapter patterns, no UI client code).
 
-3. **Build the UI client**
-   - Use `@ag-ui/client` for web applications
-   - Use `@cloudbase/agent-ui-miniprogram` for WeChat Mini Programs
-   - Connect to the agent server's `/send-message` or `/agui` endpoints
+#### Scenario-based reading lists
 
-4. **Follow the routing table below** to find detailed documentation for each task
+| If the task asks you to... | You MUST read these docs |
+|---|---|
+| **Build a full-stack agent** (backend + frontend) | `server-quickstart.md` + adapter doc + `ui-clients.md` |
+| **Deploy an agent server only** | `server-quickstart.md` |
+| **Use LangGraph for agent logic** | `adapter-langgraph.md` + `server-quickstart.md` |
+| **Use LangChain for agent logic** | `adapter-langchain.md` + `server-quickstart.md` |
+| **Build a custom adapter** (no LangGraph/LangChain) | `adapter-development.md` + `agui-protocol.md` + `server-quickstart.md` |
+| **Build a web/mini-program UI client** | `ui-clients.md` + `agui-protocol.md` |
 
-## Routing
+### Step-by-step workflow
 
-| Task | Read |
+1. **Identify the adapter type** from the task description (LangGraph / LangChain / custom)
+2. **Read the matching docs** from the table above — read ALL listed docs, not just one
+3. **Set up the agent server** using `@cloudbase/agent-server` — always include `cors: true`
+4. **Implement the agent logic** using the chosen adapter
+5. **If building UI**, read `ui-clients.md` and create the client code
+
+## Reference doc index
+
+| Doc | When to read |
 |------|------|
-| Deploy agent server (@cloudbase/agent-server) | [server-quickstart](server-quickstart.md) |
-| Use LangGraph adapter | [adapter-langgraph](adapter-langgraph.md) |
-| Use LangChain adapter | [adapter-langchain](adapter-langchain.md) |
-| Build custom adapter | [adapter-development](adapter-development.md) |
-| Understand AG-UI protocol | [agui-protocol](agui-protocol.md) |
-| Build UI client (Web or Mini Program) | [ui-clients](ui-clients.md) |
-| Deep-dive @cloudbase/agent-ui-miniprogram | [ui-miniprogram](ui-miniprogram.md) |
+| [server-quickstart](server-quickstart.md) | Always — deployment, CORS, logging, endpoints |
+| [adapter-langgraph](adapter-langgraph.md) | Task mentions LangGraph, StateGraph, or graph-based workflows |
+| [adapter-langchain](adapter-langchain.md) | Task mentions LangChain, chains, or chain-based patterns |
+| [adapter-development](adapter-development.md) | Task requires custom adapter (no existing framework adapter) |
+| [agui-protocol](agui-protocol.md) | Task requires custom adapter or deep protocol understanding |
+| [ui-clients](ui-clients.md) | Task mentions web UI, frontend, client, or SSE streaming |
+| [ui-miniprogram](ui-miniprogram.md) | Task mentions WeChat Mini Program or miniprogram UI |
 
 ## Quick Start
 

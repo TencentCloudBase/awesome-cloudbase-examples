@@ -1,19 +1,6 @@
 {
 	"envId": "luke-agent-dev-7g1nc8tqc2ab76af",
-	"framework": {
-		"name": "miniprogram",
-		"plugins": {
-			"client": {
-				"use": "@cloudbase/framework-plugin-mp",
-				"inputs": {
-					"appid": "",
-					"buildCommand": "",
-					"localPath": "./miniprogram",
-					"remoteObjectPrefix": "/"
-				}
-			}
-		}
-	},
+	"$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
 	"functions": [
 		{
 			"name": "getFlights",

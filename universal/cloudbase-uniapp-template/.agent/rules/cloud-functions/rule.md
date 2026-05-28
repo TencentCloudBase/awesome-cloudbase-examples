@@ -1,634 +1,324 @@
 ---
 name: cloud-functions
-description: Complete guide for CloudBase cloud functions development - supports both Event Functions (Node.js) and HTTP Functions (multi-language Web services). Covers runtime selection, deployment, logging, invocation, scf_bootstrap, SSE, WebSocket, and HTTP access configuration.
+description: CloudBase function runtime guide for building, deploying, and debugging your own Event Functions or HTTP Functions. This skill should be used when users need application runtime code on CloudBase, not when they are merely calling CloudBase official platform APIs.
+version: 2.20.1
 alwaysApply: false
 ---
 
+## Standalone Install Note
+
+If this environment only installed the current skill, start from the CloudBase main entry and use the published `cloudbase/references/...` paths for sibling skills.
+
+- CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
+- Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloud-functions/SKILL.md`
+
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
+
 # Cloud Functions Development
 
-Use this skill when developing, deploying, and managing CloudBase cloud functions. CloudBase supports two types of cloud functions:
+## Activation Contract
 
-- **Event Functions (普通云函数)**: Traditional serverless functions triggered by events (SDK calls, timers)
-- **HTTP Functions (HTTP 云函数)**: Web service functions triggered by HTTP requests, supporting multiple languages
+### Use this first when
 
-## When to use this skill
+- The task is to create, update, deploy, inspect, or debug a CloudBase Event Function or HTTP Function that serves application runtime logic.
+- The request mentions function runtime, function logs, `scf_bootstrap`, function triggers, or function gateway exposure.
 
-Use this skill for **cloud function operations** when you need to:
+### Read before writing code if
 
-- Create and deploy Event Functions (Node.js)
-- Create and deploy HTTP Functions (Node.js/Python/Go/Java)
-- Understand runtime limitations and selection
-- Query function logs and monitor execution
-- Invoke cloud functions from applications
-- Configure HTTP access for cloud functions
-- Implement SSE (Server-Sent Events) or WebSocket
+- You still need to decide between Event Function and HTTP Function.
+- The task mentions `manageFunctions`, `queryFunctions`, `manageGateway`, or legacy function-tool names.
+- The task might require `callCloudApi` as a fallback for logs or gateway setup.
 
-**Do NOT use for:**
-- CloudRun backend services (use `cloudrun-development` skill)
-- Complex container-based services (use `cloudrun-development` skill)
-- Database operations (use database skills)
+### Then also read
+
+- Detailed reference routing -> `./references.md`
+- Auth setup or provider-related backend work -> `../auth-tool/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-tool/SKILL.md`)
+- AI in functions -> `../ai-model-nodejs/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/ai-model-nodejs/SKILL.md`)
+- Long-lived container services or Agent runtimes -> `../cloudrun-development/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloudrun-development/SKILL.md`)
+- Calling CloudBase official platform APIs from a client or script -> `../http-api/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/http-api/SKILL.md`)
+
+### Do NOT use for
+
+- CloudRun container services.
+- Web authentication UI implementation.
+- Database-schema design or general data-model work.
+- CloudBase official platform API clients or raw HTTP integrations that only consume platform endpoints.
+
+### Common mistakes / gotchas
+
+- Picking the wrong function type and trying to compensate later.
+- Confusing official CloudBase API client work with building your own HTTP function.
+- Mixing Event Function code shape (`exports.main(event, context)`) with HTTP Function code shape (`req` / `res` on port `9000`).
+- Treating HTTP Access as the implementation model for HTTP Functions. HTTP Access is a gateway configuration for Event Functions, not the HTTP Function runtime model.
+- Assuming `db.collection("name").add(...)` will create a missing document-database collection automatically. Collection creation is a separate management step.
+- Forgetting that runtime cannot be changed after creation.
+- Using cloud functions as the first answer for Web login.
+- Forgetting that HTTP Functions must ship `scf_bootstrap`, listen on port `9000`, and include dependencies.
+- Forgetting to configure function security rules after creating an HTTP Function. Default rules reject anonymous callers with `EXCEED_AUTHORITY`. Note: anonymous login is disabled by default for new environments — if the function needs public access without authentication, configure the security rule to allow all callers rather than relying on anonymous login.
+- Mismatching the `scf_bootstrap` Node.js binary path with the function runtime (e.g. using `/var/lang/node18/bin/node` but setting `runtime: "Nodejs16.13"`).
+
+### Minimal checklist
+
+- Read [Cloud Functions Execution Checklist](checklist.md) before deployment or runtime changes.
+- Decide whether the task is Event Function, HTTP Function, or actually CloudRun.
+- Pick the detailed reference file in [references.md](references.md) before writing implementation code.
+
+## Overview
+
+Use this skill when developing, deploying, and operating CloudBase cloud functions. CloudBase has two different programming models:
+
+- **Event Functions**: serverless handlers driven by SDK calls, timers, and other events.
+- **HTTP Functions**: standard web services for HTTP endpoints, SSE, or WebSocket workloads.
+
+## Writing mode at a glance
+
+- If the request is for SDK calls, timers, or event-driven workflows, write an **Event Function** with `exports.main = async (event, context) => {}`.
+- If the request is for REST APIs, browser-facing endpoints, SSE, or WebSocket, write an **HTTP Function** with `req` / `res` on port `9000`.
+- For Node.js HTTP Functions, default to the native `http` module unless the user explicitly asks for Express, Koa, NestJS, or another framework.
+- If the user mentions HTTP access for an existing Event Function, keep the Event Function code shape and add gateway access separately.
+
+## HTTP Function authoring contract
+
+Use these rules whenever you are writing the function code itself:
+
+- Do not write an HTTP Function as `exports.main(event, context)`. That is the Event Function contract.
+- Treat the function as a standard web server process that must listen on port `9000`.
+- With Node.js, prefer `http.createServer((req, res) => { ... })` by default so the runtime contract stays explicit.
+- With the Node.js native `http` module, do not assume Express-style helpers exist. `req.body`, `req.query`, and `req.params` are not provided for you.
+- For Node.js HTTP Functions, choose one module system up front and keep it consistent. Default to CommonJS for simple functions (`require(...)`, no `"type": "module"` in `package.json`) unless you explicitly want ES Modules.
+- If you do choose ES Modules (`"type": "module"` + `import ...`), do not mix in CommonJS-only globals or APIs such as `require(...)`, `module.exports`, or bare `__dirname`. In ESM, derive file paths from `import.meta.url` with `fileURLToPath(...)` only when needed.
+- With the native `http` module, parse `req.url` yourself with `new URL(...)`, collect the request body from the stream, and only then call `JSON.parse`. Empty bodies should be handled explicitly instead of assuming JSON is always present.
+- Return responses explicitly with `res.writeHead(...)` and `res.end(...)`, including `Content-Type` such as `application/json; charset=utf-8` for JSON APIs.
+- **Handle CORS headers**. Browsers block cross-origin requests without proper CORS headers. Default to allowing all origins for simple APIs:
+  - Respond to `OPTIONS` preflight with `200` and CORS headers
+  - Include `Access-Control-Allow-Origin: *` (or specific origin) on all responses
+  - Include `Access-Control-Allow-Methods: GET, POST, OPTIONS` as needed
+  - Include `Access-Control-Allow-Headers: Content-Type` for JSON requests
+- Keep routing and method handling explicit. Unknown paths should return `404`, and known paths with unsupported methods should normally return `405`.
+- Keep gateway setup and security-rule changes separate from the runtime code. They affect access, not the HTTP Function programming model.
+- Do not add HTTP access service configuration when the task is only to create an HTTP Function itself. Gateway paths or custom domains are separate access-layer work; public invocation requirements should be handled through the function security rule workflow (note: anonymous login is disabled by default).
+
+## Quick decision table
+
+| Question | Choose |
+| --- | --- |
+| Triggered by SDK calls or timers? | Event Function |
+| Needs browser-facing HTTP endpoint? | HTTP Function |
+| Needs SSE or WebSocket service? | HTTP Function |
+| Needs long-lived container runtime or custom system environment? | CloudRun |
+| Only needs HTTP access for an existing Event Function? | Event Function + gateway access |
 
 ## How to use this skill (for a coding agent)
 
-1. **Choose the right function type**
-   - **Event Function**: For SDK calls, scheduled tasks, event-driven scenarios
-   - **HTTP Function**: For Web APIs, REST services, SSE/WebSocket, multi-language support
+1. **Choose the correct runtime model first**
+   - Event Function -> `exports.main(event, context)`
+   - HTTP Function -> web server on port `9000`
+   - If the requirement is really a container service, reroute to CloudRun early
 
-2. **Understand runtime limitations**
-   - Runtime **CANNOT be changed** after function creation
-   - Must select correct runtime during initial creation
-   - If runtime needs to change, must delete and recreate function
+2. **Use the converged MCP entrances**
+   - Reads -> `queryFunctions`, `queryGateway`
+   - Writes -> `manageFunctions`, `manageGateway`
+   - Translate legacy names before acting rather than copying them literally
 
-3. **Deploy functions correctly**
-   - **MCP Tool**: Use `createFunction` with `type: "Event"` or `type: "HTTP"`
-   - **CLI**: Use `tcb fn deploy` (Event) or `tcb fn deploy --httpFn` (HTTP)
-   - HTTP Functions require `scf_bootstrap` file in the function directory
-   - Provide correct `functionRootPath` (parent directory of function folder)
+3. **Write code and deploy, do not stop at local files**
+   - Use `manageFunctions(action="createFunction")` for creation
+   - Use `manageFunctions(action="updateFunctionCode")` for code updates
+   - Use `manageFunctions(action="updateFunctionConfig")` for config updates (timeout, memorySize, envVariables)
+   - Keep `functionRootPath` as the directory that directly contains function folders (e.g., `cloudfunctions/` or `functions/`), NOT the project root and NOT the function subdirectory itself
+   - **Prefer MCP tools over CLI** — when MCP tools are available, use `manageFunctions` and `queryFunctions` instead of CLI commands
+   - **Do NOT assume CLI is available from task wording alone** — if the available capabilities only include MCP tools, use MCP tools exclusively
+   - For batch updates (multiple functions), call `manageFunctions(action="updateFunctionConfig")` individually for each function — MCP does not have a `--all` batch parameter like CLI
 
-4. **Query logs properly**
-   - Use `getFunctionLogs` for log list (basic info)
-   - Use `getFunctionLogDetail` with RequestId for detailed logs
-   - Note time range limitations (max 1 day interval)
+4. **Prefer doc-first fallbacks**
+   - If a task falls back to `callCloudApi`, first check the official docs or knowledge-base entry for that action
+   - Confirm the exact action name and parameter contract before calling it
+   - Do not guess raw cloud API payloads from memory
 
----
+5. **Read the right detailed reference**
+   - Event Function details -> `./references/event-functions.md`
+   - HTTP Function details -> `./references/http-functions.md`
+   - Logs, gateway, env vars, and legacy mappings -> `./references/operations-and-config.md`
 
-## Function Types Comparison
+## Database write reminder
 
-| Feature | Event Function (普通云函数) | HTTP Function (HTTP 云函数) |
-|---------|---------------------------|----------------------------|
-| Trigger | Event-driven (SDK, timer) | HTTP request |
-| Entry Point | `exports.main = async (event, context) => {}` | Web Server (Express/Flask/Gin etc.) |
-| Port | No port required | **Must listen on port 9000** |
-| Bootstrap | Not required | Requires `scf_bootstrap` |
-| Connection | Short connection | Supports long connection |
-| Languages | Node.js only | Node.js, Python, Go, Java |
-| Protocols | N/A | HTTP, SSE, WebSocket |
-| Use Cases | Event processing, scheduled tasks | Web APIs, REST services, real-time streaming |
+- If a function will write to CloudBase document database, create the target collection first through console or management tooling.
+- `db.collection("feedback").add(...)` only inserts into an existing collection; it does not auto-create `feedback` when absent.
+- If the product requirement says "create when missing", implement that as an explicit collection-management step before the first write instead of assuming the runtime write call will provision it.
 
----
+## Function types comparison
 
-## Core Knowledge - Event Functions
+| Feature | Event Function | HTTP Function |
+| --- | --- | --- |
+| Primary trigger | SDK call, timer, event | HTTP request |
+| Entry shape | `exports.main(event, context)` | web server with `req` / `res` |
+| Port | No port | Must listen on `9000` |
+| `scf_bootstrap` | Not required | Required |
+| Dependencies | Auto-installed from `package.json` | Must be packaged with function code |
+| Best for | serverless handlers, scheduled jobs | APIs, SSE, WebSocket, browser-facing services |
 
-### Runtime Environment
+## Minimal code skeletons
 
-**⚠️ CRITICAL: Runtime cannot be modified after function creation**
+### Event Function hello world
 
-Once a cloud function is created with a specific runtime, the runtime **cannot be changed**. If you need a different runtime:
+`cloudfunctions/hello-event/index.js`
 
-1. Delete the existing function
-2. Create a new function with the desired runtime
-
-**Supported Node.js Runtimes:**
-
-- `Nodejs18.15` (Default, Recommended)
-- `Nodejs16.13`
-- `Nodejs14.18`
-- `Nodejs12.16`
-- `Nodejs10.15`
-- `Nodejs8.9`
-
-**Runtime Selection Guidelines:**
-
-- **Use `Nodejs18.15`** for new projects (default, most modern)
-- Choose older versions only if dependencies require specific Node.js versions
-- Consider security updates and support lifecycle
-- Test thoroughly with selected runtime before deployment
-
-### Event Function Structure
-
-Event functions require:
-
-1. **Function Directory**: Contains function code
-   - Must have `index.js` (or specified entry file)
-   - Must export handler: `exports.main = async (event, context) => {}`
-   - Include `package.json` with dependencies
-
-2. **Function Root Path**: Parent directory containing function directories
-   - Example: If function is at `/project/cloudfunctions/myFunction/`
-   - `functionRootPath` should be `/project/cloudfunctions/`
-   - **Important**: Do NOT include function name in root path
-
-3. **Entry Point**: Default is `index.js` with `exports.main`
-   - Can be customized via `handler` parameter
-
-### Event Function Deployment
-
-**Creating New Functions:**
-
-Use `createFunction` tool (see MCP tool documentation for full parameter list):
-- **Important**: Always specify `func.runtime` explicitly (defaults to `Nodejs18.15`)
-- Provide `functionRootPath` as parent directory of function folders (absolute path)
-- Use `force=true` to overwrite existing function
-
-**Updating Function Code:**
-
-Use `updateFunctionCode` tool:
-- **⚠️ Note**: Only updates code, **cannot change runtime**
-- If runtime needs to change, delete and recreate function
-
-**Deployment Best Practices:**
-
-1. **Always specify runtime** explicitly when creating functions
-2. **Use absolute paths** for `functionRootPath`
-3. **Don't upload node_modules** - dependencies installed automatically
-4. **Test locally** before deployment when possible
-5. **Use environment variables** for configuration, not hardcoded values
-
----
-
-## Core Knowledge - HTTP Functions
-
-### HTTP Function Overview
-
-HTTP Functions are optimized for Web service scenarios, supporting standard HTTP request/response patterns.
-
-**Key Characteristics:**
-- **Must listen on port 9000** (platform requirement)
-- Requires `scf_bootstrap` startup script
-- Supports multiple languages: Node.js, Python, Go, Java
-- Supports HTTP, SSE, WebSocket protocols
-
-### scf_bootstrap Startup Script
-
-**⚠️ CRITICAL: HTTP Functions require `scf_bootstrap` file**
-
-| Requirement | Description |
-|-------------|-------------|
-| File name | Must be exactly `scf_bootstrap` (no extension) |
-| Permission | Must have execute permission (`chmod +x scf_bootstrap`) |
-| Port | Must start server on port **9000** |
-| Line endings | Must use LF (Unix), not CRLF (Windows) |
-
-**Examples:**
-```bash
-# Node.js
-#!/bin/bash
-node index.js
-
-# Python
-#!/bin/bash
-export PYTHONPATH="./third_party:$PYTHONPATH"
-/var/lang/python310/bin/python3.10 app.py
-
-# Go
-#!/bin/bash
-./main
-
-# Java
-#!/bin/bash
-java -jar *.jar
+```js
+exports.main = async (event, context) => {
+  return {
+    ok: true,
+    message: "hello from event function",
+    event,
+  };
+};
 ```
 
-### HTTP Function Structure & Example
+`cloudfunctions/hello-event/package.json`
 
-```
-my-http-function/
-├── scf_bootstrap      # Required: startup script
-├── package.json       # Dependencies
-└── index.js           # Application code
-```
-
-**Node.js Example (Express):**
-```javascript
-const express = require('express');
-const app = express();
-
-app.get('/', (req, res) => res.json({ message: 'Hello!' }));
-app.listen(9000);  // Must be port 9000
-```
-
-### HTTP Function Deployment
-
-**MCP Tool:**
-```javascript
-createFunction({
-  func: {
-    name: "myHttpFunction",
-    type: "HTTP",           // Required for HTTP Function
-    protocolType: "HTTP",   // "HTTP" (default) or "WS" (WebSocket)
-    timeout: 60
-  },
-  functionRootPath: "/path/to/functions",
-  force: false
-})
-```
-
-**CLI:**
-```bash
-tcb fn deploy <name> --httpFn        # HTTP Function
-tcb fn deploy <name> --httpFn --ws   # With WebSocket
-```
-
-**⚠️ Notes:**
-- Function type **cannot be changed** after creation
-- HTTP Functions do NOT auto-install dependencies; include `node_modules` or use layers
-
-### Invoking HTTP Functions
-
-**Method 1: HTTP API (with Access Token)**
-```bash
-curl -L 'https://{envId}.api.tcloudbasegateway.com/v1/functions/{name}?webfn=true' \
-  -H 'Authorization: Bearer <TOKEN>'
-```
-**⚠️ Must include `webfn=true` parameter**
-
-**Method 2: HTTP Access Service (Custom Domain)**
-
-Use `createFunctionHTTPAccess` MCP tool to configure HTTP access:
-
-```javascript
-createFunctionHTTPAccess({
-  name: "myHttpFunction",
-  type: "HTTP",           // "HTTP" for HTTP Function
-  path: "/api/hello",     // Trigger path
-  // domain: "your-domain.com"  // Optional custom domain
-})
-```
-
-```bash
-# Access via default domain
-curl https://{envId}.{region}.app.tcloudbase.com/{path}
-
-# Access via custom domain
-curl https://your-domain.com/{path}
-```
-
-| Method | Auth Required | Use Case |
-|--------|--------------|----------|
-| HTTP API (`?webfn=true`) | Yes (Bearer Token) | Server-to-server |
-| HTTP Access Service | Optional | Browser, public APIs |
-
-### SSE & WebSocket Support
-
-**SSE (Server-Sent Events):** Enabled by default, for server-to-client streaming (AI chat, progress updates).
-
-```javascript
-// Server
-res.setHeader('Content-Type', 'text/event-stream');
-res.write(`data: ${JSON.stringify({ content: 'Hello' })}\n\n`);
-
-// Client
-const es = new EventSource('https://your-domain/stream');
-es.onmessage = (e) => console.log(JSON.parse(e.data));
-```
-
-**WebSocket:** Enable via `protocolType: "WS"` in `createFunction`. For bidirectional real-time communication.
-
-| Limit | Value |
-|-------|-------|
-| Idle timeout | 10 - 7200 seconds |
-| Max message size | 256KB |
-
-```javascript
-const wss = new WebSocket.Server({ port: 9000 });
-wss.on('connection', (ws) => {
-  ws.on('message', (msg) => ws.send(`Echo: ${msg}`));
-});
-```
-
----
-
-### Function Logs
-
-**Querying Logs:**
-
-**Primary Method:** Use `getFunctionLogs` and `getFunctionLogDetail` tools (see MCP tool documentation).
-
-**Alternative Method (Plan B):** If tools unavailable, use `callCloudApi`:
-
-1. **Get Log List** - Use `GetFunctionLogs` action:
-```
-callCloudApi({
-  service: "tcb",
-  action: "GetFunctionLogs",
-  params: {
-    EnvId: "{envId}",
-    FunctionName: "functionName",
-    Offset: 0,
-    Limit: 10,
-    StartTime: "2024-01-01 00:00:00",
-    EndTime: "2024-01-01 23:59:59",
-    LogRequestId: "optional-request-id",
-    Qualifier: "$LATEST"
-  }
-})
-```
-
-2. **Get Log Details** - Use `GetFunctionLogDetail` action (requires LogRequestId from step 1):
-```
-callCloudApi({
-  service: "tcb",
-  action: "GetFunctionLogDetail",
-  params: {
-    StartTime: "2024-01-01 00:00:00",
-    EndTime: "2024-01-01 23:59:59",
-    LogRequestId: "request-id-from-log-list"
-  }
-})
-```
-
-**Log Query Limitations:**
-
-- `Offset + Limit` cannot exceed 10000
-- `StartTime` and `EndTime` interval cannot exceed 1 day
-- Use pagination for large time ranges
-
-**Log Query Best Practices:**
-
-1. Query logs within 1-day windows
-2. Use RequestId for specific invocation debugging
-3. Combine list and detail queries for comprehensive debugging
-4. Check logs after deployment to verify function behavior
-
-### Invoking Event Functions
-
-**From Web Applications:**
-
-```javascript
-import cloudbaseSDK from "@cloudbase/js-sdk";
-
-const cloudbase = cloudbaseSDK.init({
-  env: 'your-env-id',
-  region: 'ap-shanghai',
-  accessKey: 'your-access-key'
-});
-
-// Call event function
-const result = await cloudbase.callFunction({
-  name: "functionName",
-  data: { /* function parameters */ }
-});
-```
-
-**From Mini Programs:**
-
-```javascript
-wx.cloud.callFunction({
-  name: "functionName",
-  data: { /* function parameters */ }
-}).then(res => {
-  console.log(res.result);
-});
-```
-
-**From Node.js Backend:**
-
-```javascript
-const cloudbase = require("@cloudbase/node-sdk");
-
-const app = cloudbase.init({
-  env: "your-env-id"
-});
-
-const result = await app.callFunction({
-  name: "functionName",
-  data: { /* function parameters */ }
-});
-```
-
-**From HTTP API:**
-
-Use CloudBase HTTP API to invoke event functions:
-- Endpoint: `https://{envId}.api.tcloudbasegateway.com/v1/functions/{functionName}`
-- Requires authentication token (Bearer Token)
-- See `http-api` skill for details
-
-### HTTP Access Configuration (for Event Functions)
-
-**HTTP Access vs HTTP API:**
-
-- **HTTP API**: Uses CloudBase API endpoint with authentication token
-- **HTTP Access**: Creates direct HTTP/HTTPS endpoint for standard REST API access without SDK
-
-**Creating HTTP Access:**
-
-**Primary Method:** Use `createFunctionHTTPAccess` tool (see MCP tool documentation).
-
-**Alternative Method (Plan B):** If tool unavailable, use `callCloudApi` with `CreateCloudBaseGWAPI`:
-
-```
-callCloudApi({
-  service: "tcb",
-  action: "CreateCloudBaseGWAPI",
-  params: {
-    EnableUnion: true,
-    Path: "/api/users",
-    ServiceId: "{envId}",
-    Type: 6,
-    Name: "functionName",
-    AuthSwitch: 2,
-    PathTransmission: 2,
-    EnableRegion: true,
-    Domain: "*"  // Use "*" for default domain, or custom domain name
-  }
-})
-```
-
-**Key Parameters:**
-- `Type: 6` - Cloud Function type (required)
-- `AuthSwitch: 2` - No auth (1 = with auth)
-- `Domain: "*"` - Default domain, or specify custom domain
-
-**Access URL:** `https://{envId}.{region}.app.tcloudbase.com/{path}` or `https://{domain}/{path}`
-
-### Function Configuration
-
-**Environment Variables:**
-
-Set via `func.envVariables` when creating/updating:
-```javascript
+```json
 {
-  envVariables: {
-    "DATABASE_URL": "mysql://...",
-    "API_KEY": "secret-key"
-  }
+  "name": "hello-event",
+  "version": "1.0.0"
 }
 ```
 
-**⚠️ CRITICAL: Environment Variable Update Constraint**
+### HTTP Function hello world
 
-When updating environment variables for existing functions:
+`cloudfunctions/hello-http/index.js`
 
-1. **MUST first query current environment variables** using `getFunctionList` with `action=detail` to get the function's current configuration
-2. **MUST merge** new environment variables with existing ones
-3. **DO NOT directly overwrite** - this will delete existing environment variables not included in the update
+```js
+const http = require("http");
+const { URL } = require("url");
 
-**Correct Update Pattern:**
-
-```javascript
-// 1. First, get current function details
-const currentFunction = await getFunctionList({
-  action: "detail",
-  name: "functionName"
-});
-
-// 2. Merge existing envVariables with new ones
-const mergedEnvVariables = {
-  ...currentFunction.EnvVariables,  // Existing variables
-  ...newEnvVariables                 // New/updated variables
+// CORS headers — default to * for simple cross-origin APIs
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
 };
 
-// 3. Update with merged variables
-await updateFunctionConfig({
-  funcParam: {
-    name: "functionName",
-    envVariables: mergedEnvVariables
+function sendJson(res, statusCode, data) {
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json; charset=utf-8",
+    ...CORS_HEADERS,
+  });
+  res.end(JSON.stringify(data));
+}
+
+function sendOptions(res) {
+  res.writeHead(204, CORS_HEADERS);
+  res.end();
+}
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let raw = "";
+    req.on("data", (chunk) => { raw += chunk; });
+    req.on("end", () => {
+      if (!raw) { resolve({}); return; }
+      try { resolve(JSON.parse(raw)); } catch (e) { resolve({}); }
+    });
+    req.on("error", reject);
+  });
+}
+
+const server = http.createServer(async (req, res) => {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return sendOptions(res);
+  }
+
+  const url = new URL(req.url || "/", "http://127.0.0.1");
+
+  if (req.method === "GET" && url.pathname === "/") {
+    sendJson(res, 200, { ok: true, message: "hello from http function" });
+  } else if (req.method === "POST" && url.pathname === "/") {
+    const body = await readJsonBody(req);
+    sendJson(res, 200, { received: body });
+  } else {
+    sendJson(res, 404, { error: "Not Found" });
   }
 });
+
+server.listen(9000);
 ```
 
-**Why This Matters:**
+For a more complete example with routing, method checks, and error handling, see `./references/http-functions.md`.
 
-- Direct overwrite will **delete** all environment variables not included in the update
-- This can break function functionality if critical variables are removed
-- Always preserve existing configuration when making partial updates
+`cloudfunctions/hello-http/scf_bootstrap`
 
-**Timeout Configuration:**
+```bash
+#!/bin/bash
+/var/lang/node18/bin/node index.js
+```
 
-Set via `func.timeout` (in seconds):
-- Default timeout varies by runtime
-- Maximum timeout depends on runtime version
-- Consider function execution time when setting
+The `scf_bootstrap` binary path must match the runtime — see the full mapping table in `./references/http-functions.md`.
 
-**Timer Triggers:**
+`cloudfunctions/hello-http/package.json`
 
-Configure via `func.triggers`:
-- Type: `timer` (only supported type)
-- Config: Cron expression (7 fields: second minute hour day month week year)
-- Examples:
-  - `"0 0 2 1 * * *"` - 2:00 AM on 1st of every month
-  - `"0 30 9 * * * *"` - 9:30 AM every day
-
-**VPC Configuration:**
-
-For accessing VPC resources:
-```javascript
+```json
 {
-  vpc: {
-    vpcId: "vpc-xxxxx",
-    subnetId: "subnet-xxxxx"
-  }
+  "name": "hello-http",
+  "version": "1.0.0"
 }
 ```
 
-## MCP Tools Reference
+## Preferred tool map
 
-**Function Management:**
-- `getFunctionList` - List functions or get function details
-- `createFunction` - Create cloud function (supports both Event and HTTP types via `type` parameter)
-  - `type: "Event"` - Event Function (default)
-  - `type: "HTTP"` - HTTP Function
-  - `protocolType: "WS"` - Enable WebSocket for HTTP Function
-- `updateFunctionCode` - Update function code (runtime cannot change)
-- `updateFunctionConfig` - Update function configuration (⚠️ when updating envVariables, must first query and merge with existing values to avoid overwriting)
+### Function management
 
-**Logging:**
-- `getFunctionLogs` - Get function log list (basic info)
-- `getFunctionLogDetail` - Get detailed log content by RequestId
-- `callCloudApi` (Plan B) - Use `GetFunctionLogs` and `GetFunctionLogDetail` actions if direct tools unavailable
+- `queryFunctions(action="listFunctions"|"getFunctionDetail")`
+- `manageFunctions(action="createFunction")`
+- `manageFunctions(action="updateFunctionCode")`
+- `manageFunctions(action="updateFunctionConfig")`
 
-**HTTP Access:**
-- `createFunctionHTTPAccess` - Create HTTP access for function (supports both Event and HTTP types via `type` parameter)
-- `callCloudApi` (Plan B) - Use `CreateCloudBaseGWAPI` action if direct tool unavailable
+### Logs
 
-**Triggers:**
-- `manageFunctionTriggers` - Create or delete function triggers
+**Query function logs** — use the `queryFunctions` tool:
 
-**CLI Commands:**
-- `tcb fn deploy <name>` - Deploy Event Function
-- `tcb fn deploy <name> --httpFn` - Deploy HTTP Function
-- `tcb fn deploy <name> --httpFn --ws` - Deploy HTTP Function with WebSocket
-- `tcb fn deploy --all` - Deploy all functions in config
+- `queryFunctions(action="listFunctionLogs", functionName="xxx")` — list execution logs of a specific function
+- `queryFunctions(action="getFunctionLogDetail", requestId="xxx")` — fetch the detail of one log entry
 
-## Common Patterns
+**`queryFunctions` vs `queryLogs`**:
+- `queryFunctions` queries execution logs of a single cloud function and requires `functionName`
+- `queryLogs` searches CLS (cross-service log aggregation) using CLS query syntax
 
-### Error Handling
-
+**Examples**:
 ```javascript
-exports.main = async (event, context) => {
-  try {
-    // Function logic
-    return {
-      code: 0,
-      message: "Success",
-      data: result
-    };
-  } catch (error) {
-    return {
-      code: -1,
-      message: error.message,
-      data: null
-    };
-  }
-};
+// List recent logs for cloud function "my-function"
+queryFunctions(action="listFunctionLogs", functionName="my-function", limit=10)
+
+// Inspect the log detail for a specific request id
+queryFunctions(action="getFunctionLogDetail", requestId="abc-123")
+
+// Cross-service error search via CLS
+queryLogs(action="searchLogs", queryString='(src:app OR src:system) AND log:"ERROR"', service="tcb")
 ```
 
-### Environment Variable Usage
+`queryLogs` `queryString` follows CLS syntax (see https://cloud.tencent.com/document/api/876/128127). The examples below are starting points; adapt them to the concrete log content of your query:
+- Function logs: `(src:app OR src:system) AND log:"START RequestId"`
+- Aggregated function request status: `| select request_id, max(status_code) as status where ((request_id='xxxx' AND retry_num=0) AND retry_num=0) AND status_code!=202 group by request_id, retry_num`
+- Document database (NoSQL): `module:database`
+- Document database slow-query events: `module:database AND eventType:(MongoSlowQuery)` — `MongoSlowQuery` is the document-database slow-query event
+- Relational database (MySQL): `module:rdb`
+- Relational database (MySQL) events: `module:rdb AND eventType:(MysqlFreeze OR MysqlRecover OR MysqlSlowQuery)` — `MysqlFreeze` = freeze, `MysqlRecover` = recover, `MysqlSlowQuery` = slow query
+- Workflow (approval flow): `module:workflow`
+- Data model: `module:model`
+- User permissions: `module:auth`
+- LLM trace logs: `module:llm AND logType:llm-tracelog`
+- Gateway access logs: `logType:accesslog`
+- App publish / delete events: `module:app AND eventType:(AppProdPub OR AppProdDel)` — `AppProdPub` = app publish, `AppProdDel` = app delete
 
-```javascript
-exports.main = async (event, context) => {
-  const apiKey = process.env.API_KEY;
-  const dbUrl = process.env.DATABASE_URL;
-  
-  // Use environment variables
-};
-```
+If these are unavailable, read `./references/operations-and-config.md` before any `callCloudApi` fallback
 
-### Database Operations
+### Gateway exposure
 
-```javascript
-const cloudbase = require("@cloudbase/node-sdk");
+- `queryGateway(action="getAccess")`
+- `manageGateway(action="createAccess")`
+- If gateway operations need raw cloud API fallback, read `./references/operations-and-config.md` first
 
-const app = cloudbase.init({
-  env: process.env.ENV_ID
-});
+## Related skills
 
-exports.main = async (event, context) => {
-  const db = app.database();
-  const result = await db.collection("users").get();
-  return result;
-};
-```
-
-## Best Practices
-
-### General Best Practices
-1. **Runtime Selection**: Always specify runtime explicitly, use `Nodejs18.15` for new projects
-2. **Code Organization**: Keep functions focused and single-purpose
-3. **Error Handling**: Always implement proper error handling
-4. **Environment Variables**: Use env vars for configuration, never hardcode secrets
-5. **Logging**: Add meaningful logs for debugging
-6. **Testing**: Test functions locally when possible before deployment
-7. **Security**: Implement authentication/authorization for HTTP access
-8. **Performance**: Optimize cold start time, use connection pooling for databases
-9. **Monitoring**: Regularly check logs and monitor function performance
-10. **Documentation**: Document function parameters and return values
-
-### HTTP Function Specific Best Practices
-1. **Port Configuration**: Always listen on port 9000
-2. **scf_bootstrap**: Ensure correct file permissions and LF line endings
-3. **Health Check**: Add `/health` endpoint for monitoring
-4. **CORS**: Configure CORS headers for browser access
-5. **Graceful Shutdown**: Handle process signals properly
-6. **Dependencies**: Include `node_modules` in package or use layers (no auto-install for HTTP Functions)
-7. **Timeout**: Set appropriate timeout for long-running SSE/WebSocket connections
-8. **Error Responses**: Return proper HTTP status codes and error messages
-
-### Choosing Between Event and HTTP Functions
-
-| Scenario | Recommended Type |
-|----------|-----------------|
-| SDK/Mini Program calls | Event Function |
-| Scheduled tasks (cron) | Event Function |
-| REST API / Web services | HTTP Function |
-| SSE streaming (AI chat) | HTTP Function |
-| WebSocket real-time | HTTP Function |
-| File upload/download | HTTP Function |
-| Multi-language support | HTTP Function |
-
-## Related Skills
-
-- `cloudrun-development` - For container-based backend services
-- `http-api` - For HTTP API invocation patterns
-- `cloudbase-platform` - For general CloudBase platform knowledge
-
+- `cloudrun-development` -> container services, long-lived runtimes, Agent hosting
+- `http-api` -> raw CloudBase HTTP API invocation patterns
+- `cloudbase-platform` -> general CloudBase platform decisions
+- `ops-inspector` -> AIOps-style inspection and log search across services

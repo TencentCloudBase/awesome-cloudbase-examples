@@ -8,6 +8,7 @@ import pino from "pino";
 import { v4 as uuidv4 } from "uuid";
 import { checkOpenAIEnvMiddleware, parseJwtFromRequest } from "./utils.js";
 import { ExporterType } from "@cloudbase/agent-observability/server";
+import { WeChatAgent, createWxMessageHandler, WeChatHistoryManager } from '@cloudbase/agent-adapter-wx';
 
 // 加载 .env 文件中的环境变量
 dotenvx.config();
@@ -98,6 +99,35 @@ const createAgent = ({ request, logger, requestId }) => {
   };
 };
 
+/**
+ * Create WeChat Agent Adapter that wraps LangGraph agent
+ * @param {Object} wechatConfig - WeChat configuration
+ * @returns {WeChatAgent}
+ */
+function createWxAgent({ request, options }) {
+  const { agent: baseAgent } = createAgent({ request });
+  const envId = process.env.TCB_ENV || process.env.ENV_ID;
+
+  return {
+    agent: new WeChatAgent({
+      agentId: options?.agentId || 'agent-wx',
+      agent: baseAgent,
+      wechatConfig: {
+        sendMode: 'aitools',
+        context: {
+          extendedContext: {
+            envId,
+            accessToken: request.headers.authorization,
+          }
+        }
+      },
+      historyManager: new WeChatHistoryManager({
+        envId,
+      })
+    })
+  };
+}
+
 const app = express();
 
 // 仅在 ENABLE_CORS=true 时启用 CORS
@@ -114,5 +144,9 @@ createExpressRoutes({
   logger,
   observability: isObservabilityEnabled() ? { type: ExporterType.Console } : undefined,
 });
+
+// Register WeChat message route
+app.post('/wx-send-message', express.json(), createWxMessageHandler(createWxAgent));
+app.post('/v1/aibot/bots/:agentId/wx-send-message', express.json(), createWxMessageHandler(createWxAgent));
 
 app.listen(9000, () => logger.info("Listening on 9000!"));

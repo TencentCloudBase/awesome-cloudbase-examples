@@ -10,6 +10,12 @@ import dotenvx from "@dotenvx/dotenvx";
 // import cors from "cors";
 import { DetectCloudbaseUserMiddleware } from "./utils.js";
 import { Subscriber } from "rxjs";
+import {
+  WeChatAgent,
+  createWxMessageHandler,
+  WeChatHistoryManager,
+  WeChatSendMode,
+} from "@cloudbase/agent-adapter-wx";
 
 dotenvx.config();
 
@@ -38,12 +44,17 @@ class MyAgent extends YuanqiAgent {
   // 重写父类方法，获取历史对话
   protected async getChatHistory(
     subscriber: Subscriber<BaseEvent>,
+    input: RunAgentInput,
     latestUserMessage: Message,
   ) {
     // 调用父类方法获取历史对话
-    const history = await super.getChatHistory(subscriber, latestUserMessage);
+    const history = await super.getChatHistory(
+      subscriber,
+      input,
+      latestUserMessage,
+    );
     // 也可以忽略父类方法，自行处理历史对话的获取逻辑
-    // const history = await myMethodToGetChatHistory(subscriber, latestUserMessage);
+    // const history = await myMethodToGetChatHistory(subscriber, input, latestUserMessage);
     // 可以在这里对历史对话进行处理
     return history;
   }
@@ -61,7 +72,10 @@ class MyAgent extends YuanqiAgent {
 
 function createAgent({ request }: { request: Request }) {
   // 元器 Token 体验活动 - 云开发身份认证
-  const accessToken = request.headers.get("Authorization")?.split(" ")[1] || "";
+  const Authorization =
+    (request.headers as any).Authorization ||
+    request.headers.get("Authorization");
+  const accessToken = Authorization?.split(" ")[1] || "";
   const headers: Record<string, string> = {};
   if (accessToken) {
     headers["X-Source"] = "cloudbase";
@@ -96,6 +110,40 @@ function createAgent({ request }: { request: Request }) {
   return { agent };
 }
 
+/**
+ * Create WeChat Agent Adapter that wraps Yuanqi agent
+ */
+function createWxAgent({
+  request,
+  options,
+}: {
+  request: any;
+  options?: { agentId?: string };
+}) {
+  const { agent: baseAgent } = createAgent({ request });
+  const envId = process.env.TCB_ENV || process.env.ENV_ID;
+
+  return {
+    agent: new WeChatAgent({
+      agentId: options?.agentId || "agent-wx",
+      agent: baseAgent,
+      wechatConfig: {
+        sendMode: WeChatSendMode.AITOOLS,
+        context: {
+          extendedContext: {
+            envId,
+            accessToken: request.headers.get("authorization") || undefined,
+          },
+        },
+      } as any,
+      // @ts-ignore
+      historyManager: new WeChatHistoryManager({
+        envId,
+      }),
+    }),
+  };
+}
+
 const app = express();
 
 // 调试若遇 CORS 问题可启用 CORS 中间件
@@ -110,5 +158,17 @@ createExpressRoutes({
   createAgent,
   express: app,
 });
+
+// Register WeChat message route
+app.post(
+  "/wx-send-message",
+  express.json(),
+  createWxMessageHandler(createWxAgent),
+);
+app.post(
+  "/v1/aibot/bots/:agentId/wx-send-message",
+  express.json(),
+  createWxMessageHandler(createWxAgent),
+);
 
 app.listen(9000, () => console.log("Listening on 9000!"));

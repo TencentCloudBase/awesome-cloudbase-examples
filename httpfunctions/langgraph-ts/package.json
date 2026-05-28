@@ -21,6 +21,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/node": "^25.2.2",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0",
@@ -33,8 +34,9 @@
     "rxjs": "7.8.1"
   },
   "dependencies": {
-    "@cloudbase/agent-adapter-langgraph": "0.0.11",
-    "@cloudbase/agent-server": "0.0.11",
+    "@cloudbase/agent-adapter-langgraph": "0.0.20",
+    "@cloudbase/agent-adapter-wx": "^0.0.20",
+    "@cloudbase/agent-server": "0.0.20",
     "@dotenvx/dotenvx": "^1.51.1",
     "@langchain/core": "^1.1.4",
     "@langchain/langgraph": "^1.0.4",

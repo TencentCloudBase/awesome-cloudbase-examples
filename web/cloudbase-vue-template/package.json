@@ -1,7 +1,7 @@
 {
   "name": "cloudbase-vue-template",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@cloudbase/js-sdk": "latest",
-    "@heroicons/vue": "^2.2.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
@@ -23,7 +22,6 @@
     "@vue/eslint-config-prettier": "^10.1.0",
     "@vue/tsconfig": "^0.8.1",
     "autoprefixer": "^10.4.21",
-    "daisyui": "^4.12.24",
     "eslint": "^9.39.1",
     "eslint-plugin-vue": "^9.33.0",
     "globals": "^16.5.0",
