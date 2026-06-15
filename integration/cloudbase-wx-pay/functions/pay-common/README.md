@@ -63,12 +63,20 @@ npm install
 | `privateKey` | 是 | PEM 字符串，换行用 `\n` | 商户 API 证书私钥（**最易出错项**，见下方格式说明） |
 | `wxPayPublicKey` | 条件必填 | PEM 字符串，换行用 `\n` | 微信支付公钥。**配了此项 → 自动启用公钥验签；不配 → 走证书自动下载模式** |
 | `wxPayPublicKeyId` | 条件必填 | `YOUR_WX_PAY_PUBLIC_KEY_ID` | 与 `wxPayPublicKey` 成对使用，配了公钥时必填 |
-| `notifyURLPayURL` | 是 | `https://域名/wx-pay/unifiedOrderTrigger` | 支付回调 URL（HTTPS，不能 localhost，不能带 `?`） |
-| `notifyURLRefundsURL` | 是 | `https://域名/wx-pay/refundTrigger` | 退款回调 URL |
-| `transferNotifyUrl` | 是 | `https://域名/wx-pay/transferTrigger` | 转账回调 URL |
+| `notifyURLPayURL` | 是 | `https://域名/路由Path/wx-pay/unifiedOrderTrigger` | 支付回调 URL（HTTPS，不能 localhost，不能带 `?`） |
+| `notifyURLRefundsURL` | 是 | `https://域名/路由Path/wx-pay/refundTrigger` | 退款回调 URL |
+| `transferNotifyUrl` | 是 | `https://域名/路由Path/wx-pay/transferTrigger` | 转账回调 URL |
 | `corsAllowOrigin` | 否 | `https://your-domain.com` | CORS 允许域名，多个逗号分隔 |
 
-> **集成中心用户**：以上回调 URL 由平台自动生成注入，无需手动填写。
+> **回调 URL 组装公式**：`{HTTP访问服务域名}/{路由Path}/{API路径}`
+>
+> - **域名**：从 CloudBase 控制台 → 云函数 → HTTP 访问服务页面复制，形如 `your-env-id-your-uin.ap-shanghai.app.tcloudbase.com`
+> - **路由Path**：你在"HTTP 访问服务"中为 `pay-common` 配置的访问路径（如 `/pay`）；如果直接挂在根路径则省略
+> - **API路径**：固定为 `/wx-pay/unifiedOrderTrigger`、`/wx-pay/refundTrigger`、`/wx-pay/transferTrigger`
+>
+> 完整示例：`https://test-wxpay-xxx.ap-shanghai.app.tcloudbase.com/pay/wx-pay/unifiedOrderTrigger`
+>
+> ⚠️ **集成中心用户**：以上回调 URL 由平台自动生成注入，无需手动填写。
 
 <details>
 <summary>🔑 privateKey 格式详解（最容易踩坑）</summary>
