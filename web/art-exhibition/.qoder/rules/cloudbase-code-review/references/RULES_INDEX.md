@@ -154,7 +154,7 @@ Only add rules that are backed by stable SDK/API documentation, repeated evaluat
 | PG-CR001 | error | lint | PG 表必须显式创建（CREATE TABLE）|
 | PG-CR002 | error | LLM | RLS 策略不能只开启不配置 |
 | PG-CR003 | warning | lint | PG Web 文件/图片上传需要 CloudBase 存储配置 |
-| PG-CR004 | mixed | lint/LLM | PG Web 文件/图片上传推荐 app.storage.from(bucketName).upload(path, file)；app.storage() 为错误 |
+| PG-CR004 | mixed | lint/LLM | PG Web 文件/图片上传推荐 app.storage.from().upload("bucket/path", file)；app.storage() 为错误 |
 | PG-CR005 | error | lint/LLM | PG 模式下存储上传必须配置 storage.objects RLS |
 
 ### All (RDB-TOOL-, 管理端)

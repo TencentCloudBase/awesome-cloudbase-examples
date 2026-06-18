@@ -278,12 +278,12 @@ function checkPgStorageApiRecommendation(files) {
     lines.forEach((line, i) => {
       if (/app\.storage\s*\(/.test(line)) {
         record('PG-CR004', 'error',
-          'PG Web 文件/图片上传禁止调用 app.storage()；app.storage 是属性。推荐使用 app.storage.from(bucketName).upload(path, file)。',
+          'PG Web 文件/图片上传禁止调用 app.storage()；app.storage 是属性。推荐使用 app.storage.from().upload("bucket/path", file)。',
           file, i + 1);
       }
       if (/app\.uploadFile\s*\(/.test(line)) {
         record('PG-CR004', 'warning',
-          'PG Web 文件/图片上传不推荐优先使用旧式 app.uploadFile(...)；推荐使用 app.storage.from(bucketName).upload(path, file)。',
+          'PG Web 文件/图片上传不推荐优先使用旧式 app.uploadFile(...)；推荐使用 app.storage.from().upload("bucket/path", file)。',
           file, i + 1);
       }
       if (/\.upload\s*\(\s*\{[^}]*cloudPath|\.upload\s*\(\s*\{[^}]*filePath/.test(line)) {
@@ -392,5 +392,5 @@ process.exit(report.summary.errors > 0 ? 1 : 0);
 | STORAGE001 | error | 缺少 localhost:5173 安全域名 |
 | PG-CR001 | error | db.from() 无对应 CREATE TABLE |
 | PG-CR003 | warning | 上传缺少存储配置 |
-| PG-CR004 | mixed | PG Web 文件/图片上传推荐 app.storage.from(bucketName).upload(path, file)；app.storage() 为错误 |
+| PG-CR004 | mixed | PG Web 文件/图片上传推荐 app.storage.from().upload("bucket/path", file)；app.storage() 为错误 |
 | PG-CR005 | error | PG 模式下存储上传缺少 storage.objects RLS 配置 |
