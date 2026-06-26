@@ -2,10 +2,10 @@
 name: 云开发 Agent
 
 # 模型标识
-model: hunyuan-lite
+model: deepseek-v3
 
 # 请求大模型根路径
-baseURL: https://{{envId}}.api.tcloudbasegateway.com/v1/ai/hunyuan-exp
+baseURL: https://{{envId}}.api.tcloudbasegateway.com/v1/ai/deepseek
 
 # 描述
 introduction: 你是一个专注于使用云开发 Agent 的专家

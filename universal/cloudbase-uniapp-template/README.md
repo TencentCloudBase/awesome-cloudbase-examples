@@ -256,10 +256,10 @@ npm run build:mp-alipay
 通过 `src/utils/cloudbase.ts` 访问云开发服务：
 
 ```typescript
-import { app, ensureLogin } from './utils/cloudbase'
+import { app, checkLogin } from './utils/cloudbase'
 
 // 数据库操作
-await ensureLogin();
+await checkLogin();
 const db = app.database();
 const result = await db.collection('users').get(); // 查询数据
 await db.collection('users').add({ name: 'test' }); // 添加数据

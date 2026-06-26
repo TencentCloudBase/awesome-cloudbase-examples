@@ -145,7 +145,33 @@ export class MyBot extends BotCore implements IBot {
       ]
     })
 
-    return { recordList: history, total: total }
+    const chatList = history.map((element) => {
+      const chat = {
+        botId: element.botId,
+        recordId: element.recordId,
+        role: element.role,
+        status: element.status,
+        content: element.content,
+        conversation: element.conversation,
+        fileInfos: [],
+        type: element.type,
+        image: element.image,
+        triggerSrc: element.triggerSrc,
+        reply: element.reply,
+        replyTo: element.replyTo,
+        createTime: element.createTime,
+        trace_id: element.traceId
+      }
+      const originMsg = JSON.parse(element.originMsg)
+
+      if (originMsg && originMsg.fileInfos?.length !== 0) {
+        chat.fileInfos = originMsg.fileInfos
+      }
+
+      return chat
+    })
+
+    return { recordList: chatList, total: total }
   }
 
   async getBotInfo (): Promise<GetBotInfoOutput> {

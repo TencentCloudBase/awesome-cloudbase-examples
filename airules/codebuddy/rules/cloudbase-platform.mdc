@@ -1,6 +1,7 @@
 ---
-description: 云开发 CloudBase 平台知识和最佳实践
-alwaysApply: true
+description: 
+globs:
+alwaysApply: false
 ---
 
 # CloudBase 平台知识

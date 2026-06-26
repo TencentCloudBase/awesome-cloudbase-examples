@@ -190,10 +190,10 @@ const userDisplayName = computed(() =>
 通过 `src/utils/cloudbase.js` 访问云开发服务：
 
 ```javascript
-import { app, ensureLogin } from './utils/cloudbase.js'
+import { app, checkLogin } from './utils/cloudbase.js'
 
 // 数据库操作
-await ensureLogin();
+await checkLogin();
 const db = app.database();
 const result = await db.collection('users').get(); // 查询数据
 await db.collection('users').add({ name: 'test' }); // 添加数据

@@ -1,6 +1,6 @@
 ---
-description: 微信小程序开发规则
-globs: ["**/*.wxml", "**/*.wxss", "**/*.js", "**/*.ts", "**/*.json", "miniprogram/**/*"]
+description: 
+globs:
 alwaysApply: false
 ---
 

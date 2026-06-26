@@ -1,0 +1,8 @@
+#!/bin/bash
+export PYTHONPATH="./third_party:$PYTHONPATH"
+# 优先使用 Python 3.9，如果不存在则使用 Python 3.10
+if [ -f "/var/lang/python39/bin/python3.9" ]; then
+    /var/lang/python39/bin/python3.9 index.py
+else
+    /var/lang/python310/bin/python3.10 index.py
+fi

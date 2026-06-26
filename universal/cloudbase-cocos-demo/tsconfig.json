@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "module": "ES2015",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "declaration": false,
+    "sourceMap": true,
+    "lib": ["ES2015", "DOM"],
+    "types": ["@cocos/creator-types/engine", "@cocos/creator-types/editor"]
+  },
+  "include": [
+    "assets/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

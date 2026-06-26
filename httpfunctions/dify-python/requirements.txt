@@ -1,0 +1,5 @@
+cloudbase-agent-core==0.1.11
+cloudbase-agent-server==0.1.20
+cloudbase-agent-dify==0.1.1
+httpx>=0.24.0
+python-dotenv>=1.2.1

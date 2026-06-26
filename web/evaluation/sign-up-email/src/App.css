@@ -1,0 +1,63 @@
+#root {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.register-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.register-container h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.form-group input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.send-code-btn {
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+}
+
+.register-btn {
+  padding: 0.75rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+button {
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background-color: #535bf2;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

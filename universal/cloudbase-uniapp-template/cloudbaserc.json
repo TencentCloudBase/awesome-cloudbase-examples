@@ -1,21 +1,10 @@
 {
   "envId": "your-env-id",
-  "framework": {
-    "name": "uniapp",
-    "plugins": {
-      "client": {
-        "use": "@cloudbase/framework-plugin-website",
-        "inputs": {
-          "buildCommand": "npm run build:h5",
-          "outputPath": "dist/build/h5"
-        }
-      },
-      "functions": {
-        "use": "@cloudbase/framework-plugin-function",
-        "inputs": {
-          "functionRootPath": "./cloudfunctions"
-        }
-      }
-    }
-  }
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "app": {
+    "buildCommand": "npm run build:h5",
+    "outputDir": "dist/build/h5",
+    "deployPath": "/"
+  },
+  "functionRoot": "./cloudfunctions"
 } 

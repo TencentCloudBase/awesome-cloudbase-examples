@@ -1,0 +1,41 @@
+{
+  "name": "cloudbase-react-template",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint src/ --fix",
+    "preview": "vite preview",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "@cloudbase/js-sdk": "latest",
+    "@heroicons/react": "^2.2.0",
+    "framer-motion": "^12.12.1",
+    "lucide-react": "^0.553.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^6.30.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@tailwindcss/vite": "^4.1.17",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.5.0",
+    "jiti": "^2.6.1",
+    "prettier": "3.6.2",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3",
+    "vite": "^6.3.5"
+  }
+}

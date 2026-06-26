@@ -1,10 +1,7 @@
 {
   "version": "2.0",
   "envId": "your-env-id",
-  "framework": {
-    "name": "miniprogram",
-    "plugins": {}
-  },
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
   "functionRoot": "./cloudfunctions",
   "functions": [
     {

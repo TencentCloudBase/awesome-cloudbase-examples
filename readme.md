@@ -1,4 +1,6 @@
-![awsome-cloudbase-examples](https://socialify.git.ci/TencentCloudBase/awsome-cloudbase-examples/image?font=Inter&forks=1&owner=1&pattern=Circuit+Board&stargazers=1)
+<a href="https://cloud.tencent.com/developer/article/2649588" target="_blank"><img width="3094" height="654" alt="banner" src="https://github.com/user-attachments/assets/37982d04-274a-4b6c-85b8-06983c615d9a" /></a>
+
+![awesome-cloudbase-examples](https://socialify.git.ci/TencentCloudBase/awsome-cloudbase-examples/image?font=Inter&forks=1&owner=1&pattern=Circuit+Board&stargazers=1)
 
 # Awesome CloudBase Examples
 
@@ -84,9 +86,14 @@
 
 ### 🔄 跨端应用
 
-- [UniApp 应用模板](./universal/cloudbase-uniapp-template) - 基于 UniApp 的云开发跨端应用模板 ，可编译到 H5 、微信小程序、抖音小程序、支付宝小程序以及App端 (iOS/Android) [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
-
+- [UniApp 应用模板](./universal/cloudbase-uniapp-template) - 基于 UniApp 的云开发跨端应用模板 ，可编译到 H5 、微信小程序、抖音小程序、支付宝小程序以及App端 (iOS/Android) [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi/4KjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 - [Soul Chat](./universal/soul-chat) - 基于UniApp 的随机匹配匿名聊天应用 [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
+
+- [React Native 应用示例](./universal/cloudbase-rn-demo) - 基于 React Native 的云开发跨端应用示例，支持 iOS 和 Android 平台 
+
+- [Flutter 应用示例](./universal/cloudbase-flutter-demo) - 基于 Flutter 的云开发跨端应用示例，支持 iOS、Android 和 Web 平台
+
+- [Cocos 应用示例](./universal/cloudbase-cocos-demo) - 基于 Cocos Creator 的云开发跨端应用示例，支持 iOS、Android 和 Web 平台
 
 
 ### ⚡ 函数型托管

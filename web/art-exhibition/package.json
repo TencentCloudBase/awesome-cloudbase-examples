@@ -12,7 +12,7 @@
     "zip": "zip -r project.zip * -x \".git*\" \"node_modules*\""
   },
   "dependencies": {
-    "@cloudbase/js-sdk": "^2.17.3",
+    "@cloudbase/js-sdk": "latest",
     "@cloudbase/weda-client": "^1.1.33",
     "@cloudbase/weda-cloud-sdk": "^1.0.106",
     "@hookform/resolvers": "^3.9.0",

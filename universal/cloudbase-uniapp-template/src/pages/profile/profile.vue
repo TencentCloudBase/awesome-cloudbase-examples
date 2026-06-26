@@ -8,15 +8,15 @@
       <view v-if="userInfo" class="user-info">
         <view class="info-item">
           <text class="label">用户ID:</text>
-          <text class="value">{{ userInfo.uid || '未知' }}</text>
+          <text class="value">{{ userInfo.id || '未知' }}</text>
         </view>
         <!-- <view class="info-item">
           <text class="label">登录类型:</text>
-          <text class="value">{{ getLoginType(userInfo) }}</text>
+          <text class="value">{{ session.scope }}</text>
         </view> -->
-        <view v-if="userInfo.phone_number" class="info-item">
+        <view v-if="userInfo.phone" class="info-item">
           <text class="label">手机号:</text>
-          <text class="value">{{ userInfo.phone_number }}</text>
+          <text class="value">{{ userInfo.phone }}</text>
         </view>
         <view v-if="userInfo.email" class="info-item">
           <text class="label">邮箱:</text>
@@ -28,11 +28,11 @@
         </view>
         <view class="info-item">
           <text class="label">创建时间:</text>
-          <text class="value">{{ formatDate(userInfo.createTime) }}</text>
+          <text class="value">{{ formatDate(userInfo.created_at) }}</text>
         </view>
         <view class="info-item">
           <text class="label">最后登录:</text>
-          <text class="value">{{ formatDate(userInfo.lastLoginTime) }}</text>
+          <text class="value">{{ formatDate(userInfo.last_sign_in_at) }}</text>
         </view>
         
         <button class="logout-btn" @click="handleLogout">
@@ -55,38 +55,41 @@ import { ref, onMounted } from 'vue'
 import { app, logout, auth } from '../../utils/cloudbase'
 
 const userInfo = ref<any>(null)
+const session = ref<any>(null)
 
 // 获取用户信息
 const getUserInfo = async () => {
   try {
-    // const auth = app.auth()
-    const loginState = await auth.getLoginState()
+    const { data } = await auth.getSession()
     
-    if (loginState && loginState.user) {
-      userInfo.value = loginState.user
-      console.log('用户登录状态loginState:', loginState)
-      console.log('完整用户信息loginState.user:', loginState.user)
+    if (data && data.session) {
+      session.value = data.session
+      userInfo.value = data.session.user
+      console.log('用户登录状态loginState:', data.session)
+      console.log('完整用户信息loginState.user:', data.session.user)
     } else {
+      session.value = null
       userInfo.value = null
       console.log('用户未登录')
     }
   } catch (error) {
     console.error('获取用户信息失败:', error)
+    session.value = null
     userInfo.value = null
   }
 }
 
 // 获取用户名
 const getUserName = (user: any) => {
-  if (!user) return '未知'
+  if (!user || !user.user_metadata) return '未知'
   
   // 优先显示用户设置的昵称
-  if (user.nickName) return user.nickName
-  if (user.username) return user.username
+  if (user.user_metadata.nickName) return user.user_metadata.nickName
+  if (user.user_metadata.username) return user.user_metadata.username
   
   // 如果有手机号，显示脱敏的手机号
-  if (user.phone_number) {
-    const phone = user.phone_number.replace(/^\+86\s?/, '') // 去掉+86前缀
+  if (user.phone) {
+    const phone = user.phone.replace(/^\+86\s?/, '') // 去掉+86前缀
     if (phone.length === 11) {
       return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
     }
@@ -107,8 +110,8 @@ const getUserName = (user: any) => {
   }
   
   // 匿名用户显示部分UID
-  if (user.isAnonymous && user.uid) {
-    return `匿名用户 (${user.uid.substring(0, 8)}...)`
+  if (user.is_anonymous && user.id) {
+    return `匿名用户 (${user.id.substring(0, 8)}...)`
   }
   
   return '未设置'
@@ -157,6 +160,7 @@ const handleLogout = async () => {
       if (res.confirm) {
         try {
           await logout()
+          session.value = null
           userInfo.value = null
           uni.showToast({
             title: '已退出登录',
@@ -247,6 +251,7 @@ onMounted(() => {
 .logout-btn {
   width: 100%;
   height: 88rpx;
+  line-height: 88rpx;
   background: #ff4757;
   color: white;
   border: none;
@@ -275,6 +280,7 @@ onMounted(() => {
 .login-btn {
   width: 200rpx;
   height: 88rpx;
+  line-height: 88rpx;
   background: #667eea;
   color: white;
   border: none;

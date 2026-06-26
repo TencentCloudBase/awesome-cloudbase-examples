@@ -1,5 +1,6 @@
 ---
-description: 云开发云数据库（NoSQL）参考指南
+description: 
+globs:
 alwaysApply: false
 ---
 # 数据库操作规则

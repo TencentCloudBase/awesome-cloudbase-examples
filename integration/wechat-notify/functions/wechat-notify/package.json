@@ -1,0 +1,16 @@
+{
+  "name": "wechat-notify",
+  "version": "1.0.0",
+  "description": "微信回调接收云函数（仅打印 headers + body）",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

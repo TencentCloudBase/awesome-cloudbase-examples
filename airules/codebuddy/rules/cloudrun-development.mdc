@@ -1,6 +1,6 @@
 ---
-description: 云托管（CloudBase Run）后端开发规则（函数型/容器型）
-globs: ["**/*.js", "**/*.ts", "**/*.py", "**/*.go", "**/*.java", "**/*.php", "**/Dockerfile"]
+description: 
+globs:
 alwaysApply: false
 ---
 

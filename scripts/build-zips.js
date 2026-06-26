@@ -5,6 +5,8 @@ const path = require('path');
 const archiver = require('archiver');
 const { glob } = require('glob');
 
+const projectRoot = path.dirname(__dirname);
+
 /**
  * 读取配置文件
  */
@@ -31,6 +33,45 @@ function ensureDir(dirPath) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
+}
+
+/**
+ * 加载 .gitignore 中的忽略规则
+ */
+function loadGitignorePatterns() {
+  const gitignorePath = path.join(projectRoot, '.gitignore');
+  if (!fs.existsSync(gitignorePath)) {
+    return [];
+  }
+
+  const lines = fs.readFileSync(gitignorePath, 'utf8').split('\n');
+  const patterns = [];
+
+  lines.forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) {
+      return;
+    }
+    if (line.startsWith('!')) {
+      console.warn(`⚠️  不支持的 .gitignore 反向匹配: ${line}，已跳过`);
+      return;
+    }
+
+    let normalized = line.replace(/^\//, '');
+    if (normalized.endsWith('/')) {
+      normalized = `${normalized}**`;
+    }
+
+    patterns.push(normalized);
+
+    const hasWildcard = normalized.includes('*');
+    const looksLikeFile = path.basename(normalized).includes('.');
+    if (!hasWildcard && !looksLikeFile && !normalized.endsWith('/**')) {
+      patterns.push(`${normalized}/**`);
+    }
+  });
+
+  return patterns;
 }
 
 /**
@@ -104,8 +145,10 @@ async function main() {
   console.log('🚀 开始构建 ZIP 包...\n');
   
   const config = readConfig();
-  const rootDir = path.dirname(__dirname);
+  const rootDir = projectRoot;
   const distDir = path.join(rootDir, 'dist');
+  const gitignorePatterns = loadGitignorePatterns();
+  const excludePatterns = [...(config.exclude || []), ...gitignorePatterns];
   
   // 确保 dist 目录存在
   ensureDir(distDir);
@@ -137,7 +180,7 @@ async function main() {
     console.log(`📦 打包 ${displayName} (${packagePath}) -> ${zipName}`);
     
     try {
-      await createZip(sourcePath, outputPath, config.exclude || []);
+      await createZip(sourcePath, outputPath, excludePatterns);
       results.push({
         name: displayName,
         path: packagePath,

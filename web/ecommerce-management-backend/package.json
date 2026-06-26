@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@cloudbase/js-sdk": "^2.16.0",
+    "@cloudbase/js-sdk": "latest",
     "@heroicons/react": "^2.2.0",
     "daisyui": "^5.0.35",
     "framer-motion": "^12.12.1",

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "version": "2.0",
+  "envId": "{{env.TCB_ENV_ID}}",
+  "functions": [
+    {
+      "name": "pay-common",
+      "type": "HTTP",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "memorySize": 256,
+      "installDependency": true,
+      "dir": "./",
+      "envVariables": {
+        "signMode": "{{env.SIGN_MODE}}",
+        "appId": "{{env.WX_APP_ID}}",
+        "service_app_id": "{{env.SERVICE_APP_ID}}",
+        "merchantId": "{{env.MCH_ID}}",
+        "merchantSerialNumber": "{{env.MCH_SERIAL_NO}}",
+        "apiV3Key": "{{env.API_V3_KEY}}",
+        "privateKey": "{{env.PRIVATE_KEY}}",
+        "wxPayPublicKey": "{{env.WX_PAY_PUBLIC_KEY}}",
+        "wxPayPublicKeyId": "{{env.WX_PAY_PUBLIC_KEY_ID}}",
+        "notifyURLPayURL": "{{env.NOTIFY_PAY_URL}}",
+        "notifyURLRefundsURL": "{{env.NOTIFY_REFUNDS_URL}}",
+        "transferNotifyUrl": "{{env.NOTIFY_TRANSFER_URL}}",
+        "corsAllowOrigin": "{{env.CORS_ALLOW_ORIGIN}}"
+      },
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".env",
+        ".env.*",
+        "!.env.example",
+        "tests",
+        "*.pem"
+      ]
+    }
+  ],
+  "cloudrun": {
+    "name": "pay-common"
+  }
+}

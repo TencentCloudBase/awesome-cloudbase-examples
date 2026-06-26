@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Laravel 云函数启动脚本 - 按照腾讯云官方文档标准实现
+# 参考: https://cloud.tencent.com/document/product/583/59232
+
+# 设置 Serverless 环境标识
+export SERVERLESS=1
+
+# 将视图缓存修改到 /tmp 目录（只有此目录可写）
+export VIEW_COMPILED_PATH=/tmp/storage/framework/views
+
+# Session 改为内存存储（数组），避免文件写入失败
+export SESSION_DRIVER=array
+
+# 日志输出到 stderr（标准错误流），便于云函数收集日志
+export LOG_CHANNEL=stderr
+
+# 修改应用存储路径到可写目录
+export APP_STORAGE=/tmp/storage
+
+# 设置基本环境变量
+export APP_ENV=production
+export APP_DEBUG=false
+
+# 禁用 PHP 弃用警告（云函数环境优化）
+export PHP_INI_SCAN_DIR=/tmp
+
+# 创建必要的缓存目录
+mkdir -p /tmp/storage/framework/views
+mkdir -p /tmp/storage/logs
+mkdir -p /tmp/storage/app
+mkdir -p /tmp/storage/framework/cache
+mkdir -p /tmp/storage/framework/sessions
+
+# 创建临时 PHP 配置文件禁用弃用警告
+cat > /tmp/php.ini << 'EOF'
+error_reporting = E_ALL & ~E_DEPRECATED & ~E_NOTICE
+log_errors = On
+display_errors = Off
+EOF
+
+# Web 函数要求监听端口为 9000，地址为 0.0.0.0
+/var/lang/php74/bin/php -c /tmp/php.ini artisan serve --host 0.0.0.0 --port 9000

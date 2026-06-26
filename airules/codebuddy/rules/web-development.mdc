@@ -1,6 +1,6 @@
 ---
-description: Web 前端项目开发规则
-globs: ["**/*.html", "**/*.js", "**/*.ts", "**/*.jsx", "**/*.tsx", "**/*.vue"]
+description: 
+globs:
 alwaysApply: false
 ---
 

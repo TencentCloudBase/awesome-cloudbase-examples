@@ -10,7 +10,7 @@
 ## 项目特点
 
 - 🚀 基于 Vite 构建，提供极速的开发体验
-- ⚛️ 使用 React 18 和 React Router 6 构建现代化 UI
+- ⚛️ 使用 React 19 和 React Router 6 构建现代化 UI
 - 🎨 集成 Tailwind CSS 和 DaisyUI 组件库，快速构建漂亮的界面
 - 🔄 使用 Framer Motion 实现流畅的动画效果
 - 🎁 深度集成腾讯云开发 CloudBase，提供一站式后端云服务
@@ -19,7 +19,7 @@
 
 ### 前端架构
 
-- **框架**：React 18
+- **框架**：React 19
 - **构建工具**：Vite
 - **路由**：React Router 6（使用 HashRouter）
 - **样式**：Tailwind CSS + DaisyUI
@@ -221,10 +221,10 @@ const ComponentWithNavigation = () => {
 通过 `src/utils/cloudbase.js` 访问云开发服务：
 
 ```jsx
-import { app, ensureLogin } from '../utils/cloudbase';
+import { app, checkLogin } from '../utils/cloudbase';
 
 // 数据库操作
-await ensureLogin();
+await checkLogin();
 const db = app.database();
 const result = await db.collection('users').get(); // 查询数据
 await db.collection('users').add({ name: 'test' }); // 添加数据
@@ -239,11 +239,10 @@ const models = app.models;
 ### 重要说明
 
 1. 在使用前请先在 `src/utils/cloudbase.js` 文件中将 `ENV_ID` 变量的值修改为您的云开发环境 ID。
-2. 本模板默认使用匿名登录，这适合快速开发和测试，但在生产环境中可能需要更严格的身份验证。
+2. 本模板默认使用Publishable Key 进行资源访问，这适合快速开发和测试，但在生产环境中可能需要更严格的身份验证。
 3. 所有云开发功能都通过初始化的应用实例直接调用，无需二次封装。
-4. `ensureLogin` 方法会检查当前登录状态，如果已登录则返回当前登录状态，否则会进行匿名登录。
-5. 匿名登录状态无法使用 `logout` 方法退出，只有其他登录方式（如微信登录、邮箱登录等）可以退出。
-6. 在使用数据库、云函数、云存储等功能前，请确保在云开发控制台中已创建相应的资源。
+4. `checkLogin` 方法会检查当前登录状态，如果已登录则返回当前登录状态。
+5. 在使用数据库、云函数、云存储等功能前，请确保在云开发控制台中已创建相应的资源。
 
 ## 贡献指南
 

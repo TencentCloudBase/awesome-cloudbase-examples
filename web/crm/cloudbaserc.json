@@ -1,0 +1,27 @@
+{
+  "envId": "tcb-advanced-a656fc",
+  "version": "2.0",
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "app": {
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "deployPath": "/"
+  },
+  "databases": [
+    {
+      "collectionName": "crm_customers",
+      "description": "CRM客户数据表",
+      "createIndexes": []
+    },
+    {
+      "collectionName": "crm_contacts",
+      "description": "CRM联系人数据表",
+      "createIndexes": []
+    },
+    {
+      "collectionName": "crm_opportunities",
+      "description": "CRM销售机会数据表",
+      "createIndexes": []
+    }
+  ]
+}
