@@ -60,6 +60,16 @@ cd functions/offiaccount-common
 tcb fn deploy --dir .
 ```
 
+### 5. 开启固定 IP 并配置白名单
+
+> ⚠️ **必须操作**：微信公众号的大部分 API（获取 access_token、自定义菜单、订阅通知、用户管理等）要求调用方 IP 在公众号后台的 IP 白名单中。CloudBase 云函数默认出口 IP 不固定，**不配置会导致调用微信 API 报错 `40164 invalid ip, not in whitelist`**。
+
+| 步骤 | 操作位置 | 具体操作 |
+|:----:|---------|---------|
+| ① | CloudBase 控制台 | 云函数 → `offiaccount-common` → 函数配置 → 开启「固定出口 IP」 |
+| ② | CloudBase 控制台 | 开启后复制分配的固定 IP 地址 |
+| ③ | 微信公众号后台 | 开发 → 基本配置 → IP 白名单 → 添加上一步获取的固定 IP |
+
 ---
 
 ## 环境变量说明

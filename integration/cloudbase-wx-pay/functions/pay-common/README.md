@@ -489,6 +489,320 @@ async handlerUnifiedTrigger(params) {
 | `/refundTrigger` | POST | 退款回调通知 |
 | `/transferTrigger` | POST | 商家转账回调通知 |
 
+---
+
+## API 文档（入参/出参）
+
+### 1. 下单
+
+#### 1.1 JSAPI/小程序下单
+
+`POST /wx-pay/wxpay_order`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `description` | string | ✅ | 商品描述，最长 127 字符 |
+| `out_trade_no` | string | ✅ | 商户订单号，6-32 位，仅含字母/数字/下划线/连字符。**必须由调用方生成并传入**，微信要求全局唯一 |
+| `amount` | object | ✅ | 订单金额 |
+| `amount.total` | number | ✅ | 订单总金额（单位：**分**），必须是正整数 |
+| `amount.currency` | string | ❌ | 货币类型，默认 `CNY` |
+| `payer` | object | ❌ | 支付者信息（JSAPI 必填 `openid`） |
+| `payer.openid` | string | ❌ | 用户 OpenID。**推荐不传**，后端自动从 `x-wx-openid` header 注入 |
+| `notify_url` | string | ❌ | 支付回调 URL，默认使用环境变量 `notifyURLPayURL` |
+| `appid` | string | ❌ | 覆盖默认 appId（用于多公众号场景） |
+| `useServiceAccount` | boolean | ❌ | `true` 时使用 `service_app_id` 环境变量（服务号 appId） |
+
+**出参**（成功）：
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "status": 200,
+    "data": {
+      "appId": "wx1234567890abcdef",
+      "prepay_id": "wx201410532645360000000000",
+      "timeStamp": "1720000000",
+      "nonceStr": "abc123...",
+      "package": "prepay_id=wx201410532645360000000000",
+      "signType": "RSA",
+      "paySign": "base64签名串..."
+    }
+  }
+}
+```
+
+> 📌 前端调起支付时使用 `res.data?.data || res.data` 获取支付参数。
+
+---
+
+#### 1.2 H5 下单
+
+`POST /wx-pay/wxpay_order_h5`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `description` | string | ✅ | 商品描述 |
+| `out_trade_no` | string | ❌ | 商户订单号 |
+| `amount` | object | ✅ | 订单金额 |
+| `amount.total` | number | ✅ | 订单总金额（单位：**分**） |
+| `amount.currency` | string | ❌ | 默认 `CNY` |
+| `scene_info` | object | ✅ | H5 场景信息 |
+| `scene_info.payer_client_ip` | string | ✅ | 用户客户端 IP |
+| `scene_info.h5_info` | object | ✅ | H5 信息，`{ type: 'Wap', wap_url: 'https://...', wap_name: '网页名称' }` |
+| `notify_url` | string | ❌ | 支付回调 URL |
+
+**出参**（成功）：
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "status": 200,
+    "data": {
+      "h5_url": "https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?..."
+    }
+  }
+}
+```
+
+> 📌 前端拿到 `h5_url` 后跳转，微信会自动拉起支付。
+
+---
+
+#### 1.3 Native 扫码下单
+
+`POST /wx-pay/wxpay_order_native`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `description` | string | ✅ | 商品描述 |
+| `out_trade_no` | string | ❌ | 商户订单号 |
+| `amount` | object | ✅ | 订单金额 |
+| `amount.total` | number | ✅ | 订单总金额（单位：**分**） |
+| `amount.currency` | string | ❌ | 默认 `CNY` |
+| `notify_url` | string | ❌ | 支付回调 URL |
+
+**出参**（成功）：
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "status": 200,
+    "data": {
+      "code_url": "weixin://wxpay/bizpayurl?pr=..."
+    }
+  }
+}
+```
+
+> 📌 前端用 `code_url` 生成二维码，用户扫码支付。
+
+---
+
+### 2. 查询
+
+#### 2.1 商户订单号查单
+
+`POST /wx-pay/wxpay_query_order_by_out_trade_no`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `out_trade_no` | string | ✅ | 商户订单号 |
+
+**出参**：微信支付查单接口原始返回，详见[微信文档](https://pay.weixin.qq.com/doc/v3/merchant/4012791898)。
+
+---
+
+#### 2.2 微信订单号查单
+
+`POST /wx-pay/wxpay_query_order_by_transaction_id`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `transaction_id` | string | ✅ | 微信支付订单号 |
+
+**出参**：同 2.1。
+
+---
+
+#### 2.3 关闭订单
+
+`POST /wx-pay/wxpay_close_order`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `out_trade_no` | string | ✅ | 商户订单号 |
+
+**出参**（成功）：
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "status": 204
+  }
+}
+```
+
+> 📌 微信返回 HTTP 204 表示关闭成功，无响应体。
+
+---
+
+### 3. 退款
+
+#### 3.1 申请退款
+
+`POST /wx-pay/wxpay_refund`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `out_trade_no` | string | ❌① | 商户订单号（与 `transaction_id` 二选一） |
+| `transaction_id` | string | ❌① | 微信订单号（与 `out_trade_no` 二选一） |
+| `out_refund_no` | string | ✅ | 商户退款单号，**必须全局唯一** |
+| `reason` | string | ❌ | 退款原因，会展示在用户账单中 |
+| `amount` | object | ✅ | 金额信息 |
+| `amount.total` | number | ✅ | 原订单总金额（单位：**分**） |
+| `amount.refund` | number | ✅ | 退款金额（单位：**分**），不能超过 `total` |
+| `amount.currency` | string | ❌ | 货币类型，默认 `CNY` |
+| `notify_url` | string | ❌ | 退款回调 URL，默认使用环境变量 `notifyURLRefundsURL` |
+
+> ① `out_trade_no` 和 `transaction_id` 至少填一个。
+
+**出参**（成功）：微信支付退款接口原始返回，包含 `refund_id`（微信退款单号）。
+
+---
+
+#### 3.2 查询退款
+
+`POST /wx-pay/wxpay_refund_query`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `out_refund_no` | string | ✅ | 商户退款单号 |
+
+**出参**：微信支付退款查询接口原始返回。
+
+---
+
+### 4. 商家转账
+
+#### 4.1 发起转账
+
+`POST /wx-pay/wxpay_transfer`
+
+> ⚠️ 本模板仅支持**免密小额转账（0.3 - 2000 元）**，不支持 `user_name`（需加密）。
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `out_bill_no` | string | ✅ | 商户转账单号，仅含字母/数字，最长 32 位 |
+| `transfer_scene_id` | string | ✅ | 转账场景 ID，如 `1000`（现金营销） |
+| `openid` | string | ✅ | 收款用户 OpenID。**推荐不传**，后端自动注入 |
+| `transfer_amount` | number | ✅ | 转账金额（单位：**分**），范围：30 - 200000 |
+| `transfer_remark` | string | ✅ | 转账备注，最长 32 字符 |
+| `transfer_scene_report_infos` | array | ✅ | 转账场景报备信息，格式：`[{ name: '活动名称', value: '...' }]` |
+| `notify_url` | string | ❌ | 转账回调 URL，默认使用环境变量 `transferNotifyUrl` |
+| `appid` | string | ❌ | 覆盖默认 appId |
+| `useServiceAccount` | boolean | ❌ | 使用服务号 appId |
+
+**出参**（受理成功）：
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "status": 200,
+    "data": {
+      "transfer_bill_no": "130000019820241013e0b8c6axxxxx",
+      "out_bill_no": "TRANS202604130001",
+      "create_time": "2024-04-13T10:00:00+08:00",
+      "state": "ACCEPTED",
+      "mchId": "1900009191"
+    }
+  }
+}
+```
+
+> ⚠️ `state=ACCEPTED` 表示**受理成功**，不等于转账成功。必须通过查单或回调确认最终状态。
+
+---
+
+#### 4.2 商户单号查询转账单
+
+`POST /wx-pay/wxpay_transfer_bill_query`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `out_bill_no` | string | ✅ | 商户转账单号 |
+
+**出参**：微信支付转账单查询接口原始返回。
+
+---
+
+#### 4.3 微信单号查询转账单
+
+`POST /wx-pay/wxpay_transfer_bill_query_by_no`
+
+**入参**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|:----:|------|
+| `transfer_bill_no` | string | ✅ | 微信转账单号 |
+
+**出参**：微信支付转账单查询接口原始返回。
+
+---
+
+### 5. 错误响应格式
+
+所有接口失败时使用统一格式：
+
+```json
+{
+  "code": -1,
+  "msg": "错误原因描述",
+  "data": null
+}
+```
+
+**常见错误**：
+
+| 错误信息 | 原因 |
+|---------|------|
+| `description（商品描述）必填` | 缺少商品描述 |
+| `amount.total（订单金额）必须为正整数（单位：分）` | 金额非整数或为 0/负数 |
+| `out_trade_no（商户订单号）长度必须 6-32 位` | 订单号格式错误 |
+| `amount.refund（退款金额）不能大于 amount.total（订单金额）` | 退款金额超上限 |
+| `wxpay_order 未返回完整 paymentParams` | 微信返回异常，检查 appId/商户号绑定 |
+
+---
+
 ### 请求/响应格式
 
 ```json
