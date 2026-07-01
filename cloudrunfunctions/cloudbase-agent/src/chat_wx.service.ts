@@ -23,6 +23,7 @@ import {
 } from './constant'
 import { LLMCommunicator } from './llm'
 import { WxApiService } from './wx_api.service'
+import { botConfig } from './bot_config'
 
 export interface WxChatOptions {
   botId: string;
@@ -87,6 +88,13 @@ export class WxChatService {
 
       // 获取文本内容
       const content = await this.getWxChatContent(options)
+
+      // 处理人工回复
+      if (botConfig?.manualKeyWord && content === botConfig.manualKeyWord) {
+        replyMsgData.content = botConfig?.manualReply || '未配备客服联系方式';
+        skipAI = true;
+      }
+
       // 处理未认证订阅号/服务号同步响应的情况
       if (
         [TRIGGER_SRC_WX_SUBSCRIPTION, TRIGGER_SRC_WX_SERVICE].includes(
