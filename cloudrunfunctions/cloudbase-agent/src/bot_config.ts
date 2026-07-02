@@ -32,6 +32,8 @@ export interface IBotConfig {
     outputType?: number;
   };
   multiConversationEnable: boolean;
+  manualKeyWord: string;
+  manualReply:string;
 }
 
 export class BotConfig {

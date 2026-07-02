@@ -72,3 +72,7 @@ voiceSettings:
 # example:
 # enable: true
 multiConversationEnable: false
+
+# 转人工回应
+manualKeyWord: "人工"
+manualReply: ""
