@@ -1,0 +1,57 @@
+{
+  "identifier": "http-php-laravel",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Laravel 框架",
+  "titleIcon": "",
+  "description": "Laravel",
+  "tags": [
+    "http",
+    "php",
+    "laravel",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Php",
+  "runtimeVersion": "Php7.4",
+  "isCompile": false,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-laravel",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-laravel"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-laravel"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-php-laravel"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878866074,
+    "legacyTags": [],
+    "localOnly": true,
+    "onlineIdentifier": "http-php-laravel"
+  }
+}

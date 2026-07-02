@@ -1,0 +1,57 @@
+{
+  "identifier": "http-nodejs-koa",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Koa 框架",
+  "titleIcon": "",
+  "description": "Koa",
+  "tags": [
+    "http",
+    "nodejs",
+    "koa",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-koa",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-koa"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-koa"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-koa"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878862888,
+    "legacyTags": [],
+    "localOnly": true,
+    "onlineIdentifier": "http-nodejs-koa"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "envId": "YOUR_ENV_ID",
+  "functionRoot": "./",
+  "functions": [
+    {
+      "name": "scf-nodejs-hono-template",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 10,
+      "memorySize": 256,
+      "installDependency": true
+    }
+  ]
+}

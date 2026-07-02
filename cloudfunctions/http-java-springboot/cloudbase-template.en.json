@@ -1,0 +1,58 @@
+{
+  "identifier": "http-java-springboot",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Spring Boot Framework",
+  "titleIcon": "",
+  "description": "HTTP function example built with Java Spring Boot framework",
+  "tags": [
+    "http",
+    "java",
+    "spring-boot",
+    "web-framework"
+  ],
+  "sampleCode": "# Spring Boot Template\n\nA Spring Boot HTTP function for CloudBase.\n\nBuild with `bash build.sh` to produce `app.jar`, then deploy.",
+  "language": "Java",
+  "runtimeVersion": "Java11",
+  "isCompile": true,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-springboot",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-springboot"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-springboot"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-java-springboot"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878861495,
+    "legacyTags": [],
+    "localOnly": true,
+    "i18nSource": "override",
+    "onlineIdentifier": "http-java-springboot"
+  }
+}

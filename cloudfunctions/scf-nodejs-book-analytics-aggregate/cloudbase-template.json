@@ -1,0 +1,60 @@
+{
+  "identifier": "scf-nodejs-book-analytics-aggregate",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "图书数据分析",
+  "description": "图书数据分析云函数，包含聚合操作示例",
+  "tags": [
+    "nodejs",
+    "data-analytics",
+    "aggregation"
+  ],
+  "sampleCode": "你可以使用这个云函数来进行图书数据分析。在小程序中测试调用这个云函数的示例代码如下：\n\n```js\n// 获取作者统计信息\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getAuthorStats'\n  }\n}).then(res => {\n  console.log('作者统计结果：', res)\n})\n\n// 响应示例\n{\n  \"data\": [\n    {\n      \"_id\": \"刘慈欣\",\n      \"totalBooks\": 3,\n      \"totalValue\": 167.7,\n      \"averagePrice\": 55.9,\n      \"books\": [\n        {\n          \"title\": \"三体\",\n          \"price\": 55.9,\n          \"isbn\": \"9787536692930\"\n        },\n        {\n          \"title\": \"三体2：黑暗森林\",\n          \"price\": 55.9,\n          \"isbn\": \"9787536693937\"\n        },\n        {\n          \"title\": \"三体3：死神永生\",\n          \"price\": 55.9,\n          \"isbn\": \"9787229030933\"\n        }\n      ]\n    }\n    // ... 更多作者统计\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// 获取价格区间统计\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getPriceRangeStats'\n  }\n}).then(res => {\n  console.log('价格区间统计结果：', res)\n})\n\n// 响应示例\n{\n  \"data\": [\n    {\n      \"_id\": {\n        \"range\": \"30元以下\"\n      },\n      \"count\": 15,\n      \"books\": [\n        {\n          \"title\": \"活着\",\n          \"author\": \"余华\",\n          \"price\": 28.0\n        }\n        // ... 更多图书\n      ],\n      \"averagePrice\": 25.5\n    }\n    // ... 其他价格区间\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// 获取最贵的5本书\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getTopPricedBooks',\n    data: {\n      limit: 5\n    }\n  }\n}).then(res => {\n  console.log('最贵图书结果：', res)\n})\n\n// 响应示例\n{\n  \"data\": [\n    {\n      \"_id\": \"64c9f5a79f6c8e0001b60b0a\",\n      \"title\": \"时间简史（珍藏版）\",\n      \"author\": \"霍金\",\n      \"price\": 199.0,\n      \"isbn\": \"9787535732309\"\n    }\n    // ... 更多图书\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// 获取月度统计\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getMonthlyStats'\n  }\n}).then(res => {\n  console.log('月度统计结果：', res)\n})\n\n// 响应示例\n{\n  \"data\": [\n    {\n      \"_id\": {\n        \"year\": 2023,\n        \"month\": 8\n      },\n      \"count\": 25,\n      \"totalValue\": 1580.5,\n      \"books\": [\n        {\n          \"title\": \"三体\",\n          \"author\": \"刘慈欣\",\n          \"price\": 55.9\n        }\n        // ... 更多图书\n      ]\n    }\n    // ... 更多月份\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// 获取作者价格统计\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getAuthorPriceStats'\n  }\n}).then(res => {\n  console.log('作者价格统计结果：', res)\n})\n\n// 响应示例\n{\n  \"data\": [\n    {\n      \"_id\": \"刘慈欣\",\n      \"maxPrice\": 59.9,\n      \"minPrice\": 49.9,\n      \"averagePrice\": 55.9,\n      \"priceRange\": 10.0,\n      \"totalBooks\": 3\n    }\n    // ... 更多作者\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n```\n\n这个云函数演示了以下聚合操作的用法：\n\n1. `group`: 分组统计，可以按作者、价格区间等维度统计\n2. `sum`/`avg`/`max`/`min`: 常用的聚合函数\n3. `push`: 在分组结果中保存详细数据\n4. `sort`: 结果排序\n5. `match`: 对聚合结果进行筛选\n6. `switch`: 条件分支处理\n7. `subtract`/`multiply`: 数值计算\n8. `year`/`month`: 日期处理\n9. `limit`: 限制结果数量\n\n这些聚合操作可以帮助你进行复杂的数据分析，获取有价值的统计信息。你可以根据实际需求组合使用这些操作。",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-analytics-aggregate",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-analytics-aggregate"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-analytics-aggregate"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-book-analytics-aggregate"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878870575,
+    "legacyTags": [
+      "数据库",
+      "云开发",
+      "JavaScript",
+      "数据分析",
+      "聚合查询",
+      "MongoDB"
+    ],
+    "onlineIdentifier": "scf-nodejs-book-analytics-aggregate",
+    "onlineId": "f51ab3f0689ea66901ed4c945076d072"
+  }
+}

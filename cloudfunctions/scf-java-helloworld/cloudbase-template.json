@@ -1,0 +1,55 @@
+{
+  "identifier": "scf-java-helloworld",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Java Hello World",
+  "description": "Java 语言 空白 helloworld 模板",
+  "tags": [
+    "java",
+    "helloworld"
+  ],
+  "sampleCode": "这是云函数 Java 语言的 空白 helloworld 模板，模板内仅包含入口文件。\n\n源码地址详情参考:\n\n[github](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-java-helloworld)",
+  "language": "Java",
+  "runtimeVersion": "Java11",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-java-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-java-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-java-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-java-helloworld"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878869935,
+    "legacyTags": [
+      "Java"
+    ],
+    "onlineId": "aca45c226981c5d800b68b4b47719ab0",
+    "onlineIdentifier": "scf-java-helloworld"
+  }
+}

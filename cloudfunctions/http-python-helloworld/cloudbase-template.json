@@ -1,0 +1,56 @@
+{
+  "identifier": "http-python-helloworld",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "HTTP Python Hello World",
+  "titleIcon": "",
+  "description": "Hello World",
+  "tags": [
+    "http",
+    "python",
+    "helloworld"
+  ],
+  "sampleCode": "",
+  "language": "Python",
+  "runtimeVersion": "Python3.10",
+  "isCompile": false,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-python-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878868859,
+    "legacyTags": [],
+    "localOnly": true,
+    "onlineIdentifier": "http-python-helloworld"
+  }
+}

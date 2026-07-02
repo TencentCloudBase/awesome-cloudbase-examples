@@ -1,0 +1,4 @@
+#!/bin/bash
+# 使用 PHP 内置 web server 启动，监听 9000 端口
+# Use the PHP built-in web server, listening on port 9000
+php -S 0.0.0.0:9000 -t . router.php

@@ -1,0 +1,4 @@
+#!/bin/bash
+# 使用 PHP 内置 web server + Slim 路由文件 public/index.php
+# Use PHP built-in web server with the Slim entry public/index.php
+php -S 0.0.0.0:9000 -t public public/index.php

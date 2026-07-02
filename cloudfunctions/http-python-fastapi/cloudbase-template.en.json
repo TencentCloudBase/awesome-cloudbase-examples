@@ -1,0 +1,60 @@
+{
+  "identifier": "http-python-fastapi",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "FastAPI Framework",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/339a9c05a139861acae41b63d2370277-FastAPI.svg",
+  "description": "HTTP function example built with Python FastAPI framework",
+  "tags": [
+    "http",
+    "python",
+    "fastapi",
+    "web-framework"
+  ],
+  "sampleCode": "# FastAPI Template\n\nA minimal HTTP function written with FastAPI.\n\nDeploy and visit the access path to interact with the API (Swagger docs available at `/docs`).",
+  "language": "Python",
+  "runtimeVersion": "Python3.10",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-fastapi",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-fastapi"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-fastapi"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-python-fastapi"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878868067,
+    "legacyTags": [
+      "python",
+      "fastapi"
+    ],
+    "onlineIdentifier": "http-python-fastapi",
+    "onlineId": "f51ab3f0689ea66901ed4ca5593a02de",
+    "i18nSource": "override"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "identifier": "http-nodejs-nestjs",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Nest.js 框架",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/cd48f6afd878239823f461784613c21b-Nest.js.svg",
+  "description": "基于 Nodejs 语言框架 Nestjs 实现的 HTTP 调用示例",
+  "tags": [
+    "http",
+    "nodejs",
+    "nestjs",
+    "web-framework"
+  ],
+  "sampleCode": "# 快速部署 Nestjs 应用\n\n源码详情请参考:\n\n* github: https://github.com/TencentCloudBase/cloudrun-nestjs \n* gitee: https://gitee.com/TencentCloudBase/cloudrun-nestjs",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-nestjs",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-nestjs"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-nestjs"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-nestjs"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878863513,
+    "legacyTags": [
+      "Nodejs",
+      "Nestjs",
+      "HTTPFunc",
+      "WebFramework"
+    ],
+    "onlineIdentifier": "http-nodejs-nestjs",
+    "onlineId": "f51ab3f0689ea66901ed4ca4318b94e1"
+  }
+}

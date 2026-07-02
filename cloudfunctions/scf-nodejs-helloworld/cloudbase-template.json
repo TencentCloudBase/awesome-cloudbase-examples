@@ -1,0 +1,55 @@
+{
+  "identifier": "scf-nodejs-helloworld",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Node.js Hello World",
+  "titleIcon": "",
+  "description": "Hello World",
+  "tags": [
+    "nodejs",
+    "helloworld"
+  ],
+  "sampleCode": "",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878851825,
+    "legacyTags": [],
+    "onlineIdentifier": "scf-nodejs-helloworld",
+    "onlineId": "2ccbb81568a593bc02a413865a834040"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "identifier": "http-nodejs-websocket",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Node.js WebSocket",
+  "description": "Real-time bidirectional communication example built with Node.js WebSocket",
+  "tags": [
+    "http",
+    "nodejs",
+    "realtime",
+    "websocket"
+  ],
+  "sampleCode": "# WebSocket Example\n\nA Node.js WebSocket server/client demo for CloudBase HTTP function.\n\nDeploy and connect using `wss://<env>.service.tcloudbase.com/http-nodejs-websocket/`.",
+  "language": "Nodejs18.15",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-websocket",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-websocket"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-websocket"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-websocket"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878865202,
+    "legacyTags": [
+      "HTTPFunc"
+    ],
+    "onlineIdentifier": "http-nodejs-websocket",
+    "onlineId": "a50166006981cd5400b2c8245279021f",
+    "i18nSource": "override"
+  }
+}

@@ -1,0 +1,4 @@
+#!/bin/bash
+# 使用 PHP 内置 web server 启动 Laravel（指向 public/index.php）
+# Use PHP's built-in web server to serve Laravel (entry: public/index.php)
+php -S 0.0.0.0:9000 -t public public/index.php

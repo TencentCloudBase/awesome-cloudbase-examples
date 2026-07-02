@@ -3,6 +3,9 @@ package example;
 /**
  * 参数定义类 - POJO 类型
  * 用于接收 JSON 格式的输入参数
+ *
+ * Parameter definition class (POJO).
+ * Used to deserialize JSON input parameters for the cloud function.
  */
 public class KeyValueClass {
     private String key1;

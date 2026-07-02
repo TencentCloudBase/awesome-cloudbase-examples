@@ -1,0 +1,65 @@
+{
+  "identifier": "http-go-gin",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Gin Framework",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/cd946d0e7e8c1a22a43398a6b41f2d93-gin-color.svg",
+  "description": "HTTP function example built with Go Gin framework",
+  "tags": [
+    "http",
+    "go",
+    "gin",
+    "web-framework"
+  ],
+  "sampleCode": "# Deploy a Gin app\n\nSource references:\n\n* github: https://github.com/TencentCloudBase/cloudrun-gin\n* gitee: https://gitee.com/TencentCloudBase/cloudrun-gin",
+  "language": "Golang",
+  "runtimeVersion": "Go1",
+  "isCompile": true,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-go-gin",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-go-gin"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-go-gin"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-go-gin"
+      }
+    }
+  ],
+  "displayPage": [
+    "platform-run"
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782875897260,
+    "legacyTags": [
+      "HTTPFunc",
+      "WebFramework",
+      "Golang",
+      "Gin"
+    ],
+    "onlineIdentifier": "http-go-gin",
+    "onlineId": "f51ab3f0689ea66901ed4c9f4b1c3ce1",
+    "i18nSource": "override"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "identifier": "http-java-springboot",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Spring Boot 框架",
+  "titleIcon": "",
+  "description": "Springboot",
+  "tags": [
+    "http",
+    "java",
+    "spring-boot",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Java",
+  "runtimeVersion": "Java11",
+  "isCompile": true,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-springboot",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-springboot"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-springboot"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-java-springboot"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878861211,
+    "legacyTags": [],
+    "localOnly": true,
+    "onlineIdentifier": "http-java-springboot"
+  }
+}

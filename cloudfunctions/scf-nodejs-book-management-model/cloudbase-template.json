@@ -1,0 +1,60 @@
+{
+  "identifier": "scf-nodejs-book-management-model",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "图书管理",
+  "description": "图书管理云函数，包含 models 操作示例",
+  "tags": [
+    "nodejs",
+    "database",
+    "crud"
+  ],
+  "sampleCode": "你可以使用这个云函数来管理图书。在小程序中测试调用这个云函数的示例代码如下：\n\n```js\n// 创建图书\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'createBook',\n      data: {\n        title: '三体',\n        author: '刘慈欣',\n        price: 39.9,\n        isbn: '9787536692930',\n      },\n    },\n  })\n  .then((res) => {\n    console.log('创建成功：', res);\n  });\n\n// 更新图书\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'updateBook',\n      data: {\n        id: 'xxx', // 图书ID\n        book: {\n          price: 45.0,\n        },\n      },\n    },\n  })\n  .then((res) => {\n    console.log('更新成功：', res);\n  });\n\n// 删除图书\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'deleteBook',\n      data: {\n        id: 'xxx', // 图书ID\n      },\n    },\n  })\n  .then((res) => {\n    console.log('删除成功：', res);\n  });\n\n// 获取单本图书\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'getBook',\n      data: {\n        id: 'xxx', // 图书ID\n      },\n    },\n  })\n  .then((res) => {\n    console.log('图书信息：', res);\n  });\n\n// 获取图书列表\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'listBooks',\n      data: {},\n    },\n  })\n  .then((res) => {\n    console.log('图书列表：', res);\n  });\n\n// 搜索图书\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'searchBooks',\n      data: {\n        keyword: '三体',\n      },\n    },\n  })\n  .then((res) => {\n    console.log('搜索结果：', res);\n  });\n```\n\n返回数据结构示例：\n\n```js\n// 创建图书返回\n{\n  \"data\": {\n    \"id\": \"xxx\" // 图书 id\n  }\n}\n\n// 更新/删除图书返回\n{\n  \"data\": {\n    \"count\": 1 // 影响行数\n  }\n}\n\n// 获取单本图书\n{\n  \"data\": {\n    \"_id\": \"xxx\",\n    \"title\": \"三体\",\n    \"author\": \"刘慈欣\",\n    \"price\": 39.9,\n    \"isbn\": \"9787536692930\"\n    // ...\n  }\n}\n\n// 获取图书列表返回\n{\n  \"data\": {\n    \"records\": [\n      {\n        \"_id\": \"xxx\",\n        \"title\": \"三体\",\n        \"author\": \"刘慈欣\",\n        \"price\": 39.9,\n        \"isbn\": \"9787536692930\"\n      }\n      // ...更多图书\n    ],\n    \"total\": 10\n  }\n}\n\n// 搜索图书返回\n{\n  \"data\": {\n    \"records\": [\n      {\n        \"_id\": \"xxx\",\n        \"title\": \"三体\",\n        \"author\": \"刘慈欣\",\n        \"price\": 39.9,\n        \"isbn\": \"9787536692930\"\n      }\n      // ...更多图书\n    ],\n  }\n}\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-management-model",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-management-model"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-management-model"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-book-management-model"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878871175,
+    "legacyTags": [
+      "云开发",
+      "数据库",
+      "CRUD",
+      "JavaScript",
+      "微信小程序",
+      "模型层"
+    ],
+    "onlineIdentifier": "scf-nodejs-book-management-model",
+    "onlineId": "f51ab3f0689ea66901ed4c9533363c79"
+  }
+}

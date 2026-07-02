@@ -1,0 +1,63 @@
+{
+  "identifier": "scf-nodejs-openapi-get-phonenumber",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Cloud Call to Get User's Mobilephone",
+  "description": "Cloud API to Get User's Mobile Number (Requires re-download and redeployment in WeChat Miniprograme IDE)",
+  "tags": [
+    "nodejs",
+    "wechat-miniprogram",
+    "wechat-openapi",
+    "openapi"
+  ],
+  "sampleCode": "When calling this cloud function from the Mini Program side, the code parameter must be passed in.: \n\n```javascript\nwx.cloud\n  .callFunction({\n    name: 'get-phoneNumber',\n    data: {\n      code: event.detail.code, // Obtain from getPhoneNumber button event\n    },\n  })\n  .then((res) => {\n    console.log('MobilePhone Number: ', res.result);\n  })\n  .catch((err) => {\n    console.error('Get MobilePhone Failed: ', err);\n  });\n```\n\nThis will output an object with the following structure in the debugger: \n\n```json\n{\n  \"errcode\": 0,\n  \"errmsg\": \"ok\",\n  \"phone_info\": {\n    \"phoneNumber\": \"xxxxxx\",\n    \"purePhoneNumber\": \"xxxxxx\",\n    \"countryCode\": 86,\n    \"watermark\": {\n      \"timestamp\": 1637744274,\n      \"appid\": \"xxxx\"\n    }\n  }\n}\n```\n\nNotes: \n\n1. Required: Activate the \"Get Phone Number\" feature in WeChat Mini Program Admin Console\n2. Install latest wx-server-sdk\n3. The code can only be used once and is valid for 5 minutes.",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-openapi-get-phonenumber",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-openapi-get-phonenumber"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-openapi-get-phonenumber"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-openapi-get-phonenumber"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878874291,
+    "legacyTags": [
+      "WeChat Mini Program",
+      "CloudBase",
+      "SCF",
+      "wx-server-sdk",
+      "Get Mobilephone",
+      "Cloud Call",
+      "openapi",
+      "User Authorization"
+    ],
+    "onlineIdentifier": "scf-nodejs-openapi-get-phonenumber",
+    "onlineId": "f51ab3f0689ea66901ed4cba24b03c1d"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "envId": "YOUR_ENV_ID",
+  "functionRoot": "./",
+  "functions": [
+    {
+      "name": "http-go-helloworld",
+      "type": "HTTP",
+      "runtime": "Go1",
+      "timeout": 60,
+      "memorySize": 512
+    }
+  ]
+}

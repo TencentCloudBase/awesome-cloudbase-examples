@@ -1,0 +1,4 @@
+#!/bin/bash
+# 启动 Go 编译产物
+# Start the compiled Go binary
+./main

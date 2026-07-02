@@ -1,0 +1,56 @@
+{
+  "identifier": "scf-python-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Python Hello World",
+  "description": "Python SCF cloud function blank template",
+  "tags": [
+    "python",
+    "helloworld"
+  ],
+  "sampleCode": "# Python Cloud Function Blank Template\n\nA minimal SCF cloud function written in Python.\n\nDeploy and invoke with any payload.",
+  "language": "Python3.9",
+  "runtimeVersion": "Python3.9",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-python-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-python-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-python-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-python-helloworld"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878878240,
+    "legacyTags": [
+      "Python"
+    ],
+    "onlineId": "dbbce4a468b7a87000efbce93a655840",
+    "i18nSource": "override",
+    "onlineIdentifier": "scf-python-helloworld"
+  }
+}

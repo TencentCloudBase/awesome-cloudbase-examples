@@ -1,0 +1,58 @@
+{
+  "identifier": "http-php-laravel",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Laravel Framework",
+  "titleIcon": "",
+  "description": "HTTP function example built with PHP Laravel framework",
+  "tags": [
+    "http",
+    "php",
+    "laravel",
+    "web-framework"
+  ],
+  "sampleCode": "# Laravel Template\n\nA Laravel HTTP function for CloudBase.\n\nRun `composer install` locally then deploy.",
+  "language": "Php",
+  "runtimeVersion": "Php7.4",
+  "isCompile": false,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-laravel",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-laravel"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-laravel"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-php-laravel"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878866365,
+    "legacyTags": [],
+    "localOnly": true,
+    "i18nSource": "override",
+    "onlineIdentifier": "http-php-laravel"
+  }
+}

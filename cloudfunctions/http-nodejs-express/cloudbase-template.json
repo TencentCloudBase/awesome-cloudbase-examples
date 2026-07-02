@@ -1,0 +1,64 @@
+{
+  "identifier": "http-nodejs-express",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Express 框架",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/fd8081e956a2608b586963017d0111f7-Express.svg",
+  "description": "基于 Nodejs 语言框架 Express 实现的 HTTP 调用示例",
+  "tags": [
+    "http",
+    "nodejs",
+    "express",
+    "web-framework"
+  ],
+  "sampleCode": "# 快速部署 Express 应用\n\n源码详情请参考\n\n* github: https://github.com/TencentCloudBase/cloudrun-express\n* gitee: https://gitee.com/TencentCloudBase/cloudrun-express",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-express",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-express"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-express"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-express"
+      }
+    }
+  ],
+  "displayPage": [
+    "platform-run"
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878861755,
+    "legacyTags": [
+      "Nodejs",
+      "Express",
+      "HTTPFunc",
+      "WebFramework"
+    ],
+    "onlineIdentifier": "http-nodejs-express",
+    "onlineId": "f51ab3f0689ea66901ed4ca3124cb893"
+  }
+}
