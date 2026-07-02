@@ -1,0 +1,57 @@
+{
+  "identifier": "http-java-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "HTTP Java Hello World",
+  "titleIcon": "",
+  "description": "Java HTTP function helloworld template",
+  "tags": [
+    "http",
+    "java",
+    "helloworld"
+  ],
+  "sampleCode": "# Java HTTP Hello World\n\nA minimal HTTP function written in Java.\n\nBuild with `bash build.sh` to produce `app.jar`, then deploy and visit the access path.",
+  "language": "Java",
+  "runtimeVersion": "Java11",
+  "isCompile": true,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-java-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-java-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878860866,
+    "legacyTags": [],
+    "localOnly": true,
+    "i18nSource": "override",
+    "onlineIdentifier": "http-java-helloworld"
+  }
+}

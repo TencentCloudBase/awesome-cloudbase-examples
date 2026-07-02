@@ -1,0 +1,57 @@
+{
+  "identifier": "http-php-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "HTTP PHP Hello World",
+  "titleIcon": "",
+  "description": "PHP HTTP function helloworld template",
+  "tags": [
+    "http",
+    "php",
+    "helloworld"
+  ],
+  "sampleCode": "# PHP HTTP Hello World\n\nA minimal HTTP function written in PHP.\n\nDeploy and visit the access path to see `Hello World from PHP HTTP Function!`.",
+  "language": "Php",
+  "runtimeVersion": "Php7.4",
+  "isCompile": false,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-php-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878865786,
+    "legacyTags": [],
+    "localOnly": true,
+    "i18nSource": "override",
+    "onlineIdentifier": "http-php-helloworld"
+  }
+}

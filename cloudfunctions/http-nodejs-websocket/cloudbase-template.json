@@ -1,0 +1,57 @@
+{
+  "identifier": "http-nodejs-websocket",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Node.js WebSocket",
+  "description": "Nodejs 语言 Websocket 模板",
+  "tags": [
+    "http",
+    "nodejs",
+    "realtime",
+    "websocket"
+  ],
+  "sampleCode": "这是 HTTP 云函数 Nodejs 语言的 Websocket 模板.\n\n源码详情请参考:\n\n[github](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/websockets)",
+  "language": "Nodejs18.15",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-websocket",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-websocket"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-websocket"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-websocket"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878864916,
+    "legacyTags": [
+      "HTTPFunc"
+    ],
+    "onlineIdentifier": "http-nodejs-websocket",
+    "onlineId": "a50166006981cd5400b2c8245279021f"
+  }
+}

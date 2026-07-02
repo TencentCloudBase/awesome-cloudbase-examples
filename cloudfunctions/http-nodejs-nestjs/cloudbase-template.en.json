@@ -1,0 +1,62 @@
+{
+  "identifier": "http-nodejs-nestjs",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Nest.js Framework",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/cd48f6afd878239823f461784613c21b-Nest.js.svg",
+  "description": "HTTP example built with Node.js Nest.js framework",
+  "tags": [
+    "http",
+    "nodejs",
+    "nestjs",
+    "web-framework"
+  ],
+  "sampleCode": "# Deploy a Nest.js app\n\nSource references:\n\n* github: https://github.com/TencentCloudBase/cloudrun-nestjs\n* gitee: https://gitee.com/TencentCloudBase/cloudrun-nestjs",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-nestjs",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-nestjs"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-nestjs"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-nestjs"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878863816,
+    "legacyTags": [
+      "Nodejs",
+      "Nestjs",
+      "HTTPFunc",
+      "WebFramework"
+    ],
+    "onlineIdentifier": "http-nodejs-nestjs",
+    "onlineId": "f51ab3f0689ea66901ed4ca4318b94e1",
+    "i18nSource": "override"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "identifier": "scf-go-helloworld",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Go Hello World",
+  "titleIcon": "",
+  "description": "Hello World",
+  "tags": [
+    "go",
+    "helloworld"
+  ],
+  "sampleCode": "",
+  "language": "Go",
+  "runtimeVersion": "Go1",
+  "isCompile": true,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-go-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-go-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-go-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-go-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878869400,
+    "legacyTags": [],
+    "onlineIdentifier": "scf-go-helloworld",
+    "onlineId": "25cb905f6981bd1600b5fde77c03a870"
+  }
+}

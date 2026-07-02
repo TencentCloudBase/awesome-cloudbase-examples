@@ -1,0 +1,59 @@
+{
+  "identifier": "http-python-fastapi",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "FastAPI 框架",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/339a9c05a139861acae41b63d2370277-FastAPI.svg",
+  "description": "基于 Python 框架 FastAPI 的 HTTP 服务",
+  "tags": [
+    "http",
+    "python",
+    "fastapi",
+    "web-framework"
+  ],
+  "sampleCode": "# 快速部署 FastAPI 应用\n\n源码详情请参考:\n\n* github: https://github.com/TencentCloudBase/cloudrun-fastapi\n* gitee: https://gitee.com/TencentCloudBase/cloudrun-fastapi",
+  "language": "Python",
+  "runtimeVersion": "Python3.10",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-fastapi",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-fastapi"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-fastapi"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-python-fastapi"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878867713,
+    "legacyTags": [
+      "python",
+      "fastapi"
+    ],
+    "onlineIdentifier": "http-python-fastapi",
+    "onlineId": "f51ab3f0689ea66901ed4ca5593a02de"
+  }
+}

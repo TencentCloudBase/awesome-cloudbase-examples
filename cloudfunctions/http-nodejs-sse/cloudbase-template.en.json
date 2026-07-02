@@ -1,0 +1,58 @@
+{
+  "identifier": "http-nodejs-sse",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Node.js SSE",
+  "titleIcon": "",
+  "description": "Server-Sent Events (SSE) example for HTTP function",
+  "tags": [
+    "http",
+    "nodejs",
+    "realtime",
+    "sse"
+  ],
+  "sampleCode": "# Server-Sent Events Template\n\nDemonstrates streaming responses from a CloudBase HTTP function using SSE.\n\nDeploy and visit the access path with `curl --no-buffer` to see the streaming events.",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-sse",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-sse"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-sse"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-sse"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878864469,
+    "legacyTags": [],
+    "localOnly": true,
+    "i18nSource": "override",
+    "onlineIdentifier": "http-nodejs-sse"
+  }
+}

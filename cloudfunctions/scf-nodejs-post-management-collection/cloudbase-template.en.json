@@ -1,0 +1,60 @@
+{
+  "identifier": "scf-nodejs-post-management-collection",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Article Management",
+  "description": "Article Management Cloud Function，Includes examples for adding, updating, querying, and deleting articles.",
+  "tags": [
+    "nodejs",
+    "database",
+    "crud"
+  ],
+  "sampleCode": "You can use this cloud function to manage articles. Here's sample code for calling it in a mini program: \n\n```js\n// Create\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'createPost',\n    data: {\n      title: 'My 1st Article',\n      content: 'this is the content',\n      author: 'David',\n    }\n  }\n}).then(res => {\n  console.log('Create result: ', res)\n})\n\n// response example\n{\n  \"id\": \"64c9f5a79f6c8e0001b60b0a\",\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// Update\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'updatePost',\n    data: {\n      id: '64c9f5a79f6c8e0001b60b0a',\n      post: {\n        content: 'Update content'\n      }\n    }\n  }\n}).then(res => {\n  console.log('Update result: ', res)\n})\n\n// response example\n{\n  \"id\": \"64c9f5a79f6c8e0001b60b0a\",\n  \"updated\": 1\n}\n\n// Delete\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'deletePost',\n    data: {\n      id: '64c9f5a79f6c8e0001b60b0a'\n    }\n  }\n}).then(res => {\n  console.log('Delete result: ', res)\n})\n\n// response example\n{\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\",\n  \"deleted\": 1\n}\n\n// Get One\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'getPost',\n    data: {\n      id: '64c9f5a79f6c8e0001b60b0a'\n    }\n  }\n}).then(res => {\n  console.log('Get one: ', res)\n})\n\n// response example\n{\n  \"data\": [\n    {\n      \"_id\": \"64c9f5a79f6c8e0001b60b0a\",\n      \"title\": \"My 1st Article\",\n      \"content\": \"this is the content\",\n      \"author\": \"David\"\n      // ...\n    }\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// Pagination\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'listPosts',\n    data: {\n      page: 1,\n      pageSize: 10\n    }\n  }\n}).then(res => {\n  console.log('Pagination result: ', res)\n})\n\n// response\n{\n  \"list\": [\n    {\n      \"_id\": \"64c9f5a79f6c8e0001b60b0a\",\n      \"title\": \"1st Article\",\n      \"content\": \"update content\",\n      \"author\": \"David\"\n      // ...\n    }\n    // ... more\n  ],\n  \"total\": 100,\n  \"page\": 1,\n  \"pageSize\": 10\n}\n\n// Search\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'searchPosts',\n    data: {\n      keyword: 'tech'\n    }\n  }\n}).then(res => {\n  console.log('Search: ', res)\n})\n\n// response\n{\n  \"data\": [\n    {\n      \"_id\": \"64c9f5a79f6c8e0001b60b0a\",\n      \"title\": \"1st Article\",\n      \"content\": \"update content\",\n      \"author\": \"David\"\n      // ...\n    }\n    // more\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-post-management-collection",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-post-management-collection"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-post-management-collection"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-post-management-collection"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878874823,
+    "legacyTags": [
+      "Cloudbase",
+      "database",
+      "JavaScript",
+      "CRUD",
+      "Pagination query",
+      "Full-text search"
+    ],
+    "onlineIdentifier": "scf-nodejs-post-management-collection",
+    "onlineId": "f51ab3f0689ea66901ed4cbb2477926a"
+  }
+}

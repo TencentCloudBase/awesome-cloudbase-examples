@@ -1,0 +1,60 @@
+{
+  "identifier": "scf-nodejs-user-management-sql",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "用户管理 SQL",
+  "description": "用户管理云函数，包含 sql 操作示例 （目前仅支持 select 语句）",
+  "tags": [
+    "nodejs",
+    "auth",
+    "database",
+    "crud"
+  ],
+  "sampleCode": "你可以使用这个云函数来管理用户。\n\n当前仅开放了 select 语句，如果有其他 SQL 语句需求，请通过官方社群联系我们。\n\n在小程序中测试调用这个云函数的示例代码如下：\n\n```js\n\n// 获取单个用户\nwx.cloud.callFunction({\n  name: 'user-management',\n  data: {\n    action: 'getUser',\n    data: {\n      id: 'xxx'\n    }\n  }\n}).then(res => {\n  console.log('获取用户结果：', res)\n})\n\n// 响应示例\n{\n  \"_id\": \"xxx\",\n  \"username\": \"张三\",\n  \"email\": \"zhangsan@example.com\",\n  \"phone\": \"13900139000\"\n  // ...\n}\n\n// 分页获取用户列表\nwx.cloud.callFunction({\n  name: 'user-management',\n  data: {\n    action: 'listUsers',\n    data: {\n      page: 1,\n      pageSize: 10\n    }\n  }\n}).then(res => {\n  console.log('获取用户列表结果：', res)\n})\n\n// 响应示例\n{\n  \"list\": [\n    {\n      \"_id\": \"xxx\",\n      \"username\": \"张三\",\n      \"email\": \"zhangsan@example.com\",\n      \"phone\": \"13900139000\"\n    }\n    // ... 更多用户\n  ],\n  \"total\": 100,\n  \"page\": 1,\n  \"pageSize\": 10\n}\n\n// 搜索用户\nwx.cloud.callFunction({\n  name: 'user-management',\n  data: {\n    action: 'searchUsers',\n    data: {\n      keyword: '张三'\n    }\n  }\n}).then(res => {\n  console.log('搜索用户结果：', res)\n})\n\n// 响应示例\n[\n  {\n    \"id\": 1,\n    \"username\": \"张三\",\n    \"email\": \"zhangsan@example.com\",\n    \"phone\": \"13900139000\",\n  }\n  // ... 更多匹配的用户\n]\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-user-management-sql",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-user-management-sql"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-user-management-sql"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-user-management-sql"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878875612,
+    "legacyTags": [
+      "云开发",
+      "用户管理",
+      "数据库查询",
+      "微信小程序",
+      "云函数"
+    ],
+    "onlineIdentifier": "scf-nodejs-user-management-sql",
+    "onlineId": "f51ab3f0689ea66901ed4c9b6243de04"
+  }
+}

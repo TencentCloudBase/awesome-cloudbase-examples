@@ -1,0 +1,59 @@
+{
+  "identifier": "scf-nodejs-book-analytics-aggregate",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Book Analytics Aggregate",
+  "description": "book analytics cloud function，include aggregate operator",
+  "tags": [
+    "nodejs",
+    "data-analytics",
+    "aggregation"
+  ],
+  "sampleCode": "You can use this cloud function to perform book data analysis. Here is the example code for testing the invocation of this cloud function in the mini-program:\n\n```js\n// Get author statistics\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getAuthorStats'\n  }\n}).then(res => {\n  console.log('author statistics result: ', res)\n})\n\n// Response Example\n{\n  \"data\": [\n    {\n      \"_id\": \"liucixin\",\n      \"totalBooks\": 3,\n      \"totalValue\": 167.7,\n      \"averagePrice\": 55.9,\n      \"books\": [\n        {\n          \"title\": \"The Three-Body Problem\",\n          \"price\": 55.9,\n          \"isbn\": \"9787536692930\"\n        },\n        {\n          \"title\": \"The Three-Body Problem II: The Dark Forest\",\n          \"price\": 55.9,\n          \"isbn\": \"9787536693937\"\n        },\n        {\n          \"title\": \"The Three-Body Problem III: Death's End\",\n          \"price\": 55.9,\n          \"isbn\": \"9787229030933\"\n        }\n      ]\n    }\n    // ... more\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// Get price range statistics\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getPriceRangeStats'\n  }\n}).then(res => {\n  console.log('Price range statistics result:', res)\n})\n\n// Response Example\n{\n  \"data\": [\n    {\n      \"_id\": {\n        \"range\": \"Below ?30\"\n      },\n      \"count\": 15,\n      \"books\": [\n        {\n          \"title\": \"To Live\",\n          \"author\": \"Yu Hua\",\n          \"price\": 28.0\n        }\n        // ... more books\n      ],\n      \"averagePrice\": 25.5\n    }\n    // ... other price ranges\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// Get top 5 most expensive books\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getTopPricedBooks',\n    data: {\n      limit: 5\n    }\n  }\n}).then(res => {\n  console.log('Most expensive books result:', res)\n})\n\n// Response Example\n{\n  \"data\": [\n    {\n      \"_id\": \"64c9f5a79f6c8e0001b60b0a\",\n      \"title\": \"A Brief History of Time (Collector's Edition)\",\n      \"author\": \"Stephen Hawking\",\n      \"price\": 199.0,\n      \"isbn\": \"9787535732309\"\n    }\n    // ... more books\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// Get monthly statistics\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getMonthlyStats'\n  }\n}).then(res => {\n  console.log('Monthly statistics result:', res)\n})\n\n// Response Example\n{\n  \"data\": [\n    {\n      \"_id\": {\n        \"year\": 2023,\n        \"month\": 8\n      },\n      \"count\": 25,\n      \"totalValue\": 1580.5,\n      \"books\": [\n        {\n          \"title\": \"The Three-Body Problem\",\n          \"author\": \"Liu Cixin\",\n          \"price\": 55.9\n        }\n        // ... more books\n      ]\n    }\n    // ... more months\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// Get author price statistics\nwx.cloud.callFunction({\n  name: 'book-analytics',\n  data: {\n    action: 'getAuthorPriceStats'\n  }\n}).then(res => {\n  console.log('Author price statistics result:', res)\n})\n\n// Response Example\n{\n  \"data\": [\n    {\n      \"_id\": \"Liu Cixin\",\n      \"maxPrice\": 59.9,\n      \"minPrice\": 49.9,\n      \"averagePrice\": 55.9,\n      \"priceRange\": 10.0,\n      \"totalBooks\": 3\n    }\n    // ... more authors\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n```\nThis cloud function demonstrates the usage of the following aggregation operations:\n\ngroup: Group statistics by dimensions like author, price range etc.\nsum/avg/max/min: Common aggregation functions\npush: Save detailed data in grouped results\nsort: Result sorting\nmatch: Filter aggregation results\nswitch: Conditional branching\nsubtract/multiply: Numerical calculations\nyear/month: Date processing\nlimit: Limit result count\n\n\nThese aggregation operations can help you perform complex data analysis and obtain valuable statistical information. You can combine these operations according to your actual needs.",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-analytics-aggregate",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-analytics-aggregate"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-analytics-aggregate"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-book-analytics-aggregate"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878870920,
+    "legacyTags": [
+      "database",
+      "JavaScript",
+      "data-analytics",
+      "MongoDB"
+    ],
+    "onlineIdentifier": "scf-nodejs-book-analytics-aggregate",
+    "onlineId": "f51ab3f0689ea66901ed4cb656546e59"
+  }
+}

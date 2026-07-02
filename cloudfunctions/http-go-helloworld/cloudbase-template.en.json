@@ -1,0 +1,57 @@
+{
+  "identifier": "http-go-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "HTTP Go Hello World",
+  "titleIcon": "",
+  "description": "Go HTTP function helloworld template",
+  "tags": [
+    "http",
+    "go",
+    "helloworld"
+  ],
+  "sampleCode": "# Go HTTP Hello World\n\nA minimal HTTP function written in Go.\n\nDeploy and visit the access path to see `Hello World from Go HTTP Function!`.",
+  "language": "Go",
+  "runtimeVersion": "Go1",
+  "isCompile": true,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-go-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-go-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-go-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-go-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878860356,
+    "legacyTags": [],
+    "localOnly": true,
+    "i18nSource": "override",
+    "onlineIdentifier": "http-go-helloworld"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "identifier": "scf-nodejs-get-openid",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "OPENID Get",
+  "description": "Cloud Function Example for Getting OpenID",
+  "tags": [
+    "nodejs",
+    "wechat-miniprogram",
+    "wechat-openapi"
+  ],
+  "sampleCode": "You can use this cloud function to retrieve a user's OPENID. Below is the sample code for testing this cloud function in a mini program:\n\n```js\nwx.cloud.callFunction({\n  name: 'get-openid',\n  complete: (res) => {\n    console.log('callFunction result: ', res);\n  },\n});\n```\n\nThis will output an object with the following structure in the debugger:\n\n```json\n{\n  \"openid\": \"oxxxxxxxxxxxxxx\",\n  \"appid\": \"wxxxxxxxxxxx\",\n  \"unionid\": \"oxxx_xxxxxxxxxxxxx\" // Only returned when unionId retrieval conditions are met\n}\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-get-openid",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-get-openid"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-get-openid"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-get-openid"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878872695,
+    "legacyTags": [
+      "WeChat Mini Program",
+      "CloudBase",
+      "Cloud Function",
+      "User Authentication",
+      "JavaScript"
+    ],
+    "onlineIdentifier": "scf-nodejs-get-openid",
+    "onlineId": "f51ab3f0689ea66901ed4cb93e9ca0ec"
+  }
+}

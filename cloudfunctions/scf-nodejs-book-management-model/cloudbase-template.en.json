@@ -1,0 +1,60 @@
+{
+  "identifier": "scf-nodejs-book-management-model",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Book Management",
+  "description": "Cloud Function for Book Management, Including Model Operation Example",
+  "tags": [
+    "nodejs",
+    "database",
+    "crud"
+  ],
+  "sampleCode": "You can use this cloud function to manage books. Here is the example code for testing the invocation of this cloud function in the mini-program:\n\n```js\n// Create a book\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'createBook',\n      data: {\n        title: 'The Three-Body Problem',\n        author: 'Liu Cixin',\n        price: 39.9,\n        isbn: '9787536692930',\n      },\n    },\n  })\n  .then((res) => {\n    console.log('Creation successful:', res);\n  });\n\n// Update a book\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'updateBook',\n      data: {\n        id: 'xxx', // Book ID\n        book: {\n          price: 45.0,\n        },\n      },\n    },\n  })\n  .then((res) => {\n    console.log('Update successful:', res);\n  });\n\n// Delete a book\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'deleteBook',\n      data: {\n        id: 'xxx', // Book ID\n      },\n    },\n  })\n  .then((res) => {\n    console.log('Deletion successful:', res);\n  });\n\n// Get a single book\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'getBook',\n      data: {\n        id: 'xxx', // Book ID\n      },\n    },\n  })\n  .then((res) => {\n    console.log('Book information:', res);\n  });\n\n// Get book list\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'listBooks',\n      data: {},\n    },\n  })\n  .then((res) => {\n    console.log('Book list:', res);\n  });\n\n// Search books\nwx.cloud\n  .callFunction({\n    name: 'book-management',\n    data: {\n      action: 'searchBooks',\n      data: {\n        keyword: 'The Three-Body Problem',\n      },\n    },\n  })\n  .then((res) => {\n    console.log('Search results:', res);\n  });\n\n```\n\nExample response data structures:\n\n```\n// Create book response\n{\n  \"data\": {\n    \"id\": \"xxx\" // Book ID\n  }\n}\n\n// Update/Delete book response\n{\n  \"data\": {\n    \"count\": 1 // Affected rows\n  }\n}\n\n// Get single book\n{\n  \"data\": {\n    \"_id\": \"xxx\",\n    \"title\": \"The Three-Body Problem\",\n    \"author\": \"Liu Cixin\",\n    \"price\": 39.9,\n    \"isbn\": \"9787536692930\"\n    // ...\n  }\n}\n\n// Get book list response\n{\n  \"data\": {\n    \"records\": [\n      {\n        \"_id\": \"xxx\",\n        \"title\": \"The Three-Body Problem\",\n        \"author\": \"Liu Cixin\",\n        \"price\": 39.9,\n        \"isbn\": \"9787536692930\"\n      }\n      // ...More books\n    ],\n    \"total\": 10\n  }\n}\n\n// Search books response\n{\n  \"data\": {\n    \"records\": [\n      {\n        \"_id\": \"xxx\",\n        \"title\": \"The Three-Body Problem\",\n        \"author\": \"Liu Cixin\",\n        \"price\": 39.9,\n        \"isbn\": \"9787536692930\"\n      }\n      // ...More books\n    ],\n  }\n}\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-management-model",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-management-model"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-book-management-model"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-book-management-model"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878871447,
+    "legacyTags": [
+      "cloudbase",
+      "database",
+      "CRUD",
+      "JavaScript",
+      "mini-program",
+      "model"
+    ],
+    "onlineIdentifier": "scf-nodejs-book-management-model",
+    "onlineId": "f51ab3f0689ea66901ed4cb76caba511"
+  }
+}

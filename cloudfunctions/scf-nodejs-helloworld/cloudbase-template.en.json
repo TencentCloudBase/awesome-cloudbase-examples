@@ -1,0 +1,56 @@
+{
+  "identifier": "scf-nodejs-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Node.js Hello World",
+  "titleIcon": "",
+  "description": "Node.js SCF cloud function helloworld template",
+  "tags": [
+    "nodejs",
+    "helloworld"
+  ],
+  "sampleCode": "# Node.js Cloud Function Hello World\n\nA minimal SCF cloud function written in Node.js.\n\nDeploy and invoke with any payload.",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878852359,
+    "legacyTags": [],
+    "i18nSource": "override",
+    "onlineIdentifier": "scf-nodejs-helloworld",
+    "onlineId": "2ccbb81568a593bc02a413865a834040"
+  }
+}

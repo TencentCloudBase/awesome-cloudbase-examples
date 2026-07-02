@@ -1,0 +1,13 @@
+{
+  "envId": "YOUR_ENV_ID",
+  "functionRoot": "./",
+  "functions": [
+    {
+      "name": "http-php-helloworld",
+      "type": "HTTP",
+      "runtime": "Php7.4",
+      "timeout": 60,
+      "memorySize": 512
+    }
+  ]
+}

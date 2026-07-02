@@ -1,0 +1,59 @@
+{
+  "identifier": "scf-nodejs-hono-template",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Hono.js Framework",
+  "description": "SCF cloud function example built with Hono.js framework",
+  "tags": [
+    "nodejs",
+    "hono",
+    "web-framework"
+  ],
+  "sampleCode": "# Hono.js Template\n\nAn SCF cloud function built with the Hono.js web framework.\n\nDeploy and invoke through the SCF runtime.",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-hono-template",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-hono-template"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-hono-template"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-hono-template"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 1782878873743,
+    "legacyTags": [
+      "云开发",
+      "云函数",
+      "Honojs",
+      "hono"
+    ],
+    "onlineIdentifier": "scf-nodejs-hono-template",
+    "onlineId": "f51ab3f0689ea66901ed4cb1481264e1",
+    "i18nSource": "override"
+  }
+}
