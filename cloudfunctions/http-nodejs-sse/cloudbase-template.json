@@ -17,6 +17,7 @@
   "language": "Nodejs",
   "runtimeVersion": "Nodejs18.15",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-sse.zip",
   "envParams": [],
   "linkurl": "",
   "guide": "",
@@ -47,8 +48,8 @@
   ],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-sse.zip",
+    "zipSha": "64cad715ee3abbc6be3720a275393618c6398d39e0267359cdc249c76564014f",
     "uploadedAt": 1782878864097,
     "legacyTags": [],
     "localOnly": true,

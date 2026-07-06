@@ -12,7 +12,7 @@
 //   import { pack } from './lib/packer.mjs';
 //   const { zipPath, sha256 } = await pack('scf-go-helloworld');
 
-import { existsSync, readFileSync, readdirSync, statSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join, resolve, dirname, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -90,46 +90,49 @@ function getDeployFiles(dirName, packType) {
     const EXCLUDE = [
         'node_modules',
         '.cache', '.git', '.github',
-        'cloudbase-template.json', 'cloudbase-template.en.json',
-        'cloudbaserc.json',
-        'README.md', 'README_cn.md', 'README_en.md', 'README.cn.md', 'README.en.md',
-        'build.sh',
         '*.zip',
     ];
+
+    // 公共：收集源码文件（按 EXCLUDE 过滤，过滤隐藏文件）
+    function collectSource() {
+        const result = new Set();
+        function walk(dir) {
+            for (const entry of readdirSync(join(dirPath, dir), { withFileTypes: true })) {
+                const rel = dir ? `${dir}/${entry.name}` : entry.name;
+                if (EXCLUDE.some((p) => {
+                    if (p.endsWith('*')) return rel.endsWith(p.slice(0, -1)) || entry.name.endsWith(p.slice(0, -1));
+                    return entry.name === p || rel === p;
+                })) continue;
+                if (entry.name.startsWith('.')) continue;
+                if (entry.isDirectory()) { walk(rel); }
+                else { result.add(rel); }
+            }
+        }
+        walk('');
+        return [...result];
+    }
 
     if (packType === PACK_TYPE.COMPILE_GO) {
         const files = [];
         if (existsSync(join(dirPath, 'main'))) files.push('main');
         if (isWeb && existsSync(join(dirPath, 'scf_bootstrap'))) files.push('scf_bootstrap');
+        // 追加源码
+        for (const f of collectSource()) { if (!files.includes(f)) files.push(f); }
         return files;
     }
 
     if (packType === PACK_TYPE.COMPILE_JAVA) {
         const files = [];
-        // 找所有 jar
         for (const f of readdirSync(dirPath)) {
             if (f.endsWith('.jar')) files.push(f);
         }
         if (isWeb && existsSync(join(dirPath, 'scf_bootstrap'))) files.push('scf_bootstrap');
+        for (const f of collectSource()) { if (!files.includes(f)) files.push(f); }
         return files;
     }
 
-    // 非编译型：递归源码，按 EXCLUDE 排除
-    const files = [];
-    function walk(dir) {
-        for (const entry of readdirSync(join(dirPath, dir), { withFileTypes: true })) {
-            const rel = dir ? `${dir}/${entry.name}` : entry.name;
-            if (EXCLUDE.some((p) => {
-                if (p.endsWith('*')) return rel.endsWith(p.slice(0, -1)) || entry.name.endsWith(p.slice(0, -1));
-                return entry.name === p || rel === p;
-            })) continue;
-            if (entry.name.startsWith('.')) continue;
-            const fullPath = join(dirPath, rel);
-            if (entry.isDirectory()) { walk(rel); }
-            else { files.push(rel); }
-        }
-    }
-    walk('');
+    // 非编译型：只收源码
+    const files = collectSource();
 
     // scfWeb 额外加 scf_bootstrap
     if (isWeb && existsSync(join(dirPath, 'scf_bootstrap'))) {
@@ -147,9 +150,16 @@ export function pack(dirName) {
         return { zipPath: null, sha256: null };
     }
 
-    // 编译型：先跑 build.sh
+    // 编译型：先跑 build.sh，然后清理它可能残留的 zip
     if (packType === PACK_TYPE.COMPILE_GO || packType === PACK_TYPE.COMPILE_JAVA) {
         runBuild(dirName);
+        // 清理旧 build.sh 可能留下的 zip（避免被打进部署包）
+        const dirPath = join(CLOUDFUNCTIONS_DIR, dirName);
+        for (const f of readdirSync(dirPath)) {
+            if (f.endsWith('.zip')) {
+                unlinkSync(join(dirPath, f));
+            }
+        }
     }
 
     const dirPath = join(CLOUDFUNCTIONS_DIR, dirName);
@@ -169,8 +179,8 @@ export function pack(dirName) {
     console.error(`  [pack] ${dirName}: creating ${zipName} (${deployFiles.length} files)...`);
 
     // 用系统 zip 命令（macOS / Linux 内置）
-    // zip -X -r <zipPath> <file1> <file2> ...
-    // 需要 cd 到模板目录，这样 zip 内是扁平路径
+    // 先删旧 zip（zip 命令默认追加，不覆盖），再创建
+    if (existsSync(zipPath)) unlinkSync(zipPath);
     const args = ['-X', '-r', zipPath, ...deployFiles];
     execFileSync('zip', args, { cwd: dirPath, stdio: 'pipe' });
 

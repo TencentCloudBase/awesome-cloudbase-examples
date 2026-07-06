@@ -17,6 +17,7 @@
   "language": "Python",
   "runtimeVersion": "Python3.10",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-django.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -49,8 +50,8 @@
   "category": "framework",
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-django.zip",
+    "zipSha": "022ad4769fb31285786d05082ccfcaec074e9564916f6e2de4b6bcbbb736f2f7",
     "uploadedAt": 1782878867160,
     "legacyTags": [
       "Python",

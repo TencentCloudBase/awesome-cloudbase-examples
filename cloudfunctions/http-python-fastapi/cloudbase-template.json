@@ -17,6 +17,7 @@
   "language": "Python",
   "runtimeVersion": "Python3.10",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-fastapi.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -46,8 +47,8 @@
   "displayPage": [],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-fastapi.zip",
+    "zipSha": "33dc91f68123f3c0b70665f2f5618154d5b91be7f536d22f4fc0a16df240eff9",
     "uploadedAt": 1782878867713,
     "legacyTags": [
       "python",

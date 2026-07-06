@@ -17,6 +17,7 @@
   "language": "Golang",
   "runtimeVersion": "Go1",
   "isCompile": true,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-go-gin.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -49,8 +50,8 @@
   "category": "framework",
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-go-gin.zip",
+    "zipSha": "b23ea64c56c4baa97de7c5503874221d6d29b5789693e0a3e04b87e969682a0a",
     "uploadedAt": 1782875896832,
     "legacyTags": [
       "HTTPFunc",

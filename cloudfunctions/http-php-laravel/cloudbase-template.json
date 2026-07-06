@@ -17,6 +17,7 @@
   "language": "Php",
   "runtimeVersion": "Php7.4",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-php-laravel.zip",
   "envParams": [],
   "linkurl": "",
   "guide": "",
@@ -47,8 +48,8 @@
   ],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-php-laravel.zip",
+    "zipSha": "e16558a008861726937154c5a3c206691c0f1dfc8e5a8f86599fdb5ecab490c9",
     "uploadedAt": 1782878866074,
     "legacyTags": [],
     "localOnly": true,

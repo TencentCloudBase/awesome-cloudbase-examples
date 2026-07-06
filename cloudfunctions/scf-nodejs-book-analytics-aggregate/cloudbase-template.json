@@ -15,6 +15,7 @@
   "language": "javascript",
   "runtimeVersion": "Nodejs18.15",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-book-analytics-aggregate.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -43,8 +44,8 @@
   ],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-book-analytics-aggregate.zip",
+    "zipSha": "3707857769466294f26fbb22c7578108f10e76001321bdd9b472aadef6c0c1fc",
     "uploadedAt": 1782878870575,
     "legacyTags": [
       "数据库",

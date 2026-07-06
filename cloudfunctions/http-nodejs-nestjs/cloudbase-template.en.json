@@ -17,6 +17,7 @@
   "language": "Nodejs",
   "runtimeVersion": "Nodejs",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-nestjs.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -46,8 +47,8 @@
   "displayPage": [],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-nestjs.zip",
+    "zipSha": "8edfed8ce32de77a80d2f2d567fa78f990b33af400642f226c1a7a6681598197",
     "uploadedAt": 1782878863816,
     "legacyTags": [
       "Nodejs",

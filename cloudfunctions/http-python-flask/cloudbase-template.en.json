@@ -17,6 +17,7 @@
   "language": "Python",
   "runtimeVersion": "Python3.10",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-flask.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -47,8 +48,8 @@
   "category": "framework",
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-flask.zip",
+    "zipSha": "65f3ee3c47d78f1bff76e410e7f323293f82d98192880adbca98c3ae82c795c6",
     "uploadedAt": 1782878868584,
     "legacyTags": [
       "Python",

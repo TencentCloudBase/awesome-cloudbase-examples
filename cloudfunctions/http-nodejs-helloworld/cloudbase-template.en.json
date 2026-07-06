@@ -16,6 +16,7 @@
   "language": "Nodejs",
   "runtimeVersion": "Nodejs18.15",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-helloworld.zip",
   "envParams": [],
   "linkurl": "",
   "guide": "",
@@ -46,8 +47,8 @@
   ],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-helloworld.zip",
+    "zipSha": "a5b4c6cc793b747795c135c8803c1bed4f16e6b458fd8a3954dc8ac5ee078a9f",
     "uploadedAt": 1782878862601,
     "legacyTags": [],
     "i18nSource": "override",

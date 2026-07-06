@@ -156,12 +156,13 @@ async function main() {
             try {
                 const result = await uploadFile({
                     zipPath,
-                    remoteName: `templates/${dir}.zip`,
-                    envId,
+                    remoteName: `template/${dir}.zip`,
+                    envId,       // TEMPLATE_ENV_ID (lowcode-5g5llxbq5bc9299e)
                     apiKey,
                 });
-                zipUrl = result.downloadUrl || result.url;
-                console.log(`  [upload] ${dir}: ${zipUrl.slice(0, 80)}...`);
+                zipUrl = (result && (result.downloadUrl || result.url)) || '';
+                if (zipUrl) console.log(`  [upload] ${dir}: ${zipUrl.slice(0, 80)}...`);
+                else console.log(`  [upload] ${dir}: uploaded but could not get download URL`);
             } catch (err) {
                 console.error(`  [FAIL] ${dir}: upload error: ${err.message}`);
                 summary.fail++;
@@ -187,9 +188,13 @@ async function main() {
             if (!json._source.uploadedAt) json._source.uploadedAt = Date.now();
             if (!json._source.dir) json._source.dir = '.';
 
+            // 将 zipFilePath 从 _source 提升到业务字段（用于写入 CMS）
+            if (json._source?.zipFilePath) json.zipFilePath = json._source.zipFilePath;
+            // 清除 zipFileStore（旧协议优先级高于 zipFilePath，会覆盖新包）
+            json.zipFileStore = '';
+
             // 整理业务字段 → upsert 数据
-            // tags 双轨：默认写入 tags；--keep-online-tags 保留线上原值
-            const keepTags = opts.keepTags === true;  // true only with --keep-online-tags
+            const keepTags = opts.keepTags === true;
             const upsertData = _buildUpsertData(json, { keepTags });
 
             if (opts.dryRun) {

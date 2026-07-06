@@ -16,6 +16,7 @@
   "language": "javascript",
   "runtimeVersion": "Nodejs18.15",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-user-management-sql.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -44,8 +45,8 @@
   ],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-user-management-sql.zip",
+    "zipSha": "82967a713b16f4751db9f031de779991bb75d1d02e0e85d2c1a52fb59e42ec07",
     "uploadedAt": 1782878875612,
     "legacyTags": [
       "云开发",

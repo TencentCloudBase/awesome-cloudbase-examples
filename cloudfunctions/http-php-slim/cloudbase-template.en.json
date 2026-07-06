@@ -17,6 +17,7 @@
   "language": "Php",
   "runtimeVersion": "Php7.4",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-php-slim.zip",
   "envParams": [],
   "linkurl": "",
   "guide": "",
@@ -47,8 +48,8 @@
   ],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-php-slim.zip",
+    "zipSha": "14e65c638202f3088c26ad2121e47e2123da2a2e56b85941381b82e6c177c3c7",
     "uploadedAt": 1782878866879,
     "legacyTags": [],
     "localOnly": true,

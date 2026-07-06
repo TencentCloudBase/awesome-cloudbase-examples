@@ -16,6 +16,7 @@
   "language": "Nodejs18.15",
   "runtimeVersion": "Nodejs18.15",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-websocket.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -45,8 +46,8 @@
   "displayPage": [],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-websocket.zip",
+    "zipSha": "cd1daa085fd8439d85b62e81fcaeec6b70ba2598c4f50a8a64048cdeb81eb280",
     "uploadedAt": 1782878864916,
     "legacyTags": [
       "HTTPFunc"

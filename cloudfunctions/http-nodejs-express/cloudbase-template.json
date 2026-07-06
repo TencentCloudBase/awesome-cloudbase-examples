@@ -17,6 +17,7 @@
   "language": "Nodejs",
   "runtimeVersion": "Nodejs",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-express.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -49,8 +50,8 @@
   "category": "framework",
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-express.zip",
+    "zipSha": "a460432f31f5a6db5078d27c4a3787230b9016487646b88836415a6cb65b388c",
     "uploadedAt": 1782878861755,
     "legacyTags": [
       "Nodejs",

@@ -16,6 +16,7 @@
   "language": "javascript",
   "runtimeVersion": "Nodejs18.15",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-wxpay-product.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -44,8 +45,8 @@
   ],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-wxpay-product.zip",
+    "zipSha": "fe5d71d5e72b87ef8c3088a94795d84535de1d84b56d0e12d23da4a005839abf",
     "uploadedAt": 1782878876825,
     "legacyTags": [
       "微信支付",

@@ -14,6 +14,7 @@
   "language": "Python3.9",
   "runtimeVersion": "Python3.9",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-python-helloworld.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -43,8 +44,8 @@
   "displayPage": [],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-python-helloworld.zip",
+    "zipSha": "6d809bf760949659d590f90d493269e998d1a903de2c2154ad3a32749da3db12",
     "uploadedAt": 1782878878240,
     "legacyTags": [
       "Python"

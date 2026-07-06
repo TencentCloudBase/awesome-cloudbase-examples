@@ -14,6 +14,7 @@
   "language": "Php",
   "runtimeVersion": "Php8.0",
   "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-php-helloworld.zip",
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -43,8 +44,8 @@
   "displayPage": [],
   "_source": {
     "dir": ".",
-    "zipFilePath": "",
-    "zipSha": "",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-php-helloworld.zip",
+    "zipSha": "2513d5fa889b66827a962bd25002bb9490dd80030aafd827d91a5ad4bc0b2d2c",
     "uploadedAt": 1782878877440,
     "legacyTags": [
       "PHP"
