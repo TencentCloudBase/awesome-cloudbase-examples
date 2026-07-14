@@ -1,0 +1,62 @@
+{
+  "identifier": "scf-nodejs-custom-auth",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Custom Login",
+  "description": "Custom Authentication Login Cloud Function Example",
+  "tags": [
+    "nodejs",
+    "auth",
+    "wechat-miniprogram",
+    "wechat-openapi"
+  ],
+  "sampleCode": "You can use this cloud function to manage user authentication. Here is the sample code for testing this cloud function in a mini program:\n\n```js\n// User Registration\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'register',\n    data: {\n      username: 'test@example.com',\n      password: 'password123'\n    }\n  }\n}).then(res => {\n  console.log('Registration result:', res)\n})\n\n// Response Example\n{\n  \"userId\": \"user1\"\n}\n\n// User Login\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'login',\n    data: {\n      username: 'test@example.com',\n      password: 'password123'\n    }\n  }\n}).then(res => {\n  console.log('Login result:', res)\n})\n\n// Response Example\n{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"userId\": \"user1\"\n}\n\n// Refresh Access Token\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'refreshToken',\n    data: {\n      refreshToken: \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n    }\n  }\n}).then(res => {\n  console.log('Token refresh result:', res)\n})\n\n// Response Example\n{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}\n\n// Get User Info\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'getUserInfo',\n    data: {\n      authorization: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n    }\n  }\n}).then(res => {\n  console.log('User info:', res)\n})\n\n// Response Example\n{\n  \"_id\": \"user1\",\n  \"username\": \"test@example.com\",\n  \"createdAt\": \"2023-08-02T08:30:15.000Z\",\n  \"updatedAt\": \"2023-08-02T08:30:15.000Z\"\n}\n\n// Change Password\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'changePassword',\n    data: {\n      authorization: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n      oldPassword: \"password123\",\n      newPassword: \"newpassword123\"\n    }\n  }\n}).then(res => {\n  console.log('Password change result:', res)\n})\n\n// Response Example\n{\n  \"success\": true\n}\n\n// Update User Info\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'updateUserInfo',\n    data: {\n      authorization: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n      userInfo: {\n        nickname: \"New Nickname\",\n        avatar: \"https://example.com/avatar.jpg\"\n      }\n    }\n  }\n}).then(res => {\n  console.log('User info update result:', res)\n})\n\n// Response Example\n{\n  \"success\": true\n}\n```\n\nThis authentication system includes the following features:\n\n1. **Security**:\n   - SHA256 salted password encryption\n   - JWT authentication\n   - Separate accessToken and refreshToken\n   - Prevention of sensitive information leaks\n\n2. **Complete Functionality**:\n   - User registration\n   - User login\n   - Token refresh\n   - Fetch user information\n   - Password change\n   - User info updates\n\n3. **Token Management**:\n   - Short-lived accessToken (2 hours)\n   - Long-lived refreshToken (7 days)\n   - Bearer Token authentication\n\n4. **Error Handling**:\n   - Username duplication checks\n   - Password validation\n   - Token validity verification\n   - Comprehensive error messages\n\n**Usage Notes**:\n1. Modify the keys in `config.js` before use.\n2. Use stronger keys in production environments.\n3. Adjust token expiration times as needed.\n4. It is recommended to implement request rate limiting.",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-custom-auth.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-custom-auth",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-custom-auth"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-custom-auth"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-custom-auth"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-custom-auth.zip",
+    "zipSha": "dab386e2a2aded569716b658382e3ca04c927fddb1cd03c699241344f477a4d2",
+    "uploadedAt": 1782878872033,
+    "legacyTags": [
+      "User Authentication",
+      "Secure Encryption",
+      "JWT",
+      "CloudBase",
+      "Password Management",
+      "Token Verification"
+    ],
+    "onlineIdentifier": "scf-nodejs-custom-auth",
+    "onlineId": "f51ab3f0689ea66901ed4cb854c8fe85"
+  }
+}

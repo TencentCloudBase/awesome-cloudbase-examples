@@ -1,0 +1,57 @@
+{
+  "identifier": "scf-java-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Java Hello World",
+  "description": "Java SCF cloud function blank template",
+  "tags": [
+    "java",
+    "helloworld"
+  ],
+  "sampleCode": "# Java Cloud Function Blank Template\n\nA minimal SCF cloud function written in Java.\n\nBuild with `bash build.sh` to produce the jar, then deploy.",
+  "language": "Java",
+  "runtimeVersion": "Java11",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-java-helloworld.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-java-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-java-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-java-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-java-helloworld"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-java-helloworld.zip",
+    "zipSha": "d00e755ca50c49bce6e42dc68ca7c6ccc98ea22a10885e18d4f562c716cf316e",
+    "uploadedAt": 1782878870255,
+    "legacyTags": [
+      "Java"
+    ],
+    "onlineId": "aca45c226981c5d800b68b4b47719ab0",
+    "i18nSource": "override",
+    "onlineIdentifier": "scf-java-helloworld"
+  }
+}

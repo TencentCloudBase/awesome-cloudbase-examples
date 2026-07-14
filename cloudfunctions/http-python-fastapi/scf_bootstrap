@@ -1,0 +1,4 @@
+#!/bin/bash
+# 启动 FastAPI 应用（生产模式使用 uvicorn）
+# Start the FastAPI application (use uvicorn for production)
+exec uvicorn app:app --host 0.0.0.0 --port 9000 --workers 2

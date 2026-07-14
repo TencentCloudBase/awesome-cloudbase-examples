@@ -1,0 +1,66 @@
+{
+  "identifier": "http-nodejs-express",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Express Framework",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/fd8081e956a2608b586963017d0111f7-Express.svg",
+  "description": "HTTP function example built with Node.js Express framework",
+  "tags": [
+    "http",
+    "nodejs",
+    "express",
+    "web-framework"
+  ],
+  "sampleCode": "# Express Template\n\nA minimal HTTP function written with Express.\n\nDeploy and visit the access path to interact with the API.",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-express.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-express",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-express"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-express"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-express"
+      }
+    }
+  ],
+  "displayPage": [
+    "platform-run"
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-express.zip",
+    "zipSha": "a460432f31f5a6db5078d27c4a3787230b9016487646b88836415a6cb65b388c",
+    "uploadedAt": 1782878862024,
+    "legacyTags": [
+      "Nodejs",
+      "Express",
+      "HTTPFunc",
+      "WebFramework"
+    ],
+    "onlineIdentifier": "http-nodejs-express",
+    "onlineId": "f51ab3f0689ea66901ed4ca3124cb893",
+    "i18nSource": "override"
+  }
+}

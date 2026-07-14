@@ -1,0 +1,62 @@
+{
+  "identifier": "scf-nodejs-custom-auth",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "自定义登录",
+  "description": "自定义鉴权登录云函数示例",
+  "tags": [
+    "nodejs",
+    "auth",
+    "wechat-miniprogram",
+    "wechat-openapi"
+  ],
+  "sampleCode": "你可以使用这个云函数来管理用户认证。在小程序中测试调用这个云函数的示例代码如下：\n\n```js\n// 用户注册\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'register',\n    data: {\n      username: 'test@example.com',\n      password: 'password123'\n    }\n  }\n}).then(res => {\n  console.log('注册结果：', res)\n})\n\n// 响应示例\n{\n  \"userId\": \"user1\"\n}\n\n// 用户登录\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'login',\n    data: {\n      username: 'test@example.com',\n      password: 'password123'\n    }\n  }\n}).then(res => {\n  console.log('登录结果：', res)\n})\n\n// 响应示例\n{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"userId\": \"user1\"\n}\n\n// 刷新访问令牌\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'refreshToken',\n    data: {\n      refreshToken: \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n    }\n  }\n}).then(res => {\n  console.log('刷新令牌结果：', res)\n})\n\n// 响应示例\n{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}\n\n// 获取用户信息\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'getUserInfo',\n    data: {\n      authorization: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n    }\n  }\n}).then(res => {\n  console.log('用户信息：', res)\n})\n\n// 响应示例\n{\n  \"_id\": \"user1\",\n  \"username\": \"test@example.com\",\n  \"createdAt\": \"2023-08-02T08:30:15.000Z\",\n  \"updatedAt\": \"2023-08-02T08:30:15.000Z\"\n}\n\n// 修改密码\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'changePassword',\n    data: {\n      authorization: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n      oldPassword: \"password123\",\n      newPassword: \"newpassword123\"\n    }\n  }\n}).then(res => {\n  console.log('修改密码结果：', res)\n})\n\n// 响应示例\n{\n  \"success\": true\n}\n\n// 更新用户信息\nwx.cloud.callFunction({\n  name: 'custom-auth',\n  data: {\n    action: 'updateUserInfo',\n    data: {\n      authorization: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n      userInfo: {\n        nickname: \"新昵称\",\n        avatar: \"https://example.com/avatar.jpg\"\n      }\n    }\n  }\n}).then(res => {\n  console.log('更新用户信息结果：', res)\n})\n\n// 响应示例\n{\n  \"success\": true\n}\n```\n\n这个认证系统包含以下特点：\n\n1. 安全性：\n\n   - SHA256加盐加密密码\n   - JWT身份验证\n   - 分离accessToken和refreshToken\n   - 防止敏感信息泄露\n\n2. 功能完整：\n\n   - 用户注册\n   - 用户登录\n   - 令牌刷新\n   - 获取用户信息\n   - 修改密码\n   - 更新用户信息\n\n3. 令牌管理：\n\n   - accessToken短期有效（2小时）\n   - refreshToken长期有效（7天）\n   - Bearer Token认证\n\n4. 错误处理：\n   - 用户名重复检查\n   - 密码验证\n   - 令牌有效性验证\n   - 完整的错误提示\n\n使用时注意：\n\n1. 需要修改config.js中的密钥\n2. 在生产环境中使用更强的密钥\n3. 可以根据需要调整令牌过期时间\n4. 建议添加请求频率限制",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-custom-auth.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-custom-auth",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-custom-auth"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-custom-auth"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-custom-auth"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-custom-auth.zip",
+    "zipSha": "dab386e2a2aded569716b658382e3ca04c927fddb1cd03c699241344f477a4d2",
+    "uploadedAt": 1782878871718,
+    "legacyTags": [
+      "用户认证",
+      "安全加密",
+      "JWT",
+      "云开发",
+      "密码管理",
+      "Token验证"
+    ],
+    "onlineIdentifier": "scf-nodejs-custom-auth",
+    "onlineId": "f51ab3f0689ea66901ed4c96597b5359"
+  }
+}

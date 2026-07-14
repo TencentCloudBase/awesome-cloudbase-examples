@@ -1,0 +1,58 @@
+{
+  "identifier": "http-php-slim",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Slim 框架",
+  "titleIcon": "",
+  "description": "Slim",
+  "tags": [
+    "http",
+    "php",
+    "slim",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Php",
+  "runtimeVersion": "Php7.4",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-php-slim.zip",
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-slim",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-slim"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-php-slim"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-php-slim"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-php-slim.zip",
+    "zipSha": "14e65c638202f3088c26ad2121e47e2123da2a2e56b85941381b82e6c177c3c7",
+    "uploadedAt": 1782878866646,
+    "legacyTags": [],
+    "localOnly": true,
+    "onlineIdentifier": "http-php-slim"
+  }
+}

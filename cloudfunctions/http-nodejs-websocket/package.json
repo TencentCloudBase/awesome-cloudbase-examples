@@ -1,0 +1,16 @@
+{
+  "name": "http-nodejs-websocket",
+  "version": "1.0.0",
+  "description": "WebSocket server example for CloudBase HTTP function",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "license": "MIT"
+}

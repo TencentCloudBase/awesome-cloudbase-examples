@@ -1,0 +1,58 @@
+{
+  "identifier": "http-nodejs-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "HTTP Node.js Hello World",
+  "titleIcon": "",
+  "description": "Node.js HTTP function helloworld template",
+  "tags": [
+    "http",
+    "nodejs",
+    "helloworld"
+  ],
+  "sampleCode": "# Node.js HTTP Hello World\n\nA minimal HTTP function written in Node.js.\n\nDeploy and visit the access path to see `Hello World from Node.js HTTP Function!`.",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-helloworld.zip",
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-nodejs-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-nodejs-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-helloworld.zip",
+    "zipSha": "a5b4c6cc793b747795c135c8803c1bed4f16e6b458fd8a3954dc8ac5ee078a9f",
+    "uploadedAt": 1782878862601,
+    "legacyTags": [],
+    "i18nSource": "override",
+    "onlineIdentifier": "http-nodejs-helloworld",
+    "onlineId": "f51ab3f0689ea66901ed4cc80c021d00"
+  }
+}

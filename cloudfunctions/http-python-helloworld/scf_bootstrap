@@ -1,0 +1,4 @@
+#!/bin/bash
+# 启动 Python HTTP 服务，监听 9000 端口
+# Start the Python HTTP service and listen on port 9000
+python3 main.py

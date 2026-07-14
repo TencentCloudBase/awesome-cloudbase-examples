@@ -1,0 +1,63 @@
+{
+  "identifier": "http-python-flask",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Flask 框架",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/a43a2f509a02123f1b9275868452b1c3-flask-dark.svg",
+  "description": "基于 Python 语言 Flash 框架实现的 HTTP 调用示例",
+  "tags": [
+    "http",
+    "python",
+    "flask",
+    "web-framework"
+  ],
+  "sampleCode": "# 快速部署 Flask 应用\n\n源码详情请参考:\n\n* github: https://github.com/TencentCloudBase/cloudrun-flask\n* gitee: https://gitee.com/TencentCloudBase/cloudrun-flask",
+  "language": "Python",
+  "runtimeVersion": "Python3.10",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-flask.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-flask",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-flask"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-flask"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-python-flask"
+      }
+    }
+  ],
+  "displayPage": [],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-flask.zip",
+    "zipSha": "65f3ee3c47d78f1bff76e410e7f323293f82d98192880adbca98c3ae82c795c6",
+    "uploadedAt": 1782878868334,
+    "legacyTags": [
+      "Python",
+      "Flask",
+      "HTTPFunc",
+      "WebFramework"
+    ],
+    "onlineIdentifier": "http-python-flask",
+    "onlineId": "f51ab3f0689ea66901ed4ca173fae2c9"
+  }
+}

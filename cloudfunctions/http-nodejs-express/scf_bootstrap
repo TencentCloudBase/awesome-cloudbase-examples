@@ -1,0 +1,4 @@
+#!/bin/bash
+# 启动 Express 服务，监听 9000 端口
+# Start the Express service and listen on port 9000
+node index.js

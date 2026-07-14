@@ -1,0 +1,61 @@
+{
+  "identifier": "scf-nodejs-transaction",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "账户转账",
+  "description": "账户交易云函数，包含事务操作示例",
+  "tags": [
+    "nodejs",
+    "transaction",
+    "aggregation"
+  ],
+  "sampleCode": "你可以使用这个云函数来管理账户和交易。在小程序中测试调用这个云函数的示例代码如下：\n\n```js\n// 创建账户\nwx.cloud.callFunction({\n  name: 'transaction-management',\n  data: {\n    action: 'createAccount',\n    data: {\n      name: '张三',\n      initialBalance: 1000\n    }\n  }\n}).then(res => {\n  console.log('创建账户结果：', res)\n})\n\n// 响应示例\n{\n  \"id\": \"xxx\",\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// 转账操作\nwx.cloud.callFunction({\n  name: 'transaction-management',\n  data: {\n    action: 'transfer',\n    data: {\n      fromAccountId: 'account1',\n      toAccountId: 'account2',\n      amount: 100\n    }\n  }\n}).then(res => {\n  console.log('转账结果：', res)\n})\n\n// 响应示例\n{\n  \"success\": true,\n  \"recordId\": \"xxx\"\n}\n\n// 批量转账\nwx.cloud.callFunction({\n  name: 'transaction-management',\n  data: {\n    action: 'batchTransfer',\n    data: {\n      fromAccountId: 'account1',\n      transfers: [\n        { toAccountId: 'account2', amount: 50 },\n        { toAccountId: 'account3', amount: 50 }\n      ]\n    }\n  }\n}).then(res => {\n  console.log('批量转账结果：', res)\n})\n\n// 响应示例\n{\n  \"success\": true,\n  \"records\": [\"xxx1\", \"xxx2\"]\n}\n\n// 查询余额\nwx.cloud.callFunction({\n  name: 'transaction-management',\n  data: {\n    action: 'getBalance',\n    data: {\n      accountId: 'account1'\n    }\n  }\n}).then(res => {\n  console.log('余额查询结果：', res)\n})\n\n// 响应示例\n{\n    \"result\": 800\n}\n\n\n// 查询交易历史\nwx.cloud.callFunction({\n  name: 'transaction-management',\n  data: {\n    action: 'getTransactionHistory',\n    data: {\n      accountId: 'account1'\n    }\n  }\n}).then(res => {\n  console.log('交易历史：', res)\n})\n\n// 响应示例\n{\n  \"data\": [\n    {\n      \"_id\": \"record3\",\n      \"fromAccount\": \"account1\",\n      \"toAccount\": \"account3\",\n      \"amount\": 50,\n      \"status\": \"success\",\n      \"createdAt\": \"2023-08-02T08:30:15.000Z\",\n      \"updatedAt\": \"2023-08-02T08:30:15.000Z\"\n    },\n    {\n      \"_id\": \"record2\",\n      \"fromAccount\": \"account1\",\n      \"toAccount\": \"account2\",\n      \"amount\": 50,\n      \"status\": \"success\",\n      \"createdAt\": \"2023-08-02T08:30:15.000Z\",\n      \"updatedAt\": \"2023-08-02T08:30:15.000Z\"\n    },\n    {\n      \"_id\": \"record1\",\n      \"fromAccount\": \"account1\",\n      \"toAccount\": \"account2\",\n      \"amount\": 100,\n      \"status\": \"success\",\n      \"createdAt\": \"2023-08-02T08:30:15.000Z\",\n      \"updatedAt\": \"2023-08-02T08:30:15.000Z\"\n    }\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-transaction.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-transaction",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-transaction"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-transaction"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-transaction"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-transaction.zip",
+    "zipSha": "3e6204d5140ef8aa41b4443e4279b45a1fb474f90d65a40399f1377d248cd93d",
+    "uploadedAt": 1782878875105,
+    "legacyTags": [
+      "数据库事务",
+      "金融系统",
+      "转账功能",
+      "云开发",
+      "事务处理",
+      "并发控制"
+    ],
+    "onlineIdentifier": "scf-nodejs-transaction",
+    "onlineId": "f51ab3f0689ea66901ed4c9a564d4710"
+  }
+}

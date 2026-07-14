@@ -1,0 +1,13 @@
+{
+  "envId": "YOUR_ENV_ID",
+  "functionRoot": "./",
+  "functions": [
+    {
+      "name": "http-java-helloworld",
+      "type": "HTTP",
+      "runtime": "Java8",
+      "timeout": 60,
+      "memorySize": 512
+    }
+  ]
+}

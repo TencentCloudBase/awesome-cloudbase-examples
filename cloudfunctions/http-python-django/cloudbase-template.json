@@ -1,0 +1,65 @@
+{
+  "identifier": "http-python-django",
+  "lang": "zh",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "Django 框架",
+  "titleIcon": "cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/c00f664a239e237ba12d699c13366537-django-logo-positive.svg",
+  "description": "基于 Python 语言 Django 框架实现的 HTTP 调用示例",
+  "tags": [
+    "http",
+    "python",
+    "django",
+    "web-framework"
+  ],
+  "sampleCode": "# 快速部署 Django 应用\n\n源码详情请参考:\n\n* github: https://github.com/TencentCloudBase/cloudrun-django\n* gitee: https://gitee.com/TencentCloudBase/cloudrun-django",
+  "language": "Python",
+  "runtimeVersion": "Python3.10",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-django.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-django",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-django"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-django"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-python-django"
+      }
+    }
+  ],
+  "displayPage": [
+    "platform-run"
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-django.zip",
+    "zipSha": "022ad4769fb31285786d05082ccfcaec074e9564916f6e2de4b6bcbbb736f2f7",
+    "uploadedAt": 1782878867160,
+    "legacyTags": [
+      "Python",
+      "Django",
+      "HTTPFunc",
+      "WebFramework"
+    ],
+    "onlineIdentifier": "http-python-django",
+    "onlineId": "f51ab3f0689ea66901ed4ca003dd4241"
+  }
+}
