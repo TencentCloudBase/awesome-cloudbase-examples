@@ -84,7 +84,30 @@
    VITE_OAUTH_PREFIX=oauth               # OAuth 云函数 HTTP 触发路径
    ```
 
-2. **启动开发服务器**
+   > 📌 **各变量说明及获取方式**：
+
+   | 变量 | 哪里获取 | 示例 |
+   |------|---------|------|
+   | `VITE_TCB_ENV_ID` | CloudBase 控制台 → 环境列表 → 环境 ID | `test-wxpay-5gy4ugzreef15cfe` |
+   | `VITE_TCB_UIN` | 腾讯云控制台 → 右上角账号信息 → 账号 ID | `1326375956` |
+   | `VITE_ROUTE_PREFIX` | 控制台 → 云函数 → `pay-common` → HTTP 访问服务 → 路径 | `pay` |
+   | `VITE_OAUTH_PREFIX` | 同上，对应 OAuth 云函数的 HTTP 访问路径 | `oauth` |
+
+   > ⚠️ **常见错误**：
+   > - 域名后缀不要用 `tcloudbaseapp.com`（那是静态托管），必须用 `ap-shanghai.app.tcloudbase.com`
+   > - `VITE_ROUTE_PREFIX` 的值就是控制台配置的路径，代码会自动拼接 `/wx-pay/` 前缀调用后端路由
+   > - 最终实际请求 URL 格式：`https://{envId}-{uin}.ap-shanghai.app.tcloudbase.com/{routePrefix}/wx-pay/xxx`
+
+2. **验证连通性**
+
+   配置完成后，在浏览器直接访问以下地址，确认返回 JSON（而非 HTML）：
+   ```
+   https://{VITE_TCB_ENV_ID}-{VITE_TCB_UIN}.ap-shanghai.app.tcloudbase.com/{VITE_ROUTE_PREFIX}/wx-pay/wxpay_query_order_by_out_trade_no
+   ```
+   - ✅ 返回 `{"code": -1, "msg": "..."}` 等 JSON → 连通正常
+   - ❌ 返回 HTML 页面（`<!DOCTYPE html>`）→ 域名或路径错误，检查上述配置
+
+3. **启动开发服务器**
 
    ```bash
    npm install
