@@ -101,7 +101,7 @@ export class MainChatService {
 
   async afterStream ({ error, needSave, callMsg, chunks, recordId = '' }) {
     if (error) {
-      console.log('请求大模型错误:', error)
+      console.log('afterStream_error: 请求大模型失败:', JSON.stringify(error))
     }
     if (needSave && recordId !== '') {
       const newChatEntity = new ChatHistoryEntity()

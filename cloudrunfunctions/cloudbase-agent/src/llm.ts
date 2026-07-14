@@ -1,11 +1,19 @@
 import { createDeepSeek } from '@ai-sdk/deepseek'
 import { createOpenAI } from '@ai-sdk/openai'
+import { APICallError } from 'ai'
 import * as ai from 'ai'
 import OpenAI from 'openai'
 
 import { BotContext } from './bot_context'
+import {
+  EXCEED_TOKEN_QUOTA_LIMIT,
+  EXCEED_TOKEN_QUOTA_LIMIT_MESSAGE,
+  REQUEST_LLM_ERROR_CODE,
+  REQUEST_LLM_ERROR_MESSAGE
+} from './constant'
 import { McpClient } from './mcp'
 import { getAccessToken } from './tcb'
+import { extractWithLodash, safeJsonParse } from './utils'
 
 const DEEPSEEK_PREFIX = 'deepseek'
 
@@ -28,8 +36,9 @@ export interface IMsgResult {
   content: string;
   finish_reason?: string;
   error?: {
-    name: string;
+    name?: string;
     message: string;
+    code?: string;
   };
   tool_call?: string;
   usage: object;
@@ -173,19 +182,31 @@ export class LLMCommunicator {
     messages: ChatCompletionMessage[],
     cb: (streamPart: ai.TextStreamPart<ai.ToolSet>) => void
   ) {
-    const { fullStream } = ai.streamText({
-      model: this.model,
-      tools: await this.mcpClient?.tools(),
-      maxSteps: 10,
-      messages: this.tarnsMessage([...messages]),
-      abortSignal: this.controller.signal,
-      onFinish: () => {
-        this.mcpClient?.close()
-      }
-    })
+    try {
+      const { fullStream } = ai.streamText({
+        model: this.model,
+        tools: await this.mcpClient?.tools(),
+        maxSteps: 10,
+        messages: this.tarnsMessage([...messages]),
+        abortSignal: this.controller.signal,
+        onFinish: () => {
+          this.mcpClient?.close()
+        }
+      })
 
-    for await (const streamPart of fullStream) {
-      cb(streamPart)
+      for await (const streamPart of fullStream) {
+        cb(streamPart)
+      }
+    } catch (e) {
+      cb?.({
+        type: 'error',
+        content: '',
+        step: 'error',
+        error: e,
+        finishReason: 'error'
+      })
+
+      console.log('streamText_error:', JSON.stringify({ error: e, msg: e.message }))
     }
   }
 
@@ -296,15 +317,20 @@ export class LLMCommunicator {
             )
           } else if (streamPart.type === 'error') {
             // 对话异常
+            const gwLLMError = this.handlerAICallError(
+              (streamPart as any).error?.lastError || (streamPart as any).error
+            )
             result = {
               ...result,
               finish_reason: 'error',
-              error: {
-                name: 'LLMError',
-                message: streamPart.error as string
-              }
+              error: gwLLMError
             }
-            error = streamPart.error
+            error = (streamPart as any).error
+
+            console.log('stream_error:', JSON.stringify({
+              msg: (streamPart as any).error,
+              errMsg: (streamPart as any).error?.message
+            }))
 
             callMsg.push(result)
             this.botContext.bot.sseSender.send(
@@ -316,6 +342,9 @@ export class LLMCommunicator {
         }
       )
     } catch (error) {
+      const gwLLMError = this.handlerAICallError(
+        (error as any)?.lastError || error
+      )
       let result: IMsgResult = {
         type: 'error',
         created: Date.now(),
@@ -327,12 +356,10 @@ export class LLMCommunicator {
       result = {
         ...result,
         finish_reason: 'error',
-        error: {
-          name: 'LLMError',
-          message: error as string
-        }
+        error: gwLLMError
       }
-      // error = streamPart.error
+
+      console.log('stream_error:', JSON.stringify({ error, msg: (error as any)?.message }))
 
       callMsg.push(result)
       this.botContext.bot.sseSender.send(`data: ${JSON.stringify(result)}\n\n`)
@@ -369,8 +396,30 @@ export class LLMCommunicator {
       const generateTextRes = await ai.generateText(data)
       return cb(generateTextRes)
     } catch (error) {
-      console.log(error)
-      return {}
+      console.log('generateText_error:', JSON.stringify({ error, msg: (error as any)?.message }))
+      const gwLLMError = this.handlerAICallError(
+        (error as any)?.lastError || error
+      )
+      return { error: gwLLMError }
+    }
+  }
+
+  /**
+   * 解析 LLM 调用错误，转换为统一的内部错误码和友好消息
+   */
+  handlerAICallError (callError: APICallError) {
+    const responseBody = safeJsonParse(callError?.responseBody)
+    const result = extractWithLodash(responseBody, ['message', 'code'])
+    const code = result?.code?.includes(EXCEED_TOKEN_QUOTA_LIMIT)
+      ? EXCEED_TOKEN_QUOTA_LIMIT
+      : result?.code?.[0] || REQUEST_LLM_ERROR_CODE
+    let message = result?.message?.[0] || REQUEST_LLM_ERROR_MESSAGE
+    if (code === EXCEED_TOKEN_QUOTA_LIMIT) {
+      message = EXCEED_TOKEN_QUOTA_LIMIT_MESSAGE
+    }
+    return {
+      code,
+      message
     }
   }
 }
