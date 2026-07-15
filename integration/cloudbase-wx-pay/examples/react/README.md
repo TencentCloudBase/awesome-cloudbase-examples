@@ -88,8 +88,8 @@
 
    | 变量 | 哪里获取 | 示例 |
    |------|---------|------|
-   | `VITE_TCB_ENV_ID` | CloudBase 控制台 → 环境列表 → 环境 ID | `test-wxpay-5gy4ugzreef15cfe` |
-   | `VITE_TCB_UIN` | 腾讯云控制台 → 右上角账号信息 → 账号 ID | `1326375956` |
+   | `VITE_TCB_ENV_ID` | CloudBase 控制台 → 环境列表 → 环境 ID | `your-env-id` |
+   | `VITE_TCB_UIN` | 腾讯云控制台 → 右上角账号信息 → 账号 ID | `your-uin` |
    | `VITE_ROUTE_PREFIX` | 控制台 → 云函数 → `pay-common` → HTTP 访问服务 → 路径 | `pay` |
    | `VITE_OAUTH_PREFIX` | 同上，对应 OAuth 云函数的 HTTP 访问路径 | `oauth` |
 
