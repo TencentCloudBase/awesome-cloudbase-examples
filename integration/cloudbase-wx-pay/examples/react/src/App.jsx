@@ -213,7 +213,7 @@ export default function App() {
       body.scene_info = { payer_client_ip: clientIp || '1.2.3.4', h5_info: { type: 'Wap' } }
     }
 
-    const routeMap = { jsapi: '/wxpay_order', h5: '/wxpay_order_h5', native: '/wxpay_order_native' }
+    const routeMap = { jsapi: '/wx-pay/wxpay_order', h5: '/wx-pay/wxpay_order_h5', native: '/wx-pay/wxpay_order_native' }
     showLoading('下单中...')
     try {
       const data = await request(baseUrl, routeMap[payType], body)
@@ -252,7 +252,7 @@ export default function App() {
     if (!outTradeNo) { showToast('请先下单', 'warning'); return }
     showLoading('查询订单中...')
     try {
-      const data = await request(baseUrl, '/wxpay_query_order_by_out_trade_no', { out_trade_no: outTradeNo })
+      const data = await request(baseUrl, '/wx-pay/wxpay_query_order_by_out_trade_no', { out_trade_no: outTradeNo })
       hideLoading()
       setResult({ text: data, isSuccess: data.code === 0 })
 
@@ -280,7 +280,7 @@ export default function App() {
     if (!outTradeNo) { showToast('请先下单', 'warning'); return }
     showLoading('检查订单状态...')
     try {
-      const queryResult = await request(baseUrl, '/wxpay_query_order_by_out_trade_no', { out_trade_no: outTradeNo })
+      const queryResult = await request(baseUrl, '/wx-pay/wxpay_query_order_by_out_trade_no', { out_trade_no: outTradeNo })
       hideLoading()
 
       if (queryResult.code === 0 && queryResult.data) {
@@ -313,7 +313,7 @@ export default function App() {
           if (!confirmed) return
 
           showLoading('正在关闭订单...')
-          const closeResult = await request(baseUrl, '/wxpay_close_order', { out_trade_no: outTradeNo })
+          const closeResult = await request(baseUrl, '/wx-pay/wxpay_close_order', { out_trade_no: outTradeNo })
           hideLoading()
           setResult({ text: `关单结果:\n\n${JSON.stringify(closeResult, null, 2)}`, isSuccess: closeResult.code === 0 })
 
@@ -348,7 +348,7 @@ export default function App() {
     if (!outTradeNo) { showToast('请先下单', 'warning'); return }
     showLoading('查询订单中...')
     try {
-      const queryResult = await request(baseUrl, '/wxpay_query_order_by_out_trade_no', { out_trade_no: outTradeNo })
+      const queryResult = await request(baseUrl, '/wx-pay/wxpay_query_order_by_out_trade_no', { out_trade_no: outTradeNo })
       hideLoading()
 
       if (queryResult.code === 0 && queryResult.data) {
@@ -376,7 +376,7 @@ export default function App() {
         setOutRefundNo(newRefundNo)
 
         // ⚠️ 安全警告：生产环境中退款金额必须从后端查询实际订单金额，严禁使用前端传值，此处仅为示例演示。
-        const refundResult = await request(baseUrl, '/wxpay_refund', {
+        const refundResult = await request(baseUrl, '/wx-pay/wxpay_refund', {
           out_trade_no: outTradeNo,
           out_refund_no: newRefundNo,
           reason: '用户申请退款',
@@ -418,7 +418,7 @@ export default function App() {
     if (!outRefundNo) { showToast('请先发起退款', 'warning'); return }
     showLoading('查询退款中...')
     try {
-      const data = await request(baseUrl, '/wxpay_refund_query', { out_refund_no: outRefundNo })
+      const data = await request(baseUrl, '/wx-pay/wxpay_refund_query', { out_refund_no: outRefundNo })
       hideLoading()
       setResult({ text: data, isSuccess: data.code === 0 })
 

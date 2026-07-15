@@ -31,8 +31,6 @@
         "node_modules",
         ".git",
         ".env",
-        ".env.*",
-        "!.env.example",
         "tests",
         "*.pem"
       ]
