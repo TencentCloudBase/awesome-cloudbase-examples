@@ -32,6 +32,8 @@ export const init = (config: { env?: string; timeout?: number; accessKey?: strin
  */
 export const app = init();
 
+window.app = app
+
 /**
  * 获取 auth 实例
  */

@@ -12,7 +12,7 @@
 - 🎨 使用 Material Design 3，提供现代化的 UI 体验
 - 🔐 集成多种登录方式：匿名登录、用户名密码、手机验证码、邮箱验证码
 - ☁️ 深度集成腾讯云开发 CloudBase，提供一站式后端云服务
-- 🚀 开箱即用的云函数、云托管、API 调用、MySQL 数据库、数据模型示例
+- 🚀 开箱即用的云函数、云托管、API 调用、MySQL 数据库、数据模型、文档型数据库（NoSQL）示例
 
 ## 项目架构
 
@@ -34,6 +34,7 @@
 - **API 调用**：支持调用云开发 API 代理
 - **MySQL 数据库**：支持 query / count / insert / update / delete 等操作
 - **数据模型**：基于 MySQL 封装的高级数据管理，支持 list / get / create / update / delete / upsert / mysqlCommand 等 13 种 CRUD 操作，以及 7 种数据源查询操作
+- **文档型数据库（NoSQL）**：JS SDK 风格的链式调用，支持 add / get / count / update / remove 集合操作，以及按文档 ID 的 getDoc / updateDoc / setDoc / removeDoc 操作
 
 ## 开始使用
 
@@ -112,6 +113,7 @@ flutter build web --release
 │   │       ├── api_section.dart            # API 代理测试卡片
 │   │       ├── cloud_function_section.dart # 云函数测试卡片
 │   │       ├── cloud_run_section.dart      # 云托管测试卡片
+│   │       ├── database_section.dart       # 文档型数据库（NoSQL）测试卡片
 │   │       ├── login_section.dart          # 登录表单组件
 │   │       ├── models_section.dart         # 数据模型测试卡片
 │   │       └── mysql_section.dart          # MySQL 数据库测试卡片
@@ -132,10 +134,12 @@ flutter build web --release
 
 <p>
 <img src="https://qcloudimg.tencent-cloud.cn/raw/f7bbc1fb7fc9250ddf81dd1d9765c9f1.jpg" width="32%" />
-<img src="https://qcloudimg.tencent-cloud.cn/raw/7fb7566335cfcf1559b81a79d7193752.jpg" width="32%" />
-<img src="https://qcloudimg.tencent-cloud.cn/raw/fdc7aee3731dc1d321d12e18adade045.jpg" width="32%" />
-<img src="https://qcloudimg.tencent-cloud.cn/raw/9523dfaa5278c9d1fc38aa9a6d785ce1.jpg" width="32%" />
-<img src="https://qcloudimg.tencent-cloud.cn/raw/6c67d6b50e274cfbf49c1b795f457988.jpg" width="32%" />
+<img src="https://6c6f-lowcode-1gk9y5ik310a94df-1307578329.tcb.qcloud.la/source_keep/flutter_2.png" width="32%" />
+<img src="https://6c6f-lowcode-1gk9y5ik310a94df-1307578329.tcb.qcloud.la/source_keep/flutter_1.png" width="32%" />
+<img src="https://6c6f-lowcode-1gk9y5ik310a94df-1307578329.tcb.qcloud.la/source_keep/flutter_3.png" width="32%" />
+<img src="https://6c6f-lowcode-1gk9y5ik310a94df-1307578329.tcb.qcloud.la/source_keep/flutter_4.png" width="32%" />
+<img src="https://6c6f-lowcode-1gk9y5ik310a94df-1307578329.tcb.qcloud.la/source_keep/flutter_5.png" width="32%" />
+<img src="https://6c6f-lowcode-1gk9y5ik310a94df-1307578329.tcb.qcloud.la/source_keep/flutter_6.png" width="32%" />
 </p>
 
 ## 云开发功能说明
@@ -371,6 +375,53 @@ final result = await _cloudBase!.models.getTableName(
 );
 ```
 
+### 文档型数据库（NoSQL）
+
+文档型数据库提供 JS SDK 风格的链式调用，通过 `_cloudBase!.database()` 获取实例。支持集合级的批量操作和按文档 ID 的单文档操作。
+
+```dart
+final db = _cloudBase!.database();
+final _ = db.command; // 查询/更新指令
+
+// 新增文档（支持单条或批量）
+final addRes = await db.collection('todos').add({'title': '学习 CloudBase', 'completed': false});
+final addManyRes = await db.collection('todos').add([
+  {'title': 'A'},
+  {'title': 'B'},
+]);
+
+// 条件查询 —— 支持 where / orderBy / limit / skip
+final getRes = await db
+    .collection('todos')
+    .where({'completed': false})
+    .orderBy('createdAt', OrderDirection.desc)
+    .limit(10)
+    .skip(0)
+    .get();
+print(getRes.data); // 已从 EJSON 解码为普通 Dart 值的文档列表
+
+// 统计数量
+final countRes = await db.collection('todos').where({'completed': false}).count();
+print(countRes.total);
+
+// 批量更新（可结合指令，如自增）
+final updateRes = await db
+    .collection('todos')
+    .where({'completed': false})
+    .update({'count': _.inc(1)});
+
+// 批量删除
+final removeRes = await db.collection('todos').where({'completed': true}).remove();
+
+// 按文档 ID 操作
+await db.collection('todos').doc('doc-id').get();               // 查询单个文档
+await db.collection('todos').doc('doc-id').update({'done': true}); // 合并更新
+await db.collection('todos').doc('doc-id').set({'title': '重置'});  // 完全替换（不存在则创建）
+await db.collection('todos').doc('doc-id').remove();             // 删除单个文档
+```
+
+> 注：`db.command`（`_`）提供 `eq / gt / inc / push / set` 等查询与更新指令；`db.Geo`、`db.RegExp`、`db.serverDate` 分别用于地理位置查询、模糊查询和服务端时间；此外还支持 `aggregate()` 聚合查询与 `startTransaction()` 事务操作。
+
 ## 重要说明
 
 1. 在使用前请先在应用的环境配置页面输入您的云开发环境 ID 和访问密钥。
@@ -378,6 +429,7 @@ final result = await _cloudBase!.models.getTableName(
 3. 在使用云函数、云托管等功能前，请确保在云开发控制台中已创建相应的资源。
 4. 验证码登录需要在云开发控制台开启短信或邮件服务。
 5. MySQL 和数据模型功能需要在云开发控制台中开通数据库服务并创建对应的表/模型。
+6. 文档型数据库（NoSQL）功能需要在云开发控制台中开通文档型数据库并创建对应的集合。
 
 ## 贡献指南
 

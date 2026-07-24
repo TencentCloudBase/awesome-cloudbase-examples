@@ -3,13 +3,13 @@
 // 本文件是应用的核心页面，负责以下职责：
 // 1. 环境配置：引导用户输入 CloudBase 环境 ID 和 Access Key，完成 SDK 初始化
 // 2. 用户认证：支持匿名登录、密码登录、手机验证码登录、邮箱验证码登录
-// 3. 功能测试：登录后展示云托管、云函数、API、MySQL、数据模型五大功能的测试卡片
+// 3. 功能测试：登录后通过 Tab 切换云托管、云函数、API、MySQL、数据模型、文档型数据库六大功能模块
 //
 // 架构说明：
 // - 业务逻辑（SDK 调用、状态管理）集中在 _HomePageState 中
 // - UI 卡片拆分为独立的 StatelessWidget（位于 sections/ 目录），通过回调与主页交互
 // - 各 section 组件：CloudRunSection、CloudFunctionSection、ApiSection、
-//   MySqlSection、ModelsSection、LoginSection
+//   MySqlSection、ModelsSection、DatabaseSection、LoginSection
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloudbase_flutter/cloudbase_flutter.dart';
@@ -19,7 +19,9 @@ import 'sections/cloud_function_section.dart';
 import 'sections/api_section.dart';
 import 'sections/mysql_section.dart';
 import 'sections/models_section.dart';
+import 'sections/database_section.dart';
 import 'sections/login_section.dart';
+import '../examples/command_examples.dart';
 
 /// 全局 Navigator Key
 ///
@@ -37,13 +39,17 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   // ===========================================================================
   // CloudBase SDK 实例与全局状态
   // ===========================================================================
 
   /// CloudBase SDK 实例，初始化成功后赋值
   CloudBase? _cloudBase;
+
+  /// 功能模块 Tab 控制器（云托管/云函数/API/MySQL/数据模型/文档型数据库）
+  late final TabController _tabController = TabController(length: 6, vsync: this);
 
   /// 全局加载状态，控制按钮禁用和加载指示器
   bool _isLoading = false;
@@ -78,6 +84,38 @@ class _HomePageState extends State<HomePage> {
 
   /// 数据模型操作结果
   String? _modelsResult;
+
+  /// 文档型数据库操作结果
+  String? _databaseResult;
+
+  // ===========================================================================
+  // 文档型数据库测试参数控制器
+  // ===========================================================================
+
+  /// 数据库实例 ID（可选），为空时 SDK 使用默认实例 (default)
+  final _dbInstanceController = TextEditingController();
+
+  /// 数据库名称（可选），为空时 SDK 使用默认数据库 (default)
+  final _dbDatabaseController = TextEditingController();
+  final _dbCollectionController = TextEditingController(text: 'todos');
+  final _dbDocIdController = TextEditingController();
+  final _dbWhereController = TextEditingController();
+  final _dbDataController = TextEditingController();
+  final _dbOrderFieldController = TextEditingController();
+  final _dbLimitController = TextEditingController(text: '10');
+  final _dbSkipController = TextEditingController(text: '0');
+
+  /// 当前选中的数据库排序方向
+  String _dbOrderDirection = 'asc';
+
+  /// 当前选中的数据库操作方法
+  String _dbMethod = 'add';
+
+  /// 当前选中的 db.command 查询指令示例 key
+  String _dbCommandExample = 'compareGt';
+
+  /// db.command 示例运行结果
+  String? _dbCommandResult;
 
   // ===========================================================================
   // 数据模型测试参数控制器
@@ -236,8 +274,18 @@ class _HomePageState extends State<HomePage> {
     _datasourceIdController.dispose();
     _datasourceNameController.dispose();
     _datasourceTableNameController.dispose();
+    _dbInstanceController.dispose();
+    _dbDatabaseController.dispose();
+    _dbCollectionController.dispose();
+    _dbDocIdController.dispose();
+    _dbWhereController.dispose();
+    _dbDataController.dispose();
+    _dbOrderFieldController.dispose();
+    _dbLimitController.dispose();
+    _dbSkipController.dispose();
     _envIdController.dispose();
     _accessKeyController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -1254,6 +1302,404 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ===========================================================================
+  // 文档型数据库测试 —— 调用 cloudBase.database().collection(...)
+  // ===========================================================================
+
+  /// 归一化用户输入，尽量宽容地把常见的“类 JSON”写法转成合法 JSON。
+  ///
+  /// 处理内容：
+  /// - 中文引号（“ ” ‘ ’ ＂ ＇）转半角引号
+  /// - 单引号包裹的键/值转双引号（如 {'a': 'b'} -> {"a": "b"}）
+  /// - 未加引号的对象键补上双引号（如 {completed: false} -> {"completed": false}）
+  /// - 去除对象/数组内的尾随逗号（如 {"a":1,} -> {"a":1}）
+  String _normalizeDbJson(String text) {
+    var s = text
+        .replaceAll('\u201c', '"').replaceAll('\u201d', '"')
+        .replaceAll('\u2018', "'").replaceAll('\u2019', "'")
+        .replaceAll('\uff02', '"').replaceAll('\uff07', "'");
+    // 单引号 -> 双引号（简单场景，值中一般不含未转义单引号）
+    s = s.replaceAll("'", '"');
+    // 给未加引号的对象键补双引号：匹配 { 或 , 后跟裸键名再跟 :
+    s = s.replaceAllMapped(
+      RegExp(r'([{,]\s*)([A-Za-z_$][A-Za-z0-9_$]*)(\s*:)'),
+      (m) => '${m[1]}"${m[2]}"${m[3]}',
+    );
+    // 去除尾随逗号：, 后紧跟 } 或 ]
+    s = s.replaceAllMapped(
+      RegExp(r',\s*([}\]])'),
+      (m) => m[1]!,
+    );
+    return s;
+  }
+
+  /// 解析 JSON 对象字符串（数据库用），宽容处理中文引号/单引号/裸键名/尾随逗号
+  ///
+  /// 返回 null 表示输入非法或不是 JSON 对象；调用方需据此给出错误提示，
+  /// 避免把解析失败静默当作空条件（会导致查询条件"不生效"）。
+  Map<String, dynamic>? _parseDbJsonObject(String text) {
+    if (text.isEmpty) return null;
+    final normalized = _normalizeDbJson(text);
+    try {
+      final decoded = jsonDecode(normalized);
+      // 用 `is Map` 后再 cast，兼容 jsonDecode 返回的各种 Map 运行时类型
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    } catch (_) {}
+    return null;
+  }
+
+  /// 解析 JSON（对象或数组），用于 add 操作，宽容处理中文引号/单引号/裸键名/尾随逗号
+  dynamic _parseDbJsonAny(String text) {
+    if (text.isEmpty) return null;
+    final normalized = _normalizeDbJson(text);
+    try {
+      return jsonDecode(normalized);
+    } catch (_) {}
+    return null;
+  }
+
+  /// 将文档列表格式化为可读字符串
+  String _formatDbRecords(List<Map<String, dynamic>> records) {
+    final buf = StringBuffer()..writeln('Count: ${records.length}');
+    for (var i = 0; i < records.length; i++) {
+      buf.writeln('--- Record $i ---');
+      buf.writeln(const JsonEncoder.withIndent('  ').convert(records[i]));
+    }
+    return buf.toString();
+  }
+
+  /// 执行文档型数据库操作
+  ///
+  /// 根据用户选择的操作方法（add/get/count/update/remove/getDoc/updateDoc/
+  /// setDoc/removeDoc），构建查询链并调用 SDK 的 database 接口，
+  /// 结果存入 [_databaseResult]。
+  Future<void> _testDatabase() async {
+    if (_cloudBase == null) return;
+    final collName = _dbCollectionController.text.trim();
+    if (collName.isEmpty) { _showError('请输入集合名称'); return; }
+
+    _clearMessages();
+    setState(() => _databaseResult = null);
+    _setLoading(true);
+
+    try {
+      // 实例 ID / 数据库名称为空时传 null，SDK 会使用默认值 (default)
+      final instance = _dbInstanceController.text.trim();
+      final database = _dbDatabaseController.text.trim();
+      final db = _cloudBase!.database(
+        instance: instance.isEmpty ? null : instance,
+        database: database.isEmpty ? null : database,
+      );
+      final coll = db.collection(collName);
+      final method = _dbMethod;
+      debugPrint('[Database] method=$method, collection=$collName');
+
+      switch (method) {
+        case 'add':
+          final data = _parseDbJsonAny(_dbDataController.text.trim());
+          if (data == null) {
+            _showError('请输入有效的 JSON 对象或数组');
+            _setLoading(false);
+            return;
+          }
+          final result = await coll.add(data);
+          setState(() => _databaseResult =
+              'Success: ${result.isSuccess}\nId: ${result.id}\nIds: ${result.ids}\nCode: ${result.code}\nMessage: ${result.message}\nRequestId: ${result.requestId}');
+          if (result.isSuccess) {
+            _showSuccess('add 成功');
+          } else {
+            _showError(result.message ?? 'add 失败');
+          }
+          break;
+
+        case 'get':
+          final whereText = _dbWhereController.text.trim();
+          final where = _parseDbJsonObject(whereText);
+          // 用户填了查询条件但解析失败时，明确报错，避免静默降级为全表查询
+          if (whereText.isNotEmpty && where == null) {
+            _showError('Where 查询条件无法解析，请检查括号是否匹配，例如: {"completed": false}');
+            _setLoading(false);
+            return;
+          }
+          Query query = coll.where(where ?? {});
+          final orderField = _dbOrderFieldController.text.trim();
+          if (orderField.isNotEmpty) {
+            query = query.orderBy(
+              orderField,
+              _dbOrderDirection == 'desc' ? OrderDirection.desc : OrderDirection.asc,
+            );
+          }
+          final limit = int.tryParse(_dbLimitController.text.trim());
+          if (limit != null) query = query.limit(limit);
+          final skip = int.tryParse(_dbSkipController.text.trim());
+          if (skip != null && skip > 0) query = query.skip(skip);
+          final result = await query.get();
+          if (result.isSuccess) {
+            setState(() => _databaseResult =
+                'Success: true\nRequestId: ${result.requestId}\n${_formatDbRecords(result.data)}');
+            _showSuccess('get 成功，共 ${result.data.length} 条');
+          } else {
+            setState(() => _databaseResult =
+                'Success: false\nCode: ${result.code}\nMessage: ${result.message}');
+            _showError(result.message ?? 'get 失败');
+          }
+          break;
+
+        case 'count':
+          final whereText = _dbWhereController.text.trim();
+          final where = _parseDbJsonObject(whereText);
+          if (whereText.isNotEmpty && where == null) {
+            _showError('Where 查询条件无法解析，请检查括号是否匹配，例如: {"completed": false}');
+            _setLoading(false);
+            return;
+          }
+          final result = await coll.where(where ?? {}).count();
+          setState(() => _databaseResult =
+              'Success: ${result.isSuccess}\nTotal: ${result.total}\nCode: ${result.code}\nMessage: ${result.message}\nRequestId: ${result.requestId}');
+          if (result.isSuccess) {
+            _showSuccess('count 成功，共 ${result.total} 条');
+          } else {
+            _showError(result.message ?? 'count 失败');
+          }
+          break;
+
+        case 'update':
+          final where = _parseDbJsonObject(_dbWhereController.text.trim());
+          if (where == null || where.isEmpty) {
+            _showError('批量更新必须提供查询条件');
+            _setLoading(false);
+            return;
+          }
+          final data = _parseDbJsonObject(_dbDataController.text.trim());
+          if (data == null) {
+            _showError('请输入有效的更新数据 (JSON 对象)');
+            _setLoading(false);
+            return;
+          }
+          final result = await coll.where(where).update(data);
+          setState(() => _databaseResult =
+              'Success: ${result.isSuccess}\nMatched: ${result.matched}\nUpdated: ${result.updated}\nCode: ${result.code}\nMessage: ${result.message}\nRequestId: ${result.requestId}');
+          if (result.isSuccess) {
+            _showSuccess('update 成功');
+          } else {
+            _showError(result.message ?? 'update 失败');
+          }
+          break;
+
+        case 'remove':
+          final where = _parseDbJsonObject(_dbWhereController.text.trim());
+          if (where == null || where.isEmpty) {
+            _showError('批量删除必须提供查询条件');
+            _setLoading(false);
+            return;
+          }
+          final result = await coll.where(where).remove();
+          setState(() => _databaseResult =
+              'Success: ${result.isSuccess}\nDeleted: ${result.deleted}\nCode: ${result.code}\nMessage: ${result.message}\nRequestId: ${result.requestId}');
+          if (result.isSuccess) {
+            _showSuccess('remove 成功');
+          } else {
+            _showError(result.message ?? 'remove 失败');
+          }
+          break;
+
+        case 'getDoc':
+          final docId = _dbDocIdController.text.trim();
+          if (docId.isEmpty) { _showError('请输入文档 ID'); _setLoading(false); return; }
+          final result = await coll.doc(docId).get();
+          if (result.isSuccess) {
+            setState(() => _databaseResult =
+                'Success: true\nRequestId: ${result.requestId}\n${_formatDbRecords(result.data)}');
+            _showSuccess(result.data.isEmpty ? 'getDoc 成功（文档不存在）' : 'getDoc 成功');
+          } else {
+            setState(() => _databaseResult =
+                'Success: false\nCode: ${result.code}\nMessage: ${result.message}');
+            _showError(result.message ?? 'getDoc 失败');
+          }
+          break;
+
+        case 'updateDoc':
+          final docId = _dbDocIdController.text.trim();
+          if (docId.isEmpty) { _showError('请输入文档 ID'); _setLoading(false); return; }
+          final data = _parseDbJsonObject(_dbDataController.text.trim());
+          if (data == null) { _showError('请输入有效的更新数据 (JSON 对象)'); _setLoading(false); return; }
+          final result = await coll.doc(docId).update(data);
+          setState(() => _databaseResult =
+              'Success: ${result.isSuccess}\nMatched: ${result.matched}\nUpdated: ${result.updated}\nCode: ${result.code}\nMessage: ${result.message}\nRequestId: ${result.requestId}');
+          if (result.isSuccess) {
+            _showSuccess('updateDoc 成功');
+          } else {
+            _showError(result.message ?? 'updateDoc 失败');
+          }
+          break;
+
+        case 'setDoc':
+          final docId = _dbDocIdController.text.trim();
+          if (docId.isEmpty) { _showError('请输入文档 ID'); _setLoading(false); return; }
+          final data = _parseDbJsonObject(_dbDataController.text.trim());
+          if (data == null) { _showError('请输入有效的数据 (JSON 对象)'); _setLoading(false); return; }
+          final result = await coll.doc(docId).set(data);
+          setState(() => _databaseResult =
+              'Success: ${result.isSuccess}\nMatched: ${result.matched}\nUpdated: ${result.updated}\nUpsertedId: ${result.upsertedId}\nCode: ${result.code}\nMessage: ${result.message}\nRequestId: ${result.requestId}');
+          if (result.isSuccess) {
+            _showSuccess('setDoc 成功');
+          } else {
+            _showError(result.message ?? 'setDoc 失败');
+          }
+          break;
+
+        case 'removeDoc':
+          final docId = _dbDocIdController.text.trim();
+          if (docId.isEmpty) { _showError('请输入文档 ID'); _setLoading(false); return; }
+          final result = await coll.doc(docId).remove();
+          setState(() => _databaseResult =
+              'Success: ${result.isSuccess}\nDeleted: ${result.deleted}\nCode: ${result.code}\nMessage: ${result.message}\nRequestId: ${result.requestId}');
+          if (result.isSuccess) {
+            _showSuccess('removeDoc 成功');
+          } else {
+            _showError(result.message ?? 'removeDoc 失败');
+          }
+          break;
+      }
+    } catch (e) {
+      setState(() => _databaseResult = '异常: $e');
+      _showError('数据库调用异常: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// db.command 查询指令示例的元数据：key -> (标题, 执行函数)
+  ///
+  /// 每个执行函数封装在 [CommandExamples] 中，演示一种 `db.command` 用法。
+  Map<String, ({String label, Future<String> Function(CommandExamples) run})>
+      get _dbCommandExampleMeta => {
+            'compareGt': (label: '比较 · 大于 (gt)', run: (e) => e.compareGt()),
+            'compareRange': (label: '比较 · 范围 (gte+lte)', run: (e) => e.compareRange()),
+            'compareIn': (label: '比较 · 在集合中 (inList)', run: (e) => e.compareIn()),
+            'logicOr': (label: '逻辑 · 顶层或 (\$or)', run: (e) => e.logicOr()),
+            'logicFieldOr': (label: '逻辑 · 字段或 (or)', run: (e) => e.logicFieldOr()),
+            'fieldExists': (label: '字段 · 存在 (exists)', run: (e) => e.fieldExists()),
+            'arrayAll': (label: '数组 · 包含全部 (all)', run: (e) => e.arrayAll()),
+            'arraySize': (label: '数组 · 长度 (size)', run: (e) => e.arraySize()),
+            'updateInc': (label: '更新 · 自增 (inc)', run: (e) => e.updateInc()),
+            'updatePush': (label: '更新 · 追加元素 (push)', run: (e) => e.updatePush()),
+            'updatePull': (label: '更新 · 移除元素 (pull)', run: (e) => e.updatePull()),
+            'updateRemoveField': (label: '更新 · 删除字段 (unset)', run: (e) => e.updateRemoveField()),
+          };
+
+  /// 运行选中的 db.command 查询指令示例
+  Future<void> _runDbCommandExample() async {
+    if (_cloudBase == null) return;
+    final collName = _dbCollectionController.text.trim();
+    // 实例 ID / 数据库名称为空时传 null，SDK 会使用默认值 (default)
+    final instance = _dbInstanceController.text.trim();
+    final database = _dbDatabaseController.text.trim();
+    final examples = CommandExamples(
+      _cloudBase!.database(
+        instance: instance.isEmpty ? null : instance,
+        database: database.isEmpty ? null : database,
+      ),
+      collection: collName.isEmpty ? 'todos' : collName,
+    );
+    final meta = _dbCommandExampleMeta[_dbCommandExample];
+    if (meta == null) return;
+
+    _clearMessages();
+    setState(() => _dbCommandResult = null);
+    _setLoading(true);
+    try {
+      final text = await meta.run(examples);
+      setState(() => _dbCommandResult = text);
+      _showSuccess('示例执行完成');
+    } catch (e) {
+      setState(() => _dbCommandResult = '异常: $e');
+      _showError('示例执行异常: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// 构建 db.command 查询指令示例卡片
+  Widget _buildCommandExampleCard() {
+    final meta = _dbCommandExampleMeta;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'db.command 查询指令示例',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const Divider(),
+            const Text(
+              '用类型安全的 Dart API 构造复杂查询/更新条件（\$gt、\$in、\$inc 等），'
+              '目标集合取上方「集合名称」，默认 todos。',
+              style: TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _dbCommandExample,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: '选择示例',
+                prefixIcon: Icon(Icons.auto_awesome),
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              items: [
+                for (final entry in meta.entries)
+                  DropdownMenuItem(value: entry.key, child: Text(entry.value.label)),
+              ],
+              onChanged: (v) => setState(() => _dbCommandExample = v!),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isLoading ? null : _runDbCommandExample,
+                icon: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.play_arrow),
+                label: Text(_isLoading ? '执行中...' : '运行示例'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+            if (_dbCommandResult != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                constraints: const BoxConstraints(maxHeight: 300),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    _dbCommandResult!,
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ===========================================================================
   // UI 构建 —— 页面主入口
   // ===========================================================================
 
@@ -1278,24 +1724,53 @@ class _HomePageState extends State<HomePage> {
         title: Text(_isLoggedIn ? '用户中心' : '登录'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              setState(() {
-                _isConfigured = false;
-                _cloudBase = null;
-                _isLoggedIn = false;
-                _currentUser = null;
-              });
-            },
-            tooltip: '重新配置',
-          ),
           if (_isLoggedIn)
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: _isLoading ? null : _refreshUser,
               tooltip: '刷新用户信息',
             ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.settings),
+            tooltip: '设置',
+            enabled: !_isLoading,
+            onSelected: (value) {
+              switch (value) {
+                case 'reconfigure':
+                  setState(() {
+                    _isConfigured = false;
+                    _cloudBase = null;
+                    _isLoggedIn = false;
+                    _currentUser = null;
+                  });
+                  break;
+                case 'signOut':
+                  _signOut();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<String>(
+                value: 'reconfigure',
+                child: ListTile(
+                  leading: Icon(Icons.tune),
+                  title: Text('重新配置'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              if (_isLoggedIn) ...[
+                const PopupMenuDivider(),
+                PopupMenuItem<String>(
+                  value: 'signOut',
+                  child: ListTile(
+                    leading: Icon(Icons.logout, color: Colors.red.shade700),
+                    title: Text('退出登录', style: TextStyle(color: Colors.red.shade700)),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
       body: _isLoading && _cloudBase == null
@@ -1403,171 +1878,262 @@ class _HomePageState extends State<HomePage> {
 
   /// 构建已登录后的用户中心页面
   ///
-  /// 包含：用户信息卡片 + 各功能测试卡片（云托管、云函数、API、MySQL、数据模型）
-  /// + 退出登录按钮
+  /// 布局：顶部用户信息头部 + 全局消息提示 + TabBar（六大功能模块）
+  /// + TabBarView（各模块内部独立滚动）。退出登录已移至右上角设置菜单。
   Widget _buildUserInfo() {
+    return Column(
+      children: [
+        // 顶部：用户信息头部（紧凑展示）
+        _buildUserHeader(),
+
+        // 全局消息提示
+        if (_successMessage != null || _errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Column(
+              children: [
+                if (_successMessage != null) _buildMessageCard(_successMessage!, Colors.green),
+                if (_errorMessage != null) _buildMessageCard(_errorMessage!, Colors.red),
+              ],
+            ),
+          ),
+
+        // 功能模块 Tab 导航
+        Material(
+          color: Theme.of(context).colorScheme.surface,
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs: const [
+              Tab(icon: Icon(Icons.dns), text: '云托管'),
+              Tab(icon: Icon(Icons.functions), text: '云函数'),
+              Tab(icon: Icon(Icons.api), text: 'API'),
+              Tab(icon: Icon(Icons.storage), text: 'MySQL'),
+              Tab(icon: Icon(Icons.schema), text: '数据模型'),
+              Tab(icon: Icon(Icons.folder_special), text: '文档型数据库'),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+
+        // 功能模块内容区（每个 Tab 内部独立滚动）
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildTabContent(
+                CloudRunSection(
+                  containerNameController: _containerNameController,
+                  containerPathController: _containerPathController,
+                  containerDataController: _containerDataController,
+                  containerMethod: _containerMethod,
+                  onMethodChanged: (v) => setState(() => _containerMethod = v),
+                  isLoading: _isLoading,
+                  result: _cloudRunResult,
+                  onTest: _testCallContainer,
+                ),
+              ),
+              _buildTabContent(
+                CloudFunctionSection(
+                  functionNameController: _functionNameController,
+                  functionDataController: _functionDataController,
+                  isLoading: _isLoading,
+                  result: _functionResult,
+                  onTest: _testCallFunction,
+                ),
+              ),
+              _buildTabContent(
+                ApiSection(
+                  apiNameController: _apiNameController,
+                  apiPathController: _apiPathController,
+                  apiDataController: _apiDataController,
+                  apiMethod: _apiMethod,
+                  onMethodChanged: (v) => setState(() => _apiMethod = v),
+                  isLoading: _isLoading,
+                  result: _apiResult,
+                  onTest: _testCallApi,
+                ),
+              ),
+              _buildTabContent(
+                MySqlSection(
+                  mysqlTableController: _mysqlTableController,
+                  mysqlSchemaController: _mysqlSchemaController,
+                  mysqlInstanceController: _mysqlInstanceController,
+                  mysqlSelectController: _mysqlSelectController,
+                  mysqlFiltersController: _mysqlFiltersController,
+                  mysqlLimitController: _mysqlLimitController,
+                  mysqlOffsetController: _mysqlOffsetController,
+                  mysqlOrderController: _mysqlOrderController,
+                  mysqlDataController: _mysqlDataController,
+                  mysqlMethod: _mysqlMethod,
+                  onMethodChanged: (v) => setState(() => _mysqlMethod = v),
+                  isLoading: _isLoading,
+                  result: _mysqlResult,
+                  onTest: _testMySql,
+                ),
+              ),
+              _buildTabContent(
+                ModelsSection(
+                  modelsNameController: _modelsNameController,
+                  modelsRecordIdController: _modelsRecordIdController,
+                  modelsFilterController: _modelsFilterController,
+                  modelsSelectController: _modelsSelectController,
+                  modelsDataController: _modelsDataController,
+                  modelsPageSizeController: _modelsPageSizeController,
+                  modelsPageNumberController: _modelsPageNumberController,
+                  modelsOrderByController: _modelsOrderByController,
+                  modelsSqlTemplateController: _modelsSqlTemplateController,
+                  modelsSqlParameterController: _modelsSqlParameterController,
+                  datasourceIdController: _datasourceIdController,
+                  datasourceNameController: _datasourceNameController,
+                  datasourceTableNameController: _datasourceTableNameController,
+                  modelsMethod: _modelsMethod,
+                  onMethodChanged: (v) => setState(() => _modelsMethod = v),
+                  isLoading: _isLoading,
+                  result: _modelsResult,
+                  onTest: _testModels,
+                ),
+              ),
+              _buildTabContent(
+                Column(
+                  children: [
+                    DatabaseSection(
+                      instanceController: _dbInstanceController,
+                      databaseController: _dbDatabaseController,
+                      collectionController: _dbCollectionController,
+                      docIdController: _dbDocIdController,
+                      whereController: _dbWhereController,
+                      dataController: _dbDataController,
+                      orderFieldController: _dbOrderFieldController,
+                      limitController: _dbLimitController,
+                      skipController: _dbSkipController,
+                      orderDirection: _dbOrderDirection,
+                      onOrderDirectionChanged: (v) => setState(() => _dbOrderDirection = v),
+                      method: _dbMethod,
+                      onMethodChanged: (v) => setState(() => _dbMethod = v),
+                      isLoading: _isLoading,
+                      result: _databaseResult,
+                      onTest: _testDatabase,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildCommandExampleCard(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 每个 Tab 的内容容器 —— 统一内边距并支持滚动
+  Widget _buildTabContent(Widget child) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(16.0),
+      child: child,
+    );
+  }
+
+  /// 构建顶部用户信息头部（紧凑横向布局，可展开查看详情）
+  Widget _buildUserHeader() {
+    final displayName = _currentUser?.userMetadata?.nickName ??
+        _currentUser?.userMetadata?.username ??
+        _currentUser?.userMetadata?.name ??
+        '用户';
+    final isAnonymous = _currentUser?.isAnonymous == true;
+
+    return Container(
+      width: double.infinity,
+      color: Theme.of(context).colorScheme.surface,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.blue.shade100,
-            backgroundImage: _currentUser?.userMetadata?.avatarUrl != null
-                ? NetworkImage(_currentUser!.userMetadata!.avatarUrl!)
-                : null,
-            child: _currentUser?.userMetadata?.avatarUrl == null
-                ? Icon(Icons.person, size: 50, color: Colors.blue.shade700)
-                : null,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _currentUser?.userMetadata?.nickName ??
-                _currentUser?.userMetadata?.username ??
-                _currentUser?.userMetadata?.name ??
-                '用户',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: _currentUser?.isAnonymous == true ? Colors.orange.shade100 : Colors.green.shade100,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              _currentUser?.isAnonymous == true ? '匿名用户' : '正式用户',
-              style: TextStyle(
-                color: _currentUser?.isAnonymous == true ? Colors.orange.shade800 : Colors.green.shade800,
-                fontSize: 12,
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.blue.shade100,
+                backgroundImage: _currentUser?.userMetadata?.avatarUrl != null
+                    ? NetworkImage(_currentUser!.userMetadata!.avatarUrl!)
+                    : null,
+                child: _currentUser?.userMetadata?.avatarUrl == null
+                    ? Icon(Icons.person, size: 28, color: Colors.blue.shade700)
+                    : null,
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          if (_successMessage != null) _buildMessageCard(_successMessage!, Colors.green),
-          if (_errorMessage != null) _buildMessageCard(_errorMessage!, Colors.red),
-
-          // 用户详细信息卡片
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('用户信息', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  const Divider(),
-                  _buildInfoTile(Icons.badge, '用户ID', _currentUser?.id ?? '未知'),
-                  if (_currentUser?.email != null) _buildInfoTile(Icons.email, '邮箱', _currentUser!.email!),
-                  if (_currentUser?.phone != null) _buildInfoTile(Icons.phone, '手机号', _currentUser!.phone!),
-                  if (_currentUser?.userMetadata?.username != null) _buildInfoTile(Icons.person, '用户名', _currentUser!.userMetadata!.username!),
-                  if (_currentUser?.createdAt != null) _buildInfoTile(Icons.calendar_today, '创建时间', _formatDateTime(_currentUser!.createdAt!)),
-                  if (_currentUser?.lastSignInAt != null) _buildInfoTile(Icons.login, '最后登录', _formatDateTime(_currentUser!.lastSignInAt!)),
-                  if (_currentUser?.userMetadata?.hasPassword != null)
-                    _buildInfoTile(Icons.lock, '密码状态', _currentUser!.userMetadata!.hasPassword! ? '已设置' : '未设置'),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'ID: ${_currentUser?.id ?? '未知'}',
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // 云托管测试
-          CloudRunSection(
-            containerNameController: _containerNameController,
-            containerPathController: _containerPathController,
-            containerDataController: _containerDataController,
-            containerMethod: _containerMethod,
-            onMethodChanged: (v) => setState(() => _containerMethod = v),
-            isLoading: _isLoading,
-            result: _cloudRunResult,
-            onTest: _testCallContainer,
-          ),
-          const SizedBox(height: 24),
-
-          // 云函数测试
-          CloudFunctionSection(
-            functionNameController: _functionNameController,
-            functionDataController: _functionDataController,
-            isLoading: _isLoading,
-            result: _functionResult,
-            onTest: _testCallFunction,
-          ),
-          const SizedBox(height: 24),
-
-          // API 测试
-          ApiSection(
-            apiNameController: _apiNameController,
-            apiPathController: _apiPathController,
-            apiDataController: _apiDataController,
-            apiMethod: _apiMethod,
-            onMethodChanged: (v) => setState(() => _apiMethod = v),
-            isLoading: _isLoading,
-            result: _apiResult,
-            onTest: _testCallApi,
-          ),
-          const SizedBox(height: 24),
-
-          // MySQL 测试
-          MySqlSection(
-            mysqlTableController: _mysqlTableController,
-            mysqlSchemaController: _mysqlSchemaController,
-            mysqlInstanceController: _mysqlInstanceController,
-            mysqlSelectController: _mysqlSelectController,
-            mysqlFiltersController: _mysqlFiltersController,
-            mysqlLimitController: _mysqlLimitController,
-            mysqlOffsetController: _mysqlOffsetController,
-            mysqlOrderController: _mysqlOrderController,
-            mysqlDataController: _mysqlDataController,
-            mysqlMethod: _mysqlMethod,
-            onMethodChanged: (v) => setState(() => _mysqlMethod = v),
-            isLoading: _isLoading,
-            result: _mysqlResult,
-            onTest: _testMySql,
-          ),
-          const SizedBox(height: 24),
-
-          // 数据模型测试
-          ModelsSection(
-            modelsNameController: _modelsNameController,
-            modelsRecordIdController: _modelsRecordIdController,
-            modelsFilterController: _modelsFilterController,
-            modelsSelectController: _modelsSelectController,
-            modelsDataController: _modelsDataController,
-            modelsPageSizeController: _modelsPageSizeController,
-            modelsPageNumberController: _modelsPageNumberController,
-            modelsOrderByController: _modelsOrderByController,
-            modelsSqlTemplateController: _modelsSqlTemplateController,
-            modelsSqlParameterController: _modelsSqlParameterController,
-            datasourceIdController: _datasourceIdController,
-            datasourceNameController: _datasourceNameController,
-            datasourceTableNameController: _datasourceTableNameController,
-            modelsMethod: _modelsMethod,
-            onMethodChanged: (v) => setState(() => _modelsMethod = v),
-            isLoading: _isLoading,
-            result: _modelsResult,
-            onTest: _testModels,
-          ),
-          const SizedBox(height: 24),
-
-          // 退出登录按钮
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _signOut,
-              icon: const Icon(Icons.logout),
-              label: _isLoading
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('退出登录'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.red.shade50,
-                foregroundColor: Colors.red.shade700,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isAnonymous ? Colors.orange.shade100 : Colors.green.shade100,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  isAnonymous ? '匿名用户' : '正式用户',
+                  style: TextStyle(
+                    color: isAnonymous ? Colors.orange.shade800 : Colors.green.shade800,
+                    fontSize: 12,
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                tooltip: '查看用户详情',
+                onPressed: _showUserDetailSheet,
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  /// 弹出用户详细信息底部面板（复用 _buildInfoTile / _formatDateTime）
+  void _showUserDetailSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('用户信息', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const Divider(),
+              _buildInfoTile(Icons.badge, '用户ID', _currentUser?.id ?? '未知'),
+              if (_currentUser?.email != null) _buildInfoTile(Icons.email, '邮箱', _currentUser!.email!),
+              if (_currentUser?.phone != null) _buildInfoTile(Icons.phone, '手机号', _currentUser!.phone!),
+              if (_currentUser?.userMetadata?.username != null) _buildInfoTile(Icons.person, '用户名', _currentUser!.userMetadata!.username!),
+              if (_currentUser?.createdAt != null) _buildInfoTile(Icons.calendar_today, '创建时间', _formatDateTime(_currentUser!.createdAt!)),
+              if (_currentUser?.lastSignInAt != null) _buildInfoTile(Icons.login, '最后登录', _formatDateTime(_currentUser!.lastSignInAt!)),
+              if (_currentUser?.userMetadata?.hasPassword != null)
+                _buildInfoTile(Icons.lock, '密码状态', _currentUser!.userMetadata!.hasPassword! ? '已设置' : '未设置'),
+            ],
+          ),
+        );
+      },
     );
   }
 
