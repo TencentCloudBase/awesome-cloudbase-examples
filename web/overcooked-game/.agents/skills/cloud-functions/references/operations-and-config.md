@@ -54,35 +54,25 @@ callCloudApi({
 
 ### Preferred path
 
-Use `manageGateway(action="createAccess")`.
-
-### Plan B: `callCloudApi`
-
-Use raw cloud API only after checking the documentation for `CreateCloudBaseGWAPI` and confirming the gateway parameter contract.
+Use Domain/Route via `manageGateway(action="createRoute")`. Omit `domain` to attach the route on the environment default HTTP domain (`IsDefault`).
 
 ```javascript
-callCloudApi({
-  service: "tcb",
-  action: "CreateCloudBaseGWAPI",
-  params: {
-    EnableUnion: true,
-    Path: "/api/users",
-    ServiceId: "{envId}",
-    Type: 6,
-    Name: "functionName",
-    AuthSwitch: 2,
-    PathTransmission: 2,
-    EnableRegion: true,
-    Domain: "*"
-  }
+manageGateway({
+  action: "createRoute",
+  targetType: "function",
+  targetName: "functionName",
+  type: "Event", // Event -> SCF; HTTP functions must pass type="HTTP" -> WEB_SCF
+  path: "/api/users",
+  auth: false
 });
 ```
 
-Key parameters:
+Type mapping:
 
-- `Type: 6` -> function gateway type.
-- `AuthSwitch: 2` -> no auth. Use an authenticated mode only when the requirement says so.
-- `Domain: "*"` -> default domain.
+- `type="Event"` -> `UpstreamResourceType=SCF`
+- `type="HTTP"` -> `UpstreamResourceType=WEB_SCF`
+
+Do **not** use deprecated GWAPI / `CreateCloudBaseGWAPI` via `callCloudApi` (blocked in evaluate mode and removed from MCP).
 
 ## Environment variable updates
 
@@ -152,7 +142,7 @@ Prefer the converged entrances below, but translate historical names when they a
 | `manageFunctionTriggers` | `manageFunctions(action="createFunctionTrigger"|"deleteFunctionTrigger")` |
 | `readFunctionLayers` | `queryFunctions(action="listLayers"|"listLayerVersions"|"getLayerVersionDetail"|"listFunctionLayers")` |
 | `writeFunctionLayers` | `manageFunctions(action="createLayerVersion"|"deleteLayerVersion"|"attachLayer"|"detachLayer"|"updateFunctionLayers")` |
-| `createFunctionHTTPAccess` | `manageGateway(action="createAccess")` |
+| `createFunctionHTTPAccess` | `manageGateway(action="createRoute")` with `type="HTTP"` |
 
 ## CLI fallback
 
