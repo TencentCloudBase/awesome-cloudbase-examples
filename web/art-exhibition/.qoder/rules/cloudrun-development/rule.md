@@ -212,3 +212,9 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 - **Local run failure** -> remember only Function mode is supported by local-run tools.
 - **Performance issues** -> reduce dependencies, optimize initialization, and tune minimum instances.
 - **DB / Redis connection failure after a successful deploy** -> almost always missing or wrong `VpcConf`, wrong private host, or security group. Follow `references/vpc-and-database.md` before rewriting application code.
+
+## Reference index
+
+All packaged reference files (required for skill lint reachability):
+
+- [vpc-and-database.md](references/vpc-and-database.md)

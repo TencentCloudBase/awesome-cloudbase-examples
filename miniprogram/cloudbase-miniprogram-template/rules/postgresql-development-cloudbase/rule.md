@@ -265,3 +265,16 @@ Avoid dynamic helper traps:
 - Editor permission is enforced outside the UI.
 - A pgstore bucket that matches the upload path (e.g. `covers`) exists BEFORE any browser upload runs. If it does not, create it via a management surface; the v3 SDK will not create one for you.
 - Storage upload returns a usable URL and that URL is persisted with the article. Upload errors must propagate — do not insert an article row with a placeholder cover URL.
+
+## Reference index
+
+All packaged reference files (required for skill lint reachability):
+
+- [index.md](references/index.md)
+- [pg-mode-overview.md](references/pg-mode-overview.md)
+- [auth-and-rls.md](references/auth-and-rls.md)
+- [app-workflow.md](references/app-workflow.md)
+- [storage-pg.md](references/storage-pg.md)
+- [http-api.md](references/http-api.md)
+- [rls-patterns.md](references/rls-patterns.md)
+- [troubleshooting.md](references/troubleshooting.md)
