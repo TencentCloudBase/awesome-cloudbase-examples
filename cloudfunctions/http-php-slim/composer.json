@@ -1,13 +1,11 @@
 {
-    "name": "example/http-php-slim",
-    "description": "使用 Slim 4 框架的 HTTP 函数模板 / HTTP function template powered by Slim 4",
-    "require": {
-        "slim/slim": "^4.13",
-        "slim/psr7": "^1.6"
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "src/"
-        }
-    }
+  "name": "http-php-slim",
+  "description": "Slim Framework HTTP function for CloudBase",
+  "require": {
+    "php": ">=7.4",
+    "slim/slim": "^4.0",
+    "slim/psr7": "^1.0",
+    "nyholm/psr7": "^1.0",
+    "nyholm/psr7-server": "^1.0"
+  }
 }

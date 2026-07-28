@@ -71,12 +71,12 @@ tcb fn log <name> -e <你的环境ID>
 
 ## 自动化测试与清理 / Automated testing & cleanup
 
-仓库提供了一套自动化测试与清理脚本，位于 [`scripts/`](./scripts/)：
+部署验证脚本统一位于 [`tools/deploy-verify/`](../tools/deploy-verify/)，`scripts/` 中的是对应的 thin wrapper（自动设置 `CF_ROOT` 并委托给共享工具）：
 
-- `scripts/test-local.sh`：Tier 0（静态检查）+ Tier 1（本地启动），不依赖 CloudBase 环境，适合 CI。
-- `scripts/test-deploy.sh`：Tier 2 真实部署 + 调用验证，依赖 `ENV_ID` 和 `tcb login`。
+- `scripts/test-local.sh` → Tier 0（静态检查）+ Tier 1（本地启动），不依赖 CloudBase 环境，适合 CI。
+- `scripts/test-deploy.sh` → Tier 2 真实部署 + 调用验证，依赖 `ENV_ID` 和 `tcb login`。
 - `scripts/test-matrix.json`：每个函数的测试元数据（部署 / 调用 / 断言）。
-- `scripts/.env.example`：把它复制为 `scripts/.env` 后填入 `ENV_ID` 和可选 `TEST_NAME_PREFIX`，所有脚本会自动加载。
+- 环境变量：将 `tools/deploy-verify/.env.example` 复制为 `scripts/.env`，填入 `ENV_ID` 和可选 `TEST_NAME_PREFIX`。
 
 常用入口：
 
@@ -93,9 +93,9 @@ cd cloudfunctions
 ./scripts/test-deploy.sh --clean-up
 ```
 
-完整测试方案、测试分级、矩阵字段定义、通过/失败判定与限制说明，详见 [`scripts/TEST_PLAN.md`](./scripts/TEST_PLAN.md)。
+完整测试方案、测试分级、矩阵字段定义、通过/失败判定与限制说明，详见 [`tools/deploy-verify/TEST_PLAN.md`](../tools/deploy-verify/TEST_PLAN.md)。
 
-The repo ships an automated test & cleanup toolkit under [`scripts/`](./scripts/). See [`scripts/TEST_PLAN.md`](./scripts/TEST_PLAN.md) for the full test plan, tier definitions, matrix schema, pass/fail criteria and known limitations.
+The repo ships an automated test & cleanup toolkit under [`tools/deploy-verify/`](../tools/deploy-verify/). See [`tools/deploy-verify/TEST_PLAN.md`](../tools/deploy-verify/TEST_PLAN.md) for the full test plan, tier definitions, matrix schema, pass/fail criteria and known limitations.
 
 ## 模板同步到 CloudBase 数据模型 / Sync templates to CloudBase data model
 

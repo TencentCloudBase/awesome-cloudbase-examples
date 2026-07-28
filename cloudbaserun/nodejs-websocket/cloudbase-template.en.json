@@ -1,0 +1,57 @@
+{
+  "identifier": "nodejs-websocket",
+  "lang": "en",
+  "funcTypes": [
+    "tcbrContainer"
+  ],
+  "title": "Node.js WebSocket CloudBase Run",
+  "titleIcon": "",
+  "description": "Node.js WebSocket real-time communication example",
+  "tags": [
+    "nodejs",
+    "realtime",
+    "websocket"
+  ],
+  "sampleCode": "",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "",
+  "zipFileStore": "",
+  "containerPort": 8080,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-websocket",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-websocket"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-websocket"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudbaserun/nodejs-websocket"
+      }
+    }
+  ],
+  "category": "realtime",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 0,
+    "legacyTags": [],
+    "localOnly": true
+  }
+}

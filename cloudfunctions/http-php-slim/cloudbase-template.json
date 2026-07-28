@@ -49,10 +49,11 @@
   "_source": {
     "dir": ".",
     "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-php-slim.zip",
-    "zipSha": "14e65c638202f3088c26ad2121e47e2123da2a2e56b85941381b82e6c177c3c7",
+    "zipSha": "097007d5507a0dcd89a7c808087fb4d46fb32491d55920ea653953970193677c",
     "uploadedAt": 1782878866646,
     "legacyTags": [],
     "localOnly": true,
     "onlineIdentifier": "http-php-slim"
-  }
+  },
+  "zipFileStore": ""
 }

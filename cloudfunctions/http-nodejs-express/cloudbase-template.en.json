@@ -17,7 +17,10 @@
   "language": "Nodejs",
   "runtimeVersion": "Nodejs",
   "isCompile": false,
-  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-express.zip",
+  "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-express-example.zip",
+  "zipFileStore": "",
+  "imagePath": "crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-express-example:v1.0.0",
+  "containerPort": 3000,
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -50,9 +53,9 @@
   "category": "framework",
   "_source": {
     "dir": ".",
-    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-nodejs-express.zip",
-    "zipSha": "a460432f31f5a6db5078d27c4a3787230b9016487646b88836415a6cb65b388c",
-    "uploadedAt": 1782878862024,
+    "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-express-example.zip",
+    "zipSha": "",
+    "uploadedAt": 0,
     "legacyTags": [
       "Nodejs",
       "Express",

@@ -17,7 +17,10 @@
   "language": "Golang",
   "runtimeVersion": "Go1",
   "isCompile": true,
-  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-go-gin.zip",
+  "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-gin-example.zip",
+  "zipFileStore": "",
+  "imagePath": "crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-gin-example:v1.0.0",
+  "containerPort": 8080,
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -50,9 +53,9 @@
   "category": "framework",
   "_source": {
     "dir": ".",
-    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-go-gin.zip",
-    "zipSha": "b23ea64c56c4baa97de7c5503874221d6d29b5789693e0a3e04b87e969682a0a",
-    "uploadedAt": 1782875897260,
+    "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-gin-example.zip",
+    "zipSha": "",
+    "uploadedAt": 0,
     "legacyTags": [
       "HTTPFunc",
       "WebFramework",

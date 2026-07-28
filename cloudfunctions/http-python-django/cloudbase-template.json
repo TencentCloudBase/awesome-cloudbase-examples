@@ -17,7 +17,10 @@
   "language": "Python",
   "runtimeVersion": "Python3.10",
   "isCompile": false,
-  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-django.zip",
+  "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-django-example.zip",
+  "zipFileStore": "",
+  "imagePath": "crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-django-example:v1.0.0",
+  "containerPort": 8080,
   "envParams": [],
   "targetPlatform": [
     "default",
@@ -50,9 +53,9 @@
   "category": "framework",
   "_source": {
     "dir": ".",
-    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-django.zip",
-    "zipSha": "022ad4769fb31285786d05082ccfcaec074e9564916f6e2de4b6bcbbb736f2f7",
-    "uploadedAt": 1782878867160,
+    "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-django-example.zip",
+    "zipSha": "",
+    "uploadedAt": 0,
     "legacyTags": [
       "Python",
       "Django",

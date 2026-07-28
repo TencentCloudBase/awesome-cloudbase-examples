@@ -49,11 +49,12 @@
   "_source": {
     "dir": ".",
     "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-php-laravel.zip",
-    "zipSha": "e16558a008861726937154c5a3c206691c0f1dfc8e5a8f86599fdb5ecab490c9",
+    "zipSha": "b389db352eab61ffa0e0ec0639cd567512319edcab6be948310b17cab7f21e85",
     "uploadedAt": 1782878866365,
     "legacyTags": [],
     "localOnly": true,
     "i18nSource": "override",
     "onlineIdentifier": "http-php-laravel"
-  }
+  },
+  "zipFileStore": ""
 }
