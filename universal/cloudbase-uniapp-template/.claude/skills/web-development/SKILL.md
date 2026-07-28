@@ -12,7 +12,7 @@ If this environment only installed the current skill, start from the CloudBase m
 - CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
 - Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/web-development/SKILL.md`
 
-Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool-cloudbase` or `web-development`, use the standalone fallback URL shown next to that reference.
 
 **Cross-cutting protocols** (required before code changes or static hosting publish):
 - Change Safety Protocol: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloudbase-platform/references/protocols/change-safety-protocol.md`
@@ -38,7 +38,7 @@ Keep local `references/...` paths for files that ship with the current skill dir
 
 - General React / Vue / Vite guidance -> `frameworks.md`
 - Browser flow checks or page validation -> `browser-testing.md`
-- Login flow -> `../auth-tool/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-tool/SKILL.md`), then `../auth-web/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-web/SKILL.md`)
+- Login flow -> `../auth-tool-cloudbase/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-tool-cloudbase/SKILL.md`), then `../auth-web-cloudbase/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-web-cloudbase/SKILL.md`)
 - Official Account JSAPI Pay, Native QR-code Pay, or WeChat OAuth on CloudBase -> `../cloudbase-wechat-integration/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloudbase-wechat-integration/SKILL.md`; official docs: `https://docs.cloudbase.net/integration/introduce/index.md`)
 - CloudBase database work -> matching database skill
 
@@ -135,7 +135,7 @@ Use this skill for Web engineering work such as:
 
 4. **Treat CloudBase as an integration branch**
    - Use CloudBase Web SDK and static hosting guidance only when the project actually needs CloudBase platform features.
-   - Reuse `auth-tool` and `auth-web` for login or provider readiness instead of re-describing those flows here.
+   - Reuse `auth-tool-cloudbase` and `auth-web-cloudbase` for login or provider readiness instead of re-describing those flows here.
 
 ## Core workflow
 
@@ -175,7 +175,7 @@ Use this section only when the Web project needs CloudBase platform features.
 
 - Authentication must use CloudBase SDK built-in features
 - Do not move Web login logic into cloud functions
-- For provider readiness, login method setup, or publishable key issues, route to `auth-tool` and `auth-web`
+- For provider readiness, login method setup, or publishable key issues, route to `auth-tool-cloudbase` and `auth-web-cloudbase`
 
 ### Static hosting defaults
 

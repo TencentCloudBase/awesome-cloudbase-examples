@@ -4,8 +4,8 @@ description: "[Deprecated] Optional advanced tool for complex data modeling. For
 version: 2.24.1
 alwaysApply: false
 metadata:
-  priority: 5
-  deprecated: true
+  priority: "5"
+  deprecated: "true"
 ---
 
 ## Standalone Install Note
@@ -15,7 +15,7 @@ If this environment only installed the current skill, start from the CloudBase m
 - CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
 - Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/data-model-creation/SKILL.md`
 
-Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool-cloudbase` or `web-development`, use the standalone fallback URL shown next to that reference.
 
 # Data Model Creation
 
@@ -34,8 +34,8 @@ Keep local `references/...` paths for files that ship with the current skill dir
 
 ### Then also read
 
-- Direct MySQL SQL creation or schema change -> `../relational-database-tool/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/relational-database-tool/SKILL.md`)
-- PostgreSQL / CloudBase PG schema work -> `../postgresql-development/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/postgresql-development/SKILL.md`)
+- Direct MySQL SQL creation or schema change -> `../relational-database-mcp-cloudbase/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/relational-database-mcp-cloudbase/SKILL.md`)
+- PostgreSQL / CloudBase PG schema work -> `../postgresql-development-cloudbase/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/postgresql-development-cloudbase/SKILL.md`)
 - Broader feature planning before schema work -> `../spec-workflow/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/spec-workflow/SKILL.md`)
 
 ### Do NOT use for
@@ -62,12 +62,12 @@ Keep local `references/...` paths for files that ship with the current skill dir
 
 This skill is an **advanced modeling path**, not the default path for database work.
 
-- For most MySQL database tasks, use `relational-database-tool` and write SQL directly. If the task says PostgreSQL, CloudBase PG, PG mode, `app.rdb()`, `queryPgDatabase`, `managePgDatabase`, or RLS, use `postgresql-development` instead.
+- For most MySQL database tasks, use `relational-database-mcp-cloudbase` and write SQL directly. If the task says PostgreSQL, CloudBase PG, PG mode, `app.rdb()`, `queryPgDatabase`, `managePgDatabase`, or RLS, use `postgresql-development-cloudbase` instead.
 - Use this skill only when diagram-driven modeling adds value.
 
 ## Quick routing
 
-### Use `relational-database-tool` instead when
+### Use `relational-database-mcp-cloudbase` instead when
 
 - You need MySQL `CREATE TABLE`, `ALTER TABLE`, `INSERT`, `UPDATE`, `DELETE`, or `SELECT`
 - The schema is small and already clear
@@ -188,4 +188,4 @@ Use `modifyDataModel` with:
 2. Keep the first model iteration small and reviewable.
 3. Separate business entities from implementation-only helper fields.
 4. Validate relationship direction and ownership before publishing.
-5. After modeling, hand off actual MySQL SQL/table work to `relational-database-tool` when needed. For PostgreSQL / CloudBase PG tables, hand off to `postgresql-development` instead.
+5. After modeling, hand off actual MySQL SQL/table work to `relational-database-mcp-cloudbase` when needed. For PostgreSQL / CloudBase PG tables, hand off to `postgresql-development-cloudbase` instead.

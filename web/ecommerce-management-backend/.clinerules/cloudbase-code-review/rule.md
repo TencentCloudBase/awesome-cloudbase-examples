@@ -84,3 +84,18 @@ Semantic review prompt for human or LLM to evaluate.
 
 How to fix the issue.
 ```
+
+## Reference index
+
+All packaged reference files (required for skill lint reachability):
+
+- [RULES_INDEX.md](references/RULES_INDEX.md)
+- [lint-rules/README.md](references/lint-rules/README.md)
+- [rules/cross-cutting/AUTH001.md](references/rules/cross-cutting/AUTH001.md)
+- [rules/cross-cutting/SKILL001.md](references/rules/cross-cutting/SKILL001.md)
+- [rules/postgresql/PG-CR001.md](references/rules/postgresql/PG-CR001.md)
+- [rules/postgresql/PG-CR002.md](references/rules/postgresql/PG-CR002.md)
+- [rules/postgresql/PG-CR003.md](references/rules/postgresql/PG-CR003.md)
+- [rules/postgresql/PG-CR004.md](references/rules/postgresql/PG-CR004.md)
+- [rules/postgresql/PG-CR005.md](references/rules/postgresql/PG-CR005.md)
+- [rules/storage/STORAGE001.md](references/rules/storage/STORAGE001.md)

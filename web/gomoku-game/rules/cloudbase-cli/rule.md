@@ -59,7 +59,7 @@ Use when the user wants to manage CloudBase resources via command line:
 ## Do NOT use for
 
 - SDK-based in-app integration (web/miniprogram/node) → use `cloud-functions`,
-  `no-sql-web-sdk`, `auth-web`, etc.
+  `cloudbase-document-database-web-sdk`, `auth-web-cloudbase`, etc.
 - MCP tool calls for IDE-integrated workflows → use CloudBase MCP directly
 - Console UI operations
 - CloudBase Agent SDK development → use `cloudbase-agent-ts`
@@ -74,7 +74,7 @@ Use when the user wants to manage CloudBase resources via command line:
 4. **Stop loading more context** once you have the workflow and command
    syntax for the current task.
 5. **If the task shifts to SDK/in-app code**, switch to the appropriate
-   SDK skill (e.g., `cloud-functions`, `no-sql-web-sdk`) instead.
+   SDK skill (e.g., `cloud-functions`, `cloudbase-document-database-web-sdk`) instead.
 
 ## Routing
 
@@ -107,3 +107,18 @@ Use when the user wants to manage CloudBase resources via command line:
 - [ ] Used `--dry-run` before destructive operations?
 - [ ] Verified the result after each operation?
 - [ ] Stayed within CLI scope — did not drift into SDK code?
+
+## Reference index
+
+All packaged reference files (required for skill lint reachability):
+
+- [access.md](references/access.md)
+- [app.md](references/app.md)
+- [cloudrun.md](references/cloudrun.md)
+- [core.md](references/core.md)
+- [functions.md](references/functions.md)
+- [hosting.md](references/hosting.md)
+- [mysql.md](references/mysql.md)
+- [nosql.md](references/nosql.md)
+- [permission.md](references/permission.md)
+- [storage.md](references/storage.md)

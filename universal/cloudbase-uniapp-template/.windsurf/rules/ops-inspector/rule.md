@@ -32,7 +32,7 @@ Keep local `references/...` paths for files that ship with the current skill dir
 
 - Cloud function issues -> `../cloud-functions/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloud-functions/SKILL.md`)
 - CloudRun issues -> `../cloudrun-development/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloudrun-development/SKILL.md`)
-- Database issues -> `../postgresql-development/SKILL.md` for CloudBase PG / PostgreSQL (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/postgresql-development/SKILL.md`), `../relational-database-tool/SKILL.md` for MySQL (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/relational-database-tool/SKILL.md`), or `../no-sql-web-sdk/SKILL.md` for NoSQL (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/no-sql-web-sdk/SKILL.md`)
+- Database issues -> `../postgresql-development-cloudbase/SKILL.md` for CloudBase PG / PostgreSQL (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/postgresql-development-cloudbase/SKILL.md`), `../relational-database-mcp-cloudbase/SKILL.md` for MySQL (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/relational-database-mcp-cloudbase/SKILL.md`), or `../cloudbase-document-database-web-sdk/SKILL.md` for NoSQL (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloudbase-document-database-web-sdk/SKILL.md`)
 - Platform overview -> `../cloudbase-platform/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloudbase-platform/SKILL.md`)
 
 ### Do NOT use for
@@ -239,5 +239,5 @@ Always use ISO 8601 format for `startTime`/`endTime`, e.g., `"2025-01-15 00:00:0
 - `cloud-functions` — Cloud function development, deployment, and debugging
 - `cloudrun-development` — CloudRun backend deployment and management
 - `cloudbase-platform` — General platform knowledge and console navigation
-- `postgresql-development` — CloudBase PostgreSQL / PG diagnostics and schema/RLS checks
-- `relational-database-tool` — MySQL database management and diagnostics
+- `postgresql-development-cloudbase` — CloudBase PostgreSQL / PG diagnostics and schema/RLS checks
+- `relational-database-mcp-cloudbase` — MySQL database management and diagnostics

@@ -12,7 +12,7 @@ If this environment only installed the current skill, start from the CloudBase m
 - CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
 - Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/ai-model-nodejs/SKILL.md`
 
-Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool-cloudbase` or `web-development`, use the standalone fallback URL shown next to that reference.
 
 ## When to use this skill
 
@@ -31,7 +31,7 @@ Use this skill for **calling AI models from Node.js backends, cloud functions, o
 
 - Browser/Web apps → use the `ai-model-web` skill
 - WeChat Mini Program → use the `ai-model-wechat` skill
-- Runtimes without a CloudBase SDK (Python, Go, PHP, curl, etc.) → use the `http-api` skill (it now includes the `ai_model` OpenAPI spec for direct HTTP calls to the AI model endpoint; do NOT wrap this SDK behind an HTTP proxy)
+- Runtimes without a CloudBase SDK (Python, Go, PHP, curl, etc.) → use the `http-api-cloudbase` skill (it now includes the `ai_model` OpenAPI spec for direct HTTP calls to the AI model endpoint; do NOT wrap this SDK behind an HTTP proxy)
 
 ---
 

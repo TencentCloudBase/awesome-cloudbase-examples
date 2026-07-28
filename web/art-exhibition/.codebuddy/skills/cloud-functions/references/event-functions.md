@@ -108,7 +108,7 @@ Use the CloudBase HTTP API only when the task is explicitly about raw API invoca
 https://{envId}.api.tcloudbasegateway.com/v1/functions/{functionName}
 ```
 
-This path requires authentication and belongs with the `http-api` skill, not browser-facing anonymous access.
+This path requires authentication and belongs with the `http-api-cloudbase` skill, not browser-facing anonymous access.
 
 ## Common patterns
 

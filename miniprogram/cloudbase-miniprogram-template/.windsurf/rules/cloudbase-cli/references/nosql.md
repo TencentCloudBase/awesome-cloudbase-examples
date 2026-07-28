@@ -15,7 +15,7 @@ Execute MongoDB-style commands against CloudBase document database — CRUD, agg
 ## Do NOT use for
 
 - MySQL/SQL database operations → use `references/mysql.md` (commands are `tcb db ...` without `nosql`)
-- In-app database queries via Web/Mini-Program SDK → use `no-sql-web-sdk` skill
+- In-app database queries via Web/Mini-Program SDK → use `cloudbase-document-database-web-sdk` skill
 - Cloud function database access via server SDK → use `cloud-functions` skill
 - Storage file management → use `references/storage.md`
 
