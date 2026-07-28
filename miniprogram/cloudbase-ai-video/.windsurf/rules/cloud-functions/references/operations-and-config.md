@@ -59,21 +59,22 @@ Use Domain/Route via `manageGateway(action="createRoute")`. Omit `domain` to att
 ```javascript
 manageGateway({
   action: "createRoute",
-  targetType: "function",
   targetName: "functionName",
-  type: "Event", // Event -> SCF; HTTP functions must pass type="HTTP" -> WEB_SCF
+  upstreamResourceType: "SCF", // Event function -> SCF; HTTP function -> WEB_SCF
   path: "/api/users",
   auth: false
 });
 ```
 
-Type mapping:
+Upstream type:
 
-- `type="Event"` -> `UpstreamResourceType=SCF`
-- `type="HTTP"` -> `UpstreamResourceType=WEB_SCF`
+- HTTP cloud function -> `upstreamResourceType="WEB_SCF"`
+- Event cloud function -> `upstreamResourceType="SCF"`
+- CloudRun -> `upstreamResourceType="CBR"`
+- Static hosting -> `upstreamResourceType="STATIC_STORE"` (serviceName often `staticstore`)
 
 Do **not** use deprecated GWAPI / `CreateCloudBaseGWAPI` via `callCloudApi` (blocked in evaluate mode and removed from MCP).
-
+Do **not** pass `manageFunctions` `type="HTTP"|"Event"` into `manageGateway`; gateway uses `upstreamResourceType` only.
 ## Environment variable updates
 
 Do not overwrite function environment variables blindly.
@@ -144,7 +145,7 @@ Prefer the converged entrances below, but translate historical names when they a
 | `manageFunctionTriggers` | `manageFunctions(action="createFunctionTrigger"|"deleteFunctionTrigger")` |
 | `readFunctionLayers` | `queryFunctions(action="listLayers"|"listLayerVersions"|"getLayerVersionDetail"|"listFunctionLayers")` |
 | `writeFunctionLayers` | `manageFunctions(action="createLayerVersion"|"deleteLayerVersion"|"attachLayer"|"detachLayer"|"updateFunctionLayers")` |
-| `createFunctionHTTPAccess` | `manageGateway(action="createRoute")` with `type="HTTP"` |
+| `createFunctionHTTPAccess` | `manageGateway(action="createRoute")` with `upstreamResourceType="WEB_SCF"` |
 
 ## CLI fallback
 

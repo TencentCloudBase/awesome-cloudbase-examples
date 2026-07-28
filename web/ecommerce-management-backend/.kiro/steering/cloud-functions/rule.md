@@ -332,7 +332,7 @@ If these are unavailable, read `./references/operations-and-config.md` before an
 ### Gateway exposure
 
 - `queryGateway(action="getRoute")` / `listRoutes` / `listCustomDomains`
-- `manageGateway(action="createRoute")` — for HTTP functions pass `type="HTTP"` (maps to `WEB_SCF`); for Event functions pass `type="Event"` (maps to `SCF`). Omit `domain` to use the environment default (`IsDefault`)
+- `manageGateway(action="createRoute")` — for HTTP functions pass `upstreamResourceType="WEB_SCF"`; for Event functions pass `upstreamResourceType="SCF"`. Omit `domain` to use the environment default (`IsDefault`)
 - `manageGateway(action="updateRoute")` / `deleteRoute` / `bindCustomDomain` / `deleteCustomDomain`
 - Do **not** call deprecated GWAPI actions via `callCloudApi` (`CreateCloudBaseGWAPI`, etc.)
 
