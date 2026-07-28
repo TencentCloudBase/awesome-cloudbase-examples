@@ -41,11 +41,21 @@ Read this when the task is about:
 Read this when the task is about:
 
 - function logs
-- environment-variable updates
-- trigger or VPC configuration
+- timeout / environment-variable updates
+- timer cron format
+- VPC field shape only (examples) — for TCP DB policy see `vpc-and-tcp-database.md`
 - gateway exposure for Event Functions
 - legacy tool-name translation
 - `callCloudApi` fallback for Cloud Functions
+
+### `./references/vpc-and-tcp-database.md`
+
+Read this when the task is about:
+
+- non-native TCP clients (`DATABASE_URL`, `mysql2`, `pg`, Prisma, Redis)
+- private MySQL / PostgreSQL / Redis connectivity from Event or HTTP Functions
+- when `vpc.vpcId` / `vpc.subnetId` is mandatory vs when native `app.rdb()` / `app.database()` is enough
+- **never guessing** VPC IDs
 
 ## Keep these distinctions straight
 

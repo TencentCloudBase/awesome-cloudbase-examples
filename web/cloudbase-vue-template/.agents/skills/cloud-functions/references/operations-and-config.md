@@ -118,11 +118,13 @@ Examples:
 
 ### VPC access
 
+For **non-native TCP** MySQL / PostgreSQL / Redis clients, `vpc` is mandatory and IDs must be real (never placeholders). Full policy: `./vpc-and-tcp-database.md`.
+
 ```javascript
 {
   vpc: {
-    vpcId: "vpc-xxxxx",
-    subnetId: "subnet-xxxxx"
+    vpcId: "<real-vpc-id>",
+    subnetId: "<real-subnet-id>"
   }
 }
 ```

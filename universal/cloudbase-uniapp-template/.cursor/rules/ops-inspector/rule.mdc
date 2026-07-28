@@ -173,6 +173,7 @@ When the user specifies a resource type or a specific resource:
 
 1. **Cloud function errors**: `queryFunctions(action="listFunctionLogs", functionName="<name>")` then `queryLogs(action="searchLogs", queryString="* AND functionName:<name> AND level:ERROR", ...)`
 2. **CloudRun errors**: `queryCloudRun(action="detail", detailServerName="<name>")` then `queryLogs(action="searchLogs", queryString="ERROR", service="tcbr", ...)`
+   - If logs show DB / Redis connection failures (`ECONNREFUSED`, timeout, "could not connect"): check whether `VpcConf` is set and matches the database VPC. See `cloudrun-development/references/vpc-and-database.md`.
 3. **Database issues**: Check `queryPgDatabase(action="context"|"metadata"|"objects")` for CloudBase PG, `queryMysqlDatabase` for MySQL, or `readNoSqlDatabaseStructure` for NoSQL depending on type
 4. **General error search**: `queryLogs(action="searchLogs", queryString="<error-keyword>", ...)`
 

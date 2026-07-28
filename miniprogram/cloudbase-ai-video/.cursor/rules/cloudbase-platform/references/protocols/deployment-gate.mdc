@@ -33,6 +33,8 @@ You must read and complete this gate before:
 | Application port matches Dockerfile / code | Startup failure or 502           | Confirm listening port (commonly 9000)       |
 | Health check path correctly configured | Frequent restarts / unhealthy     | Set correct path (e.g. `/` or `/health`)     |
 | Required environment variables and secrets injected | Runtime errors                 | Configure via console or MCP before deploy   |
+| TCP DB/cache dependency detected (`DATABASE_URL`, MySQL/PG/Redis host) | Deploy succeeds but runtime cannot reach DB | Set `serverConfig.VpcConf` to the DB's VPC/subnet; use private DB host; see `cloudrun-development/references/vpc-and-database.md` |
+| `OpenAccessTypes` vs `VpcConf` understood | Agent configures public ingress but omits private network | Ingress (`OpenAccessTypes`) ≠ egress VPC (`VpcConf`); both may be required |
 
 ### Static Website Hosting
 
@@ -54,6 +56,7 @@ You must read and complete this gate before:
 |-------------------------------------|-------------------------------------|----------------------------------------------|
 | Function security rule configured to allow required callers | `EXCEED_AUTHORITY` errors     | Configure via `managePermissions` immediately after creation |
 | Anonymous login status understood   | Public access unexpectedly blocked  | Explicitly inform user (disabled by default on new environments) |
+| Non-native TCP DB/cache env (`DATABASE_URL`, MySQL/PG/Redis host) without `vpc` | Deploy succeeds but runtime cannot reach private DB | Set real `vpc.vpcId` + `vpc.subnetId` from DB console / resource detail / user — never invent IDs; see `cloud-functions/references/vpc-and-tcp-database.md`. Native `app.rdb()` / `app.database()` does not need VPC. |
 
 ## Mandatory Declaration Template
 
@@ -63,6 +66,7 @@ Before starting any deployment-related work, you must output something like this
 > - [ ] Plan supports required features (custom domain, CloudRun, etc.)
 > - [ ] ICP filing and SSL certificate ready (if using custom domain)
 > - [ ] CloudRun port and health check configured
+> - [ ] If CloudRun or cloud functions use TCP MySQL/PostgreSQL/Redis (non-native SDK): real VPC + subnet IDs + private DB endpoint ready (do not invent IDs)
 > - [ ] Mini program upload IP whitelist updated (if applicable)
 > - [ ] Function / hosting security rules configured for public access
 >
