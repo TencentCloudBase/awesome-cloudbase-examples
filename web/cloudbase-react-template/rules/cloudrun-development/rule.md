@@ -128,7 +128,8 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 - `manageCloudRun(action="init")` -> create local project
 - `manageCloudRun(action="download")` -> pull remote code
 - `manageCloudRun(action="run")` -> local run for Function mode
-- `manageCloudRun(action="deploy")` -> deploy local project
+- `manageCloudRun(action="deploy")` -> deploy local project (existing services: RMW preserves remote VpcConf / EnvParams keys / OpenAccessTypes)
+- `manageCloudRun(action="updateConfig")` -> config-only update (no code upload; VPC / EnvParams / scaling / access types)
 - `manageCloudRun(action="delete")` -> delete service
 - `manageCloudRun(action="createAgent")` -> create Agent service
 

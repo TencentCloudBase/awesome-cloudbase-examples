@@ -27,8 +27,11 @@ Practical agent rules:
 
 1. Always pass `serverConfig.VpcConf` when the app needs TCP access to a VPC DB/cache.
 2. Prefer correct VPC on **first** create.
-3. If the service already exists: redeploy with `VpcConf`, then **verify** with `queryCloudRun(action="detail")` (`ServerConfig.VpcConf`).
-4. If detail still shows missing/wrong VPC after a successful update deploy, fall back to console network settings or delete + recreate — do not loop blind redeploys.
+3. If the service already exists:
+   - Prefer `manageCloudRun(action="updateConfig")` to change VPC / EnvParams / MinNum without re-uploading code (console-aligned `SubmitServerConfigChangeDiff`).
+   - Or redeploy with `VpcConf`. MCP **deploy** uses Read-Merge-Write: omitting `VpcConf` / partial `EnvParams` / omitting `OpenAccessTypes` **preserves** remote values (set `envParamsReplaceAll=true` only when you intend a full env replace).
+   - Then **verify** with `queryCloudRun(action="detail")` (`ServerConfig.VpcConf`).
+4. If detail still shows missing/wrong VPC after a successful update, fall back to console network settings or delete + recreate — do not loop blind redeploys.
 
 ## When VpcConf is mandatory
 
@@ -102,7 +105,8 @@ Missing `VpcConf` here commonly yields deploy **success** followed by runtime `E
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Deploy OK, app cannot connect to DB | Missing/wrong VPC, or old SDK dropped `VpcConf` | Redeploy with `VpcConf` on SDK &gt;= 5.6.2; verify via `detail`; if still wrong, console network settings or recreate |
+| Deploy OK, app cannot connect to DB | Missing/wrong VPC, or old SDK dropped `VpcConf` | Use `updateConfig` or redeploy with `VpcConf` on SDK &gt;= 5.6.2; verify via `detail`; if still wrong, console or recreate |
+| Redeploy wiped console VPC / env keys | Partial deploy without merge (legacy) | Current MCP deploy RMW preserves remote `VpcConf` / EnvParams keys / `OpenAccessTypes`; prefer `updateConfig` for config-only changes |
 | Timeout to DB IP | Security group / ACL | Allow CloudRun subnet CIDR on DB port |
 | Works locally, fails on CloudRun | Using `localhost` / docker-compose hostname | Replace with VPC private address |
 | Connected VPC but lost outbound Internet | Public egress disabled without NAT | Keep platform public egress, or add NAT gateway in VPC |
@@ -115,5 +119,5 @@ Missing `VpcConf` here commonly yields deploy **success** followed by runtime `E
 - [ ] `VpcId` + `SubnetId` resolved (same region as DB)
 - [ ] Private connection string prepared
 - [ ] Security group / allowlist planned
-- [ ] `manageCloudRun` deploy includes `serverConfig.VpcConf`
+- [ ] `manageCloudRun` deploy includes `serverConfig.VpcConf`, **or** `updateConfig` set VPC after create
 - [ ] Post-deploy connectivity verified
