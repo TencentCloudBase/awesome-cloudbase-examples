@@ -99,7 +99,7 @@ manageFunctions({
 | `imagePort` | — | Web Server: `9000` (default). Job-style image: `-1`. |
 | `containerImageAccelerate` | — | Image acceleration; enable for large images to cut cold-start time. |
 
-After deploy, confirm readiness with `queryFunctions(action="getFunctionDetail", functionName="my-scf-func")` and look for `Status=Active`. For public/browser access, create a Domain/Route explicitly with `manageGateway(action="createRoute", upstreamResourceType="WEB_SCF")` and set the function security rule (anonymous login is disabled by default — see `http-functions.md`).
+After deploy, confirm readiness with `queryFunctions(action="getFunctionDetail", functionName="my-scf-func")` and look for `Status=Active`. If the tool result already contains `accessUrl` / `accessUrls`, prefer those links directly. If no URL is returned yet, create a Domain/Route explicitly with `manageGateway(action="createRoute", upstreamResourceType="WEB_SCF")` and set the function security rule (anonymous login is disabled by default — see `http-functions.md`).
 
 ## Source packaging (Stage A input)
 

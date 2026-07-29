@@ -334,6 +334,7 @@ If these are unavailable, read `./references/operations-and-config.md` before an
 - `queryGateway(action="getRoute")` / `listRoutes` / `listCustomDomains`
 - `manageGateway(action="createRoute")` — for HTTP functions pass `upstreamResourceType="WEB_SCF"`; for Event functions pass `upstreamResourceType="SCF"`. Omit `domain` to use the environment default (`IsDefault`)
 - `manageGateway(action="updateRoute")` / `deleteRoute` / `bindCustomDomain` / `deleteCustomDomain`
+- When tool results include `accessUrl` / `accessUrls`, prefer them directly (gateway custom-domain URLs are ranked before default domains)
 - Do **not** call deprecated GWAPI actions via `callCloudApi` (`CreateCloudBaseGWAPI`, etc.)
 
 ## Related skills

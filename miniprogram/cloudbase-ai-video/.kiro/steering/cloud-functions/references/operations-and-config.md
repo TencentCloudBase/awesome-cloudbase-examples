@@ -75,6 +75,7 @@ Upstream type:
 
 Do **not** use deprecated GWAPI / `CreateCloudBaseGWAPI` via `callCloudApi` (blocked in evaluate mode and removed from MCP).
 Do **not** pass `manageFunctions` `type="HTTP"|"Event"` into `manageGateway`; gateway uses `upstreamResourceType` only.
+When a deploy/create tool returns `accessUrl` or `accessUrls`, prefer those values directly; they already rank gateway custom domains before default domains when routes exist.
 ## Environment variable updates
 
 Do not overwrite function environment variables blindly.
