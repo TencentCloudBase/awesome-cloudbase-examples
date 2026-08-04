@@ -298,16 +298,16 @@ manageFunctions({
 After creating an HTTP Function, it will reject unauthenticated callers with `EXCEED_AUTHORITY` by default. If the function should be publicly accessible:
 
 > ⚠️ **Note:** Anonymous login is disabled by default for new environments. For public endpoints, use `rule: "true"` to allow all callers regardless of auth state, rather than relying on anonymous login being enabled.
+>
+> ⚠️ **PostgreSQL environments:** platform `ModifyResourcePermission` / `DescribeResourcePermission` reject PG envs. Current MCP aligns with CLI `tcb policy set/get`: `managePermissions` / `queryPermissions` for `resourceType="function"` automatically fall back to Manager SDK `modifyEnvAuthzConfig` / `describeEnvAuthzConfig` (`authz.user.rego`). Passing `securityRule: '{"invoke":true}'` generates a public-functions OPA allow policy; you can also pass a full Rego document starting with `package authz.user`. See https://docs.cloudbase.net/cli-v1/policy/management
 
 ```javascript
 managePermissions({
   action: "updateResourcePermission",
   resourceType: "function",
   resourceId: "myHttpFunction",
-  permission: {
-    aclTag: "CUSTOM",
-    rule: "true"
-  }
+  permission: "CUSTOM",
+  securityRule: '{"invoke":true}'
 });
 ```
 
