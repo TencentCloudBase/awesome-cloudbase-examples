@@ -1,31 +1,42 @@
 <?php
 /**
  * 腾讯云 SCF PHP HelloWorld 示例
- * 
+ *
  * 入口函数：main_handler
  * 执行方法：index.main_handler
+ *
+ * Tencent Cloud SCF (Serverless Cloud Function) PHP HelloWorld example.
+ *
+ * Entry function: main_handler
+ * Configured runtime handler: index.main_handler
  */
 
 /**
  * 主处理函数
- * 
- * @param object $event 触发事件数据
- * @param object $context 运行时上下文信息
- * @return string 返回消息
+ *
+ * Main handler function.
+ *
+ * @param object $event 触发事件数据 / Triggering event payload
+ * @param object $context 运行时上下文信息 / Runtime context information
+ * @return string 返回消息 / The response message (JSON encoded)
  */
 function main_handler($event, $context) {
     // 打印事件信息
+    // Print the incoming event payload
     echo "Event data:\n";
     print_r($event);
     
     // 打印上下文信息
+    // Print the runtime context information
     echo "\nContext data:\n";
     print_r($context);
     
     // 获取请求ID
+    // Get the request ID, defaulting to "unknown" if unavailable
     $requestId = isset($context->requestId) ? $context->requestId : 'unknown';
     
     // 构造返回消息
+    // Build the response payload
     $response = [
         'statusCode' => 200,
         'message' => 'Hello World from PHP SCF!',
@@ -39,10 +50,12 @@ function main_handler($event, $context) {
 
 /**
  * 简单的字符串处理函数
- * 
- * @param object $event 事件数据，期望包含 name 字段
- * @param object $context 上下文信息
- * @return string 个性化问候消息
+ *
+ * Simple greeting handler.
+ *
+ * @param object $event 事件数据，期望包含 name 字段 / Event payload, expected to contain a `name` field
+ * @param object $context 上下文信息 / Runtime context information
+ * @return string 个性化问候消息 / Personalized greeting message (JSON encoded)
  */
 function hello_handler($event, $context) {
     $name = isset($event->name) ? $event->name : 'World';
@@ -58,10 +71,12 @@ function hello_handler($event, $context) {
 
 /**
  * 数学计算示例函数
- * 
- * @param object $event 事件数据，期望包含 a 和 b 字段
- * @param object $context 上下文信息
- * @return string 计算结果
+ *
+ * Arithmetic example handler.
+ *
+ * @param object $event 事件数据，期望包含 a 和 b 字段 / Event payload, expected to contain fields `a` and `b`
+ * @param object $context 上下文信息 / Runtime context information
+ * @return string 计算结果 / Calculation result (JSON encoded)
  */
 function calculate_handler($event, $context) {
     $a = isset($event->a) ? (float)$event->a : 0;
@@ -87,14 +102,17 @@ function calculate_handler($event, $context) {
 
 /**
  * 错误处理示例函数
- * 
- * @param object $event 事件数据
- * @param object $context 上下文信息
- * @return string 错误信息或成功消息
+ *
+ * Error-handling example handler.
+ *
+ * @param object $event 事件数据 / Event payload
+ * @param object $context 上下文信息 / Runtime context information
+ * @return string 错误信息或成功消息 / Error message or success message (JSON encoded)
  */
 function error_handler($event, $context) {
     try {
         // 模拟可能出错的操作
+        // Simulate an operation that may raise an error
         if (isset($event->shouldError) && $event->shouldError === true) {
             throw new Exception("This is a simulated error for testing purposes");
         }
@@ -116,6 +134,7 @@ function error_handler($event, $context) {
         ];
         
         // 记录错误日志
+        // Write the error to the log
         error_log("SCF Error: " . $e->getMessage());
         
         return json_encode($errorResponse, JSON_UNESCAPED_UNICODE);

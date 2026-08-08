@@ -1,0 +1,8 @@
+# 忽略本地环境变量与运行产物，避免泄露密钥
+# Ignore local env files and run artifacts to avoid leaking secrets
+.env
+.env.*
+!.env.example
+.last-report.json
+*.log
+*.tmp

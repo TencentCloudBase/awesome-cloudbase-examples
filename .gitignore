@@ -64,3 +64,6 @@ android/app/release
 venv
 .venv
 temp-build.zip
+
+.codebuddy/
+.vscode/

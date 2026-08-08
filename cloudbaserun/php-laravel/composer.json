@@ -1,0 +1,1 @@
+{"name":"php-laravel","require":{"php":">=8.1","laravel/framework":"^10.0"},"scripts":{"post-root-package-install":[]}}

@@ -1,0 +1,9 @@
+{
+  "name": "http-nodejs-helloworld",
+  "version": "1.0.0",
+  "description": "使用 Node.js 原生 http 模块的最小化 HTTP 函数示例 / Minimal HTTP cloud function example using the Node.js built-in http module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
