@@ -1,7 +1,7 @@
 ---
 name: cloudrun-development
 description: CloudBase Run backend development rules (Function mode/Container mode). Use this skill when deploying backend services that require long connections, multi-language support, custom environments, AI agent development, or migrating existing/GitHub apps that need VPC access to MySQL/PostgreSQL/Redis. For stateless HTTP services, prefer HTTP cloud functions.
-version: 2.26.0
+version: 2.27.0
 alwaysApply: false
 ---
 
