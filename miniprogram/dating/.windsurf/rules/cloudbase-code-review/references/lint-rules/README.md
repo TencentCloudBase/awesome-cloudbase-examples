@@ -25,6 +25,7 @@ node cloudbase-lint.mjs --project-dir .
  * - 安全域名未配置
  * - 存储 URL 拼接
  * - 已废弃 API 使用
+ * - 云函数/云托管回显 x-cloudbase-context、headers、process.env 或 httpbin
  *
  * 返回 0 表示无错误，返回 1 表示发现问题。
  */
@@ -354,6 +355,35 @@ function checkUploadConfig(files) {
   }
 }
 
+function checkSensitiveRuntimeEcho(files) {
+  const backendHint = /(cloudfunctions|cloudrun|functions|\/server\/|\/api\/)/i;
+  const backendContent = /(createServer\s*\(|express\s*\(|exports\.main\s*=|kennethreitz\/httpbin|image:\s*.*httpbin)/i;
+  for (const file of files) {
+    const content = readFileSafe(file);
+    if (!content) continue;
+    if (!backendHint.test(file) && !backendContent.test(content)) continue;
+    const lines = content.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (/x-cloudbase-context/i.test(line) && /(res\.(json|send|end)|return\s*\{)/.test(line)) {
+        record('SEC001', 'error',
+          '禁止在响应中返回 x-cloudbase-context（可能含临时云密钥）。见 sensitive-runtime-data-protection 协议。',
+          file, i + 1);
+      }
+      if (/(headers\s*:\s*req\.headers|headers\s*:\s*event\.headers|env\s*:\s*process\.env)/.test(line)) {
+        record('SEC001', 'error',
+          '禁止回显 req.headers / event.headers / process.env。网关注入的凭证会被泄露。',
+          file, i + 1);
+      }
+      if (/httpbin/i.test(line)) {
+        record('SEC001', 'error',
+          '禁止部署 httpbin 等请求反射镜像；改用固定 health/hello 响应。',
+          file, i + 1);
+      }
+    }
+  }
+}
+
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 console.error(`[cloudbase-lint] Scanning: ${projectDir}`);
@@ -377,6 +407,7 @@ checkLocalhostDomain(files);
 checkPgStorageApiRecommendation(files);
 checkCreateTable(files);
 checkUploadConfig(files);
+checkSensitiveRuntimeEcho(files);
 
 const report = {
   timestamp: new Date().toISOString(),
@@ -416,3 +447,4 @@ process.exit(report.summary.errors > 0 ? 1 : 0);
 | PG-CR003 | warning | 上传缺少存储配置 |
 | PG-CR004 | mixed | PG Web 文件/图片上传推荐 app.storage.from("bucket").upload("key", file)；app.storage() 为错误 |
 | PG-CR005 | error | PG 模式下存储上传缺少 storage.objects RLS 配置 |
+| SEC001 | error | 回显 x-cloudbase-context / headers / process.env，或部署 httpbin |

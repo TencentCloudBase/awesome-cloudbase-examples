@@ -15,6 +15,15 @@ Only add rules that are backed by stable SDK/API documentation, repeated evaluat
 | relational-database | RDB-WEB-001~005, RDB-TOOL-001~008 | — | RDB-TOOL-001~008 | RDB-TOOL-001~008 |
 | storage | STO-001~007 | — | — | — |
 | data-model | — | — | DM-001~007 | DM-001~007 |
+| security / runtime-credentials | — | — | SEC001 | SEC001 |
+
+---
+
+## Module: security / runtime-credentials
+
+| Rule ID | Severity | Check | Applies to | Description |
+|---------|----------|-------|-----------|-------------|
+| SEC001 | error | lint + LLM | Node, CR | 禁止回显 `x-cloudbase-context`、完整 headers / `process.env`，禁止部署 httpbin 类反射镜像 |
 
 ---
 

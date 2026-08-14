@@ -152,10 +152,11 @@ That combination avoids the common ESM pitfall where `__dirname` is not defined.
 
 - With Node native `http`, use `new URL(req.url, "http://127.0.0.1")` and read `url.searchParams` for query values.
 - With Node native `http`, `req.body` does not exist. Read the body stream manually, then parse JSON yourself.
-- `req.headers` -> incoming HTTP headers.
+- `req.headers` -> incoming HTTP headers for **server-side** use only (auth checks, content negotiation). **Never serialize `req.headers`, `process.env`, or `x-cloudbase-context` into the HTTP response.** See `../../cloudbase-platform/references/protocols/sensitive-runtime-data-protection.md`.
 - Path parameters are framework-level conveniences. With the native `http` module, match `url.pathname` yourself.
 - Always send a response explicitly. With Node native `http`, use `res.writeHead(...)` and `res.end(...)`.
 - Return meaningful status codes such as `400`, `401`, `404`, `405`, `500`.
+- Debug endpoints, if required, must return an explicit allowlist of non-sensitive fields (for example `method` + `path`) — not a full header or env dump.
 
 ### Example with method checks
 

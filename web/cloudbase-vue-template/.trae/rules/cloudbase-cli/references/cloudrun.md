@@ -34,6 +34,8 @@ tcb cloudrun init --service-name <serviceName> --template <templateName> --targe
 
 ### Step 2: Deploy
 
+> ⚠️ **Brand-new environment first-time deploy** — confirm CloudRun is initialized in the target env before the first deploy (console `环境 → 云托管 → 开通`, or `CreateCloudRunEnv` via the tcbr service). Deploying to an env with no 大租户 record silently lands in the legacy 小租户 path and creates wrong small-tenant services/versions.
+
 ```bash
 # Basic deploy
 tcb cloudrun deploy --service-name <serviceName> --env-id <envId>

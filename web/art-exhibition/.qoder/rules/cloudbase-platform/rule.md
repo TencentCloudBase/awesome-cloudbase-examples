@@ -14,6 +14,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 **Cross-cutting protocols** (required before code changes or deployments):
 - Change Safety Protocol: `references/protocols/change-safety-protocol.md`
 - Deployment Gate: `references/protocols/deployment-gate.md`
+- Sensitive Runtime Data Protection: `references/protocols/sensitive-runtime-data-protection.md`
 
 ## Activation Contract
 
@@ -55,6 +56,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 - Using this overview skill as a detour in an existing application where the active auth, storage, and data files are already obvious.
 - Making code or configuration changes without first following the Change Safety Protocol (`cloudbase-platform/references/protocols/change-safety-protocol.md`).
 - Starting any deployment, publish, custom domain, or CloudRun work without first completing the checks in `cloudbase-platform/references/protocols/deployment-gate.md`.
+- Echoing `x-cloudbase-context`, full `req.headers`, or `process.env` from Cloud Functions / CloudRun (including httpbin-style debug images) — follow `references/protocols/sensitive-runtime-data-protection.md`.
 - **Confusing security domains with custom domains**: These are two completely different tools for different purposes:
   - `envDomainManagement` (action: create/delete) = Security domains (安全域名) for CORS/request source validation - used for browser upload whitelisting. Does NOT accept certificateId.
   - `manageGateway(action="bindCustomDomain")` = Bind a **new** custom domain (自定义域名) for public HTTPS — requires `domain` + `certificateId`. If `queryGateway(action="listCustomDomains")` already returns a usable custom domain, prefer `manageGateway(action="createRoute", domain="<existing-domain>")` instead; routing does **not** need certificateId.
@@ -498,3 +500,4 @@ All packaged reference files (required for skill lint reachability):
 
 - [protocols/change-safety-protocol.md](references/protocols/change-safety-protocol.md)
 - [protocols/deployment-gate.md](references/protocols/deployment-gate.md)
+- [protocols/sensitive-runtime-data-protection.md](references/protocols/sensitive-runtime-data-protection.md)

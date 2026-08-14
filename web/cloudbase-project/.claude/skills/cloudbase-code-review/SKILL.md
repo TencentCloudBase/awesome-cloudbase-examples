@@ -24,6 +24,7 @@ Call this skill **after** completing a CloudBase implementation task, before dec
 - You set up CloudBase Storage (file upload, hosting)
 - You configured security rules or RLS policies
 - You wrote MCP-dependent code
+- You wrote Cloud Function or CloudRun HTTP handlers (check for credential / header echo leaks)
 
 ## How it works
 
@@ -47,6 +48,7 @@ Do not promote a single failed run or case-specific workaround into a hard rule.
 ```bash
 # Step 1: Read relevant rules for identified modules
 #   references/rules/cross-cutting/AUTH001.md
+#   references/rules/cross-cutting/SEC001.md
 #   references/rules/postgresql/PG-CR001.md
 #   ...
 
@@ -89,6 +91,7 @@ All packaged reference files (required for skill lint reachability):
 - [RULES_INDEX.md](references/RULES_INDEX.md)
 - [lint-rules/README.md](references/lint-rules/README.md)
 - [rules/cross-cutting/AUTH001.md](references/rules/cross-cutting/AUTH001.md)
+- [rules/cross-cutting/SEC001.md](references/rules/cross-cutting/SEC001.md)
 - [rules/cross-cutting/SKILL001.md](references/rules/cross-cutting/SKILL001.md)
 - [rules/postgresql/PG-CR001.md](references/rules/postgresql/PG-CR001.md)
 - [rules/postgresql/PG-CR002.md](references/rules/postgresql/PG-CR002.md)

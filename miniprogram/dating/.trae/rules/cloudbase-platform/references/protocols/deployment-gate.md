@@ -35,6 +35,7 @@ You must read and complete this gate before:
 | Application port matches Dockerfile / code | Startup failure or 502           | Confirm listening port (commonly 9000)       |
 | Health check path correctly configured | Frequent restarts / unhealthy     | Set correct path (e.g. `/` or `/health`)     |
 | Required environment variables and secrets injected | Runtime errors                 | Configure via console or MCP before deploy   |
+| No httpbin / header-echo / env-dump endpoints | `x-cloudbase-context` temporary credentials leak to callers | Follow `sensitive-runtime-data-protection.md`; health checks must return fixed non-secret payloads only |
 | TCP DB/cache dependency detected (`DATABASE_URL`, MySQL/PG/Redis host) | Deploy succeeds but runtime cannot reach DB | Set `serverConfig.VpcConf` to the DB's VPC/subnet; use private DB host; see `cloudrun-development/references/vpc-and-database.md` |
 | `OpenAccessTypes` vs `VpcConf` understood | Agent configures public ingress but omits private network | Ingress (`OpenAccessTypes`) ≠ egress VPC (`VpcConf`); both may be required |
 
@@ -58,6 +59,7 @@ You must read and complete this gate before:
 |-------------------------------------|-------------------------------------|----------------------------------------------|
 | Function security rule configured to allow required callers | `EXCEED_AUTHORITY` errors     | Configure via `managePermissions` immediately after creation |
 | Anonymous login status understood   | Public access unexpectedly blocked  | Explicitly inform user (disabled by default on new environments) |
+| Responses do not echo headers / env / `x-cloudbase-context` | Temporary credential leak     | Follow `sensitive-runtime-data-protection.md` before public exposure |
 | Non-native TCP DB/cache env (`DATABASE_URL`, MySQL/PG/Redis host) without `vpc` | Deploy succeeds but runtime cannot reach private DB | Set real `vpc.vpcId` + `vpc.subnetId` from DB console / resource detail / user — never invent IDs; see `cloud-functions/references/vpc-and-tcp-database.md`. Native `app.rdb()` / `app.database()` does not need VPC. |
 
 ## Mandatory Declaration Template

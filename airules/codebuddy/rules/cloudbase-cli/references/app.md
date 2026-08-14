@@ -204,6 +204,22 @@ To skip build entirely in CI: `tcb deploy my-app --env-id env-xxx --build-comman
 
 ---
 
+## ⚠️ 打包目录 ≠ 上传目录（大目录被整个打进 zip 的坑）
+
+**`tcb app deploy` / `manageApps(deployApp)` 打包的是项目根目录（`localPath`），不是 `outputDir`！**
+- 上传的只是 `outputDir`（如 `web/out`），但生成 `cloudapp-<ts>-<rand>.zip` 时会把**整个项目根**压缩进去
+- 若项目根下有 `target/`（Rust）、`.next/`、`dist-old/`、`build/` 等大目录，会被整个打进 zip（实测 ato 项目 54GB target → 34GB zip，占满 /tmp/var/folders 磁盘）
+- 默认 exclude 只有 `node_modules/**`、`.git/**`、`.DS_Store`、`**/.DS_Store`——**没有 `target/**` 等**
+
+**规避**（三选一，推荐 ①+③）：
+1. 部署时显式传 `--ignore "**/target/**"`（CLI）或 `ignore: ["**/target/**", ...]`（MCP deployApp）
+2. 项目根 `cloudbaserc.json` 的 `app.ignore` 加 `**/target/**`（CLI 会合并）
+3. 部署完成后删除残留：`rm -f /private/var/folders/*/*/T/cloudapp-*.zip`（部署进程异常时残留不清理会堆积）
+
+**判断**：部署日志显示 "Project directory: xxx" 只代表 framework 检测目录，**不代表打包目录**；怀疑打包过大时先看生成的 zip 大小。
+
+---
+
 ## Self-Check
 
 - [ ] `tcb` CLI installed, version >= 3.0.0
