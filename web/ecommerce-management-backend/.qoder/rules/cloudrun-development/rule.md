@@ -153,6 +153,7 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 - `queryCloudRun(action="detail")` -> inspect one service and its latest deploy status when available
 - `queryCloudRun(action="templates")` -> see available starters
 - `queryCloudRun(action="getDeployLog")` -> retrieve the latest deploy log or a specified `buildId`
+- `queryCloudRun(action="getDeployRecords")` -> list deploy records (newest first; includes `BuildId` / `RunId` / `FlowRatio` / `Status`) — use to review release history and rollback context before a traffic operation
 - `queryCloudRun(action="envStatus")` -> check whether the environment's CloudRun is opened and its provisioning status (`Status=creating` opening / `normal` opened) — use after `initEnv` to poll progress or before `deploy` to confirm readiness
 
 ### Write operations
@@ -163,6 +164,7 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 - `manageCloudRun(action="run")` -> local run for Function mode
 - `manageCloudRun(action="deploy")` -> deploy local project (**two ways**: source build via `targetPath`, or existing image via `imageUrl`) — existing services: RMW preserves remote VpcConf / EnvParams keys / OpenAccessTypes; **new services automatically validate that the environment's CloudRun is initialized** — if not, deploy is blocked with guidance to call `initEnv` first
 - `manageCloudRun(action="updateConfig")` -> config-only update (no code upload; VPC / EnvParams / scaling / access types)
+- `manageCloudRun(action="traffic")` -> **traffic management / canary release** (aligns with `tcb cloudrun traffic`): `trafficOp="set"` adjusts the stable/canary traffic ratio (`stablePercent` + `canaryPercent` must equal 100, e.g. 90/10); `trafficOp="promote"` promotes the canary version to full release (100%, closes gray release, irreversible); `trafficOp="rollback"` rolls back to the previous stable version (stops the releasing canary). Check `queryCloudRun(action="getDeployRecords")` first to understand current versions and traffic
 - `manageCloudRun(action="delete")` -> delete service
 - `manageCloudRun(action="createAgent")` -> create Agent service
 
