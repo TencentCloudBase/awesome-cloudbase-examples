@@ -182,7 +182,7 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 - `manageCloudRun(action="init")` -> create local project
 - `manageCloudRun(action="download")` -> pull remote code
 - `manageCloudRun(action="run")` -> local run for Function mode
-- `manageCloudRun(action="deploy")` -> trigger deploy + **lightweight wait for BuildId registration** (does not hang for full build). Returns `buildId` / `taskId` + `next_step`. **Source builds**: poll `queryCloudRun(action="getDeployLog", buildId=...)` then `getProcessLog`. **Image deploys** (`imageUrl`): skip build log; poll status via `detail` and diagnose with `getProcessLog` (RunId from `latestDeploy`). Existing services: RMW preserves remote VpcConf / EnvParams keys / OpenAccessTypes; **new services automatically validate that the environment's CloudRun is initialized** — if not, deploy is blocked with guidance to call `initEnv` first
+- `manageCloudRun(action="deploy")` -> trigger deploy + **lightweight wait for registration** (does not hang for full build). Returns `buildId` / `runId` / `taskId` + **DeployType-aware `next_step`**: **source** → `getDeployLog` then `getProcessLog`; **image** (`imageUrl`, BuildId often `0`) → **skip `getDeployLog`**, use `getDeployRecords`/`detail` for `RunId` then `getProcessLog`. Follow the returned `next_step` — do not always poll build logs. Existing services: RMW preserves remote VpcConf / EnvParams keys / OpenAccessTypes; **new services automatically validate that the environment's CloudRun is initialized** — if not, deploy is blocked with guidance to call `initEnv` first
 - `manageCloudRun(action="updateConfig")` -> config-only update (no code upload; VPC / EnvParams / scaling / access types)
 - `manageCloudRun(action="traffic")` -> **traffic management / canary release** (aligns with `tcb cloudrun traffic`): `trafficOp="set"` adjusts the stable/canary traffic ratio (`stablePercent` + `canaryPercent` must equal 100, e.g. 90/10); `trafficOp="promote"` promotes the canary version to full release (100%, closes gray release, irreversible); `trafficOp="rollback"` rolls back to the previous stable version (stops the releasing canary). Check `queryCloudRun(action="getDeployRecords")` first to understand current versions and traffic
 - `manageCloudRun(action="delete")` -> delete service
@@ -224,7 +224,7 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 }
 ```
 
-部署后可用 `queryCloudRun(action="detail")` 查看 `imageInfo`（镜像地址与部署类型）。镜像部署失败排查：**不要**调用 `getDeployLog`；用 `detail`/`getDeployRecords` 取 `latestDeploy.RunId` 后调用 `getProcessLog`。
+部署后：`manageCloudRun(deploy)` 对镜像返回的 `next_step` 默认指向 `getProcessLog`（或先 `getDeployRecords` 取 `RunId`），**不要**改去调 `getDeployLog`。也可用 `queryCloudRun(action="detail")` 查看 `imageInfo`（镜像地址与部署类型）。镜像部署失败排查同样走 `getProcessLog`。
 
 ## InitialDelaySeconds（端口健康检查初始延迟）
 
