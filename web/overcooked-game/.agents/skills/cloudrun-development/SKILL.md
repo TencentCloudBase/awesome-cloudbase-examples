@@ -152,9 +152,29 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 - `queryCloudRun(action="list")` -> list services
 - `queryCloudRun(action="detail")` -> inspect one service and its latest deploy status when available
 - `queryCloudRun(action="templates")` -> see available starters
-- `queryCloudRun(action="getDeployLog")` -> retrieve the latest deploy log or a specified `buildId`
+- `queryCloudRun(action="getDeployLog")` -> **构建日志**（CODING / `DescribeCloudRunBuildLog`）。**仅云端源码构建有意义**；已有镜像部署（`imageUrl`）没有构建过程，不要用它诊断镜像部署失败。未登录 CODING 的账号会报错（如 `User not created or may not qcloud user`）
+- `queryCloudRun(action="getProcessLog")` -> **运行日志**（`tcbr/DescribeCloudRunProcessLog`）。返回部署阶段步骤（如 `create_version_check_vpc` / `create_eks_virtual_service` / `check_eks_virtual_service`）+ 容器启动/运行日志（s6-overlay、应用进程、readiness probe 失败原因）。**镜像部署与源码构建均可用，不依赖 CODING**。参数：`detailServerName`/`serverName` + 可选 `runId`（不传则取最新部署的 `RunId`；`RunId` 也可从 `detail` / `getDeployRecords` 的 `latestDeploy.RunId` 取得）
 - `queryCloudRun(action="getDeployRecords")` -> list deploy records (newest first; includes `BuildId` / `RunId` / `FlowRatio` / `Status`) — use to review release history and rollback context before a traffic operation
 - `queryCloudRun(action="envStatus")` -> check whether the environment's CloudRun is opened and its provisioning status (`Status=creating` opening / `normal` opened) — use after `initEnv` to poll progress or before `deploy` to confirm readiness
+
+### Log query SOP（构建日志 vs 运行日志）
+
+部署失败排查时**必须区分**两类日志，不要只用 `getDeployLog`：
+
+1. **云端源码构建**（传 `targetPath`、走 CODING 构建）  
+   - 先 `queryCloudRun(action="getDeployLog", detailServerName=..., buildId=...)` 查**构建日志**（编译/打包失败）  
+   - 再 `queryCloudRun(action="getProcessLog", detailServerName=..., runId=...)` 查**运行日志**（部署步骤 + 容器启动/健康检查）
+2. **已有镜像部署**（传 `imageUrl`、`DeployType=image`）  
+   - **跳过** `getDeployLog`（无构建过程；且依赖 CODING，未登录会直接失败）  
+   - 直接 `queryCloudRun(action="detail")` 或 `getDeployRecords` 取 `latestDeploy.RunId`，再 `getProcessLog` 查运行日志
+
+```json
+{
+  "action": "getProcessLog",
+  "detailServerName": "my-svc",
+  "runId": "<from latestDeploy.RunId>"
+}
+```
 
 ### Write operations
 
@@ -162,7 +182,7 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 - `manageCloudRun(action="init")` -> create local project
 - `manageCloudRun(action="download")` -> pull remote code
 - `manageCloudRun(action="run")` -> local run for Function mode
-- `manageCloudRun(action="deploy")` -> trigger deploy + **lightweight wait for BuildId registration** (does not hang for full build). Returns `buildId` / `taskId` + `next_step` to poll with `queryCloudRun(action="getDeployLog", buildId=...)`. **Two ways**: source build via `targetPath`, or existing image via `imageUrl` — if the user specifies an image or says no rebuild is needed, **must pass `imageUrl`** (do not fall back to source build just because a local source dir exists). Existing services: RMW preserves remote VpcConf / EnvParams keys / OpenAccessTypes; **new services automatically validate that the environment's CloudRun is initialized** — if not, deploy is blocked with guidance to call `initEnv` first
+- `manageCloudRun(action="deploy")` -> trigger deploy + **lightweight wait for BuildId registration** (does not hang for full build). Returns `buildId` / `taskId` + `next_step`. **Source builds**: poll `queryCloudRun(action="getDeployLog", buildId=...)` then `getProcessLog`. **Image deploys** (`imageUrl`): skip build log; poll status via `detail` and diagnose with `getProcessLog` (RunId from `latestDeploy`). Existing services: RMW preserves remote VpcConf / EnvParams keys / OpenAccessTypes; **new services automatically validate that the environment's CloudRun is initialized** — if not, deploy is blocked with guidance to call `initEnv` first
 - `manageCloudRun(action="updateConfig")` -> config-only update (no code upload; VPC / EnvParams / scaling / access types)
 - `manageCloudRun(action="traffic")` -> **traffic management / canary release** (aligns with `tcb cloudrun traffic`): `trafficOp="set"` adjusts the stable/canary traffic ratio (`stablePercent` + `canaryPercent` must equal 100, e.g. 90/10); `trafficOp="promote"` promotes the canary version to full release (100%, closes gray release, irreversible); `trafficOp="rollback"` rolls back to the previous stable version (stops the releasing canary). Check `queryCloudRun(action="getDeployRecords")` first to understand current versions and traffic
 - `manageCloudRun(action="delete")` -> delete service
@@ -204,7 +224,18 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 }
 ```
 
-部署后可用 `queryCloudRun(action="detail")` 查看 `imageInfo`（镜像地址与部署类型）。
+部署后可用 `queryCloudRun(action="detail")` 查看 `imageInfo`（镜像地址与部署类型）。镜像部署失败排查：**不要**调用 `getDeployLog`；用 `detail`/`getDeployRecords` 取 `latestDeploy.RunId` 后调用 `getProcessLog`。
+
+## InitialDelaySeconds（端口健康检查初始延迟）
+
+`serverConfig.InitialDelaySeconds` 的真实语义：
+
+1. **部署流程完成后**，先等待 **N 秒**，才开始对服务端口做健康检查（readiness）
+2. 之后大约 **每 5 秒检查一次**，连续约 **30 次**
+3. **30 次全部失败** 才判定本次部署失败（探测窗口大约 **150 秒**）
+4. **不是**「等 N 秒后立即失败」——把 N 设小并不会让失败更快判定到「秒级」
+
+容器启动耗时长的应用（JVM 预热、拉配置、迁移等）应把 `InitialDelaySeconds` 调到 **60–120**，避免还在启动就被判定失败。
 
 ## Access guidance
 
@@ -284,7 +315,7 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 
 - **Access failure** -> check ingress access type, domain setup, and whether the instance scaled to zero.
 - **Deployment blocked with "尚未初始化云托管 / not initialized"** -> the environment needs CloudRun enabled first: call `manageCloudRun(action="initEnv", envId=...)` (异步开通) and poll `queryCloudRun(action="envStatus")` until `Status=normal`; or open the console `环境 → 云托管 → 开通`. For stateless HTTP services, consider an HTTP cloud function instead of CloudRun entirely.
-- **Deployment failure** -> inspect Dockerfile, build logs, and CPU/memory ratio.
+- **Deployment failure** -> follow the **Log query SOP** above: source builds check `getDeployLog` then `getProcessLog`; image deploys skip build log and use `getProcessLog` only. Also inspect Dockerfile (source), CPU/memory ratio, and `InitialDelaySeconds` if readiness fails after slow startup.
 - **Local run failure** -> remember only Function mode is supported by local-run tools.
 - **Performance issues** -> reduce dependencies, optimize initialization, and tune minimum instances.
 - **DB / Redis connection failure after a successful deploy** -> almost always missing or wrong `VpcConf`, wrong private host, or security group. Follow `references/vpc-and-database.md` before rewriting application code.
