@@ -162,7 +162,7 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 - `manageCloudRun(action="init")` -> create local project
 - `manageCloudRun(action="download")` -> pull remote code
 - `manageCloudRun(action="run")` -> local run for Function mode
-- `manageCloudRun(action="deploy")` -> deploy local project (**two ways**: source build via `targetPath`, or existing image via `imageUrl`) — existing services: RMW preserves remote VpcConf / EnvParams keys / OpenAccessTypes; **new services automatically validate that the environment's CloudRun is initialized** — if not, deploy is blocked with guidance to call `initEnv` first
+- `manageCloudRun(action="deploy")` -> trigger deploy + **lightweight wait for BuildId registration** (does not hang for full build). Returns `buildId` / `taskId` + `next_step` to poll with `queryCloudRun(action="getDeployLog", buildId=...)`. **Two ways**: source build via `targetPath`, or existing image via `imageUrl` — if the user specifies an image or says no rebuild is needed, **must pass `imageUrl`** (do not fall back to source build just because a local source dir exists). Existing services: RMW preserves remote VpcConf / EnvParams keys / OpenAccessTypes; **new services automatically validate that the environment's CloudRun is initialized** — if not, deploy is blocked with guidance to call `initEnv` first
 - `manageCloudRun(action="updateConfig")` -> config-only update (no code upload; VPC / EnvParams / scaling / access types)
 - `manageCloudRun(action="traffic")` -> **traffic management / canary release** (aligns with `tcb cloudrun traffic`): `trafficOp="set"` adjusts the stable/canary traffic ratio (`stablePercent` + `canaryPercent` must equal 100, e.g. 90/10); `trafficOp="promote"` promotes the canary version to full release (100%, closes gray release, irreversible); `trafficOp="rollback"` rolls back to the previous stable version (stops the releasing canary). Check `queryCloudRun(action="getDeployRecords")` first to understand current versions and traffic
 - `manageCloudRun(action="delete")` -> delete service
@@ -170,7 +170,7 @@ Use CloudBase Run when the task needs a deployed backend service rather than a s
 
 ## Deploying an existing image (imageUrl)
 
-> 已有一个现成镜像（本地构建好、或第三方发布）时，不需要本地源码目录，直接 `manageCloudRun(action="deploy")` 传入 `imageUrl` 即可，走 `DeployType="image"`（容器型）部署，`targetPath` 可省略。
+> 已有一个现成镜像（本地构建好、或第三方发布）时，不需要本地源码目录，直接 `manageCloudRun(action="deploy")` 传入 `imageUrl` 即可，走 `DeployType="image"`（容器型）部署，`targetPath` 可省略。若用户明确提到使用某个镜像或无需重新构建代码，**必须传 imageUrl**，不要仅因本地有源码目录就回退到源码构建。
 
 **决策路径（直填 vs 本地中转）：**
 
