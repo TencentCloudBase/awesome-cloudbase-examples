@@ -1,0 +1,163 @@
+<view class="container">
+  <!-- 毛玻璃背景装饰 -->
+  <view class="bg-decoration">
+    <view class="bg-circle"></view>
+    <view class="bg-circle"></view>
+    <view class="bg-circle"></view>
+  </view>
+
+  <scroll-view scroll-y="{{true}}" class="content">
+    
+    <!-- 用户头部信息 -->
+    <view class="user-header glass-card">
+      <view class="user-basic">
+        <view class="avatar-container">
+          <image src="{{userInfo.avatar}}" class="user-avatar"></image>
+          <view wx:if="{{userInfo.isVerified}}" class="verified-badge">✓</view>
+        </view>
+        
+        <view class="user-info">
+          <view class="nickname-row">
+            <text class="nickname">{{userInfo.nickname}}</text>
+            <view class="action-buttons">
+              <button class="edit-btn btn-feedback" bindtap="editProfile">编辑资料</button>
+              <button class="settings-btn btn-feedback" bindtap="openSettings">⚙️</button>
+            </view>
+          </view>
+          <text class="signature" bindtap="editSignature">{{userInfo.signature || '点击编辑个性签名'}}</text>
+        </view>
+      </view>
+
+      <!-- 数据统计 -->
+      <view class="stats-container">
+        <view class="stat-item" bindtap="viewFollowers">
+          <text class="stat-number">{{userInfo.followersCount}}</text>
+          <text class="stat-label">粉丝</text>
+        </view>
+        <view class="stat-item" bindtap="viewFollowing">
+          <text class="stat-number">{{userInfo.followingCount}}</text>
+          <text class="stat-label">关注</text>
+        </view>
+        <view class="stat-item" bindtap="viewLikes">
+          <text class="stat-number">{{userInfo.likesCount}}</text>
+          <text class="stat-label">获赞</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 标签页导航 -->
+    <view class="tab-container glass-card">
+      <view class="tabs">
+        <view 
+          wx:for="{{tabList}}" 
+          wx:key="index"
+          class="tab-item {{tabIndex === index ? 'active' : ''}}"
+          data-index="{{index}}"
+          bindtap="onTabChange"
+        >
+          {{item}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 视频内容区域 -->
+    <view class="video-content">
+      <!-- 作品列表 -->
+      <view wx:if="{{tabIndex === 0}}" class="video-grid">
+        <view 
+          wx:for="{{videoList}}" 
+          wx:key="_id"
+          class="video-item"
+          data-id="{{item._id}}"
+          bindtap="playVideo"
+        >
+          <image 
+            src="{{item.poster}}" 
+            class="video-poster" 
+            mode="aspectFill"
+            lazy-load="{{true}}"
+            binderror="onImageError"
+            bindload="onImageLoad"
+            data-index="{{index}}"
+          ></image>
+          <view class="video-overlay">
+            <view class="video-likes">❤ {{item.likes}}</view>
+          </view>
+          <view class="play-icon">▶</view>
+        </view>
+      </view>
+
+      <!-- 喜欢列表 -->
+      <view wx:if="{{tabIndex === 1}}" class="video-grid">
+        <view 
+          wx:for="{{likedVideos}}" 
+          wx:key="_id"
+          class="video-item"
+          data-id="{{item._id}}"
+          bindtap="playVideo"
+        >
+          <image 
+            src="{{item.poster}}" 
+            class="video-poster" 
+            mode="aspectFill"
+            lazy-load="{{true}}"
+            binderror="onImageError"
+            bindload="onImageLoad"
+            data-index="{{index}}"
+          ></image>
+          <view class="video-overlay">
+            <view class="video-likes">❤ {{item.likes}}</view>
+          </view>
+          <view class="play-icon">▶</view>
+        </view>
+      </view>
+
+      <!-- 收藏列表 -->
+      <view wx:if="{{tabIndex === 2}}" class="video-grid">
+        <view 
+          wx:for="{{collectedVideos}}" 
+          wx:key="_id"
+          class="video-item"
+          data-id="{{item._id}}"
+          bindtap="playVideo"
+        >
+          <image 
+            src="{{item.poster}}" 
+            class="video-poster" 
+            mode="aspectFill"
+            lazy-load="{{true}}"
+            binderror="onImageError"
+            bindload="onImageLoad"
+            data-index="{{index}}"
+          ></image>
+          <view class="video-overlay">
+            <view class="video-likes">❤ {{item.likes}}</view>
+          </view>
+          <view class="play-icon">▶</view>
+        </view>
+      </view>
+
+      <!-- 加载状态 -->
+      <view wx:if="{{loading}}" class="loading">
+        <view class="loading-spinner"></view>
+        <text>正在加载...</text>
+      </view>
+
+      <!-- 空状态 -->
+      <view wx:elif="{{!loading && ((tabIndex === 0 && videoList.length === 0) || (tabIndex === 1 && likedVideos.length === 0) || (tabIndex === 2 && collectedVideos.length === 0))}}" class="empty-state">
+        <view class="empty-icon">📱</view>
+        <text class="empty-text">
+          {{tabIndex === 0 ? '还没有发布作品' : tabIndex === 1 ? '还没有喜欢的视频' : '还没有收藏的视频'}}
+        </text>
+        <text class="empty-hint">
+          {{tabIndex === 0 ? '快去创作你的第一个视频吧！' : tabIndex === 1 ? '去发现更多精彩内容' : '收藏喜欢的作品随时回看'}}
+        </text>
+        <button wx:if="{{tabIndex === 0}}" class="btn btn-primary btn-round btn-medium" bindtap="onRefresh">刷新数据</button>
+      </view>
+    </view>
+
+  </scroll-view>
+  
+  <!-- 自定义底部导航 -->
+  <custom-tabbar></custom-tabbar>
+</view> 

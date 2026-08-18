@@ -1,0 +1,157 @@
+.custom-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+  border-top: 1rpx solid rgba(255, 255, 255, 0.1);
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -8rpx 40rpx rgba(0, 0, 0, 0.5);
+}
+
+.tab-list {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 80rpx;
+  padding: 20rpx 0;
+  position: relative;
+}
+
+.tab-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  padding: 10rpx;
+  cursor: pointer;
+}
+
+.tab-item:active {
+  transform: scale(0.95);
+}
+
+.tab-text {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #666666;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  line-height: 1.2;
+  letter-spacing: 1rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.tab-item.active .tab-text {
+  color: #FF6B6B;
+  font-weight: 700;
+  font-size: 32rpx;
+  transform: scale(1.2);
+  text-shadow: none;
+}
+
+/* 移除发光效果 */
+
+/* 移除所有发光动画 */
+
+/* 悬浮触摸反馈 */
+.tab-item:not(.active):hover {
+  transform: translateY(-2rpx);
+}
+
+.tab-item:not(.active):hover .tab-text {
+  color: #999999;
+  transform: scale(1.05);
+}
+
+/* 背景装饰效果 */
+.tabbar-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.decoration-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%);
+  animation: floatDots 6s infinite ease-in-out;
+}
+
+.decoration-dot-1 {
+  width: 40rpx;
+  height: 40rpx;
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.decoration-dot-2 {
+  width: 60rpx;
+  height: 60rpx;
+  top: 40%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.decoration-dot-3 {
+  width: 30rpx;
+  height: 30rpx;
+  top: 60%;
+  left: 70%;
+  animation-delay: 4s;
+}
+
+@keyframes floatDots {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+  50% { 
+    opacity: 0.6;
+    transform: translateY(-10rpx) scale(1.2);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 375px) {
+  .tab-text {
+    font-size: 24rpx;
+  }
+  
+  .tab-item.active .tab-text {
+    font-size: 28rpx;
+  }
+}
+
+@media (min-width: 414px) {
+  .tab-text {
+    font-size: 32rpx;
+  }
+  
+  .tab-item.active .tab-text {
+    font-size: 36rpx;
+  }
+}
+
+/* 深色模式优化 */
+@media (prefers-color-scheme: dark) {
+  .custom-tabbar {
+    background: rgba(0, 0, 0, 0.9);
+    border-top-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .tab-item.active .tab-text {
+    color: #FF6B6B;
+  }
+} 

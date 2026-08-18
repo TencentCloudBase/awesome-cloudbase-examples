@@ -1,0 +1,358 @@
+{
+  "name": "Agent for cloudbase",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AI Agent with Webhook for tencent cloudbase",
+        "height": 545,
+        "width": 1736,
+        "color": 6
+      },
+      "id": "47881833-9939-4ac1-b725-f3e919066eaf",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        460,
+        -380
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9f191957-6b6d-4e46-8630-3c0d6843e06e",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        -340
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoke-n8n-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "aa490a1b-ddfc-4daf-b993-f79c77b055a8",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        500,
+        -320
+      ],
+      "webhookId": "7f8a71dd-b98a-4c87-aa3c-c0f7c3b63535"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d264444f-c01a-4fa0-86a4-c0bf0e4c8537",
+              "name": "output",
+              "value": "={{ $json.output || $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        -340
+      ],
+      "id": "8c645094-b838-4340-88ac-b98eaaa67a0a",
+      "name": "Edit Fields (Set Output Field)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.chatInput }}",
+        "options": {
+          "systemMessage": "You are a personal assistant who helps answer questions.\n\nYou are given tools to perform search.\n\nAlways tell the user if you didn't find the answer. Don't make something up just to please them."
+        }
+      },
+      "id": "949002c4-82e9-42bf-80b3-d1cd7d817396",
+      "name": "Primary AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        1280,
+        -340
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        -80
+      ],
+      "id": "1296c274-9fb9-45e7-ac4f-9c03edc7cc9d",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "XCXgENoq3qLRXI8E",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$json.body.sessionId}}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1580,
+        -40
+      ],
+      "id": "4b073180-80d1-4da9-87c1-3aeb89367838",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://<your-mcp-server-url>",
+        "authentication": "bearerAuth",
+        "include": "selected",
+        "includeTools": [
+          "search_web"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        -40
+      ],
+      "id": "3328f1a3-becd-4faf-9906-817071aebe29",
+      "name": "MCP Client",
+      "alwaysOutputData": false,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "NFawv6XVgBhUkAge",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        20
+      ],
+      "id": "f32fa4e7-1330-4db3-8981-fb1bc7e69cfa",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "XCXgENoq3qLRXI8E",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.chatInput }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        1060,
+        -140
+      ],
+      "id": "23f985d1-1917-4f7a-a808-37f14c8bce1c",
+      "name": "Secondary LLM"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('Webhook').item.json.body.chatInput }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "complex",
+              "description": "用户输入为复杂任务，需要多步骤处理、工具调用或深度分析。包括但不限于：\n\n- 需要搜索外部信息的问题\n- 多步骤的问题解决或分析任务\n- 需要代码编写、调试或执行的请求\n- 复杂的数据处理或计算任务\n- 需要创建结构化内容（报告、方案、流程图等）\n- 涉及多个领域知识整合的问题\n- 需要实时信息或动态数据的查询\n- 工作流程设计或优化建议"
+            },
+            {
+              "category": "simple",
+              "description": "用户输入为简单、直接的问题或请求，可以通过单次LLM调用立即响应。包括但不限于：\n\n- 日常闲聊和问候（\"你好\"、\"今天天气怎么样\"）\n- 基础事实性问题（\"什么是人工智能\"、\"北京是中国的首都吗\"）\n- 简单的概念解释或定义\n- 情感支持或鼓励性对话\n- 基础的计算或转换（\"1+1等于多少\"）\n- 不需要外部工具或多步推理的问题"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        740,
+        -320
+      ],
+      "id": "01fe400f-24c7-48ff-bdc2-2f6f9409f715",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        660,
+        -40
+      ],
+      "id": "b85340b2-3517-494b-825f-221f1d3fc7a5",
+      "name": "DeepSeek Chat Model2",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "XCXgENoq3qLRXI8E",
+          "name": "DeepSeek account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields (Set Output Field)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Primary AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields (Set Output Field)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Primary AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Primary AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Primary AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Secondary LLM": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields (Set Output Field)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Secondary LLM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Primary AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Secondary LLM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3dd2d4cd-5a77-4498-ad8e-3664aaaebfb2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "da4a9e46b7274ae9c706f7e1854de006eb310cdf95541a24066fcaa26d2d8938"
+  },
+  "id": "R7WBvkUGs5k3fzbq",
+  "tags": []
+}

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "发布视频",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "custom-tabbar": "../../components/custom-tabbar/index"
+  }
+} 

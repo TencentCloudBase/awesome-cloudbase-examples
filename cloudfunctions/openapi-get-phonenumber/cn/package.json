@@ -1,0 +1,13 @@
+{
+  "name": "get-phonenumber",
+  "description": "云调用获取用户手机号",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "wx-server-sdk": "3.0.1"
+  }
+}

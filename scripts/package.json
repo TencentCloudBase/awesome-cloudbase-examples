@@ -1,0 +1,26 @@
+{
+  "name": "cloudbase-examples-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for building CloudBase example packages",
+  "main": "build-zips.js",
+  "scripts": {
+    "build": "node build-zips.js",
+    "build:watch": "nodemon build-zips.js",
+    "test": "node test-config.js"
+  },
+  "dependencies": {
+    "archiver": "^6.0.1",
+    "glob": "^10.3.10"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "cloudbase",
+    "zip",
+    "package",
+    "build"
+  ],
+  "author": "CloudBase Team",
+  "license": "MIT"
+} 

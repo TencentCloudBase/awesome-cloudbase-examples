@@ -1,0 +1,13 @@
+{
+  "name": "post-management",
+  "description": "文章管理云函数，包含 collection 操作示例",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7"
+  }
+}

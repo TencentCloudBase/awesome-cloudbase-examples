@@ -1,0 +1,17 @@
+{
+  "name": "offiaccount-common",
+  "version": "1.0.0",
+  "description": "微信公众号开放能力统一云函数（OAuth、AccessToken、JSSDK、订阅通知、客服消息、自定义菜单等）",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-errors": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,25 @@
+<view class="container">
+  <view class="header">
+    <text class="title">CloudBase 小程序模板</text>
+    <text class="subtitle">基于微信云开发的小程序应用</text>
+  </view>
+  
+  <view class="content">
+    <view class="info-card">
+      <text class="label">您的OpenID：</text>
+      <text class="value">{{openid || '获取中...'}}</text>
+    </view>
+    
+    <view class="features">
+      <text class="features-title">✨ 项目特点</text>
+      <view class="feature-item">🔐 云开发身份认证</view>
+      <view class="feature-item">☁️ 云函数调用能力</view>
+      <view class="feature-item">📱 原生小程序开发</view>
+      <view class="feature-item">🚀 一键部署上线</view>
+    </view>
+  </view>
+  
+  <view class="footer">
+    <cloudbase-badge show-text="{{true}}" />
+  </view>
+</view>

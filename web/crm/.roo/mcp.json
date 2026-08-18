@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "cloudbase": {
+      "command": "cloudbase-mcp",
+      "args": [],
+      "disabled": false,
+      "env": {
+        "INTEGRATION_IDE": "CloudBaseCLI"
+      }
+    }
+  }
+}

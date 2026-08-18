@@ -1,0 +1,10 @@
+{
+  "functionsRoot": "./src",
+  "functions": [
+    {
+      "name": "default",
+      "directory": "./",
+      "triggerPath": "/"
+    }
+  ]
+}

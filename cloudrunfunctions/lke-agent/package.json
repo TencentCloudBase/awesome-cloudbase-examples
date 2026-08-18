@@ -1,0 +1,32 @@
+{
+  "name": "lke-agent",
+  "description": "LKE 函数型智能体模板",
+  "main": "dist/index.js",
+  "scripts": {
+    "login": "tcb login",
+    "logout": "tcb logout",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
+    "build:w": "tsc -w",
+    "dev": "dotenvx run -- tcb cloudrunfunction run -w",
+    "deploy": "tcb cloudrunfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/aiagent-framework": "1.0.0-beta.9",
+    "@cloudbase/functions-typings": "^1.0.0",
+    "openai": "^4.77.3"
+  },
+  "devDependencies": {
+    "@cloudbase/cli": "^2.6.16",
+    "@cloudbase/functions-typings": "^1.0.0",
+    "@dotenvx/dotenvx": "^1.38.4",
+    "@types/node": "^22.10.5",
+    "prettier": "3.5.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  },
+  "tcbRepo": {
+    "type": "cloudrunfunction"
+  },
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
+}

@@ -1,0 +1,358 @@
+/**app.wxss**/
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 200rpx 0;
+  box-sizing: border-box;
+} 
+
+/* 全局重置样式 */
+page {
+  background-color: #000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* 首页全屏样式 */
+.home-page {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+
+
+/* 通用样式 */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  justify-content: space-between;
+}
+
+.flex-around {
+  justify-content: space-around;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.margin-top-sm {
+  margin-top: 20rpx;
+}
+
+.margin-top-md {
+  margin-top: 40rpx;
+}
+
+.margin-top-lg {
+  margin-top: 60rpx;
+}
+
+.margin-bottom-sm {
+  margin-bottom: 20rpx;
+}
+
+.margin-bottom-md {
+  margin-bottom: 40rpx;
+}
+
+.margin-bottom-lg {
+  margin-bottom: 60rpx;
+}
+
+.padding-sm {
+  padding: 20rpx;
+}
+
+.padding-md {
+  padding: 40rpx;
+}
+
+.padding-lg {
+  padding: 60rpx;
+}
+
+/* 按钮样式 */
+.btn {
+  border: none;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E88);
+  color: white;
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.btn-small {
+  padding: 15rpx 30rpx;
+  font-size: 24rpx;
+}
+
+.btn-medium {
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+}
+
+.btn-large {
+  padding: 25rpx 50rpx;
+  font-size: 32rpx;
+}
+
+.btn-round {
+  border-radius: 50rpx;
+}
+
+.btn:active {
+  transform: translateY(2rpx);
+  opacity: 0.8;
+}
+
+/* 卡片样式 */
+.card {
+  background: white;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.card-padding {
+  padding: 30rpx;
+}
+
+/* 文字样式 */
+.text-primary {
+  color: #333;
+}
+
+.text-secondary {
+  color: #666;
+}
+
+.text-disabled {
+  color: #999;
+}
+
+.text-danger {
+  color: #FF6B6B;
+}
+
+.text-success {
+  color: #07C160;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-size-sm {
+  font-size: 24rpx;
+}
+
+.font-size-md {
+  font-size: 28rpx;
+}
+
+.font-size-lg {
+  font-size: 32rpx;
+}
+
+.font-size-xl {
+  font-size: 36rpx;
+}
+
+/* 输入框样式 */
+.input {
+  background: #f8f8f8;
+  border-radius: 15rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  border: 1rpx solid transparent;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  border-color: #FF6B6B;
+  background: white;
+}
+
+/* 动画效果 */
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.bounce {
+  animation: bounce 0.6s ease;
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+  40%, 43% { transform: translateY(-10rpx); }
+  70% { transform: translateY(-5rpx); }
+  90% { transform: translateY(-2rpx); }
+}
+
+/* 小精灵共同样式 */
+.pet-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pet-image {
+  width: 240rpx;
+  height: 240rpx;
+  border-radius: 120rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 状态条样式 */
+.status-bar {
+  width: 100%;
+  height: 24rpx;
+  background-color: #EEEEEE;
+  border-radius: 12rpx;
+  overflow: hidden;
+  margin: 10rpx 0;
+}
+
+.status-fill {
+  height: 100%;
+  border-radius: 12rpx;
+}
+
+.hunger-fill {
+  background: linear-gradient(to right, #FFA500, #FF8C00);
+}
+
+.mood-fill {
+  background: linear-gradient(to right, #FF69B4, #FF1493);
+}
+
+.energy-fill {
+  background: linear-gradient(to right, #32CD32, #008000);
+}
+
+.exp-fill {
+  background: linear-gradient(to right, #1E90FF, #0000CD);
+}
+
+/* flex 布局辅助类 */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.align-center {
+  align-items: center;
+}
+
+/* 文本样式 */
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+
+.subtitle {
+  font-size: 30rpx;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+}
+
+.text-sm {
+  font-size: 24rpx;
+  color: var(--light-text);
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+/* 徽章样式 */
+.badge {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  margin-right: 10rpx;
+  margin-bottom: 10rpx;
+}
+
+.badge-primary {
+  background-color: rgba(106, 90, 205, 0.2);
+  color: var(--primary-color);
+}
+
+/* 分割线 */
+.divider {
+  width: 100%;
+  height: 1rpx;
+  background-color: #EEEEEE;
+  margin: 20rpx 0;
+} 

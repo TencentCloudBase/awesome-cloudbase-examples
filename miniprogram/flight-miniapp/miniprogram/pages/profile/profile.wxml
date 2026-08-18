@@ -1,0 +1,39 @@
+<view class="container">
+  <!-- 用户信息区域 -->
+  <view class="user-section">
+    <view wx:if="{{hasUserInfo}}" class="user-info">
+      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <view class="user-details">
+        <text class="username">{{userInfo.nickName}}</text>
+        <text class="user-id">会员用户</text>
+      </view>
+    </view>
+    
+    <view wx:else class="login-section">
+      <image class="default-avatar" src="/images/default-avatar.png"></image>
+      <button class="login-btn" bindtap="getUserProfile">登录/注册</button>
+    </view>
+  </view>
+
+  <!-- 菜单列表 -->
+  <view class="menu-section">
+    <view 
+      wx:for="{{menuItems}}" 
+      wx:key="type"
+      class="menu-item"
+      bindtap="handleMenuTap"
+      data-type="{{item.type}}"
+    >
+      <view class="menu-content">
+        <text class="menu-icon">{{item.icon}}</text>
+        <text class="menu-title">{{item.title}}</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text class="version-text">Flight Comparison v1.0.0</text>
+  </view>
+</view> 

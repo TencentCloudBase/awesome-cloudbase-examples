@@ -71,5 +71,5 @@ for await (let x of res.textStream) {
 
 ## 参考文档
 
-- [云函数2.0](https://docs.cloudbase.net/cbrf/intro)
+- [函数型云托管](https://docs.cloudbase.net/cbrf/intro)
 - [云开发 AI+](https://docs.cloudbase.net/ai/introduce)

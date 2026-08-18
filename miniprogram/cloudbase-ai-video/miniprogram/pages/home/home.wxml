@@ -1,0 +1,117 @@
+<view class="container">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading && videoList.length === 0}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">正在加载精彩视频...</text>
+  </view>
+  
+  <!-- 空状态 -->
+  <view wx:elif="{{!loading && videoList.length === 0}}" class="empty-container">
+    <view class="empty-icon">📹</view>
+    <text class="empty-text">暂无视频内容</text>
+    <text class="empty-hint">快去发布第一个视频吧！</text>
+    <button class="retry-btn" bindtap="onRetry">重新加载</button>
+    <button class="retry-btn" bindtap="debugTestCloudFunction" style="margin-top: 20rpx; background: #4CAF50;">测试云函数</button>
+  </view>
+  
+  <!-- 视频列表 -->
+  <swiper 
+    wx:else
+    class="video-swiper" 
+    vertical="{{true}}" 
+    current="{{currentIndex}}"
+    bindchange="onSwiperChange"
+    circular="{{false}}"
+    duration="300"
+  >
+    <swiper-item wx:for="{{videoList}}" wx:key="_id" class="video-item">
+      <view class="video-container">
+        <!-- 视频播放器 -->
+        <video 
+          id="video-{{index}}"
+          class="video-player"
+          src="{{item.videoUrl}}"
+          poster="{{item.poster}}"
+          object-fit="contain"
+          show-center-play-btn="{{false}}"
+          show-play-btn="{{false}}"
+          controls="{{false}}"
+          loop="{{true}}"
+          muted="{{true}}"
+          autoplay="{{index === currentIndex && isPlaying}}"
+          enable-progress-gesture="{{false}}"
+          enable-play-gesture="{{true}}"
+          bindtap="onVideoTap"
+          bindplay="onVideoPlay"
+          bindpause="onVideoPause"
+        ></video>
+
+        <!-- 暂停图标 -->
+        <view class="pause-overlay {{!isPlaying ? 'show' : ''}}" bindtap="onVideoTap">
+          <view class="pause-icon">▶️</view>
+        </view>
+
+        <!-- 右侧操作栏 -->
+        <view class="right-actions">
+          <!-- 用户头像 -->
+          <view class="user-avatar" bindtap="onUserProfile" data-username="{{item.author.nickname || item.author.username || '用户'}}">
+            <image src="{{item.author.avatar || item.author && item.author.avatar || '/images/user-avatar.jpg'}}" class="avatar-img"></image>
+            <view class="follow-btn" bindtap="onFollow" catchtap="true">+</view>
+          </view>
+
+          <!-- 点赞 -->
+          <view class="action-item" bindtap="onLike" data-index="{{index}}">
+            <view class="action-icon like-icon {{item.isLiked ? 'liked' : ''}}">
+              ❤️
+            </view>
+            <text class="action-text">{{item.likes || 0}}</text>
+          </view>
+
+          <!-- 评论 -->
+          <view class="action-item" bindtap="onComment">
+            <view class="action-icon">💬</view>
+            <text class="action-text">{{item.comments || 0}}</text>
+          </view>
+
+          <!-- 分享 -->
+          <view class="action-item" bindtap="onShare" data-index="{{index}}">
+            <view class="action-icon">📤</view>
+            <text class="action-text">{{item.shares || 0}}</text>
+          </view>
+
+          <!-- 音乐 -->
+          <view class="music-disc">
+            <view class="disc-bg">🎵</view>
+          </view>
+        </view>
+
+        <!-- 底部信息 -->
+        <view class="bottom-info">
+          <view class="user-info">
+            <text class="username">@{{item.author.nickname || item.author.username || '匿名用户'}}</text>
+            <text class="description">{{item.title || item.description}}</text>
+            <!-- 标签显示 -->
+            <view wx:if="{{item.tags && item.tags.length > 0}}" class="tags-container">
+              <text wx:for="{{item.tags}}" wx:key="*this" class="tag">#{item}</text>
+            </view>
+          </view>
+          
+          <!-- 位置信息 -->
+          <view wx:if="{{item.location}}" class="location-info">
+            <view class="location-icon">📍</view>
+            <text class="location-text">{{item.location}}</text>
+          </view>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+  
+  <!-- 加载更多提示 -->
+  <view wx:if="{{loading && videoList.length > 0}}" class="load-more">
+    <view class="loading-spinner small"></view>
+    <text>加载更多...</text>
+  </view>
+  
+  <!-- 自定义底部导航 -->
+  <custom-tabbar></custom-tabbar>
+</view> 

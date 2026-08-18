@@ -1,0 +1,9 @@
+{
+	"name": "getLeaderboard",
+	"version": "1.0.0",
+	"description": "获取游戏排行榜数据",
+	"main": "index.js",
+	"dependencies": {
+		"wx-server-sdk": "~2.6.3"
+	}
+}

@@ -1,0 +1,34 @@
+{
+	"envId": "{{env.ENV_ID}}",
+	"version": "2.0",
+	"$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+	"app": {
+		"buildCommand": "npm run build",
+		"outputDir": "dist",
+		"deployPath": "/overcooked-game"
+	},
+	"functions": [
+		{
+			"name": "gameSync",
+			"timeout": 60,
+			"envVariables": {},
+			"runtime": "Nodejs18.15",
+			"memorySize": 256,
+			"handler": "index.main"
+		}
+	],
+	"databases": [
+		{
+			"collectionName": "game_rooms",
+			"description": "游戏房间信息存储"
+		},
+		{
+			"collectionName": "game_scores",
+			"description": "玩家分数排行榜"
+		},
+		{
+			"collectionName": "game_players",
+			"description": "玩家信息存储"
+		}
+	]
+}

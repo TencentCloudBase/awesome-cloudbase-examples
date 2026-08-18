@@ -1,6 +1,6 @@
 # README
 
-云函数 2.0 集成消息队列（Kafka、Pulsar）和 Redis 实现与客户端收发消息/延时消息的示例。
+函数型云托管 集成消息队列（Kafka、Pulsar）和 Redis 实现与客户端收发消息/延时消息的示例。
 
 ## 架构示意图
 
@@ -12,7 +12,7 @@
 sequenceDiagram
     autonumber
     actor c as 客户端
-    box rgb(33,66,99) 云函数 2.0 集群
+    box rgb(33,66,99) 函数型云托管 集群
     participant t as 函数 trigger
     participant m as 函数 message
     end

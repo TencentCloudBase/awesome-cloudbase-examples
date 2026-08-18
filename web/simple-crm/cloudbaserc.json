@@ -1,0 +1,36 @@
+{
+  "version": "2.0",
+  "envId": "{{env.CLOUDBASE_ENV_ID}}",
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "app": {
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "deployPath": "/"
+  },
+  "functions": [
+    {
+      "name": "dx_customer",
+      "timeout": 60,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main"
+    },
+    {
+      "name": "dx_interaction",
+      "timeout": 60,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main"
+    }
+  ],
+  "databases": [
+    {
+      "collectionName": "dx_customers"
+    },
+    {
+      "collectionName": "dx_interactions"
+    }
+  ]
+}

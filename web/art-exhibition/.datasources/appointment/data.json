@@ -1,0 +1,28 @@
+
+  [
+    {
+      "_id": "1",
+      "date": "2025-06-25",
+      "time": "09:00 - 10:00",
+      "name": "张三",
+      "phone": "13800138000",
+      "email": "zhangsan@example.com",
+      "notes": "希望有讲解员",
+      "exhibitionId": "exhibition1",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    },
+    {
+      "_id": "2",
+      "date": "2025-06-26",
+      "time": "14:00 - 15:00",
+      "name": "李四",
+      "phone": "13900139000",
+      "email": "lisi@example.com",
+      "notes": "团体预约",
+      "exhibitionId": "exhibition2",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    }
+  ]
+  

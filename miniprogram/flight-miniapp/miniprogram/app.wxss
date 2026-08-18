@@ -1,0 +1,174 @@
+/**app.wxss**/
+page {
+  --primary-color: #6A5ACD;
+  --secondary-color: #9370DB;
+  --text-color: #333333;
+  --light-text: #888888;
+  --background: #F5F5F5;
+  --white: #FFFFFF;
+  
+  background-color: var(--background);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei',
+    Arial, sans-serif;
+  font-size: 14px;
+  color: var(--text-color);
+  box-sizing: border-box;
+}
+
+/* 通用容器 */
+.container {
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+/* 按钮样式 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  padding: 0 30rpx;
+  margin: 20rpx 0;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.btn-secondary {
+  background-color: var(--white);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+/* 卡片样式 */
+.card {
+  background-color: var(--white);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 小精灵共同样式 */
+.pet-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pet-image {
+  width: 240rpx;
+  height: 240rpx;
+  border-radius: 120rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 状态条样式 */
+.status-bar {
+  width: 100%;
+  height: 24rpx;
+  background-color: #EEEEEE;
+  border-radius: 12rpx;
+  overflow: hidden;
+  margin: 10rpx 0;
+}
+
+.status-fill {
+  height: 100%;
+  border-radius: 12rpx;
+}
+
+.hunger-fill {
+  background: linear-gradient(to right, #FFA500, #FF8C00);
+}
+
+.mood-fill {
+  background: linear-gradient(to right, #FF69B4, #FF1493);
+}
+
+.energy-fill {
+  background: linear-gradient(to right, #32CD32, #008000);
+}
+
+.exp-fill {
+  background: linear-gradient(to right, #1E90FF, #0000CD);
+}
+
+/* flex 布局辅助类 */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* 文本样式 */
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+
+.subtitle {
+  font-size: 30rpx;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+}
+
+.text-sm {
+  font-size: 24rpx;
+  color: var(--light-text);
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+/* 徽章样式 */
+.badge {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  margin-right: 10rpx;
+  margin-bottom: 10rpx;
+}
+
+.badge-primary {
+  background-color: rgba(106, 90, 205, 0.2);
+  color: var(--primary-color);
+}
+
+/* 分割线 */
+.divider {
+  width: 100%;
+  height: 1rpx;
+  background-color: #EEEEEE;
+  margin: 20rpx 0;
+} 

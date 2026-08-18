@@ -1,0 +1,23 @@
+.cloudbase-badge {
+  display: inline-block;
+  text-align: center;
+}
+
+.badge-image {
+  width: 320rpx;
+  height: auto;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+.badge-image:active {
+  opacity: 0.7;
+  transform: scale(0.95);
+}
+
+.badge-text {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.7);
+  margin-top: 16rpx;
+} 

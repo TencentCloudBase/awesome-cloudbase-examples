@@ -1,0 +1,14 @@
+{
+  "name": "gameRoom",
+  "version": "1.0.0",
+  "description": "五子棋游戏房间云函数",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.9.1"
+  }
+} 

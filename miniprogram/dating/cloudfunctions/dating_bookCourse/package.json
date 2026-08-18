@@ -1,0 +1,9 @@
+{
+  "name": "dating_bookCourse",
+  "version": "1.0.0",
+  "description": "预约脱单课程",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+} 

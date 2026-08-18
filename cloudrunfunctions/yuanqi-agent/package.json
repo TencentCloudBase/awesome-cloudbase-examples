@@ -3,15 +3,18 @@
   "description": "元器函数型智能体模板",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
     "build:w": "tsc -w",
-    "dev:f": "dotenvx run -- tcb-ff --enableCors=true -w",
+    "dev:f": "dotenvx run -f .env.development -- tcb-ff --enableCors=true -w",
     "preDeploy": "npm i && npm run build && rimraf ./node_modules",
     "dev": "concurrently \"npm run build:w\" \"npm run dev:f\"",
+    "login": "tcb login",
+    "logout": "tcb logout",
     "deploy": "tcb cloudrunfunction deploy"
   },
   "dependencies": {
-    "@cloudbase/aiagent-framework": "1.0.0-beta.9",
+    "@cloudbase/aiagent-framework": "1.0.0-beta.10",
     "@cloudbase/functions-typings": "^1.0.0",
     "@cloudbase/node-sdk": "^3.7.0",
     "openai": "^4.77.3",

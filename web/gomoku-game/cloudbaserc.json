@@ -1,0 +1,52 @@
+{
+  "version": "2.0",
+  "envId": "your-env-id",
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "app": {
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "deployPath": "/gomoku"
+  },
+  "framework": {
+    "name": "gomoku-battle",
+    "plugins": {
+      "server": {
+        "use": "@cloudbase/framework-plugin-function",
+        "inputs": {
+          "functionRootPath": "./cloudfunctions",
+          "functions": [
+            {
+              "name": "gameRoom",
+              "timeout": 5,
+              "envVariables": {},
+              "runtime": "Nodejs12.16",
+              "memory": 128
+            }
+          ]
+        }
+      },
+      "database": {
+        "use": "@cloudbase/framework-plugin-database",
+        "inputs": {
+          "collections": [
+            {
+              "collectionName": "game_rooms",
+              "description": "游戏房间集合",
+              "aclTag": "READONLY",
+              "createIndexes": [
+                {
+                  "name": "room_status",
+                  "unique": false,
+                  "keys": [
+                    {"name": "gameStatus", "direction": "1"},
+                    {"name": "createdAt", "direction": "-1"}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+} 

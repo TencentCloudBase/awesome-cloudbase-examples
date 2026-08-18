@@ -1,0 +1,100 @@
+
+  [
+    {
+      "_id": "1",
+      "title": "星空",
+      "artist": "文森特·梵高",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/500px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+      "description": "《星空》是荷兰后印象派画家文森特·梵高于1889年在法国圣雷米的一家精神病院里创作的一幅油画。",
+      "year": 1889,
+      "style": "后印象派",
+      "location": "纽约现代艺术博物馆",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    },
+    {
+      "_id": "2",
+      "title": "蒙娜丽莎",
+      "artist": "列奥纳多·达·芬奇",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/500px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+      "description": "《蒙娜丽莎》是意大利文艺复兴时期画家列奥纳多·达·芬奇创作的油画，被誉为世界上最著名的画作之一。",
+      "year": 1503,
+      "style": "文艺复兴",
+      "location": "巴黎卢浮宫",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    },
+    {
+      "_id": "3",
+      "title": "呐喊",
+      "artist": "爱德华·蒙克",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/500px-The_Scream.jpg",
+      "description": "《呐喊》是挪威表现主义画家爱德华·蒙克于1893年创作的一系列绘画作品，描绘了一个人在极度焦虑中的形象。",
+      "year": 1893,
+      "style": "表现主义",
+      "location": "奥斯陆国家美术馆",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    },
+    {
+      "_id": "4",
+      "title": "戴珍珠耳环的少女",
+      "artist": "约翰内斯·维米尔",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/500px-1665_Girl_with_a_Pearl_Earring.jpg",
+      "description": "《戴珍珠耳环的少女》是荷兰黄金时代画家约翰内斯·维米尔于1665年创作的一幅油画，被誉为“北方的蒙娜丽莎”。",
+      "year": 1665,
+      "style": "荷兰黄金时代",
+      "location": "海牙莫瑞泰斯皇家美术馆",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    },
+    {
+      "_id": "5",
+      "title": "向日葵",
+      "artist": "文森特·梵高",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg/500px-Vincent_van_Gosh_-_Sunflowers_-_VGM_F458.jpg",
+      "description": "《向日葵》是荷兰后印象派画家文森特·梵高的一系列静物油画作品，描绘了向日葵的美丽与生命力。",
+      "year": 1888,
+      "style": "后印象派",
+      "location": "阿姆斯特丹梵高博物馆",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    },
+    {
+      "_id": "6",
+      "title": "格尔尼卡",
+      "artist": "巴勃罗·毕加索",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/PicassoGuernica.jpg/500px-PicassoGuernica.jpg",
+      "description": "《格尔尼卡》是西班牙画家巴勃罗·毕加索于1937年创作的一幅大型油画，描绘了西班牙内战期间格尔尼卡镇遭受轰炸的场景。",
+      "year": 1937,
+      "style": "立体主义",
+      "location": "马德里索菲亚王后国家艺术中心博物馆",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    },
+    {
+      "_id": "7",
+      "title": "创造亚当",
+      "artist": "米开朗基罗",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg/500px-Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg",
+      "description": "《创造亚当》是意大利文艺复兴时期艺术家米开朗基罗于1512年创作的壁画，描绘了上帝创造亚当的场景。",
+      "year": 1512,
+      "style": "文艺复兴",
+      "location": "梵蒂冈西斯廷教堂",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    },
+    {
+      "_id": "8",
+      "title": "夜巡",
+      "artist": "伦勃朗",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/The_Nightwatch_by_Rembrandt_-_Rijksmuseum.jpg/500px-The_Nightwatch_by_Rembrandt_-_Rijksmuseum.jpg",
+      "description": "《夜巡》是荷兰黄金时代画家伦勃朗于1642年创作的一幅大型油画，描绘了阿姆斯特丹民兵队的群像。",
+      "year": 1642,
+      "style": "荷兰黄金时代",
+      "location": "阿姆斯特丹国家博物馆",
+      "createdAt": 1719100800,
+      "updatedAt": 1719100800
+    }
+  ]
+  

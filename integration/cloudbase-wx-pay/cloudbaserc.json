@@ -1,0 +1,52 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "version": "2.0",
+  "envId": "{{env.TCB_ENV_ID}}",
+
+  "_comment": "此文件仅作为项目元数据索引，实际部署请进入各子目录使用独立的 cloudbaserc.json",
+  "_deploy_guide": {
+    "云函数/云托管": "cd functions/pay-common && tcb fn deploy pay-common",
+    "Web 应用": "cd examples/react && tcb app deploy"
+  },
+
+  "functionRoot": "./functions",
+  "functions": [
+    {
+      "name": "pay-common",
+      "type": "HTTP",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "memorySize": 256,
+      "installDependency": true,
+      "envVariables": {
+        "signMode": "{{env.SIGN_MODE}}",
+        "appId": "{{env.WX_APP_ID}}",
+        "merchantId": "{{env.MCH_ID}}",
+        "merchantSerialNumber": "{{env.MCH_SERIAL_NO}}",
+        "apiV3Key": "{{env.API_V3_KEY}}",
+        "privateKey": "{{env.PRIVATE_KEY}}",
+        "wxPayPublicKey": "{{env.WX_PAY_PUBLIC_KEY}}",
+        "wxPayPublicKeyId": "{{env.WX_PAY_PUBLIC_KEY_ID}}",
+        "notifyURLPayURL": "{{env.NOTIFY_PAY_URL}}",
+        "notifyURLRefundsURL": "{{env.NOTIFY_REFUNDS_URL}}",
+        "transferNotifyUrl": "{{env.NOTIFY_TRANSFER_URL}}"
+      },
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".env",
+        "tests",
+        "*.pem"
+      ]
+    }
+  ],
+  "app": {
+    "serviceName": "web-pay",
+    "framework": "vite",
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "root": "./examples/react"
+  }
+}

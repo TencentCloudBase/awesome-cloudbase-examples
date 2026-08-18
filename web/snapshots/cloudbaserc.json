@@ -1,7 +1,11 @@
 {
   "envId": "{{tcb.envId}}",
   "version": "2.0",
-  "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json",
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "app": {
+    "outputDir": "dest",
+    "deployPath": "/snapshot"
+  },
   "framework": {
     "name": "node-starter",
     "plugins": {
@@ -21,20 +25,9 @@
               "ignore": ["node_modules/**/*"]
             }
           ],
-          "servicePaths" :{
+          "servicePaths": {
             "snapshots": "/snapshots"
           }
-        }
-      },
-      "client": {
-        "use": "@cloudbase/framework-plugin-website",
-        "inputs": {
-          "outputPath": "dest",
-          "cloudPath": "/snapshot",
-          "commands": {
-            "build": "npx ejs ./static/index.ejs -i '{\"envId\":\"{{tcb.envId}}\",\"path\":null}' -o ./dest/index.html"
-          },
-          "ignore": [".git", ".github", "node_modules", "cloudbaserc.js"]
         }
       }
     }

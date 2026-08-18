@@ -23,7 +23,7 @@ exports.main = async (event, context) => {
   const result = await tcbapp.callFunction({
     name: event.otherFuncName,
 
-    // 云函数2.0 参数
+    // 函数型云托管 参数
     type: 'cloudrun',
     method: 'POST',
     path: '/abc',

@@ -5,6 +5,6 @@
   ],
   "compilerOptions": {
     "outDir": "built",                                   /* Specify an output folder for all emitted files. */
-    "module": "ES2022",                                  /* Specify what module code is generated. */
+    "module": "commonjs",                                  /* Specify what module code is generated. */
   }
 }

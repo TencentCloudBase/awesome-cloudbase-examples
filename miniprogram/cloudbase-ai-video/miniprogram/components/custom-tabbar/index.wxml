@@ -1,0 +1,24 @@
+<view class="custom-tabbar">
+  <view class="tab-list">
+    <view 
+      wx:for="{{tabList}}" 
+      wx:key="index"
+      class="tab-item {{currentTab === item.index ? 'active' : ''}}"
+      data-index="{{item.index}}"
+      data-path="{{item.pagePath}}"
+      bindtap="switchTab"
+      aria-label="{{item.text}}"
+      role="tab"
+      aria-selected="{{currentTab === item.index}}"
+    >
+      <text class="tab-text">{{item.text}}</text>
+    </view>
+  </view>
+  
+  <!-- 背景装饰效果 -->
+  <view class="tabbar-decoration">
+    <view class="decoration-dot decoration-dot-1"></view>
+    <view class="decoration-dot decoration-dot-2"></view>
+    <view class="decoration-dot decoration-dot-3"></view>
+  </view>
+</view> 

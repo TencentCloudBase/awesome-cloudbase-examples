@@ -1,0 +1,88 @@
+{
+  "version": "2.0",
+  "envId": "your-env-id",
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "dating_getCourses",
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "installDependency": true
+    },
+    {
+      "name": "dating_getCourseDetail", 
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "installDependency": true
+    },
+    {
+      "name": "dating_bookCourse",
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15", 
+      "installDependency": true
+    },
+    {
+      "name": "dating_getUserBookings",
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "installDependency": true
+    },
+    {
+      "name": "dating_cancelBooking",
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "installDependency": true
+    },
+    {
+      "name": "dating_userLogin",
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "installDependency": true
+    },
+    {
+      "name": "dating_getUserInfo",
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "installDependency": true
+    },
+    {
+      "name": "dating_updateUserInfo",
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "installDependency": true
+    },
+    {
+      "name": "getOpenId",
+      "timeout": 10,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "installDependency": true
+    }
+  ],
+  "databases": [
+    {
+      "collectionName": "dating_courses",
+      "description": "脱单课程信息表",
+      "aclTag": "READONLY"
+    },
+    {
+      "collectionName": "dating_bookings", 
+      "description": "课程预约记录表",
+      "aclTag": "CUSTOM"
+    },
+    {
+      "collectionName": "dating_users",
+      "description": "用户信息表",
+      "aclTag": "PRIVATE"
+    }
+  ]
+} 

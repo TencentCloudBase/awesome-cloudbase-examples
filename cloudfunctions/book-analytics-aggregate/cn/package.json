@@ -1,0 +1,13 @@
+{
+  "name": "book-analytics",
+  "description": "图书数据分析云函数，包含聚合操作示例",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7"
+  }
+}

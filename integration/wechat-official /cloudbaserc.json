@@ -1,0 +1,33 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "your-env-id",
+  "functionRoot": "./functions",
+  "functions": [
+    {
+      "name": "offiaccount-common",
+      "type": "HTTP",
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "timeout": 15,
+      "memorySize": 128,
+      "installDependency": true,
+      "environmentVariables": {
+        "appId": "YOUR_APPID",
+        "appSecret": "YOUR_APPSECRET"
+      },
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".env"
+      ]
+    }
+  ],
+    "app": {
+    "serviceName": "offiaccount-app",
+    "framework": "static",
+    "installCommand": "",
+    "buildCommand": "",
+    "outputDir": ".",
+    "root": "./examples/web"
+  }
+}

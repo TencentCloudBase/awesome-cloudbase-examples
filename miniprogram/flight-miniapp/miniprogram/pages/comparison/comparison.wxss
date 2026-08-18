@@ -1,0 +1,216 @@
+.container {
+	background-color: #0d0402;
+	color: #e4dad7;
+	min-height: 100vh;
+}
+
+/* 头部样式 */
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 32rpx;
+	background-color: #0d0402;
+	border-bottom: 1rpx solid rgba(182, 152, 145, 0.2);
+}
+
+.back-button {
+	width: 80rpx;
+	height: 80rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(224, 191, 184, 0.12);
+	border-radius: 50%;
+}
+
+.back-icon {
+	font-size: 48rpx;
+	color: #e4dad7;
+	font-weight: bold;
+}
+
+.page-title {
+	font-size: 36rpx;
+	font-weight: bold;
+	color: #e4dad7;
+}
+
+.header-spacer {
+	width: 80rpx;
+}
+
+/* 航班头部信息 */
+.flights-header {
+	display: flex;
+	padding: 32rpx 16rpx;
+	gap: 16rpx;
+	overflow-x: auto;
+	background-color: #0d0402;
+}
+
+.flight-header-item {
+	min-width: 320rpx;
+	flex-shrink: 0;
+}
+
+.flight-basic-info {
+	background-color: rgba(224, 191, 184, 0.12);
+	border-radius: 24rpx;
+	padding: 32rpx;
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+}
+
+.airline-name {
+	font-size: 32rpx;
+	font-weight: bold;
+	color: #e4dad7;
+}
+
+.flight-number {
+	font-size: 26rpx;
+	color: rgba(235, 213, 209, 0.62);
+}
+
+.flight-time-info {
+	display: flex;
+	flex-direction: column;
+	gap: 8rpx;
+}
+
+.time-text {
+	font-size: 28rpx;
+	color: #e4dad7;
+}
+
+.price-highlight {
+	font-size: 36rpx;
+	font-weight: bold;
+	color: #ff5733;
+}
+
+.select-button {
+	background-color: #ff5733;
+	color: #000000;
+	border: none;
+	border-radius: 32rpx;
+	padding: 20rpx;
+	font-size: 28rpx;
+	font-weight: 500;
+	margin-top: 16rpx;
+}
+
+.select-button::after {
+	border: none;
+}
+
+/* 对比表格 */
+.comparison-table {
+	margin: 32rpx 16rpx;
+	background-color: rgba(224, 191, 184, 0.12);
+	border-radius: 24rpx;
+	overflow: hidden;
+}
+
+.table-header {
+	padding: 32rpx;
+	background-color: rgba(255, 87, 51, 0.1);
+	border-bottom: 1rpx solid rgba(182, 152, 145, 0.2);
+}
+
+.comparison-title {
+	font-size: 32rpx;
+	font-weight: bold;
+	color: #e4dad7;
+}
+
+.comparison-row {
+	display: flex;
+	border-bottom: 1rpx solid rgba(182, 152, 145, 0.1);
+}
+
+.comparison-row:last-child {
+	border-bottom: none;
+}
+
+.row-label {
+	width: 200rpx;
+	padding: 32rpx 24rpx;
+	background-color: rgba(224, 191, 184, 0.08);
+	display: flex;
+	align-items: center;
+	border-right: 1rpx solid rgba(182, 152, 145, 0.1);
+}
+
+.label-text {
+	font-size: 28rpx;
+	color: #e4dad7;
+	font-weight: 500;
+}
+
+.row-values {
+	flex: 1;
+	display: flex;
+}
+
+.value-cell {
+	flex: 1;
+	padding: 32rpx 24rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-right: 1rpx solid rgba(182, 152, 145, 0.1);
+	transition: all 0.3s ease;
+}
+
+.value-cell:last-child {
+	border-right: none;
+}
+
+.value-cell.best-value {
+	background-color: rgba(76, 175, 80, 0.2);
+}
+
+.value-cell.best-value .value-text {
+	color: #4caf50;
+	font-weight: bold;
+}
+
+.value-text {
+	font-size: 26rpx;
+	color: rgba(235, 213, 209, 0.8);
+	text-align: center;
+}
+
+/* 推荐说明 */
+.recommendation {
+	margin: 32rpx 16rpx;
+	background-color: rgba(255, 87, 51, 0.1);
+	border-radius: 24rpx;
+	padding: 32rpx;
+	border: 1rpx solid rgba(255, 87, 51, 0.2);
+}
+
+.recommendation-header {
+	margin-bottom: 24rpx;
+}
+
+.recommendation-title {
+	font-size: 32rpx;
+	font-weight: bold;
+	color: #ff5733;
+}
+
+.recommendation-content {
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
+}
+
+.recommendation-text {
+	font-size: 26rpx;
+	color: rgba(235, 213, 209, 0.8);
+	line-height: 1.4;
+} 

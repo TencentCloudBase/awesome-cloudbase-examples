@@ -1,0 +1,166 @@
+<view class="container">
+  <scroll-view scroll-y="{{true}}" class="content">
+    
+    <!-- 视频上传区域 -->
+    <view class="video-section">
+      <!-- 视频预览/选择区域 -->
+      <view class="video-upload-area glass-card">
+        <view wx:if="{{!videoSrc}}" class="video-placeholder" bindtap="chooseVideo">
+          <view class="upload-icon">📹</view>
+          <text class="upload-text">选择视频</text>
+          <text class="upload-hint">支持MP4格式，最大50MB</text>
+        </view>
+        
+        <view wx:else class="video-preview">
+          <video 
+            src="{{videoSrc}}" 
+            class="preview-video"
+            controls="{{true}}"
+            show-center-play-btn="{{true}}"
+            enable-play-gesture="{{true}}"
+          ></video>
+          
+          <!-- 封面预览区域 -->
+          <view class="poster-section">
+            <!-- 缩略图预览 -->
+            <view wx:if="{{videoPoster}}" class="poster-preview">
+              <view class="poster-label">
+                视频封面 
+                <text class="poster-type">{{isUsingGeneratedPoster ? '(自动生成)' : '(自定义)'}}</text>
+              </view>
+              <image src="{{videoPoster}}" class="poster-image" mode="aspectFit"></image>
+              
+              <!-- 封面操作按钮 -->
+              <view class="poster-actions">
+                <button class="poster-action-btn" bindtap="showPosterSelector">更换封面</button>
+                <button wx:if="{{generatedPoster && !isUsingGeneratedPoster}}" 
+                        class="poster-action-btn secondary" 
+                        bindtap="useGeneratedPoster">
+                  使用自动生成
+                </button>
+              </view>
+            </view>
+            
+            <!-- 生成中状态 -->
+            <view wx:elif="{{isGeneratingPoster}}" class="generating-poster">
+              <view class="loading-icon">🎬</view>
+              <text class="loading-text">正在生成封面...</text>
+            </view>
+            
+            <!-- 无封面状态 -->
+            <view wx:else class="auto-poster-tip">
+              <view class="tip-content">
+                <view class="tip-icon">🎬</view>
+                <text class="tip-text">发布时将自动生成视频封面</text>
+              </view>
+              <button class="custom-poster-btn" bindtap="choosePoster">选择自定义封面</button>
+            </view>
+          </view>
+          
+          <view class="video-actions">
+            <button class="action-btn reselect-btn" bindtap="chooseVideo">重新选择</button>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 上传进度 -->
+      <view wx:if="{{isUploading}}" class="upload-progress">
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{uploadProgress}}%"></view>
+        </view>
+        <text class="progress-text">上传进度: {{uploadProgress}}%</text>
+      </view>
+    </view>
+
+    <!-- 内容编辑区域 -->
+    <view class="content-section glass-card">
+      <!-- 视频标题 -->
+      <view class="input-group">
+        <view class="input-label required">视频标题</view>
+        <input 
+          class="input-field title-input" 
+          placeholder="给你的视频起个好听的标题..."
+          value="{{title}}"
+          bindinput="onTitleInput"
+          maxlength="50"
+        />
+        <view class="input-count">{{title.length}}/50</view>
+      </view>
+      
+      <!-- 视频描述 -->
+      <view class="input-group">
+        <view class="input-label">视频描述（可选）</view>
+        <textarea 
+          class="input-field description-input" 
+          placeholder="分享一下这个视频的故事..."
+          value="{{description}}"
+          bindinput="onDescriptionInput"
+          maxlength="200"
+          auto-height
+        ></textarea>
+        <view class="input-count">{{description.length}}/200</view>
+      </view>
+    </view>
+
+    <!-- 底部占位 -->
+    <view class="bottom-placeholder"></view>
+  </scroll-view>
+  
+  <!-- 底部操作栏 -->
+  <view class="operation-bar">
+    <button 
+      class="operation-btn publish-btn" 
+      bindtap="publishVideo"
+      disabled="{{!canPublish}}"
+      loading="{{isUploading}}"
+    >
+      {{isUploading ? '发布中...' : '发布'}}
+    </button>
+  </view>
+  
+
+
+  <!-- 封面选择器弹窗 -->
+  <view wx:if="{{showPosterSelector}}" class="poster-selector-overlay" bindtap="hidePosterSelector">
+    <view class="poster-selector" catchtap="">
+      <view class="selector-header">
+        <text class="selector-title">选择封面</text>
+        <view class="close-btn" bindtap="hidePosterSelector">✕</view>
+      </view>
+      
+      <view class="poster-options">
+        <view 
+          wx:for="{{posterOptions}}" 
+          wx:key="id"
+          class="poster-option {{videoPoster === item.image ? 'selected' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="selectPosterOption"
+        >
+          <image src="{{item.image}}" class="option-image" mode="aspectFill"></image>
+          <view class="option-info">
+            <text class="option-title">{{item.title}}</text>
+            <text class="option-desc">{{item.description}}</text>
+          </view>
+          <view wx:if="{{videoPoster === item.image}}" class="selected-icon">✓</view>
+        </view>
+        
+        <!-- 添加自定义封面选项 -->
+        <view class="poster-option add-custom" bindtap="choosePoster">
+          <view class="add-icon">+</view>
+          <view class="option-info">
+            <text class="option-title">自定义封面</text>
+            <text class="option-desc">从相册选择图片</text>
+          </view>
+        </view>
+        
+
+      </view>
+    </view>
+  </view>
+
+  <!-- 隐藏的Canvas用于视频帧提取 -->
+  <canvas canvas-id="video-canvas" id="video-canvas" style="position: absolute; left: -9999px; top: -9999px; width: 400px; height: 300px;"></canvas>
+
+  <!-- 自定义底部导航 -->
+  <custom-tabbar></custom-tabbar>
+</view> 

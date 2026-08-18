@@ -1,0 +1,44 @@
+
+  {
+    "name": "appointment",
+    "title": "预约",
+    "schemas": [
+      {
+        "name": "date",
+        "title": "预约日期",
+        "type": "Date",
+        "format": "date"
+      },
+      {
+        "name": "time",
+        "title": "预约时间段",
+        "type": "String"
+      },
+      {
+        "name": "name",
+        "title": "姓名",
+        "type": "String"
+      },
+      {
+        "name": "phone",
+        "title": "电话",
+        "type": "String"
+      },
+      {
+        "name": "email",
+        "title": "邮箱",
+        "type": "Email"
+      },
+      {
+        "name": "notes",
+        "title": "备注",
+        "type": "MultiLineString"
+      },
+      {
+        "name": "exhibitionId",
+        "title": "关联展览ID",
+        "type": "String"
+      }
+    ]
+  }
+  

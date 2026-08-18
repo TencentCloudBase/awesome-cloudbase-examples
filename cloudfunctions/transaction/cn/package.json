@@ -1,0 +1,13 @@
+{
+  "name": "transaction-management",
+  "description": "账户交易云函数，包含事务操作示例",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7"
+  }
+}

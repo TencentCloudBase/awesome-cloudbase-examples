@@ -1,0 +1,9 @@
+{
+  "name": "dx_interaction",
+  "version": "1.0.0",
+  "description": "互动记录管理云函数",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.0.0"
+  }
+}

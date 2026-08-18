@@ -1,0 +1,6 @@
+[mcp_servers]
+[mcp_servers.cloudbase]
+command = "cloudbase-mcp"
+args = []
+[mcp_servers.cloudbase.env]
+INTEGRATION_IDE = "CloudBaseCLI"

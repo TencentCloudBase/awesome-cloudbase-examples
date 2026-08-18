@@ -1,0 +1,43 @@
+# Agent 名称
+name: 智能小助手
+# Agent 模型标识
+model: deepseek-v3-function-call
+# Agent 设定
+agentSetting: 你什么都知道，无论用户问你什么问题，你都能输出长篇大论，滔滔不绝。
+# Agent 介绍
+introduction: 你什么都知道，无论用户问你什么问题，你都能输出长篇大论，滔滔不绝。
+# Agent 欢迎语
+welcomeMessage: 你什么都知道，无论用户问你什么问题，你都能输出长篇大论，滔滔不绝。
+# Agent 头像
+avatar: ''
+# Agent 初始化问题配置
+initQuestions:
+  - 你好，请介绍一下你自己。
+  - 你好，你能帮我回答什么问题?
+# Agent 开启推荐问题功能
+isNeedRecommend: true
+# Agent 绑定知识库
+knowledgeBase: ['your-knowledge-base-id']
+# Agent 绑定数据模型
+databaseModel: ['your-database-model-id']
+# Agent 开启联网搜送功能
+searchNetworkEnable: true
+# Agent 开启文件对话功能
+searchFileEnable: true
+mcpServerList:
+  - tools:
+      - name: 'your-mcp-server1-tool1-name'
+      - name: 'your-mcp-server1-tool2-name'
+    url: https://{your-envId}.api.tcloudbasegateway.com/v1/cloudrun/{your-mcp-server1-name}/messages
+    name: 'your-mcp-server1-name'
+    transport: 'post'
+  - tools:
+    - name: 'your-mcp-server2-tool1-name'
+    url: https://{your-envId}.api.tcloudbasegateway.com/v1/cloudrun/{your-mcp-server2-name}/messages
+    name: 'your-mcp-server2-name'
+    transport: 'sse'
+  - tools:
+    - name: 'your-mcp-server3-tool1-name'
+    url: https://{your-envId}.api.tcloudbasegateway.com/v1/cloudrun/{your-mcp-server3-name}/messages
+    name: 'your-mcp-server3-name'
+    transport: 'streamable'

@@ -1,0 +1,270 @@
+.container {
+  background-color: #0d0402;
+  color: #e4dad7;
+  min-height: 100vh;
+  padding: 32rpx;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #e4dad7;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.loading-text {
+  font-size: 24rpx;
+  color: rgba(235, 213, 209, 0.6);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 60rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: rgba(235, 213, 209, 0.6);
+  margin-bottom: 16rpx;
+}
+
+.empty-desc {
+  font-size: 24rpx;
+  color: rgba(235, 213, 209, 0.4);
+  margin-bottom: 48rpx;
+  line-height: 1.5;
+}
+
+.search-btn {
+  background-color: #ff5733;
+  color: #fff;
+  border: none;
+  border-radius: 24rpx;
+  padding: 24rpx 48rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.search-btn::after {
+  border: none;
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.booking-item {
+  background-color: rgba(224, 191, 184, 0.12);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  border: 1rpx solid rgba(182, 152, 145, 0.2);
+  transition: all 0.3s ease;
+}
+
+.booking-item:active {
+  background-color: rgba(224, 191, 184, 0.18);
+  transform: scale(0.98);
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+
+.booking-number {
+  flex: 1;
+}
+
+.number-label {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(235, 213, 209, 0.6);
+  margin-bottom: 4rpx;
+}
+
+.number-value {
+  font-size: 24rpx;
+  color: #e4dad7;
+  font-family: monospace;
+}
+
+.status {
+  padding: 8rpx 16rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  font-weight: bold;
+}
+
+.status.confirmed {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.status.pending {
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.flight-info {
+  margin-bottom: 24rpx;
+}
+
+.flight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.airline {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #e4dad7;
+}
+
+.flight-number {
+  font-size: 24rpx;
+  color: #ff5733;
+  background-color: rgba(255, 87, 51, 0.1);
+  padding: 6rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.route {
+  font-size: 26rpx;
+  color: #ff5733;
+  font-weight: bold;
+  margin-bottom: 12rpx;
+}
+
+.time-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time {
+  font-size: 24rpx;
+  color: rgba(235, 213, 209, 0.8);
+}
+
+.class {
+  font-size: 22rpx;
+  color: rgba(235, 213, 209, 0.6);
+}
+
+.passenger-info {
+  display: flex;
+  margin-bottom: 24rpx;
+  line-height: 1.4;
+}
+
+.passenger-label {
+  font-size: 24rpx;
+  color: rgba(235, 213, 209, 0.6);
+  margin-right: 8rpx;
+  min-width: 80rpx;
+}
+
+.passenger-list {
+  font-size: 24rpx;
+  color: #e4dad7;
+  flex: 1;
+}
+
+.booking-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.booking-date {
+  display: flex;
+  align-items: center;
+}
+
+.date-label {
+  font-size: 22rpx;
+  color: rgba(235, 213, 209, 0.6);
+  margin-right: 8rpx;
+}
+
+.date-value {
+  font-size: 22rpx;
+  color: rgba(235, 213, 209, 0.8);
+}
+
+.price {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ff5733;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 16rpx;
+  border-top: 1rpx solid rgba(182, 152, 145, 0.2);
+  padding-top: 24rpx;
+}
+
+.action-btn {
+  flex: 1;
+  border: none;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.detail-btn {
+  background-color: rgba(255, 87, 51, 0.1);
+  color: #ff5733;
+  border: 1rpx solid rgba(255, 87, 51, 0.3);
+}
+
+.detail-btn:active {
+  background-color: rgba(255, 87, 51, 0.2);
+  transform: scale(0.95);
+}
+
+.cancel-btn {
+  background-color: rgba(182, 152, 145, 0.1);
+  color: rgba(235, 213, 209, 0.8);
+  border: 1rpx solid rgba(182, 152, 145, 0.3);
+}
+
+.cancel-btn:active {
+  background-color: rgba(182, 152, 145, 0.2);
+  transform: scale(0.95);
+} 

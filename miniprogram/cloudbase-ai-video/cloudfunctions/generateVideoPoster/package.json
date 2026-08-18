@@ -1,0 +1,12 @@
+{
+  "name": "generateVideoPoster",
+  "version": "1.0.0", 
+  "description": "生成视频缩略图",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "canvas": "^2.11.2",
+    "fluent-ffmpeg": "^2.1.2",
+    "sharp": "^0.32.6"
+  }
+} 

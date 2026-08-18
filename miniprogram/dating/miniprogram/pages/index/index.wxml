@@ -1,0 +1,114 @@
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input">
+      <icon class="search-icon" type="search" size="16" color="#999"></icon>
+      <input placeholder="搜索课程..." placeholder-class="search-placeholder"/>
+    </view>
+  </view>
+
+  <!-- 轮播图 -->
+  <view class="banner-section">
+    <swiper class="banner-swiper" autoplay="true" interval="3000" duration="500" circular="true" indicator-dots="true" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#FF6B9D">
+      <swiper-item wx:for="{{banners}}" wx:key="id">
+        <image class="banner-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="banner-overlay">
+          <text class="banner-title">{{item.title}}</text>
+          <text class="banner-subtitle">{{item.subtitle}}</text>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 课程分类 -->
+  <view class="category-section">
+    <scroll-view class="category-scroll" scroll-x="true" show-scrollbar="false">
+      <view class="category-list">
+        <view class="category-item {{item.active ? 'active' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="selectCategory" data-id="{{item.id}}">
+          <text class="category-icon">{{item.icon}}</text>
+          <text class="category-name">{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 热门推荐 -->
+  <view class="section-header">
+    <text class="section-title">🔥 线下课程</text>
+    <text class="section-more">查看全部</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <view class="loading-spinner">
+      <text class="loading-icon">⏳</text>
+      <text class="loading-text">正在加载课程...</text>
+    </view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view class="error-state" wx:elif="{{loadError}}">
+    <text class="error-icon">😞</text>
+    <text class="error-text">加载失败</text>
+    <text class="error-subtitle">网络连接异常，请重试</text>
+    <button class="retry-button" bindtap="retryLoad">重新加载</button>
+  </view>
+
+  <!-- 课程列表 -->
+  <view class="course-list" wx:elif="{{courses.length > 0}}">
+    <view class="course-card" wx:for="{{courses}}" wx:key="id" bindtap="goToCourseDetail" data-id="{{item.id}}">
+      <image class="course-image" src="{{item.image}}" mode="aspectFill"></image>
+      
+      <!-- 免费标签 -->
+      <view class="free-badge">免费</view>
+      
+      <view class="course-info">
+        <view class="course-title">{{item.title}}</view>
+        <view class="course-subtitle">{{item.subtitle}}</view>
+        
+        <!-- 课程时间和地点 -->
+        <view class="course-schedule">
+          <view class="schedule-item">
+            <text class="schedule-icon">🕐</text>
+            <text class="schedule-text">{{item.courseTimeDisplay}}</text>
+          </view>
+          <view class="schedule-item">
+            <text class="schedule-icon">📍</text>
+            <text class="schedule-text">{{item.locationShort}}</text>
+          </view>
+          <view class="schedule-item">
+            <text class="schedule-icon">⏱</text>
+            <text class="schedule-text">{{item.duration}}</text>
+          </view>
+        </view>
+        
+        <view class="course-meta">
+          <view class="instructor">
+            <image class="instructor-avatar" src="{{item.instructor.avatar}}" mode="aspectFill"></image>
+            <text class="instructor-name">{{item.instructor.name}}</text>
+          </view>
+          <view class="course-stats">
+            <text class="stat-item">⭐ {{item.rating}}</text>
+          </view>
+        </view>
+        
+        <!-- 只保留人数信息，移除预约按钮 -->
+        <view class="course-footer">
+          <view class="participants-section">
+            <text class="participants-text">{{item.currentStudents}}/{{item.maxStudents}}人</text>
+            <view class="participants-bar">
+              <view class="participants-fill" style="width: {{(item.currentStudents / item.maxStudents * 100)}}%"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📅</text>
+    <text class="empty-text">暂无可预约课程</text>
+    <text class="empty-subtitle">请稍后再来看看吧</text>
+  </view>
+</view>

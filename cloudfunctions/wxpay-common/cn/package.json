@@ -1,0 +1,14 @@
+{
+  "name": "wxpay-common",
+  "description": "微信支付通用模板",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7",
+    "wx-server-sdk": "^3.0.1"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "userMatch",
+  "version": "1.0.0",
+  "description": "SoulChat用户匹配云函数",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.4.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cloudbase",
+    "soulchat",
+    "match"
+  ],
+  "author": "SoulChat",
+  "license": "MIT"
+} 

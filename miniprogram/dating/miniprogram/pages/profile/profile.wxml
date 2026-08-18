@@ -1,0 +1,129 @@
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 未登录状态 -->
+  <view class="login-prompt" wx:if="{{!isLoggedIn && !loading}}">
+    <text class="login-icon">👤</text>
+    <text class="login-text">请先登录使用完整功能</text>
+    <view class="login-btn" bindtap="performLogin">
+      <text>立即登录</text>
+    </view>
+  </view>
+
+  <!-- 已登录内容 -->
+  <view wx:if="{{isLoggedIn && !loading}}">
+    <!-- 用户信息卡片 -->
+    <view class="user-card">
+      <view class="user-header">
+        <image class="user-avatar" src="{{userInfo.avatar}}" mode="aspectFill"></image>
+        <view class="user-info">
+          <view class="user-name">{{userInfo.name}}</view>
+          <view class="user-join-date">加入时间：{{userInfo.joinDate}}</view>
+        </view>
+        <view class="edit-btn" bindtap="editProfile">
+          <text>编辑</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 统计数据 -->
+    <view class="stats-section">
+      <view class="stats-grid">
+        <view class="stat-item" wx:for="{{stats}}" wx:key="label">
+          <text class="stat-icon">{{item.icon}}</text>
+          <text class="stat-value">{{item.value}}</text>
+          <text class="stat-label">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 已预约课程 -->
+    <view class="courses-section">
+      <view class="section-header">
+        <text class="section-title">我的课程</text>
+        <text class="course-count">{{bookedCourses.length}}门课程</text>
+      </view>
+      
+      <!-- 课程加载状态 -->
+      <view class="courses-loading" wx:if="{{loadingBookings}}">
+        <view class="loading-spinner small"></view>
+        <text class="loading-text">加载课程中...</text>
+      </view>
+      
+      <view class="course-list" wx:if="{{!loadingBookings && bookedCourses.length > 0}}">
+        <view class="course-card" wx:for="{{bookedCourses}}" wx:key="id" bindtap="goToCourseDetail" data-id="{{item.id}}">
+          <image class="course-image" src="{{item.image}}" mode="aspectFill"></image>
+          
+          <!-- 课程状态标签 -->
+          <view class="status-badge status-{{item.status}}">
+            {{item.status === 'upcoming' ? '即将开始' : item.status === 'completed' ? '已完成' : '已取消'}}
+          </view>
+          
+          <view class="course-info">
+            <view class="course-title">{{item.title}}</view>
+            <view class="course-subtitle">{{item.subtitle}}</view>
+            
+            <view class="course-details">
+              <view class="detail-item">
+                <text class="detail-icon">🕐</text>
+                <text class="detail-text">{{item.courseTimeDisplay}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-icon">📍</text>
+                <text class="detail-text">{{item.locationShort}}</text>
+              </view>
+              <view class="detail-item">
+                <text class="detail-icon">👨‍🏫</text>
+                <text class="detail-text">{{item.instructor.name}}</text>
+              </view>
+            </view>
+            
+            <view class="course-footer">
+              <view class="booking-date">
+                <text class="booking-label">预约时间：{{item.bookingDate}}</text>
+              </view>
+              <view class="course-actions" wx:if="{{item.status === 'upcoming'}}" catchtap="cancelBooking" data-id="{{item.id}}">
+                <text class="cancel-text">取消预约</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 空状态 -->
+      <view class="empty-courses" wx:if="{{!loadingBookings && bookedCourses.length === 0}}">
+        <text class="empty-icon">📚</text>
+        <text class="empty-text">还没有预约课程</text>
+        <text class="empty-subtitle">去首页看看有什么好课程吧</text>
+        <navigator url="/pages/index/index" class="goto-home-btn">
+          <text>浏览课程</text>
+        </navigator>
+      </view>
+    </view>
+
+    <!-- 功能菜单 -->
+    <view class="menu-section">
+      <view class="menu-group">
+        <view class="menu-item" bindtap="contactService">
+          <text class="menu-icon">💬</text>
+          <text class="menu-text">联系客服</text>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="feedback">
+          <text class="menu-icon">📝</text>
+          <text class="menu-text">意见反馈</text>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="aboutUs">
+          <text class="menu-icon">ℹ️</text>
+          <text class="menu-text">关于我们</text>
+          <text class="menu-arrow">></text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view> 

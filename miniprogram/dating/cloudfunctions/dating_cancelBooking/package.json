@@ -1,0 +1,9 @@
+{
+  "name": "dating_cancelBooking",
+  "version": "1.0.0",
+  "description": "取消预约脱单课程",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+} 

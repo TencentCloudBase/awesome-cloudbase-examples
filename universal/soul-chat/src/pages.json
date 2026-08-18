@@ -1,0 +1,89 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "CloudBase UniApp",
+				"navigationBarBackgroundColor": "#667eea",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/demo/demo",
+			"style": {
+				"navigationBarTitleText": "云开发演示",
+				"navigationBarBackgroundColor": "#007aff",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "选择登录方式",
+				"navigationBarBackgroundColor": "#667eea",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/login/password-login",
+			"style": {
+				"navigationBarTitleText": "密码登录",
+				"navigationBarBackgroundColor": "#667eea",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/login/phone-login",
+			"style": {
+				"navigationBarTitleText": "手机验证码登录",
+				"navigationBarBackgroundColor": "#667eea",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/login/email-login",
+			"style": {
+				"navigationBarTitleText": "邮箱验证码登录",
+				"navigationBarBackgroundColor": "#667eea",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/profile/profile",
+			"style": {
+				"navigationBarTitleText": "用户信息",
+				"navigationBarBackgroundColor": "#667eea",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/chat/home",
+			"style": {
+				"navigationBarTitleText": "SoulChat",
+				"navigationBarBackgroundColor": "#6c5ce7",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/chat/room",
+			"style": {
+				"navigationBarTitleText": "SoulChat",
+				"navigationBarBackgroundColor": "#6c5ce7",
+				"navigationBarTextStyle": "white"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "CloudBase UniApp",
+		"navigationBarBackgroundColor": "#667eea",
+		"backgroundColor": "#f5f5f5"
+	},
+	"easycom": {
+	"autoscan": true,
+	"custom": {
+	  "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+	}
+	
+  }
+}

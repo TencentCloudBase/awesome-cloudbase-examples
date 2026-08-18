@@ -1,0 +1,74 @@
+<view class="container">
+  <!-- 顶部搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input" bindtap="goToSearch">
+      <icon type="search" size="14" color="#999"></icon>
+      <text class="placeholder">搜索商品</text>
+    </view>
+  </view>
+
+  <!-- 轮播图 -->
+  <view class="swiper-container">
+    <swiper 
+      indicator-dots="{{true}}" 
+      autoplay="{{true}}" 
+      interval="{{3000}}" 
+      duration="{{500}}"
+      circular="{{true}}"
+      indicator-color="rgba(255, 255, 255, .5)"
+      indicator-active-color="#ffffff">
+      <block wx:for="{{swiperList}}" wx:key="index">
+        <swiper-item bindtap="onSwiperTap" data-item="{{item}}">
+          <image src="{{item.imageUrl}}" class="swiper-image" mode="aspectFill"></image>
+        </swiper-item>
+      </block>
+    </swiper>
+  </view>
+
+  <!-- 商品分类网格 -->
+  <view class="category-container">
+    <view class="category-title">商品分类</view>
+    <view class="category-grid">
+      <block wx:for="{{categoryList}}" wx:key="index">
+        <view class="category-item" bindtap="onCategoryTap" data-category="{{item}}">
+          <image src="{{item.imageUrl}}" class="category-image" mode="aspectFill"></image>
+          <text class="category-name">{{item.name}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 推荐商品流 -->
+  <view class="product-container">
+    <view class="product-title">
+      <text>推荐商品</text>
+    </view>
+    <view class="product-list">
+      <block wx:for="{{productList}}" wx:key="index">
+        <view class="product-item" bindtap="onProductTap" data-id="{{item._id}}">
+          <image src="{{item.coverUrl}}" class="product-image" mode="aspectFill"></image>
+          <view class="product-info">
+            <text class="product-name">{{item.name}}</text>
+            <view class="product-meta">
+              <text class="product-price">¥{{item.price}}</text>
+              <text class="product-sales">已售{{item.sales}}件</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    
+    <!-- 加载状态 -->
+    <view class="loading-container">
+      <block wx:if="{{isLoading}}">
+        <view class="loading">加载中...</view>
+      </block>
+      <block wx:elif="{{hasMore}}">
+        <view class="load-more">上拉加载更多</view>
+      </block>
+      <block wx:else>
+        <view class="no-more">没有更多了</view>
+      </block>
+    </view>
+  </view>
+</view>

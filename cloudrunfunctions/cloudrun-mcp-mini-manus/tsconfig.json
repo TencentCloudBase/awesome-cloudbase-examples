@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "ES2015",
+    "skipLibCheck": true,
+    "moduleResolution": "node16",
+    "module": "Node16",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": ["src/mcp-playwright/"],
+  "include": ["src/", "src/mcp-playwright/src/"]
+}

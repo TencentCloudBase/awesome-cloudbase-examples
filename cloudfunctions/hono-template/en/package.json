@@ -1,0 +1,23 @@
+{
+  "name": "hono-template",
+  "tcbRepo": {
+    "type": "function"
+  },
+  "scripts": {
+    "tcb-ff": "tcb-ff",
+    "dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "^3.7.0",
+    "hono": "^4.8.3",
+    "hono-tencent-cloudbase-cloud-function-adapter": "^1.1.1",
+    "wx-server-sdk": "3.0.1"
+  },
+  "devDependencies": {
+    "@cloudbase/functions-framework": "^1.8.0"
+  },
+  "version": "1.0.0",
+  "description": "Example template for using honojs in cloud function environment",
+  "main": "index.js"
+}

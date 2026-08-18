@@ -1,0 +1,49 @@
+<view class="container">
+	<!-- 搜索栏 -->
+	<view class="search-section">
+		<view class="search-input">
+			<input 
+				placeholder="搜索航班..." 
+				value="{{searchText}}"
+				bindinput="onSearchInput"
+				bindconfirm="performSearch"
+			/>
+			<view wx:if="{{searchText}}" class="clear-btn" bindtap="clearSearch">✕</view>
+			<view class="search-icon-btn" bindtap="performSearch">
+				<image class="search-icon" src="/images/search.png"></image>
+			</view>
+		</view>
+	</view>
+
+	<!-- 欢迎区域 -->
+	<view class="welcome-section">
+		<view class="logo-area">
+			<text class="app-title">航班对比</text>
+			<text class="app-subtitle">找到最佳航班，开启精彩旅程</text>
+		</view>
+	</view>
+
+	<!-- 快速操作 -->
+	<view class="quick-actions">
+		<view class="action-card" bindtap="goToFlightComparison">
+			<view class="action-icon">✈️</view>
+			<view class="action-info">
+				<text class="action-title">比较航班</text>
+				<text class="action-desc">查找和比较不同航班选项</text>
+			</view>
+		</view>
+
+		<view class="action-card" bindtap="goToBookings">
+			<view class="action-icon">📋</view>
+			<view class="action-info">
+				<text class="action-title">预订记录</text>
+				<text class="action-desc">查看您的航班预订历史</text>
+			</view>
+		</view>
+	</view>
+
+	<!-- 底部信息 -->
+	<view class="footer-info">
+		<text class="version-text">基于微信小程序+云开发构建</text>
+	</view>
+</view>

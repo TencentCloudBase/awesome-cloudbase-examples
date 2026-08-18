@@ -1,0 +1,10 @@
+{
+  "functionsRoot": "dist",
+  "functions": [
+    {
+      "name": "agent",
+      "directory": ".",
+      "triggerPath": "/v1/aibot/bots/"
+    }
+  ]
+}

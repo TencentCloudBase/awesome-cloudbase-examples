@@ -1,0 +1,10 @@
+{
+  "version": "2.0",
+  "envId": "{{env.ENV_ID}}",
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "app": {
+    "buildCommand": "npm run build",
+    "outputDir": "dist",
+    "deployPath": "/"
+  }
+}

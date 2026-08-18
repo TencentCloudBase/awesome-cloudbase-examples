@@ -1,0 +1,135 @@
+<!-- pages/product/detail/detail.wxml -->
+<view class="product-detail-container">
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <van-icon name="setting-o" size="48rpx" class="loading-icon" />
+    <text>加载中...</text>
+  </view>
+
+  <!-- 商品详情内容 -->
+  <block wx:elif="{{product}}">
+    <!-- 商品主图 -->
+    <view class="product-cover">
+      <van-image
+        width="100%"
+        height="750rpx"
+        src="{{product.coverUrl}}"
+        fit="cover"
+        show-loading
+        lazy-load
+      />
+    </view>
+
+    <!-- 商品基本信息 -->
+    <view class="product-info">
+      <view class="product-price">
+        <text class="price-symbol">¥</text>
+        <text class="price-value">{{product.price}}</text>
+        <view class="product-sales">
+          <text>销量: {{product.sales || 0}}</text>
+        </view>
+      </view>
+      <view class="product-name">{{product.name}}</view>
+      
+      <!-- 商品分类标签 -->
+      <view class="product-categories" wx:if="{{product.categories && product.categories.length > 0}}">
+        <van-tag 
+          wx:for="{{product.categories}}" 
+          wx:key="index"
+          type="primary" 
+          color="#6A5ACD" 
+          plain
+          custom-class="category-tag"
+        >{{item}}</van-tag>
+      </view>
+    </view>
+
+    <!-- 商品详情选项卡 -->
+    <view class="product-tabs">
+      <van-tabs active="{{ activeTab }}" bind:change="onTabChange" swipeable sticky>
+        <van-tab title="商品详情">
+          <view class="tab-content">
+            <view class="detail-section">
+              <view class="section-title">商品介绍</view>
+              <view class="section-content">
+                <text>{{product.description || '暂无商品介绍'}}</text>
+              </view>
+            </view>
+            
+            <!-- 商品规格 -->
+            <view class="detail-section">
+              <view class="section-title">商品规格</view>
+              <view class="section-content">
+                <view class="spec-item">
+                  <text class="spec-label">品牌</text>
+                  <text class="spec-value">{{product.brand || '暂无'}}</text>
+                </view>
+                <view class="spec-item">
+                  <text class="spec-label">产地</text>
+                  <text class="spec-value">{{product.origin || '暂无'}}</text>
+                </view>
+                <view class="spec-item">
+                  <text class="spec-label">规格</text>
+                  <text class="spec-value">{{product.specification || '暂无'}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </van-tab>
+        
+        <van-tab title="评价">
+          <view class="tab-content">
+            <view class="empty-content">
+              <van-icon name="comment-o" size="64rpx" />
+              <text>暂无评价</text>
+            </view>
+          </view>
+        </van-tab>
+        
+        <van-tab title="推荐">
+          <view class="tab-content">
+            <view class="empty-content">
+              <van-icon name="like-o" size="64rpx" />
+              <text>暂无推荐商品</text>
+            </view>
+          </view>
+        </van-tab>
+      </van-tabs>
+    </view>
+
+    <!-- 购买数量 -->
+    <view class="buy-count-container">
+      <text class="count-label">购买数量</text>
+      <van-stepper 
+        value="{{ buyCount }}" 
+        min="1" 
+        max="99" 
+        integer 
+        bind:change="onCountChange" 
+      />
+    </view>
+
+    <!-- 底部操作栏 -->
+    <van-goods-action>
+      <van-goods-action-icon icon="home-o" text="首页" bind:click="onGoHome" />
+      <van-goods-action-icon icon="chat-o" text="客服" open-type="contact" />
+      <van-goods-action-icon icon="share" text="分享" open-type="share" />
+      <van-goods-action-button
+        text="加入购物车"
+        type="warning"
+        bind:click="onAddToCart"
+      />
+      <van-goods-action-button
+        text="立即购买"
+        bind:click="onBuyNow"
+      />
+    </van-goods-action>
+  </block>
+
+  <!-- 商品不存在 -->
+  <view class="empty-container" wx:else>
+    <van-icon name="warning-o" size="64rpx" />
+    <text>商品不存在或已下架</text>
+    <van-button type="primary" size="small" bind:click="onGoHome">返回首页</van-button>
+  </view>
+</view>

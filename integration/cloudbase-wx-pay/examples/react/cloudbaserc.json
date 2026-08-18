@@ -1,0 +1,12 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "version": "2.0",
+  "envId": "{{env.TCB_ENV_ID}}",
+  "app": {
+    "serviceName": "web-pay",
+    "framework": "vite",
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "outputDir": "dist"
+  }
+}

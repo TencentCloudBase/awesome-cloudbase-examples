@@ -1,0 +1,15 @@
+{
+  "name": "extractVideoFrame",
+  "version": "1.0.0",
+  "description": "使用FFmpeg提取视频第2秒帧作为封面",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "fluent-ffmpeg": "^2.1.2",
+    "ffmpeg-static": "^5.2.0",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 

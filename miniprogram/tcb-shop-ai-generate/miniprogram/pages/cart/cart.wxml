@@ -1,0 +1,64 @@
+<view class="cart-container">
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading">
+      <image src="https://images.unsplash.com/photo-1586769852044-692d6e3703f2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" mode="aspectFit" class="loading-image"></image>
+      <text>加载中...</text>
+    </view>
+  </view>
+
+  <!-- 购物车为空的情况 -->
+  <view class="empty-cart" wx:elif="{{cartItems.length === 0}}">
+    <image src="https://images.unsplash.com/photo-1586769852044-692d6e3703f2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" mode="aspectFit"></image>
+    <text style="font-size: 32rpx; color: #999; margin-top: 30rpx;">购物车还是空的</text>
+    <text style="font-size: 28rpx; color: #bbb; margin-top: 20rpx;">快去挑选心仪的商品吧</text>
+    <navigator url="/pages/index/index" open-type="switchTab">
+      <view style="margin-top: 40rpx; padding: 20rpx 60rpx; background-color: #6A5ACD; color: #fff; border-radius: 40rpx; font-size: 28rpx;">
+        去购物
+      </view>
+    </navigator>
+  </view>
+
+  <!-- 购物车有商品的情况 -->
+  <block wx:else>
+    <!-- 购物车列表 -->
+    <view class="cart-list">
+      <view class="cart-item" wx:for="{{cartItems}}" wx:key="_id">
+        <view class="checkbox" bindtap="toggleSelect" data-id="{{item._id}}">
+          <icon type="{{item.selected ? 'success' : 'circle'}}" size="20" color="{{item.selected ? '#6A5ACD' : '#999'}}"></icon>
+        </view>
+        <view class="item-image">
+          <image src="{{item.coverUrl}}" mode="aspectFill"></image>
+        </view>
+        <view class="item-info">
+          <view class="item-title">{{item.name}}</view>
+          <view class="item-price">¥{{item.price}}</view>
+          <view class="item-count">
+            <view class="count-btn {{item.count <= 1 ? 'disabled' : ''}}" bindtap="decreaseCount" data-id="{{item._id}}">-</view>
+            <view class="count-number">{{item.count}}</view>
+            <view class="count-btn" bindtap="increaseCount" data-id="{{item._id}}">+</view>
+          </view>
+        </view>
+        <view class="delete-btn" bindtap="deleteItem" data-id="{{item._id}}">
+          <icon type="clear" size="20" color="#999"></icon>
+        </view>
+      </view>
+    </view>
+
+    <!-- 结算区域 -->
+    <view class="cart-footer">
+      <view class="select-all" bindtap="toggleSelectAll">
+        <icon type="{{selectAll ? 'success' : 'circle'}}" size="20" color="{{selectAll ? '#6A5ACD' : '#999'}}"></icon>
+        <text>全选</text>
+      </view>
+      <view class="total-info">
+        <view class="total-price">
+          合计: <text class="price">¥{{totalPrice}}</text>
+        </view>
+        <view class="checkout-btn {{selectedCount === 0 ? 'disabled' : ''}}" bindtap="checkout">
+          结算({{selectedCount}})
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

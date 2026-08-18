@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "个人主页",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "custom-tabbar": "../../components/custom-tabbar/index"
+  }
+} 

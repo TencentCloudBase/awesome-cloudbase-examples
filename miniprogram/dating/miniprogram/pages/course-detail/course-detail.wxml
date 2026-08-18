@@ -1,0 +1,174 @@
+<view class="container" wx:if="{{!loading && courseDetail}}">
+  <!-- 课程主图 -->
+  <view class="hero-section">
+    <image class="course-main-image" src="{{courseDetail.image}}" mode="aspectFill"></image>
+    <view class="hero-overlay">
+      <view class="free-badge">免费</view>
+    </view>
+  </view>
+
+  <!-- 课程基本信息 -->
+  <view class="course-info-section">
+    <view class="course-header">
+      <view class="course-title">{{courseDetail.title}}</view>
+      <view class="course-subtitle">{{courseDetail.subtitle}}</view>
+      
+      <view class="course-meta">
+        <view class="rating-section">
+          <text class="rating-star">⭐</text>
+          <text class="rating-score">{{courseDetail.rating}}</text>
+          <text class="rating-count">({{courseDetail.reviewCount}}人评价)</text>
+        </view>
+        <view class="participants-info">
+          <text class="participants-count">{{courseDetail.currentStudents}}/{{courseDetail.maxStudents}}人</text>
+        </view>
+      </view>
+
+      <view class="course-tags">
+        <text class="tag" wx:for="{{courseDetail.tags}}" wx:key="*this">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 课程时间地点 -->
+  <view class="schedule-section">
+    <view class="section-title">📅 课程安排</view>
+    <view class="schedule-card">
+      <view class="schedule-item">
+        <text class="schedule-icon">🕐</text>
+        <view class="schedule-info">
+          <text class="schedule-label">上课时间</text>
+          <text class="schedule-value">{{courseDetail.courseTimeDisplay}}</text>
+        </view>
+      </view>
+      <view class="schedule-item">
+        <text class="schedule-icon">📍</text>
+        <view class="schedule-info">
+          <text class="schedule-label">上课地点</text>
+          <text class="schedule-value" bindtap="showLocation">{{courseDetail.location}}</text>
+        </view>
+      </view>
+      <view class="schedule-item">
+        <text class="schedule-icon">⏱</text>
+        <view class="schedule-info">
+          <text class="schedule-label">课程时长</text>
+          <text class="schedule-value">{{courseDetail.duration}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 导师介绍 -->
+  <view class="instructor-section">
+    <view class="section-title">👨‍🏫 导师介绍</view>
+    <view class="instructor-card">
+      <image class="instructor-avatar" src="{{courseDetail.instructor.avatar}}" mode="aspectFill"></image>
+      <view class="instructor-info">
+        <view class="instructor-name">{{courseDetail.instructor.name}}</view>
+        <view class="instructor-title">{{courseDetail.instructor.title}}</view>
+        <view class="instructor-stats">
+          <text class="stat-item">{{courseDetail.instructor.experience}}</text>
+          <text class="stat-item">成功率 {{courseDetail.instructor.successRate}}</text>
+        </view>
+      </view>
+      <view class="contact-btn" bindtap="contactInstructor">
+        <text>联系</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 课程描述 -->
+  <view class="description-section">
+    <view class="section-title">📝 课程介绍</view>
+    <view class="description-content">{{courseDetail.description}}</view>
+  </view>
+
+  <!-- 课程大纲 -->
+  <view class="outline-section">
+    <view class="section-title">📋 课程大纲</view>
+    <view class="outline-list">
+      <view class="outline-item" wx:for="{{courseDetail.outline}}" wx:key="title">
+        <view class="outline-number">{{index + 1}}</view>
+        <view class="outline-content">
+          <view class="outline-title">{{item.title}}</view>
+          <view class="outline-description">{{item.content}}</view>
+          <view class="outline-duration">{{item.duration}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 你将收获 -->
+  <view class="benefits-section">
+    <view class="section-title">🎯 你将收获</view>
+    <view class="benefits-list">
+      <view class="benefit-item" wx:for="{{courseDetail.benefits}}" wx:key="*this">
+        <text class="benefit-icon">✅</text>
+        <text class="benefit-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 适合人群 -->
+  <view class="audience-section">
+    <view class="section-title">👥 适合人群</view>
+    <view class="audience-list">
+      <view class="audience-item" wx:for="{{courseDetail.audience}}" wx:key="*this">
+        <text class="audience-icon">👤</text>
+        <text class="audience-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 注意事项 -->
+  <view class="notices-section">
+    <view class="section-title">⚠️ 注意事项</view>
+    <view class="notices-list">
+      <view class="notice-item" wx:for="{{courseDetail.notices}}" wx:key="*this">
+        <text class="notice-bullet">•</text>
+        <text class="notice-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部预约区域 -->
+  <view class="booking-footer">
+    <view class="participants-bar">
+      <view class="participants-fill" style="width: {{(courseDetail.currentStudents / courseDetail.maxStudents * 100)}}%"></view>
+    </view>
+    <view class="booking-info">
+      <text class="participants-text">已报名 {{courseDetail.currentStudents}}/{{courseDetail.maxStudents}} 人</text>
+    </view>
+    <view class="booking-actions">
+      <button class="cancel-btn" wx:if="{{isBooked}}" bindtap="cancelBooking" 
+              disabled="{{bookingLoading}}" loading="{{bookingLoading}}">
+        {{bookingLoading ? '取消中...' : '取消预约'}}
+      </button>
+      <button class="book-btn" wx:else bindtap="bookCourse" 
+              disabled="{{courseDetail.currentStudents >= courseDetail.maxStudents || bookingLoading}}"
+              loading="{{bookingLoading}}">
+        {{bookingLoading ? '预约中...' : (courseDetail.currentStudents >= courseDetail.maxStudents ? '课程已满' : '立即预约')}}
+      </button>
+    </view>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view class="loading-container" wx:if="{{loading}}">
+  <view class="loading-content">
+    <view class="loading-spinner">
+      <text class="loading-icon">⏳</text>
+      <text class="loading-text">正在加载课程详情...</text>
+    </view>
+  </view>
+</view>
+
+<!-- 错误状态 -->
+<view class="error-container" wx:elif="{{loadError}}">
+  <view class="error-content">
+    <text class="error-icon">😞</text>
+    <text class="error-text">加载失败</text>
+    <text class="error-subtitle">网络连接异常，请重试</text>
+    <button class="retry-button" bindtap="retryLoad">重新加载</button>
+  </view>
+</view> 

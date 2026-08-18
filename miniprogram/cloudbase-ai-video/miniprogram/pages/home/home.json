@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "首页",
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#000000",
+  "backgroundTextStyle": "light",
+  "usingComponents": {
+    "custom-tabbar": "../../components/custom-tabbar/index"
+  }
+} 

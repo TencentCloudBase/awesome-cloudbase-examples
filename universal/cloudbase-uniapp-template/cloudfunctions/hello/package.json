@@ -1,0 +1,9 @@
+{
+  "name": "hello",
+  "version": "1.0.0",
+  "description": "CloudBase 示例云函数",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.7.0"
+  }
+} 

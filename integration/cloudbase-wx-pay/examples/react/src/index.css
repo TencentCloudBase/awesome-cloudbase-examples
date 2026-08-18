@@ -1,0 +1,125 @@
+/* ========== 基础样式 ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
+
+.container { max-width: 600px; margin: 0 auto; }
+h1 { text-align: center; margin-bottom: 8px; font-size: 24px; }
+.subtitle { text-align: center; color: #999; margin-bottom: 30px; font-size: 14px; }
+
+.card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #333; display: flex; align-items: center; gap: 8px; }
+
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 14px; color: #666; margin-bottom: 6px; }
+.form-group input,
+.form-group select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.form-group input:focus,
+.form-group select:focus { border-color: #07c160; }
+.config-input { font-size: 13px; font-family: monospace; }
+
+.openid-row { display: flex; gap: 8px; align-items: center; }
+.openid-row input { flex: 1; }
+
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-row + .btn-row { margin-top: 10px; }
+
+.btn { flex: 1; min-width: 120px; padding: 12px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
+.btn:hover:not(:disabled) { opacity: 0.85; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-green { background: #07c160; color: #fff; }
+.btn-blue { background: #1989fa; color: #fff; }
+.btn-orange { background: #ff976a; color: #fff; }
+.btn-red { background: #ee0a24; color: #fff; }
+.btn-gray { background: #eee; color: #333; }
+.btn-loading { position: relative; pointer-events: none; opacity: 0.7; }
+.btn-loading::after {
+  content: ''; display: inline-block; width: 14px; height: 14px; margin-left: 6px;
+  border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+  border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle;
+}
+
+.result-box { background: #f8f8f8; border-radius: 8px; padding: 16px; margin-top: 12px; max-height: 400px; overflow-y: auto; }
+.result-box pre { font-size: 13px; color: #333; white-space: pre-wrap; word-break: break-all; font-family: 'Menlo', 'Monaco', monospace; }
+
+.order-no { font-family: monospace; color: #1989fa; font-size: 14px; margin-top: 8px; }
+
+.status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+.status-ok { background: #e8f5e9; color: #2e7d32; }
+.status-err { background: #fce4ec; color: #c62828; }
+
+.tip { font-size: 12px; color: #999; margin-top: 8px; }
+
+/* 订单状态栏 */
+.order-status-bar {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  border-radius: 8px; margin-bottom: 12px;
+}
+.order-status-icon { font-size: 24px; }
+.order-status-text { font-size: 14px; color: #333; }
+.order-status-desc { font-size: 12px; color: #999; margin-top: 2px; }
+
+/* 登录状态 */
+.login-status { margin-top: 6px; padding: 6px 10px; border-radius: 4px; font-size: 12px; }
+
+/* 支付操作区 */
+.pay-action-center { text-align: center; }
+.pay-action-center .btn { width: auto; padding: 14px 48px; font-size: 16px; }
+.pay-action-center .tip { margin-top: 10px; }
+.jsapi-params { margin-top: 12px; text-align: left; }
+.jsapi-params p { font-size: 12px; color: #999; margin-bottom: 4px; }
+.h5-link { display: inline-block; text-decoration: none; padding: 12px 32px; }
+
+/* Toast */
+.toast-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.toast-box {
+  background: rgba(0,0,0,0.75); color: #fff; border-radius: 12px; padding: 20px 28px;
+  text-align: center; min-width: 120px; max-width: 240px;
+  animation: toastIn 0.2s ease;
+}
+.toast-icon { font-size: 36px; margin-bottom: 8px; display: block; }
+.toast-text { font-size: 14px; line-height: 1.5; }
+
+/* Loading */
+.loading-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9998;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.1);
+}
+.loading-box {
+  background: rgba(0,0,0,0.75); color: #fff; border-radius: 12px; padding: 24px 32px;
+  text-align: center; min-width: 120px;
+}
+.loading-spinner {
+  width: 32px; height: 32px; margin: 0 auto 10px;
+  border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+.loading-text { font-size: 14px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.5); animation: fadeIn 0.15s ease;
+}
+.modal-box {
+  background: #fff; border-radius: 16px; width: 320px; max-width: 85vw;
+  overflow: hidden; animation: modalIn 0.2s ease;
+}
+.modal-title { font-size: 17px; font-weight: 600; text-align: center; padding: 24px 24px 8px; color: #333; }
+.modal-content { font-size: 14px; color: #666; padding: 8px 24px 24px; text-align: center; line-height: 1.6; white-space: pre-line; }
+.modal-btns { display: flex; border-top: 1px solid #eee; }
+.modal-btn { flex: 1; padding: 14px; text-align: center; font-size: 16px; cursor: pointer; border: none; background: none; }
+.modal-btn:hover { background: #f5f5f5; }
+.modal-btn-cancel { color: #666; border-right: 1px solid #eee; }
+.modal-btn-confirm { color: #07c160; font-weight: 500; }
+.modal-btn-confirm.danger { color: #ee0a24; }
+
+@keyframes toastIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }

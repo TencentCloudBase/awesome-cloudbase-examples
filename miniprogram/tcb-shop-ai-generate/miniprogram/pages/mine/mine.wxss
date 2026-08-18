@@ -1,0 +1,166 @@
+.container {
+  padding: 0;
+  background-color: #f7f7f7;
+  min-height: 100vh;
+}
+
+/* 用户信息卡片样式 */
+.user-card {
+  background-color: #ffffff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  border-radius: 0 0 16rpx 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-container {
+  position: relative;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  margin-right: 30rpx;
+  border: 2rpx solid #f0f0f0;
+}
+
+.user-detail {
+  flex: 1;
+}
+
+.nickname {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.user-id {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 订单状态卡片样式 */
+.order-card {
+  background-color: #ffffff;
+  padding: 30rpx;
+  margin: 20rpx 0;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.view-all {
+  font-size: 26rpx;
+  color: #999;
+  display: flex;
+  align-items: center;
+}
+
+.arrow {
+  margin-left: 6rpx;
+}
+
+.order-status {
+  display: flex;
+  justify-content: space-between;
+  padding: 10rpx 0;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 25%;
+}
+
+.badge-container {
+  position: relative;
+  margin-bottom: 10rpx;
+}
+
+.status-icon {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+.badge {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  background-color: #ff4d4f;
+  color: white;
+  font-size: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  line-height: 32rpx;
+  text-align: center;
+  border-radius: 16rpx;
+  padding: 0 6rpx;
+}
+
+.status-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 功能入口网格样式 */
+.function-grid {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: #ffffff;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.grid-item {
+  width: 33.33%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx 0;
+}
+
+.grid-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 16rpx;
+}
+
+.grid-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 退出登录按钮样式 */
+.logout-button {
+  margin: 60rpx auto;
+  width: 90%;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  background-color: #ffffff;
+  color: #ff4d4f;
+  font-size: 30rpx;
+  border-radius: 44rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}

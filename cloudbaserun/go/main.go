@@ -8,7 +8,7 @@ import (
 
 func main() {
     http.HandleFunc("/", handler)
-    port := "8080"
+    port := "80"
     if err := http.ListenAndServe(":"+port, nil); err != nil {
         log.Fatal(err)
     }

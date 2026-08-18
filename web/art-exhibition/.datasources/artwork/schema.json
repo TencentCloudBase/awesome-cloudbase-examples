@@ -1,0 +1,43 @@
+
+  {
+    "name": "artwork",
+    "title": "艺术品",
+    "schemas": [
+      {
+        "name": "title",
+        "title": "标题",
+        "type": "String"
+      },
+      {
+        "name": "artist",
+        "title": "艺术家",
+        "type": "String"
+      },
+      {
+        "name": "image",
+        "title": "图片",
+        "type": "Image"
+      },
+      {
+        "name": "description",
+        "title": "描述",
+        "type": "MultiLineString"
+      },
+      {
+        "name": "year",
+        "title": "创作年份",
+        "type": "Number"
+      },
+      {
+        "name": "style",
+        "title": "艺术风格",
+        "type": "String"
+      },
+      {
+        "name": "location",
+        "title": "收藏地点",
+        "type": "String"
+      }
+    ]
+  }
+  

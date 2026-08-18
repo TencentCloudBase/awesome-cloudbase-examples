@@ -1,0 +1,101 @@
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <view class="user-info">
+      <view class="avatar-container">
+        <image
+          class="avatar"
+          mode="aspectFill"
+          src="{{userInfo.avatar || '/images/default-avatar.png'}}"
+        ></image>
+      </view>
+      <view class="user-detail">
+        <view wx:if="{{!userInfo.nickName}}" class="nickname" bindtap="getUserProfile"
+          >{{'点击登录'}}
+        </view>
+        <view wx:else class="nickname">{{userInfo.nickName}}</view>
+        <view class="user-id" wx:if="{{userInfo.nickName}}"
+          >ID: {{userInfo._id || userInfo.openid}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单状态卡片 -->
+  <view class="order-card">
+    <view class="card-header">
+      <text class="title">我的订单</text>
+      <view class="view-all" bindtap="navigateToOrderList" data-type="all">
+        <text>查看全部</text>
+        <text class="arrow">></text>
+      </view>
+    </view>
+    <view class="order-status">
+      <view class="status-item" bindtap="navigateToOrderList" data-type="pending-payment">
+        <view class="badge-container">
+          <image class="status-icon" src="/images/mine/pending-payment.png"></image>
+          <view class="badge" wx:if="{{orderStats.pendingPayment > 0}}"
+            >{{orderStats.pendingPayment}}</view
+          >
+        </view>
+        <text class="status-text">待付款</text>
+      </view>
+      <view class="status-item" bindtap="navigateToOrderList" data-type="pending-delivery">
+        <view class="badge-container">
+          <image class="status-icon" src="/images/mine/pending-delivery.png"></image>
+          <view class="badge" wx:if="{{orderStats.pendingDelivery > 0}}"
+            >{{orderStats.pendingDelivery}}</view
+          >
+        </view>
+        <text class="status-text">待发货</text>
+      </view>
+      <view class="status-item" bindtap="navigateToOrderList" data-type="pending-receipt">
+        <view class="badge-container">
+          <image class="status-icon" src="/images/mine/pending-receipt.png"></image>
+          <view class="badge" wx:if="{{orderStats.pendingReceipt > 0}}"
+            >{{orderStats.pendingReceipt}}</view
+          >
+        </view>
+        <text class="status-text">待收货</text>
+      </view>
+      <view class="status-item" bindtap="navigateToOrderList" data-type="completed">
+        <view class="badge-container">
+          <image class="status-icon" src="/images/mine/completed.png"></image>
+          <view class="badge" wx:if="{{orderStats.completed > 0}}">{{orderStats.completed}}</view>
+        </view>
+        <text class="status-text">已完成</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能入口网格 -->
+  <view class="function-grid">
+    <view class="grid-item" bindtap="navigateTo" data-url="/pages/favorite/favorite">
+      <image class="grid-icon" src="/images/icons/favorite.png"></image>
+      <text class="grid-text">我的收藏</text>
+    </view>
+    <view class="grid-item" bindtap="navigateTo" data-url="/pages/coupon/coupon">
+      <image class="grid-icon" src="/images/icons/coupon.png"></image>
+      <text class="grid-text">优惠券</text>
+    </view>
+    <view class="grid-item" bindtap="navigateTo" data-url="/pages/address/address">
+      <image class="grid-icon" src="/images/icons/address.png"></image>
+      <text class="grid-text">地址管理</text>
+    </view>
+    <view class="grid-item" bindtap="navigateTo" data-url="/pages/settings/settings">
+      <image class="grid-icon" src="/images/icons/settings.png"></image>
+      <text class="grid-text">设置</text>
+    </view>
+    <view class="grid-item" bindtap="navigateTo" data-url="/pages/feedback/feedback">
+      <image class="grid-icon" src="/images/icons/feedback.png"></image>
+      <text class="grid-text">意见反馈</text>
+    </view>
+    <view class="grid-item" bindtap="navigateTo" data-url="/pages/about/about">
+      <image class="grid-icon" src="/images/icons/about.png"></image>
+      <text class="grid-text">关于我们</text>
+    </view>
+  </view>
+
+  <!-- 退出登录按钮 -->
+  <view class="logout-button" bindtap="logout" wx:if="{{userInfo.nickName}}">退出登录</view>
+</view>

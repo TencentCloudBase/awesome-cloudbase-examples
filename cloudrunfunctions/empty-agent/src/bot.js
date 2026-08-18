@@ -14,8 +14,10 @@ class MyBot extends BotCore {
       // 模拟消息发送延迟
       await sleep(50);
       // 发送消息给客户端
-      this.sseSender.send({ data: { content: ANSWER[i] } });
+      this.sseSender.send({ data: { type: "text", content: ANSWER[i] } });
     }
+
+    this.sseSender.send({ data: { type: "finish", content: "" } });
 
     // 流式传输结束
     this.sseSender.end();

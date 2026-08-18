@@ -1,0 +1,13 @@
+{
+  "name": "user-management",
+  "description": "用户管理云函数，包含 sql 操作示例 （目前仅支持 select 语句）",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+  	"dev": "tcb cloudfunction run -w",
+    "deploy": "tcb cloudfunction deploy"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.3.7"
+  }
+}

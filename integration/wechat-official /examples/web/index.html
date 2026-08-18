@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>微信公众号 API Demo</title>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+        h2 { margin-top: 28px; border-left: 4px solid #07c160; padding-left: 10px; }
+        label { display: block; margin-top: 12px; font-weight: 500; }
+        input, textarea { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: monospace; font-size: 13px; }
+        textarea { min-height: 80px; }
+        button { margin: 12px 8px 0 0; padding: 8px 18px; background: #07c160; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        pre { background: #f5f5f5; padding: 12px; border-radius: 6px; margin-top: 12px; max-height: 300px; overflow: auto; font-size: 12px; }
+        .tip { font-size: 12px; color: #999; margin-top: 4px; }
+        .tip.ok { color: #07c160; }
+        .tip.warn { color: #fa5151; }
+        .oauth-box { background: #f0faf3; border: 1px solid #d4edda; border-radius: 8px; padding: 16px; margin-top: 12px; }
+        .oauth-result { margin-top: 10px; padding: 10px; background: #fff; border-radius: 6px; font-size: 13px; font-family: monospace; display: none; }
+    </style>
+</head>
+<body>
+<h1>微信公众号开放能力 Demo</h1>
+
+<label>API 地址</label>
+<input id="base" value="https://{envId}-{uin}.ap-shanghai.app.tcloudbase.com/oauth">
+
+<h2>① 网页授权：code → openid</h2>
+
+<div class="oauth-box">
+    <!-- Step 1: 发起授权 -->
+    <label>📌 授权回调地址（redirect_uri）</label>
+    <input id="redirectUri" readonly>
+    <div class="tip">自动使用当前页面地址，微信授权后会回跳到此处并带上 code</div>
+
+    <label>scope（授权范围）</label>
+    <select id="scope" style="width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+        <option value="snsapi_base">snsapi_base（静默授权，只拿 openid）</option>
+        <option value="snsapi_userinfo">snsapi_userinfo（弹窗确认，可拿用户信息）</option>
+    </select>
+
+    <button onclick="goAuth()">🔗 发起微信授权</button>
+
+    <!-- Step 2: code 回来后自动换 openid -->
+    <label>code（微信回调带回）</label>
+    <input id="code" placeholder="等待微信回调..." readonly>
+    <div id="codeTip" class="tip">页面加载时会自动从 URL 中提取 code 参数</div>
+
+    <button id="btnExchange" onclick="exchangeCode()" disabled>换 openid</button>
+
+    <div id="oauthResult" class="oauth-result"></div>
+</div>
+
+<!-- 后续接口需要 openid / access_token，自动回填 -->
+<div id="oauthContext" style="display:none; margin-top:12px; padding:10px; background:#fffbe6; border:1px solid #ffe58f; border-radius:6px; font-size:13px;">
+    ✅ 已获取 openid: <code id="gotOpenid"></code>
+</div>
+
+<h2>② AccessToken 管理</h2>
+<button onclick="call('/token/get')">拉取全局 access_token</button>
+<button onclick="call('/token/stable')">拉取稳定版 token</button>
+
+<h2>③ JS-SDK 签名</h2>
+<label>当前页面 URL（需精确匹配）</label>
+<input id="jssdkUrl">
+<button onclick="call('/jssdk/config', { url: $('jssdkUrl').value })">获取签名</button>
+
+<h2>④ 订阅通知发送</h2>
+<label>touser（接收者 openid）</label>
+<input id="touser" placeholder="ox_xxx">
+<label>template_id</label>
+<input id="tid" placeholder="模板ID">
+<label>data（JSON 格式）</label>
+<textarea id="subData">{"thing1":{"value":"XX"}}</textarea>
+<button onclick="sendSubscribe()">发送订阅消息</button>
+
+<h2>⑤ 自定义菜单</h2>
+<textarea id="menuJson">{
+  "button": [
+    {"type":"view","name":"官网","url":"https://your.site"},
+    {"type":"click","name":"签到","key":"SIGN_IN"}
+  ]
+}</textarea>
+<button onclick="call('/menu/create', JSON.parse($('menuJson').value))">创建菜单</button>
+<button onclick="call('/menu/get')">查询菜单</button>
+<button onclick="call('/menu/delete')">删除菜单</button>
+
+<h2>⑥ 带参数二维码</h2>
+<button onclick="call('/qrcode/create', { action_name:'QR_STR_SCENE', action_info:{ scene:{ scene_str: 'from_web' } }, expire_seconds: 3600 })">生成临时二维码</button>
+
+<pre id="result">（结果会显示在这里）</pre>
+
+<script>
+    const $ = id => document.getElementById(id);
+    const baseUrl = () => $('base').value.replace(/\/$/, '');
+    const show = d => $('result').textContent = JSON.stringify(d, null, 2);
+
+    // ── 工具函数 ────────────────────────────────────────────────
+    function getQueryParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    }
+
+    // ── 通用 API 调用 ───────────────────────────────────────────
+    async function call(path, body) {
+        try {
+            const r = await fetch(baseUrl() + path, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body || {}),
+            });
+            show(await r.json());
+        } catch (e) {
+            show({ error: e.message });
+        }
+    }
+
+    // ── ① 网页授权流程 ─────────────────────────────────────────
+
+    // 发起微信授权跳转
+    async function goAuth() {
+        // 先从后端拿 appId
+        try {
+            const r = await fetch(baseUrl() + '/oauth/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: '{}',
+            });
+            const json = await r.json();
+            if (json.code !== 0 || !json.data?.appId) {
+                show(json);
+                alert('获取 appId 失败，请检查后端配置');
+                return;
+            }
+
+            const appId = json.data.appId;
+            const redirectUri = encodeURIComponent($('redirectUri').value);
+            const scope = $('scope').value;
+            const state = 'demo';
+
+            // 跳转微信授权页
+            const authUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}#wechat_redirect`;
+            window.location.href = authUrl;
+        } catch (e) {
+            show({ error: e.message });
+            alert('请求失败: ' + e.message);
+        }
+    }
+
+    // 用 code 换 openid
+    async function exchangeCode() {
+        const code = $('code').value;
+        if (!code) {
+            alert('没有 code，请先发起微信授权');
+            return;
+        }
+        try {
+            const r = await fetch(baseUrl() + '/oauth/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code }),
+            });
+            const json = await r.json();
+            show(json);
+
+            // 成功时自动回填 openid 到后续接口
+            if (json.code === 0 && json.data?.openid) {
+                $('gotOpenid').textContent = json.data.openid;
+                $('oauthContext').style.display = 'block';
+                $('touser').value = json.data.openid;
+
+                const resultDiv = $('oauthResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `✅ openid: <b>${json.data.openid}</b><br>scope: ${json.data.scope || '-'}`;
+            }
+        } catch (e) {
+            show({ error: e.message });
+        }
+    }
+
+    // ── ④ 订阅消息 ─────────────────────────────────────────────
+    function sendSubscribe() {
+        try {
+            call('/subscribe/bizsend', {
+                touser: $('touser').value,
+                template_id: $('tid').value,
+                data: JSON.parse($('subData').value),
+            });
+        } catch (e) {
+            show({ error: 'data 字段不是合法 JSON: ' + e.message });
+        }
+    }
+
+    // ── 页面初始化 ─────────────────────────────────────────────
+    (function init() {
+        // 自动填入当前页面地址作为 redirect_uri（去掉 code/state 参数）
+        const url = new URL(window.location.href);
+        url.searchParams.delete('code');
+        url.searchParams.delete('state');
+        $('redirectUri').value = url.toString();
+
+        // JS-SDK 签名的 URL 默认用当前页面完整地址
+        $('jssdkUrl').value = window.location.href.split('#')[0];
+
+        // 自动提取 URL 中的 code 参数
+        const code = getQueryParam('code');
+        if (code) {
+            $('code').value = code;
+            $('btnExchange').disabled = false;
+            $('codeTip').textContent = '✅ 已从 URL 中提取 code，点击按钮换取 openid';
+            $('codeTip').className = 'tip ok';
+
+            // 自动换取 openid
+            exchangeCode();
+        } else {
+            $('codeTip').textContent = '当前 URL 中没有 code 参数，请先点击「发起微信授权」';
+            $('codeTip').className = 'tip warn';
+        }
+    })();
+</script>
+</body>
+</html>

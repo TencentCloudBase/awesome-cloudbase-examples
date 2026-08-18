@@ -1,0 +1,77 @@
+<view class="checkout-container">
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading">
+      <image src="https://images.unsplash.com/photo-1586769852044-692d6e3703f2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" mode="aspectFit" class="loading-image"></image>
+      <text>加载中...</text>
+    </view>
+  </view>
+
+  <block wx:else>
+    <!-- 收货地址 -->
+    <view class="address-section" bindtap="chooseAddress">
+      <view class="address-info" wx:if="{{address}}">
+        <view class="user-info">
+          <text class="name">{{address.userName}}</text>
+          <text class="phone">{{address.telNumber}}</text>
+        </view>
+        <view class="address-detail">{{address.provinceName}}{{address.cityName}}{{address.countyName}}{{address.detailInfo}}</view>
+      </view>
+      <view class="no-address" wx:else>
+        <text>请选择收货地址</text>
+      </view>
+      <view class="arrow">></view>
+    </view>
+
+    <!-- 商品列表 -->
+    <view class="goods-list">
+      <view class="goods-item" wx:for="{{checkoutItems}}" wx:key="_id">
+        <image class="goods-image" src="{{item.coverUrl}}" mode="aspectFill"></image>
+        <view class="goods-info">
+          <text class="goods-name">{{item.name}}</text>
+          <text class="goods-price">¥{{item.price}}</text>
+        </view>
+        <view class="goods-count">x{{item.count}}</view>
+      </view>
+    </view>
+
+    <!-- 订单金额信息 -->
+    <view class="order-info">
+      <view class="info-item">
+        <text>商品总额</text>
+        <text>¥{{totalPrice}}</text>
+      </view>
+      <view class="info-item">
+        <text>运费</text>
+        <text>¥{{deliveryFee}}</text>
+      </view>
+      <view class="divider"></view>
+      <view class="info-item total">
+        <text>实付金额</text>
+        <text class="final-price">¥{{finalPrice}}</text>
+      </view>
+    </view>
+
+    <!-- 备注 -->
+    <view class="remark-section">
+      <text class="remark-label">备注</text>
+      <input class="remark-input" 
+             placeholder="请输入备注信息（选填）" 
+             value="{{remark}}"
+             bindinput="onRemarkInput"/>
+    </view>
+
+    <!-- 提交订单 -->
+    <view class="submit-section {{isSubmitting ? 'submitting' : ''}}">
+      <view class="total-info">
+        <text>合计：</text>
+        <text class="final-price">¥{{finalPrice}}</text>
+      </view>
+      <button class="submit-btn" 
+              bindtap="submitOrder" 
+              disabled="{{isSubmitting}}">
+        {{isSubmitting ? '提交中...' : '提交订单'}}
+      </button>
+    </view>
+  </block>
+</view>
