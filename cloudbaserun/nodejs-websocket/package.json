@@ -1,0 +1,8 @@
+{
+  "name": "nodejs-websocket",
+  "version": "1.0.0",
+  "description": "WebSocket example for CloudBase Run",
+  "main": "app/server.js",
+  "scripts": { "start": "node app/server.js" },
+  "dependencies": { "express": "^4.18.2", "express-ws": "^5.0.2" }
+}

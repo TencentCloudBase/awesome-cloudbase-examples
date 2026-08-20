@@ -1,0 +1,13 @@
+# 忽略本地环境变量与运行产物，避免泄露密钥
+# Ignore local env files and run artifacts to avoid leaking secrets
+
+# .env 与所有衍生命名（.env.local, .env.test, .env.production.local 等）
+# .env and all variants (.env.local, .env.test, .env.production.local, etc.)
+.env
+.env.*
+!.env.example
+
+# 运行产物 / Run artifacts
+.last-report.json
+*.log
+*.tmp

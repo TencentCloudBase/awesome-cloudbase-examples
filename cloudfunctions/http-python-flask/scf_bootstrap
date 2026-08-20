@@ -1,0 +1,4 @@
+#!/bin/bash
+# 启动 Flask 应用（生产模式用 gunicorn）
+# Start the Flask application (use gunicorn for production)
+exec gunicorn -b 0.0.0.0:9000 -w 2 app:app

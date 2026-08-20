@@ -1,0 +1,57 @@
+{
+  "identifier": "nodejs-koa",
+  "lang": "zh",
+  "funcTypes": [
+    "tcbrContainer"
+  ],
+  "title": "Koa 云托管",
+  "titleIcon": "",
+  "description": "基于 Koa 框架的 CloudBase Run 容器部署示例",
+  "tags": [
+    "nodejs",
+    "koa",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "",
+  "zipFileStore": "",
+  "containerPort": 8080,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-koa",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-koa"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-koa"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudbaserun/nodejs-koa"
+      }
+    }
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 0,
+    "legacyTags": [],
+    "localOnly": true
+  }
+}

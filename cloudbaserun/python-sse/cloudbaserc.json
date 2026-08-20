@@ -1,0 +1,1 @@
+{"envId":"YOUR_ENV_ID","framework":{"name":"python-sse","plugins":{"container":{"use":"@cloudbase/framework-plugin-container","inputs":{"serviceName":"python-sse","servicePath":"/python-sse","localPath":"./"}}}}}
