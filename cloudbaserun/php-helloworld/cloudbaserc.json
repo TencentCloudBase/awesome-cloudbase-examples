@@ -1,0 +1,1 @@
+{"envId":"YOUR_ENV_ID","framework":{"name":"php-helloworld","plugins":{"container":{"use":"@cloudbase/framework-plugin-container","inputs":{"serviceName":"php-helloworld","servicePath":"/php-helloworld","localPath":"./"}}}}}

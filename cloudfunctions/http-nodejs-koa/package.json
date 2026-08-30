@@ -1,0 +1,14 @@
+{
+  "name": "http-nodejs-koa",
+  "version": "1.0.0",
+  "description": "使用 Koa 框架的 HTTP 函数模板 / HTTP function template using the Koa framework",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@koa/router": "^12.0.1",
+    "koa": "^2.15.3",
+    "koa-bodyparser": "^4.4.1"
+  }
+}

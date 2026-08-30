@@ -1,0 +1,1 @@
+{"envId":"YOUR_ENV_ID","framework":{"name":"python-django","plugins":{"container":{"use":"@cloudbase/framework-plugin-container","inputs":{"serviceName":"python-django","servicePath":"/python-django","localPath":"./"}}}}}

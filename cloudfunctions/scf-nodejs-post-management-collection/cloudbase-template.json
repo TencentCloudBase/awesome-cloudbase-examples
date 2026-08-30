@@ -1,0 +1,61 @@
+{
+  "identifier": "scf-nodejs-post-management-collection",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "文章管理",
+  "description": "文章管理云函数，包含 collection 操作示例",
+  "tags": [
+    "nodejs",
+    "database",
+    "crud"
+  ],
+  "sampleCode": "你可以使用这个云函数来管理文章。在小程序中测试调用这个云函数的示例代码如下：\n\n```js\n// 创建文章\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'createPost',\n    data: {\n      title: '我的第一篇文章',\n      content: '这是文章内容',\n      author: '张三',\n    }\n  }\n}).then(res => {\n  console.log('创建文章结果：', res)\n})\n\n// 响应示例\n{\n  \"id\": \"64c9f5a79f6c8e0001b60b0a\",\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// 更新文章\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'updatePost',\n    data: {\n      id: '64c9f5a79f6c8e0001b60b0a',\n      post: {\n        content: '更新后的文章内容'\n      }\n    }\n  }\n}).then(res => {\n  console.log('更新文章结果：', res)\n})\n\n// 响应示例\n{\n  \"id\": \"64c9f5a79f6c8e0001b60b0a\",\n  \"updated\": 1\n}\n\n// 删除文章\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'deletePost',\n    data: {\n      id: '64c9f5a79f6c8e0001b60b0a'\n    }\n  }\n}).then(res => {\n  console.log('删除文章结果：', res)\n})\n\n// 响应示例\n{\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\",\n  \"deleted\": 1\n}\n\n// 获取单篇文章\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'getPost',\n    data: {\n      id: '64c9f5a79f6c8e0001b60b0a'\n    }\n  }\n}).then(res => {\n  console.log('获取文章结果：', res)\n})\n\n// 响应示例\n{\n  \"data\": [\n    {\n      \"_id\": \"64c9f5a79f6c8e0001b60b0a\",\n      \"title\": \"我的第一篇文章\",\n      \"content\": \"这是文章内容\",\n      \"author\": \"张三\"\n      // ...\n    }\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n\n// 分页获取文章列表\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'listPosts',\n    data: {\n      page: 1,\n      pageSize: 10\n    }\n  }\n}).then(res => {\n  console.log('获取文章列表结果：', res)\n})\n\n// 响应示例\n{\n  \"list\": [\n    {\n      \"_id\": \"64c9f5a79f6c8e0001b60b0a\",\n      \"title\": \"我的第一篇文章\",\n      \"content\": \"更新后的文章内容\",\n      \"author\": \"张三\"\n      // ...\n    }\n    // ... 更多文章\n  ],\n  \"total\": 100,\n  \"page\": 1,\n  \"pageSize\": 10\n}\n\n// 搜索文章\nwx.cloud.callFunction({\n  name: 'post-management',\n  data: {\n    action: 'searchPosts',\n    data: {\n      keyword: '技术'\n    }\n  }\n}).then(res => {\n  console.log('搜索文章结果：', res)\n})\n\n// 响应示例\n{\n  \"data\": [\n    {\n      \"_id\": \"64c9f5a79f6c8e0001b60b0a\",\n      \"title\": \"我的第一篇文章\",\n      \"content\": \"更新后的文章内容\",\n      \"author\": \"张三\"\n      // ...\n    }\n    // 更多文章\n  ],\n  \"requestId\": \"1735086147_0.36272387876657_33594-193f355e_1\"\n}\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-post-management-collection.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-post-management-collection",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-post-management-collection"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-post-management-collection"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-post-management-collection"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-post-management-collection.zip",
+    "zipSha": "c92c4dc48cb401ddde5bafbbfde757e164a62205f9a925e5c680f2118a63ca2f",
+    "uploadedAt": 1782878874570,
+    "legacyTags": [
+      "云开发",
+      "数据库",
+      "JavaScript",
+      "CRUD",
+      "分页查询",
+      "全文搜索"
+    ],
+    "onlineIdentifier": "scf-nodejs-post-management-collection",
+    "onlineId": "f51ab3f0689ea66901ed4c991c571c08"
+  }
+}

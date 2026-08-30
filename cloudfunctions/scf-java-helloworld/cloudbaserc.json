@@ -1,0 +1,14 @@
+{
+  "envId": "YOUR_ENV_ID",
+  "functionRoot": "./",
+  "functions": [
+    {
+      "name": "scf-java-helloworld",
+      "runtime": "Java8",
+      "handler": "example.Hello::mainHandler",
+      "timeout": 10,
+      "memorySize": 256,
+      "installDependency": false
+    }
+  ]
+}

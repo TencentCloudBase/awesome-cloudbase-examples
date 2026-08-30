@@ -1,0 +1,61 @@
+{
+  "identifier": "scf-nodejs-user-management-sql",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "User Management SQL",
+  "description": "User management cloud function with SQL operation examples (currently only supports SELECT statements)",
+  "tags": [
+    "nodejs",
+    "auth",
+    "database",
+    "crud"
+  ],
+  "sampleCode": "You can use this cloud function to manage users.\n\nCurrently, only SELECT statements are available. If you need other SQL statements, please contact us through the official community.\n\nHere’s sample code for testing this cloud function in a Mini Program: \n\n```js\n\n// Get One\nwx.cloud.callFunction({\n  name: 'user-management',\n  data: {\n    action: 'getUser',\n    data: {\n      id: 'xxx'\n    }\n  }\n}).then(res => {\n  console.log('Get One: ', res)\n})\n\n// response\n{\n  \"_id\": \"xxx\",\n  \"username\": \"张三\",\n  \"email\": \"zhangsan@example.com\",\n  \"phone\": \"13900139000\"\n  // ...\n}\n\n// Get user list with pagination\nwx.cloud.callFunction({\n  name: 'user-management',\n  data: {\n    action: 'listUsers',\n    data: {\n      page: 1,\n      pageSize: 10\n    }\n  }\n}).then(res => {\n  console.log('Get List: ', res)\n})\n\n// response\n{\n  \"list\": [\n    {\n      \"_id\": \"xxx\",\n      \"username\": \"张三\",\n      \"email\": \"zhangsan@example.com\",\n      \"phone\": \"13900139000\"\n    }\n    // ... more\n  ],\n  \"total\": 100,\n  \"page\": 1,\n  \"pageSize\": 10\n}\n\n// Search\nwx.cloud.callFunction({\n  name: 'user-management',\n  data: {\n    action: 'searchUsers',\n    data: {\n      keyword: '张三'\n    }\n  }\n}).then(res => {\n  console.log('Search: ', res)\n})\n\n// response\n[\n  {\n    \"id\": 1,\n    \"username\": \"张三\",\n    \"email\": \"zhangsan@example.com\",\n    \"phone\": \"13900139000\",\n  }\n  // ... more\n]\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-user-management-sql.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-user-management-sql",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-user-management-sql"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-user-management-sql"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-user-management-sql"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-user-management-sql.zip",
+    "zipSha": "82967a713b16f4751db9f031de779991bb75d1d02e0e85d2c1a52fb59e42ec07",
+    "uploadedAt": 1782878875894,
+    "legacyTags": [
+      "Cloudbase",
+      "User management",
+      "Database Query",
+      "WeChat Mini Program",
+      "CloudFunction"
+    ],
+    "onlineIdentifier": "scf-nodejs-user-management-sql",
+    "onlineId": "f51ab3f0689ea66901ed4cbd7e24d94f"
+  }
+}

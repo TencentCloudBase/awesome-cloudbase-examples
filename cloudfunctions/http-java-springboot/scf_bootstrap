@@ -1,0 +1,4 @@
+#!/bin/bash
+# 启动 Spring Boot 应用（fat jar）
+# Start the Spring Boot application (fat jar)
+java -jar app.jar --server.port=9000 --server.address=0.0.0.0
