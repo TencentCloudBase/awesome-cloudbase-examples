@@ -1,0 +1,4 @@
+#!/bin/bash
+# 启动 Gin 编译产物
+# Start the compiled Gin binary
+./main

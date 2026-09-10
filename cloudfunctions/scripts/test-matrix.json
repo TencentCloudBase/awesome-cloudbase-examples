@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "_comment": "云函数测试矩阵。脚本会读取此文件以驱动各 Tier 的测试。修改此文件后无需改动脚本。",
+  "functions": [
+    {
+      "name": "scf-nodejs-helloworld",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "hello": "world" } },
+      "expectInvokeContains": ["hello", "world"]
+    },
+    {
+      "name": "scf-python-helloworld",
+      "type": "scf",
+      "lang": "python",
+      "deployable": true,
+      "invoke": { "params": { "key1": "test", "key2": "value" } }
+    },
+    {
+      "name": "scf-go-helloworld",
+      "type": "scf",
+      "lang": "go",
+      "deployable": true,
+      "prepare": "bash build.sh",
+      "invoke": { "params": { "name": "CloudBase", "message": "Hello" } },
+      "expectInvokeContains": ["Hello"],
+      "notes": "Runtime=Go1，handler=main；部署前需 ./build.sh 编译 linux/amd64 二进制"
+    },
+    {
+      "name": "scf-java-helloworld",
+      "type": "scf",
+      "lang": "java",
+      "deployable": true,
+      "prepare": "mvn -q -DskipTests clean package",
+      "invoke": { "params": { "key1": "test", "key2": "value" } },
+      "expectInvokeContains": ["Hello World"],
+      "notes": "Runtime=Java8，handler=example.Hello::mainHandler；部署前需 mvn clean package"
+    },
+    {
+      "name": "scf-php-helloworld",
+      "type": "scf",
+      "lang": "php",
+      "deployable": true,
+      "invoke": { "params": { "test": "data" } },
+      "expectInvokeContains": ["Hello World from PHP SCF"],
+      "notes": "Runtime=Php7.4，handler=index.main_handler"
+    },
+
+    {
+      "name": "scf-nodejs-book-analytics-aggregate",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "action": "getAuthorStats" } },
+      "expectInvokeContains": [],
+      "notes": "依赖云开发数据库 collection 'book'，未初始化数据时仅断言入口可达"
+    },
+    {
+      "name": "scf-nodejs-book-management-model",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "action": "listBooks", "data": {} } },
+      "notes": "依赖数据模型 book，未初始化数据时仅断言入口可达"
+    },
+    {
+      "name": "scf-nodejs-custom-auth",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "action": "register", "data": { "username": "tester", "password": "p@ssw0rd" } } },
+      "notes": "依赖云开发数据库 collection 'user'"
+    },
+    {
+      "name": "scf-nodejs-get-openid",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": {} },
+      "notes": "需要小程序上下文，单元 invoke 无 OPENID，预期返回空"
+    },
+    {
+      "name": "scf-nodejs-hono-template",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "warnOnly": true,
+      "warnReason": "代码是 Hono HTTP 风格，但 cloudbaserc.json 声明为事件型 SCF。如需 HTTP 访问请改为 type: http。",
+      "invoke": { "params": {} }
+    },
+    {
+      "name": "scf-nodejs-openapi-get-phonenumber",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "code": "demo" } },
+      "notes": "依赖云调用资质，未授权时会失败"
+    },
+    {
+      "name": "scf-nodejs-post-management-collection",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "action": "listPosts", "data": { "page": 1, "pageSize": 10 } } }
+    },
+    {
+      "name": "scf-nodejs-transaction",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "action": "getBalance", "data": { "accountId": "non-existent" } } }
+    },
+    {
+      "name": "scf-nodejs-user-management-sql",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "action": "listUsers", "data": { "page": 1, "pageSize": 10 } } }
+    },
+    {
+      "name": "scf-nodejs-wxpay-common",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "type": "unknown" } },
+      "expectInvokeContains": ["Unimplemented method"]
+    },
+    {
+      "name": "scf-nodejs-wxpay-product",
+      "type": "scf",
+      "lang": "nodejs",
+      "deployable": true,
+      "invoke": { "params": { "type": "unknown" } },
+      "expectInvokeContains": ["Unimplemented method"]
+    },
+
+    {
+      "name": "http-nodejs-helloworld",
+      "type": "http",
+      "lang": "nodejs",
+      "deployable": true,
+      "localStart": "node index.js",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Node.js"] }
+    },
+    {
+      "name": "http-nodejs-sse",
+      "type": "http",
+      "lang": "nodejs",
+      "deployable": true,
+      "prepare": "npm install --no-audit --no-fund",
+      "localStart": "node index.js",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["server-datetime"], "isSSE": true },
+      "notes": "SSE 长连接，依赖 @cloudbase/functions-framework；HTTP 函数走 CustomRuntime 不会自动装依赖，必须 prepare=npm install。curl 测试需 --no-buffer 并在收到首条 event 后关闭"
+    },
+    {
+      "name": "http-nodejs-express",
+      "type": "http",
+      "lang": "nodejs",
+      "deployable": true,
+      "prepare": "npm install --no-audit --no-fund",
+      "localStart": "node index.js",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Express"] }
+    },
+    {
+      "name": "http-nodejs-koa",
+      "type": "http",
+      "lang": "nodejs",
+      "deployable": true,
+      "prepare": "npm install --no-audit --no-fund",
+      "localStart": "node index.js",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Koa"] }
+    },
+
+    {
+      "name": "http-python-helloworld",
+      "type": "http",
+      "lang": "python",
+      "deployable": true,
+      "localStart": "python3 main.py",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Python HTTP"] }
+    },
+    {
+      "name": "http-python-flask",
+      "type": "http",
+      "lang": "python",
+      "deployable": true,
+      "prepare": "pip install -r requirements.txt",
+      "localStart": "gunicorn -b 0.0.0.0:9000 -w 1 app:app",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Flask"] }
+    },
+    {
+      "name": "http-python-fastapi",
+      "type": "http",
+      "lang": "python",
+      "deployable": true,
+      "prepare": "pip install -r requirements.txt",
+      "localStart": "uvicorn app:app --host 0.0.0.0 --port 9000 --workers 1",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from FastAPI"] }
+    },
+
+    {
+      "name": "http-go-helloworld",
+      "type": "http",
+      "lang": "go",
+      "deployable": true,
+      "prepare": "GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o main main.go",
+      "localStart": "go run main.go",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Go HTTP"] }
+    },
+    {
+      "name": "http-go-gin",
+      "type": "http",
+      "lang": "go",
+      "deployable": true,
+      "prepare": "go mod tidy && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o main main.go",
+      "localStart": "go run main.go",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Gin"] }
+    },
+
+    {
+      "name": "http-java-helloworld",
+      "type": "http",
+      "lang": "java",
+      "deployable": true,
+      "prepare": "mvn -q -DskipTests clean package && cp -f target/app.jar ./app.jar",
+      "localStart": "java -jar app.jar",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Java HTTP"] }
+    },
+    {
+      "name": "http-java-springboot",
+      "type": "http",
+      "lang": "java",
+      "deployable": true,
+      "prepare": "mvn -q -DskipTests clean package && cp -f target/app.jar ./app.jar",
+      "localStart": "java -jar app.jar --server.port=9000 --server.address=0.0.0.0",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Spring Boot"] }
+    },
+
+    {
+      "name": "http-php-helloworld",
+      "type": "http",
+      "lang": "php",
+      "deployable": true,
+      "localStart": "php -S 0.0.0.0:9000 -t . router.php",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from PHP HTTP"] }
+    },
+    {
+      "name": "http-php-slim",
+      "type": "http",
+      "lang": "php",
+      "deployable": true,
+      "prepare": "composer install --no-dev --optimize-autoloader",
+      "localStart": "php -S 0.0.0.0:9000 -t public public/index.php",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "expectContains": ["Hello World from Slim"] }
+    },
+    {
+      "name": "http-php-laravel",
+      "type": "http",
+      "lang": "php",
+      "deployable": false,
+      "skipReason": "模板仅提供骨架，需要先 composer create-project laravel/laravel 拉取完整脚手架后才能部署",
+      "localStart": null,
+      "localPort": 9000
+    }
+  ]
+}

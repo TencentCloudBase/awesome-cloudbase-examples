@@ -1,0 +1,14 @@
+{
+  "envId": "YOUR_ENV_ID",
+  "functionRoot": "./",
+  "functions": [
+    {
+      "name": "scf-php-helloworld",
+      "runtime": "Php7.4",
+      "handler": "index.main_handler",
+      "timeout": 10,
+      "memorySize": 256,
+      "installDependency": false
+    }
+  ]
+}

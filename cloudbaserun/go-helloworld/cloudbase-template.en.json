@@ -1,0 +1,56 @@
+{
+  "identifier": "go-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "tcbrContainer"
+  ],
+  "title": "Go CloudBase Run",
+  "titleIcon": "",
+  "description": "Go language CloudBase Run container deployment example",
+  "tags": [
+    "go",
+    "helloworld"
+  ],
+  "sampleCode": "",
+  "language": "Go",
+  "runtimeVersion": "Go1",
+  "isCompile": false,
+  "zipFilePath": "",
+  "zipFileStore": "",
+  "containerPort": 8080,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/go-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/go-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/go-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudbaserun/go-helloworld"
+      }
+    }
+  ],
+  "category": "helloworld",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 0,
+    "legacyTags": [],
+    "localOnly": true
+  }
+}

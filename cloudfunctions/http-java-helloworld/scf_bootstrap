@@ -1,0 +1,4 @@
+#!/bin/bash
+# 启动 Java HTTP 服务（fat jar）
+# Start the Java HTTP service (fat jar)
+java -jar app.jar

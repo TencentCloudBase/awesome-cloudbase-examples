@@ -1,0 +1,57 @@
+{
+  "identifier": "php-laravel",
+  "lang": "zh",
+  "funcTypes": [
+    "tcbrContainer"
+  ],
+  "title": "Laravel 云托管",
+  "titleIcon": "",
+  "description": "基于 Laravel 框架的 CloudBase Run 容器部署示例",
+  "tags": [
+    "php",
+    "laravel",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Php",
+  "runtimeVersion": "Php7.4",
+  "isCompile": false,
+  "zipFilePath": "",
+  "zipFileStore": "",
+  "containerPort": 8080,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/php-laravel",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/php-laravel"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/php-laravel"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudbaserun/php-laravel"
+      }
+    }
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 0,
+    "legacyTags": [],
+    "localOnly": true
+  }
+}

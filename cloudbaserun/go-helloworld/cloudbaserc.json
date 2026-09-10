@@ -1,0 +1,16 @@
+{
+  "envId": "YOUR_ENV_ID",
+  "framework": {
+    "name": "go-helloworld",
+    "plugins": {
+      "container": {
+        "use": "@cloudbase/framework-plugin-container",
+        "inputs": {
+          "serviceName": "go-helloworld",
+          "servicePath": "/go-helloworld",
+          "localPath": "./"
+        }
+      }
+    }
+  }
+}

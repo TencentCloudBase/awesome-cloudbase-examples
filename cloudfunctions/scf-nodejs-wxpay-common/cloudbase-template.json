@@ -1,0 +1,62 @@
+{
+  "identifier": "scf-nodejs-wxpay-common",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "微信支付通用",
+  "description": "微信支付通用模板",
+  "tags": [
+    "nodejs",
+    "wechat-miniprogram",
+    "wechat-pay",
+    "payment"
+  ],
+  "sampleCode": "这是一个微信支付相关的云函数,包含了统一下单、订单查询、退款等功能。\n\n使用前，请确保已经正确安装和配置 **小程序微信支付** 云模板。\n\n若未安装，可前往 模板中心-模板市场-小程序微信支付 进行安装。安装完成后，前往 模板中心-我的模板-小程序微信支付-参数设置，完成必要参数的配置。\n\n以下是调用示例:\n\n1. 统一下单:\n\n```js\nwx.cloud.callFunction({\n  name: 'wxpay-common',\n  data: {\n    type: 'wxpay_order',\n  },\n  success: (res) => {\n    console.log('下单成功', res.result);\n    // res.result 示例:\n    // {\n    //   \"code\": 0,\n    //   \"data\": {\n    //     \"prepay_id\": \"wx2016121516****55928f9b1b2c0********\"\n    //   }\n    // }\n  },\n  fail: (err) => {\n    console.error('下单失败', err);\n  },\n});\n```\n\n2. 通过商户订单号查询订单:\n\n```js\nwx.cloud.callFunction({\n  name: 'wxpay-common',\n  data: {\n    type: 'wxpay_query_order_by_out_trade_no',\n  },\n  success: (res) => {\n    console.log('查询成功', res.result);\n    // res.result 示例:\n    // {\n    //   \"code\": 0,\n    //   \"data\": {\n    //     \"out_trade_no\": \"2024040118006666\",\n    //     \"transaction_id\": \"4200000001201801011234567890\",\n    //     \"trade_state\": \"SUCCESS\",\n    //     \"trade_state_desc\": \"支付成功\"\n    //   }\n    // }\n  },\n});\n```\n\n3. 申请退款:\n\n```js\nwx.cloud.callFunction({\n  name: 'wxpay-common',\n  data: {\n    type: 'wxpay_refund',\n  },\n  success: (res) => {\n    console.log('退款申请成功', res.result);\n    // res.result 示例:\n    // {\n    //   \"code\": 0,\n    //   \"data\": {\n    //     \"out_refund_no\": \"2024040118006666\",\n    //     \"refund_id\": \"50000000382019052709732678859\",\n    //     \"status\": \"SUCCESS\"\n    //   }\n    // }\n  },\n});\n```\n\n4. 查询退款:\n\n```js\nwx.cloud.callFunction({\n  name: 'wxpay-common',\n  data: {\n    type: 'wxpay_refund_query',\n  },\n  success: (res) => {\n    console.log('退款查询成功', res.result);\n    // res.result 示例:\n    // {\n    //   \"code\": 0,\n    //   \"data\": {\n    //     \"out_refund_no\": \"2024040118006666\",\n    //     \"refund_status\": \"SUCCESS\",\n    //     \"success_time\": \"2020-12-01T16:18:12+08:00\"\n    //   }\n    // }\n  },\n});\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-wxpay-common.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-wxpay-common",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-wxpay-common"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-wxpay-common"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-wxpay-common"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-wxpay-common.zip",
+    "zipSha": "336fd9979058b77c13ea73f69bf2febb029602af2c23b5d9e02d001cd8b22880",
+    "uploadedAt": 1782878876218,
+    "legacyTags": [
+      "微信支付",
+      "云函数",
+      "支付接口",
+      "订单管理",
+      "退款功能",
+      "小程序开发"
+    ],
+    "onlineIdentifier": "scf-nodejs-wxpay-common",
+    "onlineId": "f51ab3f0689ea66901ed4c9c2ef8c3dd"
+  }
+}

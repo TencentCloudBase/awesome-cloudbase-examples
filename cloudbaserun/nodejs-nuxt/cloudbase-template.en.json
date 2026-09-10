@@ -1,0 +1,57 @@
+{
+  "identifier": "nodejs-nuxt",
+  "lang": "en",
+  "funcTypes": [
+    "tcbrContainer"
+  ],
+  "title": "Nuxt.js CloudBase Run",
+  "titleIcon": "",
+  "description": "Nuxt.js framework CloudBase Run container deployment example",
+  "tags": [
+    "nodejs",
+    "nuxtjs",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "",
+  "zipFileStore": "",
+  "containerPort": 8080,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-nuxt",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-nuxt"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-nuxt"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudbaserun/nodejs-nuxt"
+      }
+    }
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "",
+    "zipSha": "",
+    "uploadedAt": 0,
+    "legacyTags": [],
+    "localOnly": true
+  }
+}

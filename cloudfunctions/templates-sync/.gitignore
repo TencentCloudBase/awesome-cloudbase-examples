@@ -1,0 +1,11 @@
+# 缓存与临时产物 / Caches and transient artifacts
+.cache/
+.last-report.json
+*.log
+
+# 本目录脚本打包出来的临时 zip（push 后会上传到云存储，本地不留版）
+# Local ZIPs produced by packer; uploaded to CloudBase Storage then discarded.
+*.zip
+
+# 但保留 schema 快照（供 push/diff 用）
+!.schema.cache.json

@@ -1,0 +1,58 @@
+{
+  "identifier": "http-python-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfWeb"
+  ],
+  "title": "HTTP Python Hello World",
+  "titleIcon": "",
+  "description": "Python HTTP function helloworld template",
+  "tags": [
+    "http",
+    "python",
+    "helloworld"
+  ],
+  "sampleCode": "# Python HTTP Hello World\n\nA minimal HTTP function written in Python.\n\nDeploy and visit the access path to see `Hello World from Python HTTP Function!`.",
+  "language": "Python",
+  "runtimeVersion": "Python3.10",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-helloworld.zip",
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/http-python-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/http-python-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/http-python-helloworld.zip",
+    "zipSha": "fd760586690a7ee73e46200f2de3a7d4a6bfc2fac7ee46224f23df1f5498c07c",
+    "uploadedAt": 1782878869100,
+    "legacyTags": [],
+    "localOnly": true,
+    "i18nSource": "override",
+    "onlineIdentifier": "http-python-helloworld"
+  }
+}

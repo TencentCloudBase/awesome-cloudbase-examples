@@ -1,0 +1,58 @@
+{
+  "identifier": "python-django",
+  "lang": "en",
+  "funcTypes": [
+    "tcbrContainer"
+  ],
+  "title": "Django CloudBase Run",
+  "titleIcon": "",
+  "description": "Django framework CloudBase Run container deployment example",
+  "tags": [
+    "python",
+    "django",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Python",
+  "runtimeVersion": "Python3.10",
+  "isCompile": false,
+  "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-django-example.zip",
+  "zipFileStore": "",
+  "imagePath": "crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-django-example:v1.0.0",
+  "containerPort": 8080,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/python-django",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/python-django"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/python-django"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudbaserun/python-django"
+      }
+    }
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-django-example.zip",
+    "zipSha": "",
+    "uploadedAt": 0,
+    "legacyTags": [],
+    "localOnly": true
+  }
+}

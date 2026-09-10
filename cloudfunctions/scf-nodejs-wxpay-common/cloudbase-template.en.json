@@ -1,0 +1,62 @@
+{
+  "identifier": "scf-nodejs-wxpay-common",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "WeChat Pay General",
+  "description": "WeChat Pay Universal Template",
+  "tags": [
+    "nodejs",
+    "wechat-miniprogram",
+    "wechat-pay",
+    "payment"
+  ],
+  "sampleCode": "This is a WeChat Pay cloud function that includes unified order placement, order query, refund, and other features.\n\nBefore use, ensure you have properly installed and configured the Mini Program WeChat Pay cloud template.\n\nIf not installed, go to Template Center > Template Marketplace > Mini Program WeChat Pay to install. After installation, navigate to Template Center > My Templates > Mini Program WeChat Pay > Parameter Settings to complete the required configurations.\n\n\nHere is the calling example:\n\n1. unified order:\n\n```js\nwx.cloud.callFunction({\n  name: 'wxpay-common',\n  data: {\n    type: 'wxpay_order',\n  },\n  success: (res) => {\n    console.log('下单成功', res.result);\n    // res.result :\n    // {\n    //   \"code\": 0,\n    //   \"data\": {\n    //     \"prepay_id\": \"wx2016121516****55928f9b1b2c0********\"\n    //   }\n    // }\n  },\n  fail: (err) => {\n    console.error('下单失败', err);\n  },\n});\n```\n\n2. Query order by merchant order number:\n\n```js\nwx.cloud.callFunction({\n  name: 'wxpay-common',\n  data: {\n    type: 'wxpay_query_order_by_out_trade_no',\n  },\n  success: (res) => {\n    console.log('查询成功', res.result);\n    // res.result:\n    // {\n    //   \"code\": 0,\n    //   \"data\": {\n    //     \"out_trade_no\": \"2024040118006666\",\n    //     \"transaction_id\": \"4200000001201801011234567890\",\n    //     \"trade_state\": \"SUCCESS\",\n    //     \"trade_state_desc\": \"支付成功\"\n    //   }\n    // }\n  },\n});\n```\n\n3. Request a refund:\n\n```js\nwx.cloud.callFunction({\n  name: 'wxpay-common',\n  data: {\n    type: 'wxpay_refund',\n  },\n  success: (res) => {\n    console.log('退款申请成功', res.result);\n    // res.result :\n    // {\n    //   \"code\": 0,\n    //   \"data\": {\n    //     \"out_refund_no\": \"2024040118006666\",\n    //     \"refund_id\": \"50000000382019052709732678859\",\n    //     \"status\": \"SUCCESS\"\n    //   }\n    // }\n  },\n});\n```\n\n4. Check refund status:\n\n```js\nwx.cloud.callFunction({\n  name: 'wxpay-common',\n  data: {\n    type: 'wxpay_refund_query',\n  },\n  success: (res) => {\n    console.log('退款查询成功', res.result);\n    // res.result 示例:\n    // {\n    //   \"code\": 0,\n    //   \"data\": {\n    //     \"out_refund_no\": \"2024040118006666\",\n    //     \"refund_status\": \"SUCCESS\",\n    //     \"success_time\": \"2020-12-01T16:18:12+08:00\"\n    //   }\n    // }\n  },\n});\n```",
+  "language": "javascript",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-wxpay-common.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-wxpay-common",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-wxpay-common"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-nodejs-wxpay-common"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-nodejs-wxpay-common"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-nodejs-wxpay-common.zip",
+    "zipSha": "336fd9979058b77c13ea73f69bf2febb029602af2c23b5d9e02d001cd8b22880",
+    "uploadedAt": 1782878876489,
+    "legacyTags": [
+      "WeChat Pay",
+      "CloudFunction",
+      "Pay API",
+      "Order Management",
+      "Refund function",
+      "Mini-program development"
+    ],
+    "onlineIdentifier": "scf-nodejs-wxpay-common",
+    "onlineId": "f51ab3f0689ea66901ed4cbe707f37d4"
+  }
+}

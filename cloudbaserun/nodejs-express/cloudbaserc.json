@@ -1,0 +1,1 @@
+{"envId":"YOUR_ENV_ID","framework":{"name":"nodejs-express","plugins":{"container":{"use":"@cloudbase/framework-plugin-container","inputs":{"serviceName":"nodejs-express","servicePath":"/nodejs-express","localPath":"./"}}}}}

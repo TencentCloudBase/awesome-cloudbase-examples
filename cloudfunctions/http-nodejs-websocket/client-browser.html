@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 浏览器客户端</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .connection-panel {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .connection-panel input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .connection-panel button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .connect-btn {
+            background: #007bff;
+            color: white;
+        }
+        
+        .disconnect-btn {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            background: #fafafa;
+            border-radius: 4px;
+        }
+        
+        .message {
+            margin-bottom: 8px;
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+        
+        .message.system {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .message.chat {
+            background: #f3e5f5;
+            color: #4a148c;
+        }
+        
+        .message.own {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .input-panel {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-panel input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .input-panel button {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .input-panel button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .controls button {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .controls button:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔌 WebSocket 浏览器客户端</h1>
+            <p>实时聊天演示</p>
+        </div>
+        
+        <div class="connection-panel">
+            <input type="text" id="serverUrl" placeholder="WebSocket 服务器地址" value="ws://localhost:8080">
+            <input type="text" id="clientId" placeholder="客户端ID (可选)">
+            <button id="connectBtn" class="connect-btn">连接</button>
+            <button id="disconnectBtn" class="disconnect-btn" style="display: none;">断开</button>
+        </div>
+        
+        <div id="status" class="status disconnected">
+            ❌ 未连接
+        </div>
+        
+        <div class="controls">
+            <button onclick="sendPing()">💓 发送心跳</button>
+            <button onclick="clearMessages()">🗑️ 清空消息</button>
+            <button onclick="showHelp()">❓ 帮助</button>
+        </div>
+        
+        <div id="messages" class="messages"></div>
+        
+        <div class="input-panel">
+            <input type="text" id="messageInput" placeholder="输入消息..." disabled>
+            <button id="sendBtn" onclick="sendMessage()" disabled>发送</button>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let isConnected = false;
+        let clientId = '';
+        
+        const statusEl = document.getElementById('status');
+        const messagesEl = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        
+        // 连接到服务器
+        function connect() {
+            const serverUrl = document.getElementById('serverUrl').value.trim();
+            clientId = document.getElementById('clientId').value.trim() || `browser_${Date.now()}`;
+            
+            if (!serverUrl) {
+                alert('请输入服务器地址');
+                return;
+            }
+            
+            try {
+                const wsUrl = `${serverUrl}?clientId=${clientId}`;
+                addMessage('system', `正在连接到 ${wsUrl}...`);
+                
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = function() {
+                    isConnected = true;
+                    updateStatus('connected', '✅ 已连接');
+                    addMessage('system', '🎉 WebSocket 连接已建立');
+                    
+                    connectBtn.style.display = 'none';
+                    disconnectBtn.style.display = 'inline-block';
+                    messageInput.disabled = false;
+                    sendBtn.disabled = false;
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const message = JSON.parse(event.data);
+                        handleMessage(message);
+                    } catch (error) {
+                        addMessage('system', `收到消息: ${event.data}`);
+                    }
+                };
+                
+                ws.onclose = function(event) {
+                    isConnected = false;
+                    updateStatus('disconnected', `❌ 连接已关闭 (代码: ${event.code})`);
+                    addMessage('system', `连接已关闭: ${event.reason || '未知原因'}`);
+                    
+                    connectBtn.style.display = 'inline-block';
+                    disconnectBtn.style.display = 'none';
+                    messageInput.disabled = true;
+                    sendBtn.disabled = true;
+                };
+                
+                ws.onerror = function(error) {
+                    addMessage('error', `连接错误: ${error.message || '未知错误'}`);
+                };
+                
+            } catch (error) {
+                addMessage('error', `连接失败: ${error.message}`);
+            }
+        }
+        
+        // 断开连接
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+        
+        // 处理收到的消息
+        function handleMessage(message) {
+            const timestamp = new Date(message.timestamp).toLocaleTimeString();
+            
+            switch (message.type) {
+                case 'welcome':
+                    addMessage('system', `🎉 ${message.message}`);
+                    break;
+                    
+                case 'chat':
+                    const isOwn = message.clientId === clientId;
+                    const messageType = isOwn ? 'own' : 'chat';
+                    const sender = isOwn ? '我' : message.clientId;
+                    addMessage(messageType, `[${timestamp}] ${sender}: ${message.message}`);
+                    break;
+                    
+                case 'user_joined':
+                    if (message.clientId !== clientId) {
+                        addMessage('system', `👋 ${message.message} (在线人数: ${message.onlineCount})`);
+                    }
+                    break;
+                    
+                case 'user_left':
+                    addMessage('system', `👋 ${message.message} (在线人数: ${message.onlineCount})`);
+                    break;
+                    
+                case 'pong':
+                    addMessage('system', '💓 心跳响应');
+                    break;
+                    
+                case 'error':
+                    addMessage('error', `❌ 错误: ${message.message}`);
+                    break;
+                    
+                default:
+                    addMessage('system', `📨 收到消息: ${JSON.stringify(message)}`);
+            }
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || !isConnected) return;
+            
+            try {
+                ws.send(JSON.stringify({
+                    type: 'chat',
+                    content: message,
+                    timestamp: new Date().toISOString()
+                }));
+                
+                messageInput.value = '';
+            } catch (error) {
+                addMessage('error', `发送失败: ${error.message}`);
+            }
+        }
+        
+        // 发送心跳
+        function sendPing() {
+            if (!isConnected) {
+                addMessage('error', '未连接到服务器');
+                return;
+            }
+            
+            try {
+                ws.send(JSON.stringify({
+                    type: 'ping',
+                    timestamp: new Date().toISOString()
+                }));
+            } catch (error) {
+                addMessage('error', `发送心跳失败: ${error.message}`);
+            }
+        }
+        
+        // 添加消息到界面
+        function addMessage(type, content) {
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${type}`;
+            messageEl.textContent = content;
+            
+            messagesEl.appendChild(messageEl);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+        
+        // 更新连接状态
+        function updateStatus(status, text) {
+            statusEl.className = `status ${status}`;
+            statusEl.textContent = text;
+        }
+        
+        // 清空消息
+        function clearMessages() {
+            messagesEl.innerHTML = '';
+        }
+        
+        // 显示帮助
+        function showHelp() {
+            addMessage('system', '📖 使用说明:');
+            addMessage('system', '1. 输入服务器地址和客户端ID（可选）');
+            addMessage('system', '2. 点击"连接"按钮连接到服务器');
+            addMessage('system', '3. 在输入框中输入消息并发送');
+            addMessage('system', '4. 使用"发送心跳"测试连接');
+            addMessage('system', '5. 点击"断开"按钮断开连接');
+        }
+        
+        // 事件监听
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 页面加载完成后显示帮助
+        window.addEventListener('load', function() {
+            showHelp();
+        });
+    </script>
+</body>
+</html>

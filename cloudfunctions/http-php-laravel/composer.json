@@ -1,0 +1,11 @@
+{
+  "name": "http-php-laravel",
+  "description": "Laravel HTTP function for CloudBase",
+  "require": {
+    "php": ">=7.4",
+    "laravel/framework": "^8.0 || ^9.0 || ^10.0"
+  },
+  "scripts": {
+    "post-root-package-install": ["@php -r \"file_exists('.env') || copy('.env.example', '.env');\""]
+  }
+}

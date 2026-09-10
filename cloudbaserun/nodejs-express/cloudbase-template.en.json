@@ -1,0 +1,58 @@
+{
+  "identifier": "nodejs-express",
+  "lang": "en",
+  "funcTypes": [
+    "tcbrContainer"
+  ],
+  "title": "Express CloudBase Run",
+  "titleIcon": "",
+  "description": "Express framework CloudBase Run container deployment example",
+  "tags": [
+    "nodejs",
+    "express",
+    "web-framework"
+  ],
+  "sampleCode": "",
+  "language": "Nodejs",
+  "runtimeVersion": "Nodejs18.15",
+  "isCompile": false,
+  "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-express-example.zip",
+  "zipFileStore": "",
+  "imagePath": "crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-express-example:v1.0.0",
+  "containerPort": 3000,
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-express",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-express"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudbaserun/nodejs-express"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudbaserun/nodejs-express"
+      }
+    }
+  ],
+  "category": "framework",
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/cbrf-template-express-example.zip",
+    "zipSha": "",
+    "uploadedAt": 0,
+    "legacyTags": [],
+    "localOnly": true
+  }
+}

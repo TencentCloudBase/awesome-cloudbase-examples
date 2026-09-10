@@ -1,0 +1,12 @@
+{
+  "name": "http-nodejs-express",
+  "version": "1.0.0",
+  "description": "使用 Express 框架的 HTTP 函数模板 / HTTP function template using the Express framework",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

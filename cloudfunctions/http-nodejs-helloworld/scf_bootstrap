@@ -1,0 +1,4 @@
+#!/bin/bash
+# CloudBase HTTP 函数启动脚本：启动 Node.js HTTP 服务并监听 9000 端口
+# CloudBase HTTP function bootstrap: start the Node.js HTTP server on port 9000
+exec node index.js

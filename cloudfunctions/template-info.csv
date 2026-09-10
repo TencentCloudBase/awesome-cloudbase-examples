@@ -1,0 +1,3885 @@
+﻿标识,函数类型,题图,模板标题,编程语言（页面展示）,运行时版本,入口函数名称,是否是编译型语言,ZipFile 地址,zipFile文件,描述,标签组,说明示例,镜像路径,服务端口,对外隐藏,排序,跳转链接,语言,陈列页面,Git仓库地址（默认github）,模板归类,服务环境变量,目标平台,模板ID,git仓库列表,使用指引
+openclaw,"[""tcbrContainer"",""scfWeb""]",https://qcloudimg.tencent-cloud.cn/raw/1336503cf5d90e9ae308a71129fd044e.svg,OpenClaw,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/ai/agent/templates_tcbr_zip/openclaw-js-0.0.1.zip,,"快速接入开源 AI 助手""龙虾AI""、支持 SSE 流式返回，实时响应、支持 JWT Token 用户身份识别","[""Agent 开发平台""]",,crunbuild-az-new.tencentcloudcr.com/cloudbase/openclaw-js:0.0.1,9000,否,2,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/openclaw-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""请输入 OpenClaw Gateway Token（API 密钥）"",""key"":""OPENCLAW_GATEWAY_TOKEN""},{""visible"":true,""placeholder"":""请输入 OpenClaw API 基础 URL"",""key"":""OPENCLAW_BASE_URL""},{""visible"":true,""placeholder"":""请输入 OpenClaw Agent ID"",""value"":""main"",""key"":""OPENCLAW_AGENT_ID""}]","[""国内站""]",demo-nscqrv3j,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/openclaw-js""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/openclaw-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/openclaw-js""}}]",查看环境变量[填写指南](https://docs.cloudbase.net/ai/agent-development/frameworks/openclaw)，如需部署开源版本，[点击前往](https://tcb.cloud.tencent.com/dev#/lighthouse/create?blueprintType=APP_OS&blueprintId=lhbp-2jn60c9c)
+dify-py-en,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/42daad18f5376a08367c027c4b59d50a.png,Dify,Python,Python3.10,,否,https://tcb.cloud.tencent.com/cloud-run-function-template/dify-agent.zip,,"You can connect to the Dify official website and open source deployment versions. Support dialogue API, support streaming and blocking responses, support Agent mode tool calls, support JWT authentication integration","[""Agent dev platform""]","Support Dify dialogue API, support streaming and blocking responses, support Agent mode tool calls, support JWT authentication integration",crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-dify-python-agent:latest,9000,,100,,英文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/dify-python,创建AI Agent服务,"[{""visible"":true,""placeholder"":""Please enter the API Key of Dify platform"",""key"":""DIFY_API_KEY""},{""visible"":true,""placeholder"":""Please enter the basic URL of the Dify platform"",""value"":""https://api.dify.ai/v1"",""key"":""DIFY_API_BASE""}]","[""国内站""]",demo-9kbl6coz,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/dify-python""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/dify-python""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/dify-python""}}]","View [Get API Key Document](https://docs.dify.ai/zh/use-dify/publish/developing-with-apis)，To deploy the open-source version, [click to go](https://tcb.cloud.tencent.com/dev#/lighthouse/create?blueprintType=APP_OS&blueprintId=lhbp-hvd5b064)"
+n8n-en,"[""tcbrContainer"",""scfWeb""]",https://qcloudimg.tencent-cloud.cn/raw/644f18b601598150f32ca2f668d08603.svg,n8n,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/ai/agent/templates_tcbr_zip/n8n-js-v0.0.1.zip,,"Can connect to the n8n official website and open source deployment versions. Support connecting n8n workflows through n8n webhooks, support streaming response, and support OpenTelemetry observability","[""Agent dev platform""]",,crunbuild-az-new.tencentcloudcr.com/cloudbase/n8n-js:v0.0.1,9000,,80,,英文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/n8n-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""Please enter the n8n Webhook URL from the 'When chat message received' node"",""key"":""N8N_WEBHOOK_URL""}]","[""国内站""]",demo-oph7qmar,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/n8n-js""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/n8n-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/n8n-js""}}]","View [configuration document](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/n8n-js#n8n-workflow-%E9%85%8D%E7%BD%AE)，To deploy the open source version, [click to go]((https://tcb.cloud.tencent.com/dev#/lighthouse/create?blueprintType=APP_OS&blueprintId=lhbp-5utfah5i))"
+n8n,"[""tcbrContainer"",""scfWeb""]",https://qcloudimg.tencent-cloud.cn/raw/644f18b601598150f32ca2f668d08603.svg,n8n,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/ai/agent/templates_tcbr_zip/n8n-js-v0.0.1.zip,,可以对接 n8n 官网和开源部署版本。支持通过 n8n Webhook 连接 n8n 工作流、支持流式响应、支持 OpenTelemetry 可观测性,"[""Agent 开发平台""]",,crunbuild-az-new.tencentcloudcr.com/cloudbase/n8n-js:v0.0.1,9000,否,80,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/n8n-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""请输入 n8n Webhook URL，来自 \""When chat message received\"" 节点"",""key"":""N8N_WEBHOOK_URL""}]","[""国内站""]",demo-oph7qmar,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/n8n-js""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/n8n-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/n8n-js""}}]",查看[配置文档](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/n8n-js#n8n-workflow-%E9%85%8D%E7%BD%AE)，如需部署开源版本，[点击前往](https://tcb.cloud.tencent.com/dev#/lighthouse/create?blueprintType=APP_OS&blueprintId=lhbp-5utfah5i)
+openclaw-en,"[""tcbrContainer"",""scfWeb""]",https://qcloudimg.tencent-cloud.cn/raw/1336503cf5d90e9ae308a71129fd044e.svg,OpenClaw,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/ai/agent/templates_tcbr_zip/openclaw-js-0.0.1.zip,,"Quickly integrate the open-source AI assistant ""Lobster AI,"" supporting SSE streaming responses, real-time interaction, and JWT token-based user authentication","[""Agent dev platform""]",,crunbuild-az-new.tencentcloudcr.com/cloudbase/openclaw-js:0.0.1,9000,,2,,英文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/openclaw-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""Please enter the OpenClaw Gateway Token (API key)"",""key"":""OPENCLAW_GATEWAY_TOKEN""},{""visible"":true,""placeholder"":""Please enter the OpenClaw API base URL"",""key"":""OPENCLAW_BASE_URL""},{""visible"":true,""placeholder"":""Please enter OpenClaw Agent ID"",""value"":""main"",""key"":""OPENCLAW_AGENT_ID""}]","[""国内站""]",demo-nscqrv3j,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/openclaw-js""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/openclaw-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/openclaw-js""}}]","View the guide for filling in [environment variables]((https://docs.cloudbase.net/ai/agent-development/frameworks/openclaw)), To deploy the open source version, [click to go]((https://tcb.cloud.tencent.com/dev#/lighthouse/create?blueprintType=APP_OS&blueprintId=lhbp-2jn60c9c))"
+scf-golang-helloworld,"[""scfFunc""]",,Golang 空白模版,Go,Go1,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/f19062d0e8120b92c2f497400f64c096-scf-golang-helloworld.zip,Golang 语言空白 helloworld 模版,"[""Golang""]","这是云函数 Golang 语言的 空白 helloworld 模板，模板内仅包含入口文件。
+
+函数源码可以参考:
+
+[github](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-golang-helloworld)",,,,2,,中文,,,,,"[""国内站""]",,,
+scf-helloworld,"[""scfFunc""]",,Nodejs空白模板,Nodejs18.15,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/e8828e0cf867c39ba91925dc073f4704-helloworld.zip,Nodejs 语言 空白 helloworld 模板,"[""Nodejs""]",这是云函数 Nodejs 语言的 空白 helloworld 模板，模板内仅包含入口文件。,,,,1,,中文,,,,,"[""国内站""]",,,
+yuanqi,"[""scfWeb"",""tcbrContainer""]",https://7163-qcloud-tcb-console-1258344699.tcb.qcloud.la/cloudbase-cms/upload/2025-07-03/k9kew8lmirmkk5hdk4lvbtigslpk5hii_.png,腾讯元器,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/ai/agent/templates_tcbr_zip/yuanqi-js-0.0.5.zip,,支持微信公众号智能体，支持工作流、插件、MCP、知识库、multi-agent等能力，低门槛搭建 agent,"[""Agent 开发平台""]",,crunbuild-az-new.tencentcloudcr.com/cloudbase/yuanqi-js:0.0.5,9000,否,9,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/yuanqi-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""请输入腾讯元器的智能体的 appid"",""value"":"""",""key"":""YUANQI_APP_ID""},{""visible"":true,""placeholder"":""请输入腾讯元器的智能体的 appkey"",""key"":""YUANQI_APP_KEY""}]","[""国内站""]",demo-kauuzvkz,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/yuanqi-js""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/yuanqi-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/yuanqi-js""}}]",去[腾讯元器](https://yuanqi.tencent.com/index)创建智能体，并获取智能体ID和Token，[查看文档](https://yuanqi.tencent.com/guide/publish-agent-api-documentation)
+adp-test,"[""scfWeb"",""tcbrContainer""]",,ADP-test,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/cloud-run-function-template/adp-js.zip,,,"[""Agent 开发平台""]",,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-adp-js:latest,,是,100,,中文,,,,"[{""visible"":true,""placeholder"":""请输入腾讯云智能体开发平台的 AppKey"",""key"":""ADP_APP_KEY""}]","[""国内站""]",demo-m9d3d57z,,
+nextjs-web-template,"[""tcbStatichost""]",https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/weda-uploader/2091a45cf2905b9c8f376e94b03b08d4-Next.js.svg,Nextjs Web 应用模板,javascript,Nodejs20.0,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/032f49be0d2ac3ffc58fbba07cce7592-web-cloudbase-nextjs-template1.zip,基于 Next.js、React 和腾讯云开发（CloudBase）的 SSG 静态站点模板，为开发者提供了快速构建全栈应用的能力。,"[""nextjs"",""web""]",,,,否,3,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/web/web-cloudbase-nextjs-template,,,"[""国内站"",""国际站""]",,,
+adp-js,"[""scfWeb"",""tcbrContainer""]",https://7163-qcloud-tcb-console-1258344699.tcb.qcloud.la/cloudbase-cms/upload/2025-07-11/430pv8zlerthmdt5z71el9p1ailwr4re_.ico,腾讯云智能体开发平台,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/ai/agent/templates_tcbr_zip/adp-js-0.0.4.zip,,可以在云开发中调用腾讯云智能体开发平台的 Agent，它提供了知识库、工作流、多智能体等能力,"[""Agent 开发平台""]",可以在云开发中调用腾讯云智能体开发平台的 Agent，它提供了知识库、工作流、多智能体等能力,crunbuild-az-new.tencentcloudcr.com/cloudbase/adp-js:0.0.4,9000,否,4,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/adp-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""请输入腾讯云智能体开发平台的 AppKey"",""fileld"":""应用密钥"",""key"":""ADP_APP_KEY""}]","[""国内站""]",demo-m9d3d57z,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/adp-js""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/adp-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/adp-js""}}]",点击查看[获取App Key的文档](https://cloud.tencent.com/document/product/1759/105560#8590003a-0a6d-4a8d-9a02-b706221a679d) 
+langgraph-py,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/3787775f4f90d30b25521414898a8d55.png,LangGraph（Python）,Python,Python3.10,,否,https://scf-template-1307578329.cos.ap-guangzhou.myqcloud.com/langgraph-python.zip,,支持与兼容 OpenAI 协议的大模型进行对话，您可以二次开发,"[""Agent 开发框架""]",支持与兼容 OpenAI 协议的大模型进行对话，您可以进行二次开发。,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-langgraph-python:v0.0.1,9000,否,3,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langgraph-python,创建AI Agent服务,"[{""placeholder"":""您可以选择已有模型，也可以输入新的模型名称"",""fileld"":""模型名"",""key"":""OPENAI_MODEL""},{""placeholder"":""请选择或输入兼容 OpenAI 协议的 Base UR"",""fileld"":""模型地址"",""key"":""OPENAI_BASE_URL""},{""placeholder"":""请输入模型调用的凭证"",""fileld"":""API Key"",""key"":""OPENAI_API_KEY""}]","[""国内站""]",demo-ph2lp9r7,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langgraph-python""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langgraph-python""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""http://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/langgraph-python""}}]",
+langgraph-js,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/3787775f4f90d30b25521414898a8d55.png,LangGraph（JavaScript）,Javascript,Nodejs20.19,,否,https://scf-template-1307578329.cos.ap-guangzhou.myqcloud.com/langgraph-js.zip,,使用 LangGraph StateGraph 构建工作流，支持 OpenAI 兼容的 LLM 接口，支持客户端工具调用，支持对话记忆（MemorySaver）,"[""Agent 开发框架""]",支持与兼容 OpenAI 协议的大模型进行对话，您可以进行二次开发,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-langgraph-ts:v0.0.1,9000,否,2,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langgraph-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""您可以选择已有模型，也可以输入新的模型名称"",""fileld"":""模型名"",""key"":""OPENAI_MODEL""},{""visible"":true,""placeholder"":""请选择或输入兼容 OpenAI 协议的 Base URL"",""fileld"":""模型地址"",""key"":""OPENAI_BASE_URL""},{""visible"":true,""placeholder"":""请输入模型调用的凭证"",""fileld"":""API Key"",""key"":""OPENAI_API_KEY""}]","[""国内站""]",demo-bk3z3mof,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langgraph-js""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langgraph-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/langgraph-js""}}]",
+wxpay-common,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/6e644c70a51e226eb2fc72e38937950c-wechat-pay.svg,微信支付通用模版,NodeJS,v22.22,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/550116924f3430e837d28679ee7ff9b9-pay-common.zip,微信支付通用模版,,"# 云托管微信支付通用模版
+
+这是一个微信支付相关的云托管服务，包含统一下单，订单查询，退款等功能。
+
+使用前，请确保已经配置相关环境变量或这在项目 ```config/config.js``` 中配置相关信息
+
+### 配置文件说明
+
+* jsapiNotifyUrl: 该参数可在云托管服务部署完成之后获取公网域名地址填写。
+* refundNotifyUrl: 该参数可在云托管服务部署完成之后获取公网域名地址填写。
+
+```
+module.exports = {
+    payConfig: {
+        // 下单回调通知 URL
+        jsapiNotifyUrl: '',
+        // 退款回调通知 URL
+        refundNotifyUrl: '',
+        // 商户 ID
+        mchId: '',
+        // 小程序 ID
+        appId: '',
+        // 商户序列号
+        mchSerialNo: '',
+        // 商户 API 密钥
+        mchAPIv3Key: '',
+        // 商户平台证书私钥
+        mchPrivateKey: '',
+        // 商户平台证书公钥
+        mchPublicKey: '',
+    }
+};
+```
+
+### 环境变量
+
+环境变量优先级大于配置文件，即若有环境变量，配置文件将会被覆盖。
+
+* WX_APP_ID: 小程序 ID
+* WX_MCH_ID: 商户 ID
+* WX_SERIAL_NO: 商户序列号
+* WX_KEY: 商户 API 密钥
+* WX_PRIVATE_KEY: 商户平台证书私钥
+* WX_PUBLIC_KEY: 商户平台证书公钥
+
+### 默认路由
+* 微信小程序-下单: /cloudrun/v1/pay/wxpay_order
+* 微信小程序-通过商户订单号查询订单: /cloudrun/v1/pay/wxpay_query_order_by_out_trade_no
+* 微信小程序-通过微信订单号查询订单: /cloudrun/v1/pay/wxpay_query_order_by_transaction_id
+* 微信小程序-退款: /cloudrun/v1/pay/wxpay_refund
+* 微信小程序-查询退款: /cloudrun/v1/pay/wxpay_query_refund
+* 微信小程序-支付成功回调: /cloudrun/v1/pay/unifiedOrderTrigger
+* 微信小程序-退款成功回调: /cloudrun/v1/pay/refundTrigger
+
+### 自定义支付逻辑处理
+
+在 ```services/orderService.js``` 中处理自定义逻辑
+
+```
+class OrderService {
+    constructor() {}
+
+    /**
+     * 创建订单
+     * @param {Object} params - 订单参数对象
+     * @param {string} params.out_trade_no - 商户订单号
+     * @param {description} params.description - 商品描述
+     * @param {Object} params.amount - 订单金额
+     * @param {integer} params.amount.total - 总金额
+     * @param {string} params.amount.currency - 货币类型
+     * @param {Object} params.payer - 支付者信息
+     * @param {string} params.openid - 用户标识
+     * @returns {boolean} 返回是否更新成功，true表示成功
+     */
+    async handlerUnified(params) {
+        console.info('handlerUnified success.');
+        return true;
+    }
+
+    /**
+     * 更新订单
+     * @param {Object} params - 要更新的订单参数对象
+     * @param {string} params.out_trade_no - 商户订单号
+     * @param {string} params.transaction_id - 微信支付订单号
+     * @param {string} params.trade_type - 交易类型
+     * @param {string} params.trade_state - 交易状态
+     * @param {Object} params.payer - 支付者信息
+     * @param {string} params.payer.openid - 用户标识
+     * @returns {boolean} 返回是否更新成功，true表示成功
+     */
+    async handlerUnifiedTrigger(params) {
+        console.info('handlerUnifiedTrigger success.');
+        return true;
+    }
+
+    /**
+     * 订单退款
+     * @param {Object} params - 退款请求参数对象
+     * @param {string} params.refund_id - 微信支付退款单号
+     * @param {string} params.out_refund_no - 商户退款单号
+     * @param {string} params.transaction_id - 微信支付订单号
+     * @param {string} params.out_trade_no - 商户订单号
+     * @param {string} params.channel - 退款渠道
+     * @param {string} params.user_received_account - 退款入账账户
+     * @param {string} params.status - 退款状态
+     * @param {Object} params.amount - 金额信息
+     * @param {integer} params.amount.total - 订单金额
+     * @param {integet} params.amount.refund - 退款金额
+     * @returns {boolean} 返回是否更新成功，true表示成功
+     */
+    async handlerRefund(params) {
+        console.info('handlerRefund success.');
+        return true;
+    }
+
+    /**
+     * 查询订单详情（退款触发相关）
+     * @param {Object} params - 查询参数对象
+     * @param {Object} params - 退款请求参数对象
+     * @param {string} params.refund_id - 微信支付退款单号
+     * @param {string} params.out_refund_no - 商户退款单号
+     * @param {string} params.transaction_id - 微信支付订单号
+     * @param {string} params.out_trade_no - 商户订单号
+     * @param {string} params.refund_status - 退款状态
+     * @param {Object} params.amount - 金额信息
+     * @param {integer} params.amount.total - 订单金额
+     * @param {integet} params.amount.refund - 退款金额
+     * @param {integer} params.amount.payer_total - 用户实际支付金额
+     * @param {integer} params.amount.payer_refund - 用户退款金额
+     * @returns {boolean} 返回是否更新成功，true表示成功
+     */
+    async handlerRefundTrigger(params) {
+        console.info('handlerRefundTrigger success.');
+        return true;
+    }
+}
+```
+### 微信小程序调用示例
+
+这里的云托管服务名称，我们以 ```pay-common``` 为例
+
+1、统一下单 
+
+```
+const res = await wx.cloud.callContainer({
+      path: '/cloud-run/custom/v1/pay/unifiedOrder',
+      method: 'POST',
+      header: {
+        'X-WX-SERVICE': 'pay-common',
+      },
+      data: {
+        'goods_id': 'xxxxxx',
+      },
+    });
+console.log(res);
+```",crunbuild-az-new.tencentcloudcr.com/cloudbase/pay-common:v0.1,3000,否,100,"	/platform-run/service/create?type=package&zipUrl=https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/pay-common.zip&serverName=wxpaycommon&port=3000",中文,,,,"[{""value"":""<小程序ID>"",""key"":""WX_APP_ID""},{""value"":""<商户ID>"",""key"":""WX_MCH_ID""},{""value"":""<商户序列号>"",""key"":""WX_SERIAL_NO""},{""value"":""<商户API密钥>"",""key"":""WX_KEY""},{""value"":""<商户平台证书私钥>"",""key"":""WX_PRIVATE_KEY""},{""value"":""<商户平台证书公钥>"",""key"":""WX_PUBLIC_KEY""}]","[""国内站""]",,,
+google-adk-py,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/a968489a84e6c523f8e6b353aca10015.png,Google Agent Development Kit,Python,Python3.10,,否,https://tcb.cloud.tencent.com/cloud-run-function-template/adk-python.zip,,支持与兼容 OpenAI 协议的大模型进行对话，您可以二次开发,"[""Agent 开发框架""]",支持与兼容 OpenAI 协议的大模型进行对话，您可以进行二次开发。,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-adk-python:latest,9000,否,5,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/adk-python,创建AI Agent服务,"[{""placeholder"":""您可以选择已有模型，也可以输入新的模型名称"",""fileld"":""模型名"",""value"":"""",""key"":""OPENAI_MODEL""},{""placeholder"":""请选择或输入兼容 OpenAI 协议的 Base URL"",""fileld"":""模型地址"",""key"":""OPENAI_BASE_URL""},{""placeholder"":""请输入模型调用的凭证"",""fileld"":""API Key"",""key"":""OPENAI_API_KEY""}]","[""国内站""]",demo-8fvhotl1,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/adk-python""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/adk-python""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/adk-python""}}]",
+python-mysql,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/a7436f833f386531f046891bb668fc31-MySQL.svg,Python 内网直连 MySQL,Python,Python 3.8+,main,否,https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/python-mysql.zip,,"云托管服务通过内网访问 MySQL 示例. 示例使用 Python (Flask) + SQLAlchemy 实现, 包含一套数据库 CRUD API 和一个调用 API 的前端页面.","[""python"",""flask"",""mysql""]","# Python + MySQL 云托管服务
+
+## 快速开始
+
+### 配置 MySQL 连接参数
+
+1. 初始化 MySQL 参考[文档](https://docs.cloudbase.net/database/configuration/db/tdsql/initialization)
+2. 前往云开发控制台, 选择 `数据库 - MySQL`, 在右上角点击 `连接数据库`, 在 `连接字符串` 标签页可以获得数据库实例可以获得连接参数 `host`, `port`, `database` 参数.
+3. [可选] 如果不希望使用管理员账号, 在弹窗中点击 `忘记密码` 按钮, 可以创建一套新的用户名密码.
+
+### 部署服务
+
+前往 [腾讯云云开发控制台](https://tcb.cloud.tencent.com/dev), 选择 `云托管`, 在 `创建服务` 区块选择 `通过模板部署`, 选择模版, 进入模板代码预览页面.
+在代码预览区, 找到 `.env` 文件, 点击右上角 `编辑` 按钮, 修改 MySQL 链接相关参数, 并点击 `保存` 按钮.
+
+```
+MYSQL_ADDRESS=<mysql-instance-host-and-port>
+MYSQL_USERNAME=<mysql-username>
+MYSQL_PASSWORD=<mysql-password>
+MYSQL_DATABASE=<mysql-database>
+```
+
+之后点击 `部署` 按钮, 等待部署完成. 部署完成后, 在云托管的 `服务列表` 页面, 点击 `服务名称` 进入服务详情页, 通过服务域名即可访问服务.
+
+## 本地调试
+
+### 环境要求
+
+- Python 3.8+
+- MySQL 5.7+ 或 MySQL 8.0+
+
+### 1. 克隆项目并安装依赖
+
+```bash
+# 克隆项目
+git clone https://github.com/TencentCloudBase/awesome-cloudbase-examples.git
+cd cloudbaserun/python-mysql
+
+# [可选] 使用国内镜像源以提高下载速度
+pip config set global.index-url https://mirrors.cloud.tencent.com/pypi/simple
+
+# 使用 pip 安装依赖
+pip install -r requirements.txt
+
+# 或者使用虚拟环境 (推荐)
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 2. 配置 MySQL 数据库
+
+编辑 .env 文件，修改为你的本地 MySQL 配置
+
+```bash
+MYSQL_USERNAME=your_username
+MYSQL_PASSWORD=your_password
+MYSQL_ADDRESS=localhost:port
+MYSQL_DATABASE=your_database
+# 可以用 PORT 环境变量指定其他端口
+PORT=8080
+```
+
+### 3. 启动本地开发服务器
+
+确保本地 MySQL 服务已启动
+
+```bash
+# 直接运行 Flask 应用
+python app.py
+```
+
+应用将在 `http://localhost:8080` 启动。
+
+### 4. 测试应用功能
+
+- 访问 `http://localhost:8080` 查看前端页面
+- 使用页面上的按钮测试计数器功能：
+  - 点击 ""增加"" 按钮增加计数
+  - 点击 ""清空"" 按钮重置计数
+- 或者直接调用 API 接口：
+
+  ```bash
+  # 获取当前计数
+  curl http://localhost:8080/api/count
+
+  # 增加计数
+  curl -X POST http://localhost:8080/api/count \
+    -H ""Content-Type: application/json"" \
+    -d '{""action"": ""inc""}'
+
+  # 清空计数
+  curl -X POST http://localhost:8080/api/count \
+    -H ""Content-Type: application/json"" \
+    -d '{""action"": ""clear""}'
+  ```
+
+### 常见问题排查
+
+- **数据库连接失败**：检查 `.env` 文件中的数据库配置和 MySQL 服务状态
+- **端口被占用**：修改 `app.py` 中的端口号或使用 `PORT` 环境变量
+- **依赖安装失败**：确保 Python 版本兼容，或使用虚拟环境
+- **权限问题**：确保 MySQL 用户有对应数据库的读写权限
+
+### 使用 Docker 进行本地调试（可选）
+
+```bash
+# 构建镜像
+docker build -t python-mysql-demo .
+
+# 运行容器（需要先启动 MySQL 容器）
+docker run --rm -p 8080:8080 python-mysql-demo
+```
+
+## Dockerfile 最佳实践
+
+请参考 [优化容器镜像](https://docs.cloudbase.net/run/develop/image-optimization)
+",crunbuild-az-new.tencentcloudcr.com/cloudbase/python-mysql:v0.0.1,8080,否,5,"	/platform-run/service/create?type=package&zipUrl=https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/python-mysql.zip&serverName=pythonmysql&port=8080",中文,,,,"[{""value"":""<mysql-instance-host-and-port>"",""key"":""MYSQL_ADDRESS""},{""value"":""<mysql-username>"",""key"":""MYSQL_USERNAME""},{""value"":""<mysql-password>"",""key"":""MYSQL_PASSWORD""},{""value"":""<mysql-database>"",""key"":""MYSQL_DATABASE""}]","[""国内站""]",,,
+react-web-template,"[""tcbStatichost""]",https://qcloudimg.tencent-cloud.cn/raw/78f13657d6172914ad3be3fe431220ab.svg,React Web 应用模板,javascript,Nodejs18.15,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/5cb6864bb998d00e02af98894fa96b28-raact-template.zip,基于 React、Vite 和腾讯云开发（CloudBase）的现代化 Web 应用模板,"[""react"",""web""]",,,,,1,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/web/cloudbase-react-template,,,"[""国内站"",""国际站""]",,,
+nuxt-web-template,"[""tcbStatichost""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/9a8a3606aed7695f0eed3ea0482876ef-nuxt.svg,Nuxt Web Application Template,javascript,Nodejs20.0,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/e3d34cf2c638e9bcbb39b3b19e1f865c-web-cloudbase-nuxt-template1.zip,"The SSG static site Template based on Nuxt 3, Vue 3 and Tencent CloudBase provides developers with the ability to quickly build full-stack applications.","[""nuxt"",""web""]",,,,否,4,,英文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/web/web-cloudbase-nuxt-template,,,"[""国内站"",""国际站""]",,,
+websocket,"[""scfWeb""]",,Websocket 模版(Nodejs),Nodejs18.15,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/2b3626f9e9dd838b572a873f3a0ecab7-scf-websockets.zip,Nodejs 语言 Websocket 模板,"[""HTTPFunc""]","这是 HTTP 云函数 Nodejs 语言的 Websocket 模板.
+
+源码详情请参考:
+
+[github](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/websockets)",,,,10,,中文,,,,,"[""国内站""]",,,
+ai-test,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/5f02790737e0ff71ab148cfd965d88b2.svg,测试模板,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/cloud-run-function-template/adp-js.zip,,这是测试模板,"[""Agent 开发平台""]",,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-adp-js:latest,,是,100,,中文,,,,,"[""国内站""]",,,
+scf-java-helloworld,"[""scfFunc""]",,Java 空白模板,Java,Java11,example.Hello::simpleHandler,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/1b6e7ad61888bf2a392a10748f1daa05-scf-java-helloworld-1.0.0.jar,Java 语言 空白 helloworld 模板,"[""Java""]","这是云函数 Java 语言的 空白 helloworld 模板，模板内仅包含入口文件。
+
+源码地址详情参考:
+
+[github](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-java-helloworld)",,,,2,,中文,,,,,"[""国内站""]",,,
+dify-py,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/42daad18f5376a08367c027c4b59d50a.png,Dify,Python,Python3.10,,否,https://tcb.cloud.tencent.com/cloud-run-function-template/dify-agent.zip,,可以对接 Dify 官网和开源部署版本。支持对话API、支持流式响应和阻塞响应、支持 Agent 模式工具调用、支持JWT 认证集成,"[""Agent 开发平台""]",支持 Dify 对话API、支持流式响应和阻塞响应、支持 Agent 模式工具调用、支持JWT 认证集成,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-dify-python-agent:latest,9000,否,100,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/dify-python,创建AI Agent服务,"[{""visible"":true,""placeholder"":""请输入 Dify 平台的 API Key "",""key"":""DIFY_API_KEY""},{""visible"":true,""placeholder"":""请输入 Dify 平台的基础 URL"",""value"":""https://api.dify.ai/v1"",""key"":""DIFY_API_BASE""}]","[""国内站""]",demo-9kbl6coz,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/dify-python""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/dify-python""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/dify-python""}}]",查看[获取 API Key 文档](https://docs.dify.ai/zh/use-dify/publish/developing-with-apis)，如需部署开源版本，[点击前往](https://tcb.cloud.tencent.com/dev#/lighthouse/create?blueprintType=APP_OS&blueprintId=lhbp-hvd5b064)
+scf-php-helloworld,"[""scfFunc""]",,Php空白模板,Php,Php8.0,index.main_handler,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/9963d168533a9a6307eb12f981a4d64c-scf-php-helloworld.zip,Php 语言 空白 helloworld 模板,"[""PHP""]","这是云函数 Php 语言的 空白 helloworld 模板，模板内仅包含入口文件。
+
+源码地址请参考:
+
+[github](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-php-helloworld)",,,,2,,中文,,,,,"[""国内站""]",,,
+langchain-js,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/e59d21e150b8a6458a1ee799e15af645.svg,LangChain,Javascript,Nodejs20.19,,否,https://scf-template-1307578329.cos.ap-guangzhou.myqcloud.com/langchain-js.zip,,使用 OpenAI 协议兼容的 LLM 接口，支持对话记忆（MemorySaver），JWT 认证集成、SSE 流式传输等特性,"[""Agent 开发框架""]",支持与兼容 OpenAI 协议的大模型进行对话，您可以进行二次开发,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-langchain-ts:v0.0.1,9000,否,3,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langchain-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""您可以选择已有模型，也可以输入新的模型名称"",""fileld"":""模型名"",""key"":""OPENAI_MODEL""},{""visible"":true,""placeholder"":""请选择或输入兼容 OpenAI 协议的 Base URL"",""fileld"":""模型地址"",""key"":""OPENAI_BASE_URL""},{""visible"":true,""placeholder"":""请输入模型调用的凭证"",""fileld"":""API Key"",""key"":""OPENAI_API_KEY""}]","[""国内站""]",demo-0oogh4gz,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langchain-js""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/langchain-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/langchain-js""}}]",
+nodejs-mysql,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/1e585b61c132ad870ced777b2c5059a1-MySQL.svg,Nodejs 内网直连 MySQL,Nodejs,Nodejs 18+,main,否,https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/nodejs-mysql.zip,,"云托管服务通过内网访问 MySQL 示例. 示例使用 Nodejs (express) + mysql2 实现, 包含一套数据库 CRUD API 和一个调用 API 的前端页面.","[""express"",""mysql"",""nodejs""]","# Nodejs + MySQL 云托管服务
+
+## 快速开始
+
+### 配置 MySQL 连接参数
+
+1. 初始化 MySQL 参考 [开通及使用文档](https://docs.cloudbase.net/database/configuration/db/tdsql/initialization).
+2. 前往云开发控制台, 选择 `数据库 - MySQL`, 在右上角点击 `连接数据库`, 在 `连接字符串` 标签页可以获得数据库实例可以获得连接参数 `host`, `port`, `database` 参数.
+3. [可选] 如果不希望使用管理员账号, 在弹窗中点击 `忘记密码` 按钮, 可以创建一套新的用户名密码.
+
+### 部署服务
+
+前往 [腾讯云云开发控制台](https://tcb.cloud.tencent.com/dev), 选择 `云托管`, 在 `创建服务` 区块选择 `通过模板部署`, 选择模版, 进入模板代码预览页面.
+在代码预览区, 找到 `.env` 文件, 点击右上角 `编辑` 按钮, 修改 MySQL 链接相关参数, 并点击 `保存` 按钮.
+
+```
+MYSQL_ADDRESS=<mysql-instance-host>:<mysql-instance-port>
+MYSQL_USERNAME=<mysql-username>
+MYSQL_PASSWORD=<mysql-password>
+MYSQL_DATABASE=<mysql-database>
+```
+
+之后点击 `部署` 按钮, 等待部署完成. 部署完成后, 在云托管的 `服务列表` 页面, 点击 `服务名称` 进入服务详情页, 通过服务域名即可访问服务.
+
+## 本地调试
+
+### 环境要求
+
+- Nodejs 18+
+- MySQL 5.7+ 或 MySQL 8.0+
+
+### 1. 克隆项目并安装依赖
+
+```bash
+# 克隆项目
+git clone https://github.com/TencentCloudBase/awesome-cloudbase-examples.git
+cd cloudbaserun/nodejs-mysql
+
+# [可选] 使用国内镜像源以提高下载速度
+npm config set registry https://mirrors.cloud.tencent.com/npm/
+# 使用 npm 安装依赖
+npm install
+```
+
+### 2. 配置 MySQL 数据库
+
+编辑 .env 文件，修改为你的本地 MySQL 配置
+
+```bash
+MYSQL_USERNAME=your_username
+MYSQL_PASSWORD=your_password
+MYSQL_ADDRESS=localhost:port
+MYSQL_DATABASE=your_database
+# 可以用 PORT 环境变量指定其他端口
+PORT=8080
+```
+
+### 3. 启动本地开发服务器
+
+确保本地 MySQL 服务已启动
+
+```bash
+npm start
+```
+
+应用将在 `http://localhost:8080` 启动。
+
+### 4. 测试应用功能
+
+- 访问 `http://localhost:8080` 查看前端页面
+- 使用页面上的按钮测试计数器功能：
+  - 点击 ""增加"" 按钮增加计数
+  - 点击 ""清空"" 按钮重置计数
+- 或者直接调用 API 接口：
+
+  ```bash
+  # 获取当前计数
+  curl http://localhost:8080/api/count
+
+  # 增加计数
+  curl -X POST http://localhost:8080/api/count \
+    -H ""Content-Type: application/json"" \
+    -d '{""action"": ""inc""}'
+
+  # 清空计数
+  curl -X POST http://localhost:8080/api/count \
+    -H ""Content-Type: application/json"" \
+    -d '{""action"": ""clear""}'
+  ```
+
+### 常见问题排查
+
+- **数据库连接失败**：检查 `.env` 文件中的数据库配置和 MySQL 服务状态
+- **端口被占用**：修改 `app.js` 中的端口号或使用 `PORT` 环境变量
+- **权限问题**：确保 MySQL 用户有对应数据库的读写权限
+
+### 使用 Docker 进行本地调试（可选）
+
+```bash
+# 构建镜像
+docker build -t nodejs-mysql-demo .
+
+# 运行容器（需要先启动 MySQL 容器）
+docker run --rm -p 8080:8080 nodejs-mysql-demo
+```
+
+## Dockerfile 最佳实践
+
+请参考 [优化容器镜像](https://docs.cloudbase.net/run/develop/image-optimization)
+",crunbuild-az-new.tencentcloudcr.com/cloudbase/nodejs-mysql:v0.0.1,8080,否,5,"	/platform-run/service/create?type=package&zipUrl=https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/nodejs-mysql.zip&serverName=nodejsmysql&port=8080",中文,,,,"[{""value"":""<mysql-instance-host>:<mysql-instance-port>"",""key"":""MYSQL_ADDRESS""},{""value"":""<mysql-username>"",""key"":""MYSQL_USERNAME""},{""value"":""<mysql-password>"",""key"":""MYSQL_PASSWORD""},{""value"":""<mysql-database>"",""key"":""MYSQL_DATABASE""}]","[""国内站""]",,,
+react-web-template,"[""tcbStatichost""]",https://qcloudimg.tencent-cloud.cn/raw/78f13657d6172914ad3be3fe431220ab.svg,React Web Application Template,javascript,Nodejs18.15,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/339dbb83d1b131f48d3a8b652749e6ce-raact-template.zip,"Modern Web Application Template based on React, Vite, and Tencent CloudBase","[""react"",""web""]",,,,,1,,英文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/web/cloudbase-react-template,,,"[""国际站"",""国内站""]",,,
+vue-web-template,"[""tcbStatichost""]",https://qcloudimg.tencent-cloud.cn/raw/4e832fa8ee80bbeb1fe2bd1deb753cba.svg,Vue Web Application Template,javascript,Nodejs18.15,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/841bf653996c331404dad4a4223c1a37-vue-template.zip,"Modern Web Application Template based on Vue3, Vite and Tencent CloudBase","[""vue"",""web""]",,,,,2,,英文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/web/cloudbase-vue-template,,,"[""国际站"",""国内站""]",,,
+scf-integration-wechat-notify,"[""scfFunc""]",,集成中心微信通用回调,nodejs,js20,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/51ee17110429d007ed0b68cefe51702f-wechat-notify.zip,集成中心微信通用回调,,,,,,100,,中文,,,,,"[""国内站"",""国际站""]",,,
+nuxt-web-template,"[""tcbStatichost""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/a53b4b9b0df40309c63243969180a905-nuxt.svg,Nuxt Web 应用模板,javascript,Nodejs20.0,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/648a20932e76a9268a2c09994c6cb222-web-cloudbase-nuxt-template1.zip,基于 Nuxt 3、Vue 3 和腾讯云开发（CloudBase）的 SSG 静态站点模板，为开发者提供了快速构建全栈应用的能力,"[""nuxt"",""web""]",,,,否,4,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/web/web-cloudbase-nuxt-template,,,"[""国内站"",""国际站""]",,,
+scf-python-helloworld,"[""scfFunc""]",,Python空白模板,Python3.9,Python3.9,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/5caf215502e1b32a9f6ab1c1458e7abf-python-helloworld.zip,Python 语言 空白 helloworld 模板,"[""Python""]",这是云函数 Python 语言的 空白 helloworld 模板，模板内仅包含入口文件。,,,,1,,中文,,,,,"[""国内站""]",,,
+nextjs-web-template,"[""tcbStatichost""]",https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/weda-uploader/2091a45cf2905b9c8f376e94b03b08d4-Next.js.svg,Nextjs Web Application Template,javascript,Nodejs20.0,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/c323fe7f469e8699f3ebc198cb277153-web-cloudbase-nextjs-template1.zip,"The SSG static site Template based on Next.js, React, and Tencent CloudBase provides developers the ability to quickly build full-stack applications.","[""nextjs"",""web""]",,,,否,3,,英文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/web/web-cloudbase-nextjs-template,,,"[""国际站"",""国内站""]",,,
+vue-web-template,"[""tcbStatichost""]",https://qcloudimg.tencent-cloud.cn/raw/4e832fa8ee80bbeb1fe2bd1deb753cba.svg,Vue Web 应用模板,javascript,Nodejs18.15,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/6d1eb4965d3e7dd25dfa62bd8f8d4a39-vue-template.zip,基于 Vue 3、Vite 和腾讯云开发（CloudBase）的现代化 Web 应用模板,"[""vue"",""web""]",,,,,2,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/web/cloudbase-vue-template,,,"[""国内站"",""国际站""]",,,
+cloudbase-agent-v2,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/5f02790737e0ff71ab148cfd965d88b2.svg,云开发 Agent 模板,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/ai/agent/templates_tcbr_zip/cloudbase-js-0.0.1.zip,,云开发开源Agent，支持功能如下：MCP、语音功能、数据模型、文件上传、多会话、知识库、联网搜索、人设与回复约束、开场白、问题建议。,"[""Agent 开发平台""]",,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudbase-js:0.0.1,9000,是,100,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/cloudbase-js,创建AI Agent服务,"[{""visible"":true,""placeholder"":""请输入云开发的服务端 API Key"",""fileld"":""CLOUDBASE_APIKEY"",""key"":""CLOUDBASE_APIKEY""}]","[""国内站""]",,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/cloudbase-js""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/cloudbase-js""}}]",点击去[获取 API Key](./dev#/env/apikey)
+yuanqi-js,"[""tcbrFunc""]",https://7163-qcloud-tcb-console-1258344699.tcb.qcloud.la/cloudbase-cms/upload/2025-07-03/k9kew8lmirmkk5hdk4lvbtigslpk5hii_.png,腾讯元器（旧版）,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/cloud-run-function-template/cloudbase-custom-yuanqi-agent.zip,,提供 1 亿免费 token，支持微信支付MCP、微信公众号知识库、工作流编排、角色扮演等功能,"[""Agent 开发平台""]",可以对接元器旧版 Agent，它提供 1 亿免费 token，支持工作流编排、公众号知识库、角色扮演等功能,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-yuanqi-agent:0.0.1,,否,90,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudrunfunctions/yuanqi-agent,创建AI Agent服务,"[{""placeholder"":""请输入元器的智能体ID"",""fileld"":""智能体ID"",""key"":""YUAN_QI_AGENT_ID""},{""placeholder"":""请输入元器的 Token"",""fileld"":""元器Token"",""key"":""YUAN_QI_API_KEY""}]","[""国内站""]",,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudrunfunctions/yuanqi-agent""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudrunfunctions/yuanqi-agent""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudrunfunctions/yuanqi-agent""}}]",去[腾讯元器](https://yuanqi.tencent.com/index)创建智能体，并获取智能体ID和Token，[查看文档](https://docs.qq.com/aio/p/scxmsn78nzsuj64?p=BVUAh9OGFvSEFA7CgBOyED4)
+crewai-py,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/1a0b19f45c687e67a4c355c378ecfb0e.png,Crew AI,Python,Python3.10,,否,https://scf-template-1307578329.cos.ap-guangzhou.myqcloud.com/crewai-python.zip,,支持与兼容 OpenAI 协议的大模型进行对话，您可以二次开发,"[""Agent 开发框架""]",支持与兼容 OpenAI 协议的大模型进行对话，您可以进行二次开发,crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-crewai-python:v0.0.1,9000,否,7,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/crewai-python,创建AI Agent服务,"[{""placeholder"":""您可以选择已有模型，也可以输入新的模型名称"",""fileld"":""模型名"",""key"":""OPENAI_MODEL""},{""placeholder"":""请选择或输入兼容 OpenAI 协议的 Base URL"",""fileld"":""模型地址"",""key"":""OPENAI_BASE_URL""},{""placeholder"":""请输入模型调用的凭证"",""fileld"":""API Key"",""key"":""OPENAI_API_KEY""}]","[""国内站""]",demo-h56z4j4f,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/crewai-python""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/crewai-python""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/crewai-python""}}]",
+coze-py,"[""scfWeb"",""tcbrContainer""]",https://qcloudimg.tencent-cloud.cn/raw/85ba8656e75faf2c1c8f859c54f71182.png,扣子,Python,Python3.10,,否,https://tcb.cloud.tencent.com/ai/agent/templates_tcbr_zip/coze-python-0.0.6.zip,,支持对接扣子平台，扣子提供了AI写作、PPT生成、网页开发与AI设计等能力,"[""Agent 开发平台""]",支持对接扣子平台，扣子提供了AI写作、PPT生成、网页开发与AI设计等能力,crunbuild-az-new.tencentcloudcr.com/cloudbase/coze-python:0.0.6,9000,否,15,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/coze-python,创建AI Agent服务,"[{""placeholder"":""请输入 Coze 平台的 token"",""fileld"":""API Token"",""key"":""COZE_API_TOKEN""},{""placeholder"":""请输入 Coze 平台的 bot_id"",""fileld"":""智能体ID"",""key"":""COZE_BOT_ID""}]","[""国内站""]",demo-30c5swy5,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/coze-python""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/httpfunctions/coze-python""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/httpfunctions/coze-python""}}]",查看环境变量的[获取指南](https://www.coze.cn/open/playground/chat_v3)
+scf-integration-wechat-official,"[""scfFunc""]",,集成中心公众号模板,nodejs,js20,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/03bb949671781b9dddc7066876d2f651-offiaccount-0525.zip,,,,,,是,100,,中文及英文,,,,,"[""国内站"",""国际站""]",,,
+book-analytics-aggregate,"[""scfFunc""]",,图书数据分析模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/788f8b38243f9334e0bff5372c209e63-0ti52mg44f4eqjqn8t52xt6nveoho8tl_.zip,图书数据分析云函数，包含聚合操作示例,"[""数据库"",""云开发"",""JavaScript"",""数据分析"",""聚合查询"",""MongoDB""]","你可以使用这个云函数来进行图书数据分析。在小程序中测试调用这个云函数的示例代码如下：
+
+```js
+// 获取作者统计信息
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getAuthorStats'
+  }
+}).then(res => {
+  console.log('作者统计结果：', res)
+})
+
+// 响应示例
+{
+  ""data"": [
+    {
+      ""_id"": ""刘慈欣"",
+      ""totalBooks"": 3,
+      ""totalValue"": 167.7,
+      ""averagePrice"": 55.9,
+      ""books"": [
+        {
+          ""title"": ""三体"",
+          ""price"": 55.9,
+          ""isbn"": ""9787536692930""
+        },
+        {
+          ""title"": ""三体2：黑暗森林"",
+          ""price"": 55.9,
+          ""isbn"": ""9787536693937""
+        },
+        {
+          ""title"": ""三体3：死神永生"",
+          ""price"": 55.9,
+          ""isbn"": ""9787229030933""
+        }
+      ]
+    }
+    // ... 更多作者统计
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// 获取价格区间统计
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getPriceRangeStats'
+  }
+}).then(res => {
+  console.log('价格区间统计结果：', res)
+})
+
+// 响应示例
+{
+  ""data"": [
+    {
+      ""_id"": {
+        ""range"": ""30元以下""
+      },
+      ""count"": 15,
+      ""books"": [
+        {
+          ""title"": ""活着"",
+          ""author"": ""余华"",
+          ""price"": 28.0
+        }
+        // ... 更多图书
+      ],
+      ""averagePrice"": 25.5
+    }
+    // ... 其他价格区间
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// 获取最贵的5本书
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getTopPricedBooks',
+    data: {
+      limit: 5
+    }
+  }
+}).then(res => {
+  console.log('最贵图书结果：', res)
+})
+
+// 响应示例
+{
+  ""data"": [
+    {
+      ""_id"": ""64c9f5a79f6c8e0001b60b0a"",
+      ""title"": ""时间简史（珍藏版）"",
+      ""author"": ""霍金"",
+      ""price"": 199.0,
+      ""isbn"": ""9787535732309""
+    }
+    // ... 更多图书
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// 获取月度统计
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getMonthlyStats'
+  }
+}).then(res => {
+  console.log('月度统计结果：', res)
+})
+
+// 响应示例
+{
+  ""data"": [
+    {
+      ""_id"": {
+        ""year"": 2023,
+        ""month"": 8
+      },
+      ""count"": 25,
+      ""totalValue"": 1580.5,
+      ""books"": [
+        {
+          ""title"": ""三体"",
+          ""author"": ""刘慈欣"",
+          ""price"": 55.9
+        }
+        // ... 更多图书
+      ]
+    }
+    // ... 更多月份
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// 获取作者价格统计
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getAuthorPriceStats'
+  }
+}).then(res => {
+  console.log('作者价格统计结果：', res)
+})
+
+// 响应示例
+{
+  ""data"": [
+    {
+      ""_id"": ""刘慈欣"",
+      ""maxPrice"": 59.9,
+      ""minPrice"": 49.9,
+      ""averagePrice"": 55.9,
+      ""priceRange"": 10.0,
+      ""totalBooks"": 3
+    }
+    // ... 更多作者
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+```
+
+这个云函数演示了以下聚合操作的用法：
+
+1. `group`: 分组统计，可以按作者、价格区间等维度统计
+2. `sum`/`avg`/`max`/`min`: 常用的聚合函数
+3. `push`: 在分组结果中保存详细数据
+4. `sort`: 结果排序
+5. `match`: 对聚合结果进行筛选
+6. `switch`: 条件分支处理
+7. `subtract`/`multiply`: 数值计算
+8. `year`/`month`: 日期处理
+9. `limit`: 限制结果数量
+
+这些聚合操作可以帮助你进行复杂的数据分析，获取有价值的统计信息。你可以根据实际需求组合使用这些操作。",,,,1,,中文,,,,,"[""国际站"",""国内站""]",,,
+book-management-model,"[""scfFunc""]",,图书管理模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/95ff1e7bac9545358ad5bc1785efdc0f-ijgsdz8rmi1gwrqongaziby7lfa5mw6t_.zip,图书管理云函数，包含 models 操作示例,"[""云开发"",""数据库"",""CRUD"",""JavaScript"",""微信小程序"",""模型层""]","你可以使用这个云函数来管理图书。在小程序中测试调用这个云函数的示例代码如下：
+
+```js
+// 创建图书
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'createBook',
+      data: {
+        title: '三体',
+        author: '刘慈欣',
+        price: 39.9,
+        isbn: '9787536692930',
+      },
+    },
+  })
+  .then((res) => {
+    console.log('创建成功：', res);
+  });
+
+// 更新图书
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'updateBook',
+      data: {
+        id: 'xxx', // 图书ID
+        book: {
+          price: 45.0,
+        },
+      },
+    },
+  })
+  .then((res) => {
+    console.log('更新成功：', res);
+  });
+
+// 删除图书
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'deleteBook',
+      data: {
+        id: 'xxx', // 图书ID
+      },
+    },
+  })
+  .then((res) => {
+    console.log('删除成功：', res);
+  });
+
+// 获取单本图书
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'getBook',
+      data: {
+        id: 'xxx', // 图书ID
+      },
+    },
+  })
+  .then((res) => {
+    console.log('图书信息：', res);
+  });
+
+// 获取图书列表
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'listBooks',
+      data: {},
+    },
+  })
+  .then((res) => {
+    console.log('图书列表：', res);
+  });
+
+// 搜索图书
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'searchBooks',
+      data: {
+        keyword: '三体',
+      },
+    },
+  })
+  .then((res) => {
+    console.log('搜索结果：', res);
+  });
+```
+
+返回数据结构示例：
+
+```js
+// 创建图书返回
+{
+  ""data"": {
+    ""id"": ""xxx"" // 图书 id
+  }
+}
+
+// 更新/删除图书返回
+{
+  ""data"": {
+    ""count"": 1 // 影响行数
+  }
+}
+
+// 获取单本图书
+{
+  ""data"": {
+    ""_id"": ""xxx"",
+    ""title"": ""三体"",
+    ""author"": ""刘慈欣"",
+    ""price"": 39.9,
+    ""isbn"": ""9787536692930""
+    // ...
+  }
+}
+
+// 获取图书列表返回
+{
+  ""data"": {
+    ""records"": [
+      {
+        ""_id"": ""xxx"",
+        ""title"": ""三体"",
+        ""author"": ""刘慈欣"",
+        ""price"": 39.9,
+        ""isbn"": ""9787536692930""
+      }
+      // ...更多图书
+    ],
+    ""total"": 10
+  }
+}
+
+// 搜索图书返回
+{
+  ""data"": {
+    ""records"": [
+      {
+        ""_id"": ""xxx"",
+        ""title"": ""三体"",
+        ""author"": ""刘慈欣"",
+        ""price"": 39.9,
+        ""isbn"": ""9787536692930""
+      }
+      // ...更多图书
+    ],
+  }
+}
+```",,,,2,,中文,,,,,"[""国际站"",""国内站""]",,,
+custom-auth,"[""scfFunc""]",,自定义登录模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/31fdf780208d3f06b2faf8f1afbcbd89-mo6g16k8x9s81vjj3235jmyj7ixrq3np_--1-.zip,自定义鉴权登录云函数示例,"[""用户认证"",""安全加密"",""JWT"",""云开发"",""密码管理"",""Token验证""]","你可以使用这个云函数来管理用户认证。在小程序中测试调用这个云函数的示例代码如下：
+
+```js
+// 用户注册
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'register',
+    data: {
+      username: 'test@example.com',
+      password: 'password123'
+    }
+  }
+}).then(res => {
+  console.log('注册结果：', res)
+})
+
+// 响应示例
+{
+  ""userId"": ""user1""
+}
+
+// 用户登录
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'login',
+    data: {
+      username: 'test@example.com',
+      password: 'password123'
+    }
+  }
+}).then(res => {
+  console.log('登录结果：', res)
+})
+
+// 响应示例
+{
+  ""accessToken"": ""eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."",
+  ""refreshToken"": ""eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."",
+  ""userId"": ""user1""
+}
+
+// 刷新访问令牌
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'refreshToken',
+    data: {
+      refreshToken: ""eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...""
+    }
+  }
+}).then(res => {
+  console.log('刷新令牌结果：', res)
+})
+
+// 响应示例
+{
+  ""accessToken"": ""eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...""
+}
+
+// 获取用户信息
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'getUserInfo',
+    data: {
+      authorization: ""Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...""
+    }
+  }
+}).then(res => {
+  console.log('用户信息：', res)
+})
+
+// 响应示例
+{
+  ""_id"": ""user1"",
+  ""username"": ""test@example.com"",
+  ""createdAt"": ""2023-08-02T08:30:15.000Z"",
+  ""updatedAt"": ""2023-08-02T08:30:15.000Z""
+}
+
+// 修改密码
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'changePassword',
+    data: {
+      authorization: ""Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."",
+      oldPassword: ""password123"",
+      newPassword: ""newpassword123""
+    }
+  }
+}).then(res => {
+  console.log('修改密码结果：', res)
+})
+
+// 响应示例
+{
+  ""success"": true
+}
+
+// 更新用户信息
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'updateUserInfo',
+    data: {
+      authorization: ""Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."",
+      userInfo: {
+        nickname: ""新昵称"",
+        avatar: ""https://example.com/avatar.jpg""
+      }
+    }
+  }
+}).then(res => {
+  console.log('更新用户信息结果：', res)
+})
+
+// 响应示例
+{
+  ""success"": true
+}
+```
+
+这个认证系统包含以下特点：
+
+1. 安全性：
+
+   - SHA256加盐加密密码
+   - JWT身份验证
+   - 分离accessToken和refreshToken
+   - 防止敏感信息泄露
+
+2. 功能完整：
+
+   - 用户注册
+   - 用户登录
+   - 令牌刷新
+   - 获取用户信息
+   - 修改密码
+   - 更新用户信息
+
+3. 令牌管理：
+
+   - accessToken短期有效（2小时）
+   - refreshToken长期有效（7天）
+   - Bearer Token认证
+
+4. 错误处理：
+   - 用户名重复检查
+   - 密码验证
+   - 令牌有效性验证
+   - 完整的错误提示
+
+使用时注意：
+
+1. 需要修改config.js中的密钥
+2. 在生产环境中使用更强的密钥
+3. 可以根据需要调整令牌过期时间
+4. 建议添加请求频率限制",,,,3,,中文,,,,,"[""国际站"",""国内站""]",,,
+get-openid,"[""scfFunc""]",,OPENID 模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/fcdca8925823878da387beb1faf52e48-teomggc96q8wp0rmmleg6b4ablpi9apb_.zip,获取 openid 云函数示例,"[""微信小程序"",""云开发"",""云函数"",""用户鉴权"",""JavaScript""]","你可以使用这个云函数来获取用户的 OPENID。在小程序中测试调用这个云函数的示例代码如下：
+
+```js
+wx.cloud.callFunction({
+  name: 'get-openid',
+  complete: (res) => {
+    console.log('callFunction result: ', res);
+  },
+});
+```
+
+这将会在调试器中输出如下结构的对象：
+
+```json
+{
+  ""openid"": ""oxxxxxxxxxxxxxx"",
+  ""appid"": ""wxxxxxxxxxxx"",
+  ""unionid"": ""oxxx_xxxxxxxxxxxxx"" // 仅在满足 unionId 获取条件时返回
+}
+```",,,,4,,中文,,,,,"[""国际站"",""国内站""]",,,
+openapi-get-phonenumber,"[""scfFunc""]",,云调用解析用户手机号,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/97b65676ef712bda404bef7f62c271ec-gtc3bqxawrqjviz77g90e21m8d2yytqg_.zip,云调用获取用户手机号（需要在微信 IDE 重新下载和部署）,"[""微信小程序"",""云开发"",""云函数"",""wx-server-sdk"",""手机号获取"",""云调用"",""openapi"",""用户授权""]","在小程序端调用此云函数时，需要传入code参数：
+
+```javascript
+// 小程序端调用示例
+wx.cloud
+  .callFunction({
+    name: 'get-phoneNumber',
+    data: {
+      code: event.detail.code, // 从获取手机号按钮事件中获取
+    },
+  })
+  .then((res) => {
+    console.log('手机号信息：', res.result);
+  })
+  .catch((err) => {
+    console.error('获取手机号失败：', err);
+  });
+```
+
+这将会在调试器中输出如下结构的对象：
+
+```json
+{
+  ""errcode"": 0,
+  ""errmsg"": ""ok"",
+  ""phone_info"": {
+    ""phoneNumber"": ""xxxxxx"",
+    ""purePhoneNumber"": ""xxxxxx"",
+    ""countryCode"": 86,
+    ""watermark"": {
+      ""timestamp"": 1637744274,
+      ""appid"": ""xxxx""
+    }
+  }
+}
+```
+
+注意事项：
+
+1. 需要在微信小程序管理后台开启""获取手机号""功能
+2. 确保已经安装最新版本的wx-server-sdk
+3. code只能使用一次，且有效期为5分钟",,,,5,,中文,,,,,"[""国际站"",""国内站""]",,,
+post-management-collection,"[""scfFunc""]",,文章管理模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/6f25a15475c78c45fbe9a8868a0a036f-wz8csx138xckxorpvva4elh8x9bcgkrz_.zip,文章管理云函数，包含 collection 操作示例,"[""云开发"",""数据库"",""JavaScript"",""CRUD"",""分页查询"",""全文搜索""]","你可以使用这个云函数来管理文章。在小程序中测试调用这个云函数的示例代码如下：
+
+```js
+// 创建文章
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'createPost',
+    data: {
+      title: '我的第一篇文章',
+      content: '这是文章内容',
+      author: '张三',
+    }
+  }
+}).then(res => {
+  console.log('创建文章结果：', res)
+})
+
+// 响应示例
+{
+  ""id"": ""64c9f5a79f6c8e0001b60b0a"",
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// 更新文章
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'updatePost',
+    data: {
+      id: '64c9f5a79f6c8e0001b60b0a',
+      post: {
+        content: '更新后的文章内容'
+      }
+    }
+  }
+}).then(res => {
+  console.log('更新文章结果：', res)
+})
+
+// 响应示例
+{
+  ""id"": ""64c9f5a79f6c8e0001b60b0a"",
+  ""updated"": 1
+}
+
+// 删除文章
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'deletePost',
+    data: {
+      id: '64c9f5a79f6c8e0001b60b0a'
+    }
+  }
+}).then(res => {
+  console.log('删除文章结果：', res)
+})
+
+// 响应示例
+{
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1"",
+  ""deleted"": 1
+}
+
+// 获取单篇文章
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'getPost',
+    data: {
+      id: '64c9f5a79f6c8e0001b60b0a'
+    }
+  }
+}).then(res => {
+  console.log('获取文章结果：', res)
+})
+
+// 响应示例
+{
+  ""data"": [
+    {
+      ""_id"": ""64c9f5a79f6c8e0001b60b0a"",
+      ""title"": ""我的第一篇文章"",
+      ""content"": ""这是文章内容"",
+      ""author"": ""张三""
+      // ...
+    }
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// 分页获取文章列表
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'listPosts',
+    data: {
+      page: 1,
+      pageSize: 10
+    }
+  }
+}).then(res => {
+  console.log('获取文章列表结果：', res)
+})
+
+// 响应示例
+{
+  ""list"": [
+    {
+      ""_id"": ""64c9f5a79f6c8e0001b60b0a"",
+      ""title"": ""我的第一篇文章"",
+      ""content"": ""更新后的文章内容"",
+      ""author"": ""张三""
+      // ...
+    }
+    // ... 更多文章
+  ],
+  ""total"": 100,
+  ""page"": 1,
+  ""pageSize"": 10
+}
+
+// 搜索文章
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'searchPosts',
+    data: {
+      keyword: '技术'
+    }
+  }
+}).then(res => {
+  console.log('搜索文章结果：', res)
+})
+
+// 响应示例
+{
+  ""data"": [
+    {
+      ""_id"": ""64c9f5a79f6c8e0001b60b0a"",
+      ""title"": ""我的第一篇文章"",
+      ""content"": ""更新后的文章内容"",
+      ""author"": ""张三""
+      // ...
+    }
+    // 更多文章
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+```",,,,6,,中文,,,,,"[""国际站"",""国内站""]",,,
+transaction,"[""scfFunc""]",,账户转账模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/53d8f2779bca0200a7bba8850cf8332a-zdvy4znluicrkp9aj9mj7i4v3mklyf2n_.zip,账户交易云函数，包含事务操作示例,"[""数据库事务"",""金融系统"",""转账功能"",""云开发"",""事务处理"",""并发控制""]","你可以使用这个云函数来管理账户和交易。在小程序中测试调用这个云函数的示例代码如下：
+
+```js
+// 创建账户
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'createAccount',
+    data: {
+      name: '张三',
+      initialBalance: 1000
+    }
+  }
+}).then(res => {
+  console.log('创建账户结果：', res)
+})
+
+// 响应示例
+{
+  ""id"": ""xxx"",
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// 转账操作
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'transfer',
+    data: {
+      fromAccountId: 'account1',
+      toAccountId: 'account2',
+      amount: 100
+    }
+  }
+}).then(res => {
+  console.log('转账结果：', res)
+})
+
+// 响应示例
+{
+  ""success"": true,
+  ""recordId"": ""xxx""
+}
+
+// 批量转账
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'batchTransfer',
+    data: {
+      fromAccountId: 'account1',
+      transfers: [
+        { toAccountId: 'account2', amount: 50 },
+        { toAccountId: 'account3', amount: 50 }
+      ]
+    }
+  }
+}).then(res => {
+  console.log('批量转账结果：', res)
+})
+
+// 响应示例
+{
+  ""success"": true,
+  ""records"": [""xxx1"", ""xxx2""]
+}
+
+// 查询余额
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'getBalance',
+    data: {
+      accountId: 'account1'
+    }
+  }
+}).then(res => {
+  console.log('余额查询结果：', res)
+})
+
+// 响应示例
+{
+    ""result"": 800
+}
+
+
+// 查询交易历史
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'getTransactionHistory',
+    data: {
+      accountId: 'account1'
+    }
+  }
+}).then(res => {
+  console.log('交易历史：', res)
+})
+
+// 响应示例
+{
+  ""data"": [
+    {
+      ""_id"": ""record3"",
+      ""fromAccount"": ""account1"",
+      ""toAccount"": ""account3"",
+      ""amount"": 50,
+      ""status"": ""success"",
+      ""createdAt"": ""2023-08-02T08:30:15.000Z"",
+      ""updatedAt"": ""2023-08-02T08:30:15.000Z""
+    },
+    {
+      ""_id"": ""record2"",
+      ""fromAccount"": ""account1"",
+      ""toAccount"": ""account2"",
+      ""amount"": 50,
+      ""status"": ""success"",
+      ""createdAt"": ""2023-08-02T08:30:15.000Z"",
+      ""updatedAt"": ""2023-08-02T08:30:15.000Z""
+    },
+    {
+      ""_id"": ""record1"",
+      ""fromAccount"": ""account1"",
+      ""toAccount"": ""account2"",
+      ""amount"": 100,
+      ""status"": ""success"",
+      ""createdAt"": ""2023-08-02T08:30:15.000Z"",
+      ""updatedAt"": ""2023-08-02T08:30:15.000Z""
+    }
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+```",,,,7,,中文,,,,,"[""国际站"",""国内站""]",,,
+user-management-sql,"[""scfFunc""]",,用户管理 SQL 模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/97a52ca8d203e47c38cca6384a7a5fb1-8cex0gdeu9def8su03q4rljnw3ig716g_.zip,用户管理云函数，包含 sql 操作示例 （目前仅支持 select 语句）,"[""云开发"",""用户管理"",""数据库查询"",""微信小程序"",""云函数""]","你可以使用这个云函数来管理用户。
+
+当前仅开放了 select 语句，如果有其他 SQL 语句需求，请通过官方社群联系我们。
+
+在小程序中测试调用这个云函数的示例代码如下：
+
+```js
+
+// 获取单个用户
+wx.cloud.callFunction({
+  name: 'user-management',
+  data: {
+    action: 'getUser',
+    data: {
+      id: 'xxx'
+    }
+  }
+}).then(res => {
+  console.log('获取用户结果：', res)
+})
+
+// 响应示例
+{
+  ""_id"": ""xxx"",
+  ""username"": ""张三"",
+  ""email"": ""zhangsan@example.com"",
+  ""phone"": ""13900139000""
+  // ...
+}
+
+// 分页获取用户列表
+wx.cloud.callFunction({
+  name: 'user-management',
+  data: {
+    action: 'listUsers',
+    data: {
+      page: 1,
+      pageSize: 10
+    }
+  }
+}).then(res => {
+  console.log('获取用户列表结果：', res)
+})
+
+// 响应示例
+{
+  ""list"": [
+    {
+      ""_id"": ""xxx"",
+      ""username"": ""张三"",
+      ""email"": ""zhangsan@example.com"",
+      ""phone"": ""13900139000""
+    }
+    // ... 更多用户
+  ],
+  ""total"": 100,
+  ""page"": 1,
+  ""pageSize"": 10
+}
+
+// 搜索用户
+wx.cloud.callFunction({
+  name: 'user-management',
+  data: {
+    action: 'searchUsers',
+    data: {
+      keyword: '张三'
+    }
+  }
+}).then(res => {
+  console.log('搜索用户结果：', res)
+})
+
+// 响应示例
+[
+  {
+    ""id"": 1,
+    ""username"": ""张三"",
+    ""email"": ""zhangsan@example.com"",
+    ""phone"": ""13900139000"",
+  }
+  // ... 更多匹配的用户
+]
+```",,,,8,,中文,,,,,"[""国际站"",""国内站""]",,,
+wxpay-common,"[""scfFunc""]",,微信支付通用模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/6f9387bf53da6bdc4953e724e014a6bd-cy6xcoidvb8uq0b0he83vh9rh6ilk10z_.zip,微信支付通用模板,"[""微信支付"",""云函数"",""支付接口"",""订单管理"",""退款功能"",""小程序开发""]","这是一个微信支付相关的云函数,包含了统一下单、订单查询、退款等功能。
+
+使用前，请确保已经正确安装和配置 **小程序微信支付** 云模板。
+
+若未安装，可前往 模板中心-模板市场-小程序微信支付 进行安装。安装完成后，前往 模板中心-我的模板-小程序微信支付-参数设置，完成必要参数的配置。
+
+以下是调用示例:
+
+1. 统一下单:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-common',
+  data: {
+    type: 'wxpay_order',
+  },
+  success: (res) => {
+    console.log('下单成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""prepay_id"": ""wx2016121516****55928f9b1b2c0********""
+    //   }
+    // }
+  },
+  fail: (err) => {
+    console.error('下单失败', err);
+  },
+});
+```
+
+2. 通过商户订单号查询订单:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-common',
+  data: {
+    type: 'wxpay_query_order_by_out_trade_no',
+  },
+  success: (res) => {
+    console.log('查询成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_trade_no"": ""2024040118006666"",
+    //     ""transaction_id"": ""4200000001201801011234567890"",
+    //     ""trade_state"": ""SUCCESS"",
+    //     ""trade_state_desc"": ""支付成功""
+    //   }
+    // }
+  },
+});
+```
+
+3. 申请退款:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-common',
+  data: {
+    type: 'wxpay_refund',
+  },
+  success: (res) => {
+    console.log('退款申请成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_refund_no"": ""2024040118006666"",
+    //     ""refund_id"": ""50000000382019052709732678859"",
+    //     ""status"": ""SUCCESS""
+    //   }
+    // }
+  },
+});
+```
+
+4. 查询退款:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-common',
+  data: {
+    type: 'wxpay_refund_query',
+  },
+  success: (res) => {
+    console.log('退款查询成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_refund_no"": ""2024040118006666"",
+    //     ""refund_status"": ""SUCCESS"",
+    //     ""success_time"": ""2020-12-01T16:18:12+08:00""
+    //   }
+    // }
+  },
+});
+```",,,,9,,中文,,,,,"[""国际站"",""国内站""]",,,
+wxpay-product,"[""scfFunc""]",,商品下单模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/39f97560f88c8eab6c2a9e4e8adecaec-s0rx7ob09tbxnbgktfueem4nq8oagz74_.zip,微信支付云函数商品模板,"[""微信支付"",""订单系统"",""商品管理"",""支付流程"",""退款功能"",""数据库操作""]","这是一个完整的微信支付商品下单云函数示例,包含了商品查询、订单创建、支付、退款等完整流程。
+
+使用前，请确保已经正确安装和配置 **小程序微信支付** 云模板。
+
+若未安装，可前往 模板中心-模板市场-小程序微信支付 进行安装。安装完成后，前往 模板中心-我的模板-小程序微信支付-参数设置，完成必要参数的配置。
+
+以下是调用示例:
+
+1. 创建商品订单:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-product',
+  data: {
+    type: 'wxpay_order',
+    productId: 'product123', // 商品ID
+    count: 2, // 购买数量
+  },
+  success: (res) => {
+    console.log('下单成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""prepay_id"": ""wx2016121516****55928f9b1b2c0********"",
+    //     ""out_trade_no"": ""202404011800666688888""
+    //   }
+    // }
+  },
+});
+```
+
+2. 查询订单状态(通过商户订单号):
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-product',
+  data: {
+    type: 'wxpay_query_order_by_out_trade_no',
+    outTradeNo: '202404011800666688888',
+  },
+  success: (res) => {
+    console.log('查询成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_trade_no"": ""202404011800666688888"",
+    //     ""transaction_id"": ""4200000001202404011234567890"",
+    //     ""trade_state"": ""SUCCESS"",
+    //     ""trade_state_desc"": ""支付成功""
+    //   }
+    // }
+  },
+});
+```
+
+3. 申请退款:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-product',
+  data: {
+    type: 'wxpay_refund',
+    orderId: 'order123', // 订单ID
+  },
+  success: (res) => {
+    console.log('退款申请成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_refund_no"": ""202404011800777788888"",
+    //     ""refund_id"": ""50000000382019052709732678859"",
+    //     ""status"": ""SUCCESS""
+    //   }
+    // }
+  },
+});
+```
+
+4. 查询退款状态:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-product',
+  data: {
+    type: 'wxpay_refund_query',
+    outRefundNo: '202404011800777788888',
+  },
+  success: (res) => {
+    console.log('退款查询成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_refund_no"": ""202404011800777788888"",
+    //     ""refund_status"": ""SUCCESS"",
+    //     ""success_time"": ""2024-04-01T16:18:12+08:00"",
+    //     ""amount"": {
+    //       ""refund"": 100,
+    //       ""total"": 100,
+    //       ""currency"": ""CNY""
+    //     }
+    //   }
+    // }
+  },
+});
+```
+
+注意事项:
+
+1. 商品信息从数据库查询,不要从前端传入
+2. 用户openid从云函数上下文获取,不要从前端传入
+3. 订单相关信息需要存储到数据库
+4. 退款操作需要更新订单状态
+5. 建议对所有操作加入适当的错误处理",,,,10,,中文,,,,,"[""国际站"",""国内站""]",,,
+helloworld,"[""tcbrContainer""]",,函数型开发框架示例,Node.js,Nodejs20.18,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/7020a99bf6bc4cfb2bf450d2ad6d14b3-func-v2-template.zip,提供通过函数型框架开发云托管服务的示例,"[""helloworld""]","此模板为云托管函数开发框架的示例模板。
+
+使用此模板将会快速完成一个云托管服务的创建，创建完成后将会包含若干可调用函数：
+* 主路径：输出 “Hello world!”
+* echo：输出具体请求内容
+
+可以通过如下方式，在小程序中调用函数：
+```js
+// 容器调用必填环境id，不能为空
+const c1 = new wx.cloud.Cloud({
+    resourceEnv: '环境id'
+})
+await c1.init()
+ 
+const r1 = await c1.callContainer({
+    path: '/',   // 默认函数对应的请求路径
+    header: {
+        'X-WX-SERVICE': 'helloworld', // 填入创建时的函数名称 helloworld
+    },  
+    // 其余参数同 wx.request
+    method: 'GET',
+})
+console.log(r1) //输出 Hello world!
+const r2 = await c1.callContainer({
+    path: '/echo',   // echo 函数对应的请求路径
+    header: {
+        'X-WX-SERVICE': 'helloworld', // 填入创建时的函数名称 helloworld
+    },
+    // 其余参数同 wx.request
+    method: 'POST',
+    data: {
+        a: 1,
+        b: 2
+    }
+})
+console.log(r2)  //输出具体请求及时间
+```
+  
+详细的代码及可调用内容、或进一步的使用方式可见[模板仓库](https://github.com/TencentCloudBase/func-v2-template/tree/main)",crunbuild-az-new.tencentcloudcr.com/cloudbase/func-v2-template:v1.0.0,3000,否,1,,中文,,https://github.com/TencentCloudBase/func-v2-template.git;https://gitee.com/TencentCloudBase/func-v2-template.git,部署开源项目,,"[""国际站"",""国内站""]",,,
+gin,"[""tcbrContainer"",""scfWeb""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/cd946d0e7e8c1a22a43398a6b41f2d93-gin-color.svg,Gin 模板,Golang,Go1,main,是,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/59105b92ea22dfecba473fd153b77776-cloudrun-gin.zip,基于 Go 语言 Gin 框架实现的 HTTP 调用示例,"[""HTTPFunc"",""WebFramework"",""Golang"",""Gin""]","# 快速部署 Gin 应用
+
+源码详情请参考:
+
+* github: https://github.com/TencentCloudBase/cloudrun-gin
+* gitee: https://gitee.com/TencentCloudBase/cloudrun-gin",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-gin-example:v1.0.0,8080,,2,,中文,"[""platform-run""]",https://github.com/TencentCloudBase/cloudrun-gin.git;https://gitee.com/TencentCloudBase/cloudrun-gin.git,使用开源框架创建服务,,"[""国际站"",""国内站""]",,,
+django,"[""tcbrContainer"",""scfWeb""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/c00f664a239e237ba12d699c13366537-django-logo-positive.svg,Django 模板,Python,Python3.10,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/b7f3fd068cb30bd6d08deb49b7231548-cloudrun-django-app.zip,基于 Python 语言 Django 框架实现的 HTTP 调用示例,"[""Python"",""Django"",""HTTPFunc"",""WebFramework""]","# 快速部署 Django 应用
+
+源码详情请参考:
+
+* github: https://github.com/TencentCloudBase/cloudrun-django
+* gitee: https://gitee.com/TencentCloudBase/cloudrun-django",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-django-example:v1.0.0,8080,,3,,中文,"[""platform-run""]",https://github.com/TencentCloudBase/cloudrun-django.git;https://gitee.com/TencentCloudBase/cloudrun-django.git,使用开源框架创建服务,,"[""国际站"",""国内站""]",,,
+flask,"[""tcbrContainer"",""scfWeb""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/a43a2f509a02123f1b9275868452b1c3-flask-dark.svg,Flask 模板,Python,Python3.10,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/f508a581e171d539b55363483f1fb9da-cloudrun-flask-app.zip,基于 Python 语言 Flash 框架实现的 HTTP 调用示例,"[""Python"",""Flask"",""HTTPFunc"",""WebFramework""]","# 快速部署 Flask 应用
+
+源码详情请参考:
+
+* github: https://github.com/TencentCloudBase/cloudrun-flask
+* gitee: https://gitee.com/TencentCloudBase/cloudrun-flask",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-flask-example:v1.0.0,8080,,4,,中文,,https://github.com/TencentCloudBase/cloudrun-flask.git;https://gitee.com/TencentCloudBase/cloudrun-flask.git,使用开源框架创建服务,,"[""国际站"",""国内站""]",,,
+springboot,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/328d8d380a3913553d94f326558810f1-Spring_Boot.svg,Springboot 模板,Java,Java11,main,是,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/49174bd47addd35f28657bee08c1c69c-cloudrun-springboot-app.zip,基于 Java 语言框架 Spingboot 实现的 HTTP 调用示例,"[""Java"",""Springboot"",""HTTPFunc"",""WebFramework""]","# 快速部署 Springboot 应用
+
+源码详情请参考:
+
+* github: https://github.com/TencentCloudBase/cloudrun-springboot
+* gitee: https://gitee.com/TencentCloudBase/cloudrun-springboot",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-springboot-example:v1.0.0,8080,,5,,中文,"[""platform-run""]",https://github.com/TencentCloudBase/cloudrun-springboot.git;https://gitee.com/TencentCloudBase/cloudrun-springboot.git,使用开源框架创建服务,,"[""国内站"",""国际站""]",,,
+express,"[""tcbrContainer"",""scfWeb""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/fd8081e956a2608b586963017d0111f7-Express.svg,Express 模板,Nodejs,Nodejs,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/f5833f4d15023e8fca8bcc31ea571eeb-cloudrun-express.zip,基于 Nodejs 语言框架 Express 实现的 HTTP 调用示例,"[""Nodejs"",""Express"",""HTTPFunc"",""WebFramework""]","# 快速部署 Express 应用
+
+源码详情请参考
+
+* github: https://github.com/TencentCloudBase/cloudrun-express
+* gitee: https://gitee.com/TencentCloudBase/cloudrun-express",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-express-example:v1.0.0,3000,否,6,,中文,"[""platform-run""]",https://github.com/TencentCloudBase/cloudrun-express.git;https://gitee.com/TencentCloudBase/cloudrun-express.git,使用开源框架创建服务,,"[""国内站"",""国际站""]",,,
+nestjs,"[""tcbrContainer"",""scfWeb""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/cd48f6afd878239823f461784613c21b-Nest.js.svg,Nestjs 模板,Nodejs,Nodejs,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/9b42f9a08297fe259f6329d71ce76015-cloudrun-nestjs-app.zip,基于 Nodejs 语言框架 Nestjs 实现的 HTTP 调用示例,"[""Nodejs"",""Nestjs"",""HTTPFunc"",""WebFramework""]","# 快速部署 Nestjs 应用
+
+源码详情请参考:
+
+* github: https://github.com/TencentCloudBase/cloudrun-nestjs 
+* gitee: https://gitee.com/TencentCloudBase/cloudrun-nestjs",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-nestjs-example:v1.0.0,3000,,7,,中文,,https://github.com/TencentCloudBase/cloudrun-nestjs.git;https://gitee.com/TencentCloudBase/cloudrun-nestjs,,,"[""国际站"",""国内站""]",,,
+fastapi,"[""tcbrContainer"",""scfWeb""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/339a9c05a139861acae41b63d2370277-FastAPI.svg,FastAPI 模板,Python,Python3.10,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/c589866f6f05ccb2ce12bf1b0e1b0ea7-cloudrun-fastapi-app.zip,基于 Python 框架 FastAPI 的 HTTP 服务,"[""python"",""fastapi""]","# 快速部署 FastAPI 应用
+
+源码详情请参考:
+
+* github: https://github.com/TencentCloudBase/cloudrun-fastapi
+* gitee: https://gitee.com/TencentCloudBase/cloudrun-fastapi",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-fastapi-example:v1.0.0,8080,,8,,中文,,https://github.com/TencentCloudBase/cloudrun-fastapi.git;https://gitee.com/TencentCloudBase/cloudrun-fastapi.git,,,"[""国内站"",""国际站""]",,,
+scfWeb,"[""scfWeb""]",,http 云函数,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/c30a261c2342e7dbd0455c1815a3f9d6-exqvqhwgmxmfhpd4yadueu6pyyxi7tm8_.zip,http 云函数示例模板,"[""JavaScript"",""http 云函数""]",,,,,11,,中文,,,,,"[""国内站"",""国际站""]",,,
+phpMyAdmin,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/03f209fb5add2a57b20592d0da3fc870-PhpMyAdmin_logo.svg,phpMyAdmin,PHP,PHP,main,否,,,phpMyAdmin 是一个非常流行的开源 Web 应用，用于管理 MySQL 和 MariaDB 数据库。它基于 PHP 开发，提供图形化界面，方便用户执行数据库管理任务，比如创建数据库、执行 SQL 查询、管理用户权限、导入导出数据等。,"[""php"",""phpMyAdmin""]","# phpMyAdmin 数据库管理工具
+## 介绍
+phpMyAdmin 是一款用 PHP 编写的免费软件工具，旨在通过 Web 管理 MySQL。phpMyAdmin 支持 MySQL 和 MariaDB 的多种操作。您可以通过用户界面执行常用操作（管理数据库、表、列、关系、索引、用户、权限等），同时您仍然可以直接执行任何 SQL 语句。
+## 使用
+为了保证安全，我们设置默认情况下 phpMyAdmin 可以连接任意的数据库，每次打开都需要输入数据库登录信息，且服务器本身并不会保存数据库连接信息。
+
+## 连接腾讯云 CloudBase MySQL 数据库
+数据模型服务默认内置了 MySQL 数据库，默认情况下，该 MySQL 与云托管服务内网互通，即只需要在腾讯云 CloudBase MySQL 数据库开启内网访问即可。",phpmyadmin:5.2.2-apache,80,否,10,"	/platform-run/service/create?type=image&image=phpmyadmin:5.2.2-apache&serverName=phpmyadmin",中文,,,部署开源项目,"[{""value"":""1"",""key"":""PMA_ARBITRARY""}]","[""国内站""]",,,
+supabase-realtime,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/97ba57bedc5be2dc8d5a00ddddc82bca-supabase.svg,实时通讯示例,Elixir,Mix,main,是,,,本模板通过使用自行部署的 supabase realtime 框架，提供了可以供多个客户端实时通讯的能力。,"[""Elixir"",""supabase-realtime""]","# 实时通讯说明示例
+
+Supabase Realtime 通过 Elixir 进行构建，可实现以下功能：
+
+- **广播**（Broadcast）：以低延迟从客户端向客户端发送临时消息。
+- **存在感知**（Presence）：跟踪并同步客户端之间的共享状态。
+- **Postgres 变化**（Postgres Changes）：监听 Postgres 数据库变化并将其发送给授权客户端。
+
+## 1. 使用场景
+
+实时通讯示例适用于需要低延迟、高并发消息传输的场景，例如：
+
+- **在线聊天应用**：实现用户间的即时消息发送和接收。
+- **实时协作工具**：如在线文档编辑、白板协作，同步用户操作和状态。
+- **游戏**：实时同步玩家位置、游戏状态和聊天信息。
+- **物联网设备监控**：实时接收传感器数据和设备状态更新。
+- **金融交易平台**：实时推送股票行情、交易信息。
+
+## 2. 配置过程
+### 2.1 部署服务
+
+1. 登录 云开发平台控制台。
+2. 点击“通过模版部署”，选择“实时通讯示例”。
+3. 输入自定义服务名称，并根据您的业务场景修改环境变量配置（详见2.2 环境变量配置章节）。
+4. 点击“部署”，等待部署完成。
+5. 部署完成后，点击左上角箭头返回服务详情页，在“概述”中获取默认域名并访问，验证服务是否正常运行。
+### 2.2 环境变量配置
+
+在创建服务时，以下环境变量建议根据您的业务场景进行修改，以提高业务安全性：
+
+| Variable        | Type   | Description                  |
+| --------------- | ------ | ---------------------------- |
+| PORT            | number | 服务启动的端口，默认 4000              |
+| DB_PASSWORD     | string | Database 密码，建议修改为复杂密码        |
+| API_JWT_SECRET  | string | 用于生产 HTTP 请求 JWT Token，建议修改  |
+| SECRET_KEY_BASE | string | 用于生产 Cookie，推荐使用 64 字节的随机字符串 |
+
+更多环境变量配置，请参考 [Supabase Realtime GitHub 仓库](https://github.com/supabase/realtime)。
+
+### 2.3 版本说明
+
+| 组件           | 版本      | 备注                                |
+| ------------ | ------- | --------------------------------- |
+| realtime-js  | 2.11.15 | 2.15.2版本有invalid_token的bug，需要官方修复 |
+| python       | 3.13.5  |                                   |
+| node         | v24.2.0 |                                   |
+| realtime服务版本 | v2.43.1 |                                   |
+
+## 3. 使用过程
+### 3.1 在本地环境调用，创建 Tenant
+
+Tenants 用于隔离不同的实时通讯应用或用户组，==**注意**==：Supabase Realtime 默认使用域名的第一段作为 `tenants ID`。例如，如果您的默认域名是`https://supabase-realtime-148085-6-1257473911.sh.run.tcloudbase.com/`，则`tenants ID` 为 `supabase-realtime-148085-6-1257473911`，强烈建议在生产环境中使用自定义域名。
+
+Supabase Realtime 新建客户端时需要`api_key`，`api_key`是一个`JWT Token`，其声明必须包含`exp`和`role`, `role`为`tenants ID`
+
+**创建 Tenants 示例代码**：将以下 Python 代码保存为 `.py` 文件（例如 `create_tenant.py`），并在命令行中运行。此代码会向您的 Supabase Realtime 服务发送 HTTP POST 请求创建Tenants，并打印生成的`api_key`，完整代码如下：
+
+```python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*
+import datetime
+import json
+import jwt
+import requests
+
+
+http_url = ""https://supabase-realtime-160426-9-1307578329.sh.run.tcloudbase.com/api/tenants"" # 替换为您的服务域名
+tenant_id = ""supabase-realtime-160426-9-1307578329"" # 替换为您的 tenants ID
+secret_key = ""dc447559-996d-4761-a306-f47a5eab1623"" # 替换为您的 API_JWT_SECRET
+
+# 生成api_key
+def jwt_token():
+    algorithm = ""HS256""
+    payload = {
+        ""iss"": """",
+        ""iat"": int((datetime.datetime.utcnow() + datetime.timedelta(days=-1)).timestamp()),
+        ""exp"": int((datetime.datetime.utcnow() + datetime.timedelta(days=30)).timestamp()),
+        ""aud"": """",
+        ""sub"": """",
+        ""role"": tenant_id
+    }
+    encoded_jwt = jwt.encode(payload, secret_key, algorithm=algorithm)
+    print(""api_key:"", encoded_jwt)
+    return encoded_jwt
+
+# 创建租户
+def create_tenant(tenant_id):
+    payload = {
+        ""tenant"": {
+            ""name"": tenant_id,
+            ""external_id"": tenant_id,
+            ""jwt_secret"": secret_key,
+            ""extensions"": [
+                {
+                    ""type"": ""postgres_cdc_rls"",
+                    ""settings"": {
+                        ""db_name"": ""postgres"",  # 替换为您的数据库名称，下同
+                        ""db_host"": ""127.0.0.1"",
+                        ""db_user"": ""postgres"",
+                        ""db_password"": ""postgres"",
+                        ""db_port"": ""5432"",
+                        ""region"": ""us-west-1"",
+                        ""poll_interval_ms"": 100,
+                        ""poll_max_record_bytes"": 1048576
+                    }
+                }
+            ]
+        }
+    }
+    header = {
+        ""Content-Type"": ""application/json"",
+        ""Authorization"": ""Bearer {}"".format(jwt_token())
+    }
+    try:
+        r = requests.post(url=http_url, headers=header, data=json.dumps(payload))
+        print(r.text)
+    except Exception as e:
+        print(e)
+
+# 查询租户
+def list_tenants():
+    header = {
+        ""Content-Type"": ""application/json"",
+        ""Authorization"": ""Bearer {}"".format(jwt_token())
+    }
+    try:
+        r = requests.get(url=http_url, headers=header)
+        print(r.text)
+    except Exception as e:
+        print(e)
+
+
+def main():
+    create_tenant(tenant_id) # 创建租户
+    list_tenants() # 查询租户列表
+
+if __name__ == '__main__':
+    main()
+```
+
+output示例:
+
+```text
+api_key: eyJhbGciOiJIUzI1NiIsInR************
+{""data"":{""id"":""275e7d4c-dfaa-4aff-944d-540f33309af9"",""name"":""sup.....}}
+
+api_key: eyJhbGciOiJIUzI1NiIsInR************
+{""data"":[{""id"":""e41b59f9-f8da-468a-95a9-93de5b10df91"",""name"":""realtime-dev""......}]}
+```
+### 3.2 在客户端应用上监听和发送广播
+
+客户端可以通过 Realtime 库监听和发送广播消息。[参考文档](https://supabase.com/docs/guides/realtime/broadcast)
+
+安装依赖：`npm i @supabase/realtime-js@2.11.15`
+
+**监听广播示例代码**：将以下 JavaScript 代码集成到您的前端应用（如浏览器环境）或 Node.js 后端服务中运行
+
+```js
+import { RealtimeClient } from ""@supabase/realtime-js"";
+
+const http_url = ""https://supabase-realtime-160426-9-1307578329.sh.run.tcloudbase.com/socket""; // 替换为你的自定义域名或者使用默认域名进行测试
+const api_key = ""******""; // 替换为上文的api_key
+
+const client = new RealtimeClient(http_url, { params: { apikey: api_key } });
+const room = client.channel(""room_01"");
+room
+  .on(
+    ""broadcast"",
+    {
+      event: ""RoomBroadCast"",
+    },
+    (payload) => {
+      console.log(""Recevie:"", payload);
+    }
+  )
+  .subscribe();
+```
+
+**发送广播示例代码**：将以下 JavaScript 代码集成到您的前端应用（如浏览器环境）或 Node.js 后端服务中运行
+
+```js
+import { RealtimeClient } from ""@supabase/realtime-js"";
+
+const http_url = ""https://supabase-realtime-160426-9-1307578329.sh.run.tcloudbase.com/socket""; // 替换为你的自定义域名或者使用默认域名进行测试
+const api_key = ""******""; // 替换为上文的api_key
+
+const client = new RealtimeClient(http_url, { params: { apikey: api_key } });
+const room = client.channel(""room_01"");
+
+room.subscribe(async (status, err) => {
+  if (status === ""SUBSCRIBED"") {
+    await room.send({
+      type: ""broadcast"",
+      event: ""RoomBroadCast"",
+      payload: {
+        from_user: ""client_1"",
+        to_user: ""*"",
+        message: ""client_1 join the room..."",
+      },
+    });
+  }
+});
+```
+### 3.3 在客户端应用上监听存在状态
+
+客户端可以通过 Realtime 库监听存在状态。[参考文档](https://supabase.com/docs/guides/realtime/presence)
+
+**监听存在状态示例代码**：将以下 JavaScript 代码集成到您的前端应用（如浏览器环境）或 Node.js 后端服务中运行
+
+```js
+import { RealtimeClient } from ""@supabase/realtime-js"";
+
+const http_url = ""https://supabase-realtime-160426-9-1307578329.sh.run.tcloudbase.com/socket""; // 替换为你的自定义域名或者使用默认域名进行测试
+const api_key = ""******""; // 替换为上文的api_key
+
+const client = new RealtimeClient(http_url, { params: { apikey: api_key } });
+const room = client.channel(""room_02"");
+
+room
+  .on('presence', { event: 'sync' }, () => {
+    const newState = room.presenceState()
+    console.log('sync 同步', newState)
+  })
+  .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+    console.log('join 加入', key, newPresences)
+  })
+  .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+    console.log('leave 离开', key, leftPresences)
+  })
+  .subscribe()
+```
+
+**同步存在状态示例代码**：
+
+```js
+import { RealtimeClient } from ""@supabase/realtime-js"";
+
+const http_url = ""https://supabase-realtime-160426-9-1307578329.sh.run.tcloudbase.com/socket""; // 替换为你的自定义域名或者使用默认域名进行测试
+const api_key = ""******""; // 替换为上文的api_key
+
+const client = new RealtimeClient(http_url, { params: { apikey: api_key } });
+const room = client.channel(""room_02"");
+
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// 1. 等待订阅成功 为了方便演示，使用Promise, 实际使用参考官方文档示例
+const subscribeStatus = await new Promise((resolve, reject) => {
+  room.subscribe((status) => {
+    if (status === 'SUBSCRIBED') resolve(status);
+    else if (status === 'CHANNEL_ERROR') reject(new Error(""Subscribe failed""));
+  });
+});
+
+// 2. 同步 Presence 状态
+const userStatus = { user: 'user-1', online_at: new Date().toISOString() };
+const trackStatus = await room.track(userStatus);
+console.log(""Track status:"", trackStatus);
+
+// 3. 等待 5 秒
+await delay(5000);
+console.log(""5秒等待完成"");
+
+// 4. 取消 Presence 同步
+const untrackStatus = await room.untrack();
+console.log(""Untrack status:"", untrackStatus);
+```
+
+### 3.4 在客户端应用上监听Postgres变化
+
+**WIP**: Supabase Realtime 2.15.2存在bug，需要等待官方修复
+
+### 3.5 在微信小程序中使用
+
+小程序开发者工具设置：
+- 开启 -【详情】-【将JS编译成ES5】
+
+`package.json`如下：
+
+```json
+{
+  ""dependencies"": {
+    ""supabase-wechat-stable-v2"": ""^2.2.0"",
+    ""tdesign-miniprogram"": ""^1.9.7""
+  }
+}
+```
+
+`index.wxml` 如下：
+
+```xml
+<!--index.wxml-->
+<scroll-view class=""scrollarea"" scroll-y type=""list"">
+  <view class=""container"">
+    <view class=""button-example"">
+      <t-button bind:tap=""onButtonTap"" data-type=""broadcast"" theme=""primary"" size=""large"" block>测试Broadcast</t-button>
+      <view class=""spacer""></view>
+      <t-button bind:tap=""onButtonTap"" data-type=""presence"" theme=""primary"" size=""large"" block>测试Presence</t-button>
+    </view>
+  </view>
+</scroll-view>
+```
+
+`index.js` 如下：
+
+```js
+// index.js
+import {
+  RealtimeClient
+} from 'supabase-wechat-stable-v2/realtime-js/src'
+
+const url = ""ws://supabase-realtime-160426-9-1307578329.sh.run.tcloudbase.com/socket""; // 替换为你的自定义域名或者使用默认域名进行测试
+const api_key = ""******""; // 替换为上文的api_key
+
+Page({
+  data: {},
+  onButtonTap: function (event) {
+    const buttonType = event.currentTarget.dataset.type; // 获取按钮标识
+
+    // 初始化公共客户端
+    const client = new RealtimeClient(url, {
+      params: { ""apikey"": api_key }
+    });
+
+    // 根据按钮类型执行不同逻辑
+    if (buttonType === 'broadcast') {
+      this.handleBroadcast(client);
+    } else if (buttonType === 'presence') {
+      this.handlePresence(client);
+    }
+  },
+
+  // Broadcast处理逻辑
+  handleBroadcast: function (client) {
+    console.log(""Broadcast按钮触发"");
+    const room = client.channel('room_01');
+    room.subscribe(async (status, err) => {
+      if (status === 'SUBSCRIBED') {
+        await room.send({
+          type: 'broadcast',
+          event: 'RoomBroadCast',
+          payload: {
+            from_user: ""wx_client_1"",
+            to_user: ""*"",
+            message: 'wx_client_1 join the room...'
+          },
+        })
+      }
+    })
+  },
+
+  // Presence处理逻辑
+  handlePresence: function (client) {
+    console.log(""Presence按钮触发"");
+    const room = client.channel('room_02');
+    const userStatus = {
+      user: 'wx-user-1',
+      online_at: new Date().toISOString(),
+    }
+    room.subscribe(async (status) => {
+      if (status == 'SUBSCRIBED') {
+        const presenceTrackStatus = await room.track(userStatus)
+        console.log(presenceTrackStatus)
+      }
+    })
+  }
+})
+```
+## 4. 其他注意事项
+
+**数据持久性**：实时通讯示例默认不持久保存数据库数据，服务重启后 tenants 信息可能丢失。建议在服务启动时检查并重建 tenants。
+**域名使用**：强烈建议在生产环境中使用自定义域名，云托管提供的默认域名仅适用于调试。
+**运行方式**：建议使用“持续运行”的方式部署实时通讯服务，以避免服务重启后需要重新初始化的问题。
+
+更多配置方式，请参考[Supabase Realtime GitHub 仓库](https://github.com/supabase/realtime)。
+
+更多示例用法，请参考[Supabase Realtime 文档](https://supabase.com/docs/guides/realtime)
+
+",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-supabase-realtime:v0.0.2,4000,否,11,"	/platform-run/service/create?type=image&image=crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-supabase-realtime:v0.0.2&serverName=supabase-realtime&port=4000",中文,,,部署开源项目,"[{""value"":""dc447559-996d-4761-a306-f47a5eab1623"",""key"":""API_JWT_SECRET""},{""value"":""realtime"",""key"":""APP_NAME""},{""value"":""SET search_path TO _realtime"",""key"":""DB_AFTER_CONNECT_QUERY""},{""value"":""supabaserealtime"",""key"":""DB_ENC_KEY""},{""value"":""127.0.0.1"",""key"":""DB_HOST""},{""value"":""postgres"",""key"":""DB_NAME""},{""value"":""postgres"",""key"":""DB_PASSWORD""},{""value"":""5432"",""key"":""DB_PORT""},{""value"":""postgres"",""key"":""DB_USER""},{""value"":""\""''\"""",""key"":""DNS_NODES""},{""value"":""\""-proto_dist inet_tcp\"""",""key"":""ERL_AFLAGS""},{""value"":""1.14"",""key"":""GOSU_VERSION""},{""value"":""60000"",""key"":""JANITOR_INTERVAL""},{""value"":""en_US.utf8"",""key"":""LANG""},{""value"":""info"",""key"":""LOG_LEVEL""},{""value"":""14"",""key"":""PG_MAJOR""},{""value"":""4000"",""key"":""PORT""},{""value"":""1000000"",""key"":""RLIMIT_NOFILE""},{""value"":""true"",""key"":""RUN_JANITOR""},{""value"":""UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"",""key"":""SECRET_KEY_BASE""},{""value"":""true"",""key"":""SEED_SELF_HOST""}]","[""国内站""]",,,
+cloudbase-agent,"[""tcbrFunc""]",https://qcloudimg.tencent-cloud.cn/raw/5f02790737e0ff71ab148cfd965d88b2.svg,云开发 Agent 模板,Javascript,Nodejs20.19,,否,https://tcb.cloud.tencent.com/cloud-run-function-template/cloudbase-agent.zip,,云开发开源Agent，支持功能如下：MCP、语音功能、数据模型、文件上传、多会话、知识库、联网搜索、人设与回复约束、开场白、问题建议。,"[""Agent 开发平台""]","本示例项目为函数型云托管的Agent项目示例，是 [函数型 Agent](https://docs.cloudbase.net/ai/cbrf-agent/intro) 的一个示例项目。
+
+本示例项目主要演示如何在本地开发环境中开发调试函数型 Agent，以及如何实现Agent 中的基础对话、联网搜索、知识库查询、文件查询等功能。",crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-cloudbase-agent:0.0.6,9000,否,10,,中文,,https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudrunfunctions/cloudbase-agent,创建AI Agent服务,,"[""国内站""]",,"[{""gitPlatform"":{""gitType"":""github"",""gitUrl"":""https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudrunfunctions/cloudbase-agent""}},{""gitPlatform"":{""gitType"":""gitee"",""gitUrl"":""https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudrunfunctions/cloudbase-agent""}},{""gitPlatform"":{""gitType"":""cnb"",""gitUrl"":""https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudrunfunctions/cloudbase-agent""}}]",
+empty-agent,"[""tcbrContainer""]",https://7163-qcloud-tcb-console-1258344699.tcb.qcloud.la/cloudbase-cms/upload/2025-07-11/th2c8mlsvartzxmbv2ozpffmz9vlbc0o_.svg,空白 Agent 模板,NodeJS,Nodejs20.18,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/a13db540ae8c46b4e396f2fe7dfb0bb0-empyt-agent-v1.0.0.zip,云开发提供的智能体开发模板，您可以基于此模板进行代码编写和更新,"[""函数型智能体""]","# 空白 Agent
+
+本模板提供了自定义 Agent 的云托管实现，通过使用函数型开放框架，封装了一个最简的 Agent 接口，部署后提供以下 Agent 相关接口：
+
+```shell
+POST    /v1/aibot/bots/:botId/send-message       发送消息
+```
+
+本模板使用了 `@cloudbase/aiagent-framework`，只需要实现该库定义的 Agent 接口即可完成接入，详见 `src/bot.js`。
+
+## 部署须知
+
+在部署至云托管前，请删除本目录的 node_modules。
+
+## 本地调试指引
+
+运行 `npm run dev` 启动本地调试。
+
+现在即可通过 `127.0.0.1:3000` 访问本地 Agent 服务了。
+
+### cURL 访问本地服务
+
+直接访问 `127.0.0.1:3000` 即可，例如 `POST /v1/aibot/bots/:botId/send-message 发送消息` 接口：
+
+```shell
+curl 'http://127.0.0.1:3000/v1/aibot/bots/ibot-myBot-botTag/send-message' \
+  -H 'Accept: text/event-stream' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{""msg"":""hi""}'
+```
+
+### Web 访问本地服务
+
+使用 Web 页面访问本地服务，可以直接编写网络请求代码，也可以使用 [@cloudbase/js-sdk 提供的 Agent SDK](https://docs.cloudbase.net/ai/agent/sdk)。
+
+若使用 @cloudbase/js-sdk，则需要配置一定的代理服务。以 [whistle](https://wproxy.org/whistle/) 举例，按照如下配置：
+
+```shell
+/.*.api.tcloudbasegateway.com/([^S]*)/ http://localhost:3000/$1
+```
+
+即可使用 @cloudbase/js-sdk 用以下代码访问到本地服务：
+
+```js
+const res = await ai.bot.sendMessage({
+  botId: 'ibot-myBot-botTag',
+  msg: 'hi',
+  history: []
+})
+
+for await (let x of res.textStream) {
+  console.log(x);
+}
+```
+
+## 参考文档
+
+- [函数型开发框架](https://docs.cloudbase.net/cbrf/intro)
+- [云开发 AI+](https://docs.cloudbase.net/ai/introduce)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cloudrun-agent-empty-agent:0.0.1,3000,否,13,,中文,,,,,"[""国内站""]",,,
+hono-template,"[""scfFunc""]",,Honojs 模板,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/755ad8eb9a6521f0089f78b8f201506c-88isbi4cn5b7603g515npy9iobcvii88_.zip,云函数环境中使用 honojs 示例模板,"[""云开发"",""云函数"",""Honojs"",""hono""]","# Hono 云函数使用示例
+
+该模板演示了如何在云函数环境中使用 Honojs 框架，包含多种功能接口。以下是各个接口的使用示例，包括云函数调用和 HTTP 请求调用方式。
+
+**使用 HTTP 访问前，需要前往 云开发平台-云函数-函数配置 设定 HTTP 访问服务路径。**
+
+## 1. 基础接口调用
+
+### 获取文本响应
+
+**云函数调用方式：**
+```js
+// 小程序中调用示例
+wx.cloud.callFunction({
+  name: 'hono-template',
+  data: { path: '/' }, // 请求根路径
+}).then((res) => {
+  console.log('文本响应结果:', res.result.body); // 输出: Hello Hono!
+})
+```
+
+**HTTP 请求方式：**
+```js
+// 假设云函数HTTP服务地址为 https://your-domain.com/hono-template
+fetch('https://your-domain.com/hono-template/')
+  .then(response => response.text())
+  .then(data => {
+    console.log('文本响应结果:', data); // 输出: Hello Hono!
+  });
+```
+
+**curl 命令：**
+```bash
+curl https://your-domain.com/hono-template/
+```
+
+### 获取JSON数据
+
+**云函数调用方式：**
+```js
+// 小程序中调用示例
+wx.cloud.callFunction({
+  name: 'hono-template',
+  data: { path: '/json' },
+}).then((res) => {
+  console.log('JSON响应结果:', JSON.parse(res.result.body));
+  // 输出: { data: { a: 123 }, code: 200 }
+});
+```
+
+**HTTP 请求方式：**
+```js
+fetch('https://your-domain.com/hono-template/json')
+  .then(response => response.json())
+  .then(data => {
+    console.log('JSON响应结果:', data);
+    // 输出: { data: { a: 123 }, code: 200 }
+  });
+```
+
+**curl 命令：**
+```bash
+curl https://your-domain.com/hono-template/json
+```
+
+## 2. 图片代理功能
+
+**HTTP 请求方式：**
+```js
+// 在浏览器或其他环境中直接使用
+const imageUrl = 'https://your-domain.com/hono-template/image?url=' + 
+                 encodeURIComponent('https://example.com/sample-image.jpg');
+
+// 直接在img标签中使用
+document.getElementById('proxyImage').src = imageUrl;
+```
+
+## 3. 文件上传功能
+
+**HTTP 请求方式：**
+```js
+// 在浏览器中使用FormData上传文件
+const fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  try {
+    const response = await fetch('https://your-domain.com/hono-template/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    console.log('文件上传信息:', result);
+  } catch (error) {
+    console.error('上传失败:', error);
+  }
+});
+```
+
+**curl 命令上传文件：**
+```bash
+curl -X POST https://your-domain.com/hono-template/upload \
+  -F ""file=@/path/to/local/file.jpg""
+```
+
+## 4. 定时触发器使用
+
+定时触发器主要由云函数平台根据配置的时间自动触发，但也可以手动模拟触发。
+
+### 配置定时触发器
+
+**手动模拟触发（HTTP方式）：**
+```js
+fetch('https://your-domain.com/hono-template/CLOUDBASE_TIMER_TRIGGER/daily-task')
+  .then(response => response.json())
+  .then(data => {
+    console.log('定时器测试结果:', data);
+  });
+```
+
+**curl 命令模拟触发：**
+```bash
+curl https://your-domain.com/hono-template/CLOUDBASE_TIMER_TRIGGER/daily-task
+```
+
+当触发器被触发时，云函数会返回如下结果：
+```json
+{
+  ""message"": ""定时器 daily-task 成功执行"",
+  ""timestamp"": ""2023-08-15T08:00:00.123Z"",
+  ""originalEvent"": {...触发器事件对象...}
+}
+```
+
+---
+
+通过上述方式，您可以根据自己的应用场景选择合适的调用方式，以灵活地使用 Hono 框架构建云函数应用。",,,否,12,,中文,,,,,"[""国内站""]",,,
+Next.js,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/2091a45cf2905b9c8f376e94b03b08d4-Next.js.svg,Next.js 模板,React,React,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/fe0c7acd0e1e8eb34b5e95d3adf477ec-cloudrun-nextjs.zip,基于 Next.js 的 Web 应用示例,"[""next.js"",""react"",""tailwind.css""]","# 快速部署 Next.js 应用
+
+模板介绍了如何在云开发云托管下快速部署 Next.js Web 应用
+
+## 安装体验
+
+- 在云托管菜单下选者通过模板部署
+- 选择 Next.js 模板，点击部署
+- 等待部署完成，使用默认域名访问，即可查看 Next.js 应用
+
+## 基于模板开发
+
+模板使用 Next.js v15 官方脚手架创建，并且编写了部署需要的 dockerfile 文件，可基于模板开发，然后部署到云托管，使用方式如下：
+
+### 下载 Next.js 模板
+
+前往 github [模板仓库](https://github.com/TencentCloudBase/tcbr-templates/tree/main/cloudrun-nextjs)下载模板。
+
+### 本地开发
+
+安装依赖
+
+```bash
+npm install
+# or
+yarn install
+```
+
+运行dev命令
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+### 通过代码包部署
+
+开发完成后，在云托管中选择代码包部署，上传代码包，等待构建完成
+
+### 更多部署方式
+
+根据托管代码的方式，可选择不同的部署方式，如 Git 仓库部署，镜像部署等",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-nextjs-example:v1.0.0,3000,否,19,,中文,,https://github.com/TencentCloudBase/cloudrun-nextjs.git;https://gitee.com/TencentCloudBase/cloudrun-nextjs.git,,,"[""国内站""]",,,
+NocoDB,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/fddd8e986d7a29262e4a13c8f369809a-nocodb-icon.svg,NocoDB,Nodejs,Nodejs,main,否,,,NocoDB 是一个开源的无代码数据库平台，它将关系型数据库（如MySQL、PostgreSQL、SQL Server 等）转化为一个类似 Airtable 的智能电子表格界面。它允许用户通过直观的界面管理数据、创建自定义应用，无需编写代码。NocoDB 支持多种数据库、团队协作、权限管理，并提供API，适用于各种数据管理和应用开发场景。﻿,"[""OpenSource"",""Nodejs"",""NocoDB""]","# 开源神器 NocoDB: 零代码玩转数据库
+
+## 介绍
+
+NocoDB 是一个开源的无代码数据库平台，它将关系型数据库（如MySQL、PostgreSQL、SQL Server 等）转化为一个类似 Airtable 的智能电子表格界面。它允许用户通过直观的界面管理数据、创建自定义应用，无需编写代码。NocoDB 支持多种数据库、团队协作、权限管理，并提供API，适用于各种数据管理和应用开发场景。
+
+## 使用
+
+* 1、进入[腾讯云托管](https://tcb.cloud.tencent.com/dev?#/platform-run/service/create?type=template)；
+* 2、选择 ```NocoDB``` 模版；
+* 3、跳转到模版安装页面；
+* 4、填写环境变量
+     
+     * NC_ADMIN_EMAIL: 默认管理员邮箱，可自定义，默认为 ```admin@nocodb.com```；
+     * NC_ADMIN_PASSWORD: 默认管理员密码，可自定义，默认为 ```admin@123456```；
+     * NC_DB: MySQL 数据库连接信息```mysql2://{MYSQL_HOST}:{MYSQL_PORT}?u={MYSQL_USERNAME}&p={MYSQL_PASSWORD}&d={MYSQL_DBNAME}```, 需要使用真实数据库连接信息，替换上述值；（注意: 建议优先使用 8.x MySQL 数据库，同时需要提前创建新的数据库 Database）
+* 5、填写完成之后，等待部署完成后，返回```概述```页面，点击域名即可访问。
+
+## MySQL 数据库集成
+
+模版中可通过以下几种方式连接数据库:
+* 使用云开发 MySQL 数据库
+* 连接公网 MySQL 数据库
+* 通过内网连接腾讯云账号下的 MySQL 数据库
+
+以上具体可参考：[云托管 MySQL 数据库集成](https://docs.cloudbase.net/run/develop/databases/mysql)
+
+## 更多
+
+更多 NocoDB 配置请参考: [NocoDB 环境变量配置](https://nocodb.com/docs/self-hosting/environment-variables)",nocodb/nocodb:0.264.0,8080,否,20,"	/platform-run/service/create?type=image&image=nocodb/nocodb:0.264.0&serverName=nocodb&port=8080",中文,,,部署开源项目,"[{""value"":""admin@nocodb.com"",""key"":""NC_ADMIN_EMAIL""},{""value"":""admin@123456"",""key"":""NC_ADMIN_PASSWORD""},{""value"":""mysql2://{MYSQL_HOST}:{MYSQL_PORT}?u={MYSQL_USERNAME}&p={MYSQL_PASSWORD}&d={MYSQL_DBNAME}"",""key"":""NC_DB""}]","[""国内站""]",,,
+Metebase,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/0a9f0847ae51d1f57fcbe8b475dfba79-metabase.svg,Metabase,Nodejs,Nodejs,main,否,,,Metabase 是一个开源的商业智能(BI) 工具，它允许用户连接到各种数据源，并以图表、表格等形式可视化数据，从而进行数据分析和探索。Metabase 的主要特点包括易用性、可视化能力、交互式仪表板、团队协作和安全性。﻿,"[""OpenSource"",""Nodejs"",""Metabase""]","# Metabase
+
+## 介绍
+
+Metabase 是一个开源的商业智能(BI) 工具，它允许用户连接到各种数据源，并以图表、表格等形式可视化数据，从而进行数据分析和探索。Metabase 的主要特点包括易用性、可视化能力、交互式仪表板、团队协作和安全性。
+
+## 使用
+
+* 1、进入[腾讯云托管](https://tcb.cloud.tencent.com/dev?#/platform-run/service/create?type=template)；
+* 2、选择 ```Metabase``` 模版；
+* 3、跳转到模版安装页面；
+* 4、填写环境变量
+     
+     * MB_DB_USER: 数据库连接用户名称；
+     * MB_DB_PASS: 数据库连接用户密码;
+     * MB_DB_CONNECTION_URI: MySQL 数据库连接信息```jdbc:mysql://{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DBNAME}?sessionVariables=sql_mode='STRICT_TRANS_TABLES'```, 需要使用真实数据库连接信息，替换上述值；（注意: 建议优先使用 8.x MySQL 数据库，同时需要提前创建新的数据库 Database）
+* 5、填写完成之后，等待部署完成后，返回```概述```页面，点击域名即可访问。
+
+## MySQL 数据库集成
+
+模版中可通过以下几种方式连接数据库:
+* 使用云开发 MySQL 数据库
+* 连接公网 MySQL 数据库
+* 通过内网连接腾讯云账号下的 MySQL 数据库
+
+以上具体可参考：[云托管 MySQL 数据库集成](https://docs.cloudbase.net/run/develop/databases/mysql)
+
+## 更多
+
+更多 NocoDB 配置请参考: [Metabase 环境变量配置](https://www.metabase.com/docs/latest/configuring-metabase/environment-variables)",metabase/metabase:v0.55.10.1,3000,否,21,"	/platform-run/service/create?type=image&image=metabase/metabase:v0.55.10.1&serverName=metabase&port=3000",中文,,,部署开源项目,"[{""value"":"""",""key"":""MB_DB_CONNECTION_URI""},{""value"":"""",""key"":""MB_DB_PASS""},{""value"":"""",""key"":""MB_DB_USER""}]","[""国内站""]",,,
+strapi,"[""tcbrContainer""]",cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/c92cbba7713c3eee53465f1323b1db48-strapi.svg,Strapi CMS,Nodejs,Nodejs,app.js,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/02b21035b0f3fa6603f060aa3d60543f-tvqgm4om55xstl2ti8pv7ni6q7jwg2eo_.zip,Strapi 是一款开源的无头内容管理系统（Headless CMS），它使用Node.js 构建，旨在为开发者提供灵活高效的开发体验。它允许用户快速搭建可定制的API，满足各种应用场景的内容管理需求。Strapi 以其易用的管理界面和强大的插件系统，简化了内容创建和管理流程，让开发者可以专注于前端开发和用户体验。,"[""OpenSource"",""Nodejs"",""Strapi""]","# StrapiCMS
+## 介绍
+
+Strapi 是一款开源的无头内容管理系统（Headless CMS），它使用Node.js 构建，旨在为开发者提供灵活高效的开发体验。它允许用户快速搭建可定制的API，满足各种应用场景的内容管理需求。Strapi 以其易用的管理界面和强大的插件系统，简化了内容创建和管理流程，让开发者可以专注于前端开发和用户体验。
+
+## 使用
+
+* 1、进入[腾讯云托管](https://tcb.cloud.tencent.com/dev?#/platform-run/service/create?type=template)；
+* 2、选择 ```StrapiCMS``` 模版；
+* 3、跳转到模版安装页面；
+* 4、填写环境变量
+     
+     * DATABASE_CLIENT: 数据库连接类型，默认为 ```mysql```；
+     * DATABASE_HOST: 数据库连接地址；
+     * DATABASE_PORT: 数据库连接端口；（注意: 建议优先使用 8.x MySQL 数据库，同时需要提前创建新的数据库 Database）
+     * DATABASE_NAME: 数据库连接库名称;
+     * DATABASE_USERNAME: 数据库连接用户名称；
+     * DATABASE_PASSWORD: 数据库连接密码;
+     * JWT_SECRET: 可以通过 ```Node.js crypto.randomBytes(16).toString('base64')``` 生成
+* 5、填写完成之后，等待部署完成后，返回```概述```页面，点击域名即可访问。
+
+## MySQL 数据库集成
+
+模版中可通过以下几种方式连接数据库:
+* 使用云开发 MySQL 数据库
+* 连接公网 MySQL 数据库
+* 通过内网连接腾讯云账号下的 MySQL 数据库
+
+以上具体可参考：[云托管 MySQL 数据库集成](https://docs.cloudbase.net/run/develop/databases/mysql)
+
+## 腾讯云对象存储集成
+
+默认情况下， Strapi CMS 相关图片均存储在本地目录中，伴随着服务重启或更新，本地目录中的文件可能会丢失，所以我们强烈建议将文件存储在腾讯云对象存储中。(对象存储具体可以参考: [strapi腾讯云对象存储支持](https://market.strapi.io/providers/strapi-provider-upload-tencent-cloud-storage))
+
+### 创建一个 strapi 项目
+
+#### 条件
+
+* Node.js：仅限活动 LTS 或维护 LTS 版本支持（当前v20和v22）。奇数版本的 Node（称为 Node.js 的“当前”版本）不受支持（例如 v21、v23）。
+* 您首选的 Node.js 包管理器：
+  * npm（v6及以上）
+
+#### 运行安装脚本并创建 Strapi 项目
+
+* 1、在终端运行一下命令
+```
+npx create-strapi@latest strapi-project
+```
+
+* 2、终端会提示您登录注册,您也可以选择跳过登录注册过程;
+
+* 3、选择是否使用 sqlite 数据库，选择 ```n```, 并选择 ```mysql``` 数据库;
+
+* 4、填写真实的数据库信息即可。
+
+* 5、按照提示选择即可，然后等待项目初始化完成。
+
+#### 运行使用
+
+执行 ```npm run develop``` 即可在本地启动项目，项目启动后，通过 ```http://localhost:1337/admin``` 即可访问项目。
+
+#### 项目部署到腾讯云托管
+
+在项目目录下增加 ```Dockerfile``` 文件，内容如下:
+
+```
+FROM node:22-alpine
+# Installing libvips-dev for sharp Compatibility
+RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev nasm bash vips-dev git
+ARG NODE_ENV=development
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /opt/
+COPY package.json package-lock.json ./
+RUN npm install -g node-gyp
+RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install
+ENV PATH=/opt/node_modules/.bin:$PATH
+
+WORKDIR /opt/app
+COPY . .
+RUN chown -R node:node /opt/app
+USER node
+RUN [""npm"", ""run"", ""build""]
+EXPOSE 1337
+CMD [""npm"", ""run"", ""develop""]
+```
+
+#### 部署到云托管
+(PS: 注意上传代码包时，请删除本地 node_module 目录)
+
+打开腾讯云托管, 点击通过本地代码部署 -> 填写服务名称 -> 部署方式选择上传代码包 -> 代码包类型选择文件夹 -> 选择项目目录进行上传 -> 端口填写 1337 -> 填写相关环境变量, 点击创建并等待创建完成即可。
+
+### 安装腾讯云对象存储插件
+```
+# using yarn
+yarn add strapi-provider-upload-tencent-cloud-storage
+
+# using npm
+npm install strapi-provider-upload-tencent-cloud-storage --save
+```
+
+### 插件配置
+
+修改项目 ```./config/plugins.ts``` 文件内容如下:
+
+```
+module.exports = ({ env }) => ({
+  // ...
+  upload: {
+    config: {
+      provider: ""strapi-provider-upload-tencent-cloud-storage"",
+      providerOptions: {
+        SecretId: env(""COS_SECRET_ID""),
+        SecretKey: env(""COS_SECRET_KEY""),
+        Region: env(""COS_REGION""),
+        Bucket: env(""COS_BUCKET""),
+        ACL: ""private"", // <= set ACL to private
+      },
+    },
+  },
+  // ...
+});
+```
+
+部署时，设置 ```COS_SECRET_ID```, ```COS_SECRET_KEY```, ```COS_REGION```, ```COS_BUCKET``` 环境变量。
+
+### 安全配置
+修改项目 ```./config/middlewares.ts``` 文件内容如下:
+
+```
+module.exports = [
+  // ...
+  {
+    name: ""strapi::security"",
+    config: {
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          ""connect-src"": [""'self'"", ""https:""],
+          ""img-src"": [
+            ""'self'"",
+            ""data:"",
+            ""blob:"",
+            ""market-assets.strapi.io"",
+            ""yourBucketName.cos.yourRegion.myqcloud.com"",
+          ],
+          ""media-src"": [
+            ""'self'"",
+            ""data:"",
+            ""blob:"",
+            ""market-assets.strapi.io"",
+            ""yourBucketName.cos.yourRegion.myqcloud.com"",
+          ],
+          upgradeInsecureRequests: null,
+        },
+      },
+    },
+  },
+  // ...
+];
+```
+
+### 腾讯云云开发对象存储
+
+你也可以使用[腾讯云开发对象存储](https://tcb.cloud.tencent.com/dev#/storage)作为默认存储来使用。其使用方式和腾讯云对象存储使用方式完全一致。其默认地域为上海(ap-shanghai), 桶名称为默认目录名称同时增加```-{appid}``` appid 可以在[腾讯云账号信息](https://console.cloud.tencent.com/developer) 页面获取 APPID 字段信息即可。",,1337,否,22,"	/platform-run/service/create?type=package&zipUrl=https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/languages-frameworks/strapi-project.zip&serverName=strapi&port=1337",中文,,,部署开源项目,"[{""value"":""mysql"",""key"":""DATABASE_CLIENT""},{""value"":"""",""key"":""DATABASE_HOST""},{""value"":""strapi"",""key"":""DATABASE_NAME""},{""value"":"""",""key"":""DATABASE_PASSWORD""},{""value"":""3306"",""key"":""DATABASE_PORT""},{""value"":"""",""key"":""DATABASE_USERNAME""},{""value"":""q9v8J3m+X1aR7FzN0YbW9g=="",""key"":""JWT_SECRET""}]","[""国内站""]",,,
+book-analytics-aggregate,"[""scfFunc""]",,book analytics aggregate,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/a45f8534824996556a51434ac000f562-book-analytics-aggregate-en-fix-2.zip,book analytics cloud function，include aggregate operator,"[""database"",""JavaScript"",""data-analytics"",""MongoDB""]","You can use this cloud function to perform book data analysis. Here is the example code for testing the invocation of this cloud function in the mini-program:
+
+```js
+// Get author statistics
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getAuthorStats'
+  }
+}).then(res => {
+  console.log('author statistics result: ', res)
+})
+
+// Response Example
+{
+  ""data"": [
+    {
+      ""_id"": ""liucixin"",
+      ""totalBooks"": 3,
+      ""totalValue"": 167.7,
+      ""averagePrice"": 55.9,
+      ""books"": [
+        {
+          ""title"": ""The Three-Body Problem"",
+          ""price"": 55.9,
+          ""isbn"": ""9787536692930""
+        },
+        {
+          ""title"": ""The Three-Body Problem II: The Dark Forest"",
+          ""price"": 55.9,
+          ""isbn"": ""9787536693937""
+        },
+        {
+          ""title"": ""The Three-Body Problem III: Death's End"",
+          ""price"": 55.9,
+          ""isbn"": ""9787229030933""
+        }
+      ]
+    }
+    // ... more
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// Get price range statistics
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getPriceRangeStats'
+  }
+}).then(res => {
+  console.log('Price range statistics result:', res)
+})
+
+// Response Example
+{
+  ""data"": [
+    {
+      ""_id"": {
+        ""range"": ""Below ?30""
+      },
+      ""count"": 15,
+      ""books"": [
+        {
+          ""title"": ""To Live"",
+          ""author"": ""Yu Hua"",
+          ""price"": 28.0
+        }
+        // ... more books
+      ],
+      ""averagePrice"": 25.5
+    }
+    // ... other price ranges
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// Get top 5 most expensive books
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getTopPricedBooks',
+    data: {
+      limit: 5
+    }
+  }
+}).then(res => {
+  console.log('Most expensive books result:', res)
+})
+
+// Response Example
+{
+  ""data"": [
+    {
+      ""_id"": ""64c9f5a79f6c8e0001b60b0a"",
+      ""title"": ""A Brief History of Time (Collector's Edition)"",
+      ""author"": ""Stephen Hawking"",
+      ""price"": 199.0,
+      ""isbn"": ""9787535732309""
+    }
+    // ... more books
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// Get monthly statistics
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getMonthlyStats'
+  }
+}).then(res => {
+  console.log('Monthly statistics result:', res)
+})
+
+// Response Example
+{
+  ""data"": [
+    {
+      ""_id"": {
+        ""year"": 2023,
+        ""month"": 8
+      },
+      ""count"": 25,
+      ""totalValue"": 1580.5,
+      ""books"": [
+        {
+          ""title"": ""The Three-Body Problem"",
+          ""author"": ""Liu Cixin"",
+          ""price"": 55.9
+        }
+        // ... more books
+      ]
+    }
+    // ... more months
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// Get author price statistics
+wx.cloud.callFunction({
+  name: 'book-analytics',
+  data: {
+    action: 'getAuthorPriceStats'
+  }
+}).then(res => {
+  console.log('Author price statistics result:', res)
+})
+
+// Response Example
+{
+  ""data"": [
+    {
+      ""_id"": ""Liu Cixin"",
+      ""maxPrice"": 59.9,
+      ""minPrice"": 49.9,
+      ""averagePrice"": 55.9,
+      ""priceRange"": 10.0,
+      ""totalBooks"": 3
+    }
+    // ... more authors
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+```
+This cloud function demonstrates the usage of the following aggregation operations:
+
+group: Group statistics by dimensions like author, price range etc.
+sum/avg/max/min: Common aggregation functions
+push: Save detailed data in grouped results
+sort: Result sorting
+match: Filter aggregation results
+switch: Conditional branching
+subtract/multiply: Numerical calculations
+year/month: Date processing
+limit: Limit result count
+
+
+These aggregation operations can help you perform complex data analysis and obtain valuable statistical information. You can combine these operations according to your actual needs.",,,,1,,英文,,,,,"[""国际站"",""国内站""]",,,
+book-management-model,"[""scfFunc""]",,Book Management,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/20bc66adade6a08f65d945ddbad81fd8-ijgsdz8rmi1gwrqongaziby7lfa5mw6t_.zip,"Cloud Function for Book Management, Including Model Operation Example","[""cloudbase"",""database"",""CRUD"",""JavaScript"",""mini-program"",""model""]","You can use this cloud function to manage books. Here is the example code for testing the invocation of this cloud function in the mini-program:
+
+```js
+// Create a book
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'createBook',
+      data: {
+        title: 'The Three-Body Problem',
+        author: 'Liu Cixin',
+        price: 39.9,
+        isbn: '9787536692930',
+      },
+    },
+  })
+  .then((res) => {
+    console.log('Creation successful:', res);
+  });
+
+// Update a book
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'updateBook',
+      data: {
+        id: 'xxx', // Book ID
+        book: {
+          price: 45.0,
+        },
+      },
+    },
+  })
+  .then((res) => {
+    console.log('Update successful:', res);
+  });
+
+// Delete a book
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'deleteBook',
+      data: {
+        id: 'xxx', // Book ID
+      },
+    },
+  })
+  .then((res) => {
+    console.log('Deletion successful:', res);
+  });
+
+// Get a single book
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'getBook',
+      data: {
+        id: 'xxx', // Book ID
+      },
+    },
+  })
+  .then((res) => {
+    console.log('Book information:', res);
+  });
+
+// Get book list
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'listBooks',
+      data: {},
+    },
+  })
+  .then((res) => {
+    console.log('Book list:', res);
+  });
+
+// Search books
+wx.cloud
+  .callFunction({
+    name: 'book-management',
+    data: {
+      action: 'searchBooks',
+      data: {
+        keyword: 'The Three-Body Problem',
+      },
+    },
+  })
+  .then((res) => {
+    console.log('Search results:', res);
+  });
+
+```
+
+Example response data structures:
+
+```
+// Create book response
+{
+  ""data"": {
+    ""id"": ""xxx"" // Book ID
+  }
+}
+
+// Update/Delete book response
+{
+  ""data"": {
+    ""count"": 1 // Affected rows
+  }
+}
+
+// Get single book
+{
+  ""data"": {
+    ""_id"": ""xxx"",
+    ""title"": ""The Three-Body Problem"",
+    ""author"": ""Liu Cixin"",
+    ""price"": 39.9,
+    ""isbn"": ""9787536692930""
+    // ...
+  }
+}
+
+// Get book list response
+{
+  ""data"": {
+    ""records"": [
+      {
+        ""_id"": ""xxx"",
+        ""title"": ""The Three-Body Problem"",
+        ""author"": ""Liu Cixin"",
+        ""price"": 39.9,
+        ""isbn"": ""9787536692930""
+      }
+      // ...More books
+    ],
+    ""total"": 10
+  }
+}
+
+// Search books response
+{
+  ""data"": {
+    ""records"": [
+      {
+        ""_id"": ""xxx"",
+        ""title"": ""The Three-Body Problem"",
+        ""author"": ""Liu Cixin"",
+        ""price"": 39.9,
+        ""isbn"": ""9787536692930""
+      }
+      // ...More books
+    ],
+  }
+}
+```",,,,2,,英文,,,,,"[""国内站"",""国际站""]",,,
+custom-auth,"[""scfFunc""]",,Custom Login,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/461b599f13751ae1e0e23e5e13a95ca2-mo6g16k8x9s81vjj3235jmyj7ixrq3np_.zip,Custom Authentication Login Cloud Function Example,"[""User Authentication"",""Secure Encryption"",""JWT"",""CloudBase"",""Password Management"",""Token Verification""]","You can use this cloud function to manage user authentication. Here is the sample code for testing this cloud function in a mini program:
+
+```js
+// User Registration
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'register',
+    data: {
+      username: 'test@example.com',
+      password: 'password123'
+    }
+  }
+}).then(res => {
+  console.log('Registration result:', res)
+})
+
+// Response Example
+{
+  ""userId"": ""user1""
+}
+
+// User Login
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'login',
+    data: {
+      username: 'test@example.com',
+      password: 'password123'
+    }
+  }
+}).then(res => {
+  console.log('Login result:', res)
+})
+
+// Response Example
+{
+  ""accessToken"": ""eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."",
+  ""refreshToken"": ""eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."",
+  ""userId"": ""user1""
+}
+
+// Refresh Access Token
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'refreshToken',
+    data: {
+      refreshToken: ""eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...""
+    }
+  }
+}).then(res => {
+  console.log('Token refresh result:', res)
+})
+
+// Response Example
+{
+  ""accessToken"": ""eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...""
+}
+
+// Get User Info
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'getUserInfo',
+    data: {
+      authorization: ""Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...""
+    }
+  }
+}).then(res => {
+  console.log('User info:', res)
+})
+
+// Response Example
+{
+  ""_id"": ""user1"",
+  ""username"": ""test@example.com"",
+  ""createdAt"": ""2023-08-02T08:30:15.000Z"",
+  ""updatedAt"": ""2023-08-02T08:30:15.000Z""
+}
+
+// Change Password
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'changePassword',
+    data: {
+      authorization: ""Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."",
+      oldPassword: ""password123"",
+      newPassword: ""newpassword123""
+    }
+  }
+}).then(res => {
+  console.log('Password change result:', res)
+})
+
+// Response Example
+{
+  ""success"": true
+}
+
+// Update User Info
+wx.cloud.callFunction({
+  name: 'custom-auth',
+  data: {
+    action: 'updateUserInfo',
+    data: {
+      authorization: ""Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."",
+      userInfo: {
+        nickname: ""New Nickname"",
+        avatar: ""https://example.com/avatar.jpg""
+      }
+    }
+  }
+}).then(res => {
+  console.log('User info update result:', res)
+})
+
+// Response Example
+{
+  ""success"": true
+}
+```
+
+This authentication system includes the following features:
+
+1. **Security**:
+   - SHA256 salted password encryption
+   - JWT authentication
+   - Separate accessToken and refreshToken
+   - Prevention of sensitive information leaks
+
+2. **Complete Functionality**:
+   - User registration
+   - User login
+   - Token refresh
+   - Fetch user information
+   - Password change
+   - User info updates
+
+3. **Token Management**:
+   - Short-lived accessToken (2 hours)
+   - Long-lived refreshToken (7 days)
+   - Bearer Token authentication
+
+4. **Error Handling**:
+   - Username duplication checks
+   - Password validation
+   - Token validity verification
+   - Comprehensive error messages
+
+**Usage Notes**:
+1. Modify the keys in `config.js` before use.
+2. Use stronger keys in production environments.
+3. Adjust token expiration times as needed.
+4. It is recommended to implement request rate limiting.",,,,3,,英文,,,,,"[""国际站"",""国内站""]",,,
+get-openid,"[""scfFunc""]",,OPENID Get,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/6bb9a9b1a1bab8432aa687235e844759-teomggc96q8wp0rmmleg6b4ablpi9apb_.zip,Cloud Function Example for Getting OpenID,"[""WeChat Mini Program"",""CloudBase"",""Cloud Function"",""User Authentication"",""JavaScript""]","You can use this cloud function to retrieve a user's OPENID. Below is the sample code for testing this cloud function in a mini program:
+
+```js
+wx.cloud.callFunction({
+  name: 'get-openid',
+  complete: (res) => {
+    console.log('callFunction result: ', res);
+  },
+});
+```
+
+This will output an object with the following structure in the debugger:
+
+```json
+{
+  ""openid"": ""oxxxxxxxxxxxxxx"",
+  ""appid"": ""wxxxxxxxxxxx"",
+  ""unionid"": ""oxxx_xxxxxxxxxxxxx"" // Only returned when unionId retrieval conditions are met
+}
+```",,,,4,,英文,,,,,"[""国际站"",""国内站""]",,,
+openapi-get-phonenumber,"[""scfFunc""]",,Cloud Call to Get User's Mobilephone,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/8e049d3e444e6d7d73b1a9cec8cbc6b6-gtc3bqxawrqjviz77g90e21m8d2yytqg_.zip,Cloud API to Get User's Mobile Number (Requires re-download and redeployment in WeChat Miniprograme IDE),"[""WeChat Mini Program"",""CloudBase"",""SCF"",""wx-server-sdk"",""Get Mobilephone"",""Cloud Call"",""openapi"",""User Authorization""]","When calling this cloud function from the Mini Program side, the code parameter must be passed in.: 
+
+```javascript
+wx.cloud
+  .callFunction({
+    name: 'get-phoneNumber',
+    data: {
+      code: event.detail.code, // Obtain from getPhoneNumber button event
+    },
+  })
+  .then((res) => {
+    console.log('MobilePhone Number: ', res.result);
+  })
+  .catch((err) => {
+    console.error('Get MobilePhone Failed: ', err);
+  });
+```
+
+This will output an object with the following structure in the debugger: 
+
+```json
+{
+  ""errcode"": 0,
+  ""errmsg"": ""ok"",
+  ""phone_info"": {
+    ""phoneNumber"": ""xxxxxx"",
+    ""purePhoneNumber"": ""xxxxxx"",
+    ""countryCode"": 86,
+    ""watermark"": {
+      ""timestamp"": 1637744274,
+      ""appid"": ""xxxx""
+    }
+  }
+}
+```
+
+Notes: 
+
+1. Required: Activate the ""Get Phone Number"" feature in WeChat Mini Program Admin Console
+2. Install latest wx-server-sdk
+3. The code can only be used once and is valid for 5 minutes.",,,,5,,英文,,,,,"[""国际站"",""国内站""]",,,
+post-management-collection,"[""scfFunc""]",,Article Management Template,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/b237127b5b2a19cf41937f18fa9fe5df-wz8csx138xckxorpvva4elh8x9bcgkrz_.zip,"Article Management Cloud Function，Includes examples for adding, updating, querying, and deleting articles.","[""Cloudbase"",""database"",""JavaScript"",""CRUD"",""Pagination query"",""Full-text search""]","You can use this cloud function to manage articles. Here's sample code for calling it in a mini program: 
+
+```js
+// Create
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'createPost',
+    data: {
+      title: 'My 1st Article',
+      content: 'this is the content',
+      author: 'David',
+    }
+  }
+}).then(res => {
+  console.log('Create result: ', res)
+})
+
+// response example
+{
+  ""id"": ""64c9f5a79f6c8e0001b60b0a"",
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// Update
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'updatePost',
+    data: {
+      id: '64c9f5a79f6c8e0001b60b0a',
+      post: {
+        content: 'Update content'
+      }
+    }
+  }
+}).then(res => {
+  console.log('Update result: ', res)
+})
+
+// response example
+{
+  ""id"": ""64c9f5a79f6c8e0001b60b0a"",
+  ""updated"": 1
+}
+
+// Delete
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'deletePost',
+    data: {
+      id: '64c9f5a79f6c8e0001b60b0a'
+    }
+  }
+}).then(res => {
+  console.log('Delete result: ', res)
+})
+
+// response example
+{
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1"",
+  ""deleted"": 1
+}
+
+// Get One
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'getPost',
+    data: {
+      id: '64c9f5a79f6c8e0001b60b0a'
+    }
+  }
+}).then(res => {
+  console.log('Get one: ', res)
+})
+
+// response example
+{
+  ""data"": [
+    {
+      ""_id"": ""64c9f5a79f6c8e0001b60b0a"",
+      ""title"": ""My 1st Article"",
+      ""content"": ""this is the content"",
+      ""author"": ""David""
+      // ...
+    }
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// Pagination
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'listPosts',
+    data: {
+      page: 1,
+      pageSize: 10
+    }
+  }
+}).then(res => {
+  console.log('Pagination result: ', res)
+})
+
+// response
+{
+  ""list"": [
+    {
+      ""_id"": ""64c9f5a79f6c8e0001b60b0a"",
+      ""title"": ""1st Article"",
+      ""content"": ""update content"",
+      ""author"": ""David""
+      // ...
+    }
+    // ... more
+  ],
+  ""total"": 100,
+  ""page"": 1,
+  ""pageSize"": 10
+}
+
+// Search
+wx.cloud.callFunction({
+  name: 'post-management',
+  data: {
+    action: 'searchPosts',
+    data: {
+      keyword: 'tech'
+    }
+  }
+}).then(res => {
+  console.log('Search: ', res)
+})
+
+// response
+{
+  ""data"": [
+    {
+      ""_id"": ""64c9f5a79f6c8e0001b60b0a"",
+      ""title"": ""1st Article"",
+      ""content"": ""update content"",
+      ""author"": ""David""
+      // ...
+    }
+    // more
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+```",,,,6,,英文,,,,,"[""国内站"",""国际站""]",,,
+transaction,"[""scfFunc""]",,Account Transfer Template,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/a2599c046b2224272b4cbe9913be8584-zdvy4znluicrkp9aj9mj7i4v3mklyf2n_.zip,Account Transaction Cloud Function (with transaction operation example),"[""Database transaction"",""Financial system"",""Transfer function"",""Cloudbase"",""Transaction processing"",""Concurrency control""]","You can use this cloud function to manage accounts and transactions. Here's sample code for testing the cloud function call in the mini-program:
+
+```js
+// Create
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'createAccount',
+    data: {
+      name: 'David',
+      initialBalance: 1000
+    }
+  }
+}).then(res => {
+  console.log('Create: ', res)
+})
+
+// response
+{
+  ""id"": ""xxx"",
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+// Transfer
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'transfer',
+    data: {
+      fromAccountId: 'account1',
+      toAccountId: 'account2',
+      amount: 100
+    }
+  }
+}).then(res => {
+  console.log('Transfer: ', res)
+})
+
+// response
+{
+  ""success"": true,
+  ""recordId"": ""xxx""
+}
+
+// Batch Transfer
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'batchTransfer',
+    data: {
+      fromAccountId: 'account1',
+      transfers: [
+        { toAccountId: 'account2', amount: 50 },
+        { toAccountId: 'account3', amount: 50 }
+      ]
+    }
+  }
+}).then(res => {
+  console.log('Batch Transfer: ', res)
+})
+
+// response
+{
+  ""success"": true,
+  ""records"": [""xxx1"", ""xxx2""]
+}
+
+// Check balance
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'getBalance',
+    data: {
+      accountId: 'account1'
+    }
+  }
+}).then(res => {
+  console.log('Check balance: ', res)
+})
+
+// response
+{
+    ""result"": 800
+}
+
+
+// Check transaction history
+wx.cloud.callFunction({
+  name: 'transaction-management',
+  data: {
+    action: 'getTransactionHistory',
+    data: {
+      accountId: 'account1'
+    }
+  }
+}).then(res => {
+  console.log('Check transaction history: ', res)
+})
+
+// response
+{
+  ""data"": [
+    {
+      ""_id"": ""record3"",
+      ""fromAccount"": ""account1"",
+      ""toAccount"": ""account3"",
+      ""amount"": 50,
+      ""status"": ""success"",
+      ""createdAt"": ""2023-08-02T08:30:15.000Z"",
+      ""updatedAt"": ""2023-08-02T08:30:15.000Z""
+    },
+    {
+      ""_id"": ""record2"",
+      ""fromAccount"": ""account1"",
+      ""toAccount"": ""account2"",
+      ""amount"": 50,
+      ""status"": ""success"",
+      ""createdAt"": ""2023-08-02T08:30:15.000Z"",
+      ""updatedAt"": ""2023-08-02T08:30:15.000Z""
+    },
+    {
+      ""_id"": ""record1"",
+      ""fromAccount"": ""account1"",
+      ""toAccount"": ""account2"",
+      ""amount"": 100,
+      ""status"": ""success"",
+      ""createdAt"": ""2023-08-02T08:30:15.000Z"",
+      ""updatedAt"": ""2023-08-02T08:30:15.000Z""
+    }
+  ],
+  ""requestId"": ""1735086147_0.36272387876657_33594-193f355e_1""
+}
+
+```",,,,7,,英文,,,,,"[""国际站"",""国内站""]",,,
+user-management-sql,"[""scfFunc""]",,User management SQL template,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/455183c463418742a5ba9638216e80a8-8cex0gdeu9def8su03q4rljnw3ig716g_.zip,User management cloud function with SQL operation examples (currently only supports SELECT statements),"[""Cloudbase"",""User management"",""Database Query"",""WeChat Mini Program"",""CloudFunction""]","You can use this cloud function to manage users.
+
+Currently, only SELECT statements are available. If you need other SQL statements, please contact us through the official community.
+
+Here’s sample code for testing this cloud function in a Mini Program: 
+
+```js
+
+// Get One
+wx.cloud.callFunction({
+  name: 'user-management',
+  data: {
+    action: 'getUser',
+    data: {
+      id: 'xxx'
+    }
+  }
+}).then(res => {
+  console.log('Get One: ', res)
+})
+
+// response
+{
+  ""_id"": ""xxx"",
+  ""username"": ""张三"",
+  ""email"": ""zhangsan@example.com"",
+  ""phone"": ""13900139000""
+  // ...
+}
+
+// Get user list with pagination
+wx.cloud.callFunction({
+  name: 'user-management',
+  data: {
+    action: 'listUsers',
+    data: {
+      page: 1,
+      pageSize: 10
+    }
+  }
+}).then(res => {
+  console.log('Get List: ', res)
+})
+
+// response
+{
+  ""list"": [
+    {
+      ""_id"": ""xxx"",
+      ""username"": ""张三"",
+      ""email"": ""zhangsan@example.com"",
+      ""phone"": ""13900139000""
+    }
+    // ... more
+  ],
+  ""total"": 100,
+  ""page"": 1,
+  ""pageSize"": 10
+}
+
+// Search
+wx.cloud.callFunction({
+  name: 'user-management',
+  data: {
+    action: 'searchUsers',
+    data: {
+      keyword: '张三'
+    }
+  }
+}).then(res => {
+  console.log('Search: ', res)
+})
+
+// response
+[
+  {
+    ""id"": 1,
+    ""username"": ""张三"",
+    ""email"": ""zhangsan@example.com"",
+    ""phone"": ""13900139000"",
+  }
+  // ... more
+]
+```",,,,8,,英文,,,,,"[""国际站"",""国内站""]",,,
+wxpay-common,"[""scfFunc""]",,WeChat Pay general template,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/c3f4483604f8a761bec64a03574dfce0-cy6xcoidvb8uq0b0he83vh9rh6ilk10z_.zip,WeChat Pay Universal Template,"[""WeChat Pay"",""CloudFunction"",""Pay API"",""Order Management"",""Refund function"",""Mini-program development""]","This is a WeChat Pay cloud function that includes unified order placement, order query, refund, and other features.
+
+Before use, ensure you have properly installed and configured the Mini Program WeChat Pay cloud template.
+
+If not installed, go to Template Center > Template Marketplace > Mini Program WeChat Pay to install. After installation, navigate to Template Center > My Templates > Mini Program WeChat Pay > Parameter Settings to complete the required configurations.
+
+
+Here is the calling example:
+
+1. unified order:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-common',
+  data: {
+    type: 'wxpay_order',
+  },
+  success: (res) => {
+    console.log('下单成功', res.result);
+    // res.result :
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""prepay_id"": ""wx2016121516****55928f9b1b2c0********""
+    //   }
+    // }
+  },
+  fail: (err) => {
+    console.error('下单失败', err);
+  },
+});
+```
+
+2. Query order by merchant order number:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-common',
+  data: {
+    type: 'wxpay_query_order_by_out_trade_no',
+  },
+  success: (res) => {
+    console.log('查询成功', res.result);
+    // res.result:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_trade_no"": ""2024040118006666"",
+    //     ""transaction_id"": ""4200000001201801011234567890"",
+    //     ""trade_state"": ""SUCCESS"",
+    //     ""trade_state_desc"": ""支付成功""
+    //   }
+    // }
+  },
+});
+```
+
+3. Request a refund:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-common',
+  data: {
+    type: 'wxpay_refund',
+  },
+  success: (res) => {
+    console.log('退款申请成功', res.result);
+    // res.result :
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_refund_no"": ""2024040118006666"",
+    //     ""refund_id"": ""50000000382019052709732678859"",
+    //     ""status"": ""SUCCESS""
+    //   }
+    // }
+  },
+});
+```
+
+4. Check refund status:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-common',
+  data: {
+    type: 'wxpay_refund_query',
+  },
+  success: (res) => {
+    console.log('退款查询成功', res.result);
+    // res.result 示例:
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_refund_no"": ""2024040118006666"",
+    //     ""refund_status"": ""SUCCESS"",
+    //     ""success_time"": ""2020-12-01T16:18:12+08:00""
+    //   }
+    // }
+  },
+});
+```",,,,9,,英文,,,,,"[""国际站"",""国内站""]",,,
+wxpay-product,"[""scfFunc""]",,Product order template,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/f9d1b47fa6eb09375661a507be3d1249-s0rx7ob09tbxnbgktfueem4nq8oagz74_.zip,WeChat Pay cloud function product template,"[""WeChat Pay"",""Order System"",""Product Management"",""Pay process"",""Refund Function"",""Database Query""]","Here is a complete WeChat Pay cloud function example for product orders, including the full process of product query, order creation, payment, and refund.
+
+Before use, please ensure you have properly installed and configured the Mini Program WeChat Pay cloud template.
+
+If not installed, go to:
+
+Template Center > Template Market > Mini Program WeChat Pay for installation.
+
+After installation, navigate to:
+
+Template Center > My Templates > Mini Program WeChat Pay > Parameter Settings to complete necessary configurations.
+
+Here is the calling example:
+
+1. Create order:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-product',
+  data: {
+    type: 'wxpay_order',
+    productId: 'product123', // Product ID
+    count: 2, // count
+  },
+  success: (res) => {
+    console.log('下单成功', res.result);
+    // res.result :
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""prepay_id"": ""wx2016121516****55928f9b1b2c0********"",
+    //     ""out_trade_no"": ""202404011800666688888""
+    //   }
+    // }
+  },
+});
+```
+
+2. Check order status (by merchant order number):
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-product',
+  data: {
+    type: 'wxpay_query_order_by_out_trade_no',
+    outTradeNo: '202404011800666688888',
+  },
+  success: (res) => {
+    console.log('查询成功', res.result);
+    // res.result :
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_trade_no"": ""202404011800666688888"",
+    //     ""transaction_id"": ""4200000001202404011234567890"",
+    //     ""trade_state"": ""SUCCESS"",
+    //     ""trade_state_desc"": ""支付成功""
+    //   }
+    // }
+  },
+});
+```
+
+3. Request a refund:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-product',
+  data: {
+    type: 'wxpay_refund',
+    orderId: 'order123', // order ID
+  },
+  success: (res) => {
+    console.log('退款申请成功', res.result);
+    // res.result :
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_refund_no"": ""202404011800777788888"",
+    //     ""refund_id"": ""50000000382019052709732678859"",
+    //     ""status"": ""SUCCESS""
+    //   }
+    // }
+  },
+});
+```
+
+4. Check refund status:
+
+```js
+wx.cloud.callFunction({
+  name: 'wxpay-product',
+  data: {
+    type: 'wxpay_refund_query',
+    outRefundNo: '202404011800777788888',
+  },
+  success: (res) => {
+    console.log('退款查询成功', res.result);
+    // res.result :
+    // {
+    //   ""code"": 0,
+    //   ""data"": {
+    //     ""out_refund_no"": ""202404011800777788888"",
+    //     ""refund_status"": ""SUCCESS"",
+    //     ""success_time"": ""2024-04-01T16:18:12+08:00"",
+    //     ""amount"": {
+    //       ""refund"": 100,
+    //       ""total"": 100,
+    //       ""currency"": ""CNY""
+    //     }
+    //   }
+    // }
+  },
+});
+```
+
+Notes:
+
+1、Query product info from database, do not pass from frontend
+2、Get user openid from cloud function context, do not pass from frontend
+3、Store order-related info in database
+4、Refund operation should update order status
+5、Add proper error handling for all operations",,,,10,,英文,,,,,"[""国际站"",""国内站""]",,,
+helloworld,"[""tcbrFunc""]",,Cloud Function In Cloud Run Example,Node.js,Nodejs20.19,,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/766e4c524c0e932d914d8e14d1fb1ebd-p130ec0d09p6f9de4m15lyb5zn9qk5vp_.zip,"Quickly create a cloud function in cloud run service. Upon completion, it will include callable functions like echo and log. For more details, see the template description.","[""Agent 开发平台""]","Quickly create a cloud function in cloud run service. Upon completion, it will include callable functions like echo and log.: 
+
+* Main path: Outputs ""Hello world!""
+* echo: Outputs the specific request content
+
+
+You can call the function in the mini program as follows:
+
+```js
+// cloud run call required environment ID, cannot be empty
+const c1 = new wx.cloud.Cloud({
+  resourceEnv: 'env id'
+})
+await c1.init()
+
+const r1 = await c1.callContainer({
+  path: '/',   // Default function's request path
+  header: {
+    'X-WX-SERVICE': 'helloworld', // Fill in the name created helloworld
+  },
+  // Other parameters are the same as wx.request
+  method: 'GET',
+})
+console.log(r1) //output Hello world!
+
+const r2 = await c1.callContainer({
+  path: '/echo',   // echo function's request path
+  header: {
+    'X-WX-SERVICE': 'helloworld', // Fill in the name created helloworld
+  },
+  // Other parameters are the same as wx.request
+  method: 'POST',
+  data: {
+    a: 1,
+    b: 2
+  }
+})
+console.log(r2)  //Output the specific request and time
+```
+
+For more available content or usage methods, see [template project](https://github.com/TencentCloudBase/func-v2-template/tree/main)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-basic-example:1.0.0,,是,100,,中文,,,,,"[""国际站"",""国内站""]",,,
+gin,"[""tcbrContainer""]",,Gin template,Golang,Golang,main,是,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/b19339b3e15d93ca1c9d9b40e7aad913-tk9kafzooaq1jamd4a4x13tzh845cj5g_.zip,HTTP call example implemented using Go language with Gin framework,"[""golang"",""gin"",""WebFramework""]","## Intro
+
+HTTP call example implemented using Go language with Gin framework
+
+## Source code
+
+[cloudrun-gin](https://github.com/TencentCloudBase/tcbr-templates/tree/main/cloudrun-gin)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-gin-example:v1.0.0,8080,,2,,英文,"[""platform-run""]",https://github.com/TencentCloudBase/cloudrun-gin.git,使用开源框架创建服务,,"[""国际站"",""国内站""]",,,
+django,"[""tcbrContainer""]",,Django template,Python,Python,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/a9262feb7317d516df68cb2b4acb5569-u7dzsx3za8czg0dov2qohzs0pfcdnbbv_.zip,HTTP call example implemented using Python language with Django framework,"[""python"",""django""]","## Intro
+
+HTTP call example implemented using Python language with Django framework
+
+## Source code
+
+[cloudrun-django](https://github.com/TencentCloudBase/tcbr-templates/tree/main/cloudrun-django)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-django-example:v1.0.0,8080,,3,,英文,"[""platform-run""]",https://github.com/TencentCloudBase/cloudrun-django.git,使用开源框架创建服务,,"[""国际站"",""国内站""]",,,
+flask,"[""tcbrContainer""]",,Flask template,Python,Python,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/3602473ba09cfe2b344b56d7e741466e-3equ3nni5khpa6zyy3z8bdwfgfyqwb1u_.zip,HTTP call example implemented using Python language with Flask framework,"[""python"",""flask"",""WebFramework""]","## Intro
+
+HTTP call example implemented using Python language with Flask framework
+
+## Source Code
+
+[cloudrun-flask](https://github.com/TencentCloudBase/tcbr-templates/tree/main/cloudrun-flask)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-flask-example:v1.0.0,8080,,4,,英文,,https://github.com/TencentCloudBase/cloudrun-flask.git,使用开源框架创建服务,,"[""国际站"",""国内站""]",,,
+springboot,"[""tcbrContainer""]",,Springboot template,Java,Java,main,是,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/ec3989423442fe796d391f75065de1db-1sy1fcy6a2gt62dijkf9n2lmlf6z9gu3_.zip,HTTP call example implemented using Java language with Springboot framework,"[""java"",""springboot"",""WebFramework""]","## Intro
+
+HTTP call example implemented using Java language with Springboot framework
+
+## Source code
+
+[cloudrun-springboot](https://github.com/TencentCloudBase/tcbr-templates/tree/main/cloudrun-springboot)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-springboot-example:v1.0.0,8080,,6,,英文,"[""platform-run""]",https://github.com/TencentCloudBase/cloudrun-springboot.git,使用开源框架创建服务,,"[""国内站"",""国际站""]",,,
+express,"[""tcbrContainer""]",,Express template,Nodejs,Nodejs,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/7c958babaf0d4d4e69fb000444778fd8-utipe8qt0plv6kdlvgi7k38iiq56659t_.zip,HTTP call example implemented using Nodejs language with Express framework,"[""nodejs"",""express"",""WebFramework""]","## Intro
+
+HTTP call example implemented using Nodejs language with Express framework
+
+## Source code
+
+[cloudrun-express](https://github.com/TencentCloudBase/tcbr-templates/tree/main/cloudrun-express)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-express-example:v1.0.0,3000,,6,,英文,"[""platform-run""]",https://github.com/TencentCloudBase/cloudrun-express.git,使用开源框架创建服务,,"[""国内站"",""国际站""]",,,
+nestjs,"[""tcbrContainer""]",,Nestjs template,Nodejs,Nodejs,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/2d776b7ab64bb519d488ef46adca9b93-1sar29wttwp90ces48bjfa1fhvj1p9sc_.zip,HTTP call example implemented using Nodejs language with Nestjs framework,"[""nodejs"",""nestjs"",""WebFramework""]","## Intro
+
+HTTP call example implemented using Nodejs language with Nestjs framework
+
+## Source code
+
+[cloudrun-nestjs](https://github.com/TencentCloudBase/tcbr-templates/tree/main/cloudrun-nestjs)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-nestjs-example:v1.0.0,3000,,7,,英文,,https://github.com/TencentCloudBase/cloudrun-nestjs.git,,,"[""国际站"",""国内站""]",,,
+fastapi,"[""tcbrContainer""]",,FastAPI template,Python,Python,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/3265378cb5a93a5649ba3a5dbc62368b-jytre601fdidfdefnyme0qsfw8h5dy54_.zip,HTTP call example implemented using Python language with FastAPI framework,"[""python"",""fastapi"",""WebFramework""]","## Intro
+
+HTTP call example implemented using Python language with FastAPI framework
+
+## Source code
+
+[cloudrun-fastapi](https://github.com/TencentCloudBase/tcbr-templates/tree/main/cloudrun-fastapi)",crunbuild-az-new.tencentcloudcr.com/cloudbase/cbrf-template-fastapi-example:v1.0.0,80,,8,,英文,,https://github.com/TencentCloudBase/cloudrun-fastapi.git,,,"[""国内站"",""国际站""]",,,
+scfWeb,"[""scfWeb""]",,Web Cloud Function,javascript,Nodejs18.15,index.main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/013af20e539325e07d361ed5f26a4ec8-exqvqhwgmxmfhpd4yadueu6pyyxi7tm8_.zip,Web cloud function example template,"[""JavaScript"",""HTTPFunc""]",A web cloud function example template,,,,11,,英文,,,,,"[""国内站"",""国际站""]",,,
+golang-mysql,"[""tcbrContainer""]",,Golang 内网直连 MySQL,Golang,go 1.23.0,main,是,https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/golang-mysql.zip,,"云托管服务通过内网访问 MySQL 示例. 示例使用 Golang (Gin) + gorm 实现, 包含一套数据库 CRUD API 和一个调用 API 的前端页面.","[""golang"",""gin"",""mysql""]","# Go + MySQL 云托管服务
+
+## 快速开始
+
+### 配置 MySQL 连接参数
+
+1. 初始化 MySQL 参考 [开通及使用文档](https://docs.cloudbase.net/database/configuration/db/tdsql/initialization).
+2. 前往云开发控制台, 选择 `数据库 - MySQL`, 在右上角点击 `连接数据库`, 在 `连接字符串` 标签页可以获得数据库实例可以获得连接参数 `host`, `port`, `database` 参数.
+3. [可选] 如果不希望使用管理员账号, 在弹窗中点击 `忘记密码` 按钮, 可以创建一套新的用户名密码.
+
+### 部署服务
+
+前往 [腾讯云云开发控制台](https://tcb.cloud.tencent.com/dev), 选择 `云托管`, 在 `创建服务` 区块选择 `通过模板部署`, 选择模版, 进入模板代码预览页面.
+在代码预览区, 找到 `.env` 文件, 点击右上角 `编辑` 按钮, 修改 MySQL 链接相关参数, 并点击 `保存` 按钮.
+
+```
+MYSQL_ADDRESS=<mysql-instance-host>:<mysql-instance-port>
+MYSQL_USERNAME=<mysql-username>
+MYSQL_PASSWORD=<mysql-password>
+MYSQL_DATABASE=<mysql-database>
+```
+
+之后点击 `部署` 按钮, 等待部署完成. 部署完成后, 在云托管的 `服务列表` 页面, 点击 `服务名称` 进入服务详情页, 通过服务域名即可访问服务.
+
+## 本地调试
+
+### 环境要求
+
+- Go 1.23+
+- MySQL 5.7+ 或 MySQL 8.0+
+
+### 1. 克隆项目并安装依赖
+
+```bash
+# 克隆项目
+git clone https://github.com/TencentCloudBase/awesome-cloudbase-examples.git
+cd cloudbaserun/golang-mysql
+
+# 使用 Go modules 安装依赖
+go mod download
+
+# [可选] 使用国内镜像源以提高下载速度
+go env -w GOPROXY=https://mirrors.cloud.tencent.com/go/,direct
+```
+
+### 2. 配置 MySQL 数据库
+
+创建 `.env` 文件，配置你的本地 MySQL 连接参数：
+
+```bash
+MYSQL_USERNAME=your_username
+MYSQL_PASSWORD=your_password
+MYSQL_ADDRESS=localhost:3306
+MYSQL_DATABASE=your_database
+# 可以用 PORT 环境变量指定其他端口
+PORT=8080
+```
+
+### 3. 启动本地开发服务器
+
+确保本地 MySQL 服务已启动
+
+```bash
+# 直接运行
+go run ./cmd/server
+
+# 或者先构建再运行
+go build -o server ./cmd/server
+./server
+```
+
+应用将在 `http://localhost:8080` 启动。
+
+### 4. 测试应用功能
+
+- 访问 `http://localhost:8080` 查看前端页面
+- 使用页面上的按钮测试计数器功能：
+  - 点击 ""计数+1"" 按钮增加计数
+  - 点击 ""清零"" 按钮重置计数
+- 或者直接调用 API 接口：
+
+  ```bash
+  # 获取当前计数
+  curl http://localhost:8080/api/count
+
+  # 增加计数
+  curl -X POST http://localhost:8080/api/count \
+    -H ""Content-Type: application/json"" \
+    -d '{""action"": ""inc""}'
+
+  # 清空计数
+  curl -X POST http://localhost:8080/api/count \
+    -H ""Content-Type: application/json"" \
+    -d '{""action"": ""clear""}'
+  ```
+
+### 常见问题排查
+
+- **数据库连接失败**：检查 `.env` 文件中的数据库配置和 MySQL 服务状态
+- **端口被占用**：修改 `PORT` 环境变量或直接修改代码中的端口号
+- **权限问题**：确保 MySQL 用户有对应数据库的读写权限
+- **Go 版本问题**：确保使用 Go 1.23 或更高版本
+
+### 使用 Docker 进行本地调试（可选）
+
+```bash
+# 构建镜像
+docker build -t golang-mysql-demo .
+
+# 运行容器（需要先启动 MySQL 容器）
+docker run --rm -p 8080:8080 golang-mysql-demo
+```
+
+## Dockerfile 最佳实践
+
+请参考 [优化容器镜像](https://docs.cloudbase.net/run/develop/image-optimization)
+",crunbuild-az-new.tencentcloudcr.com/cloudbase/golang-mysql:v0.0.1,8080,否,5,"	/platform-run/service/create?type=package&zipUrl=https://clooudbaserun-az-1258016615.cos.ap-shanghai.myqcloud.com/golang-mysql.zip&serverName=golangmysql&port=8080",中文,,,,"[{""value"":""<mysql-instance-host>:<mysql-instance-port>"",""key"":""MYSQL_ADDRESS""},{""value"":""<mysql-username>"",""key"":""MYSQL_USERNAME""},{""value"":""<mysql-password>"",""key"":""MYSQL_PASSWORD""},{""value"":""<mysql-database>"",""key"":""MYSQL_DATABASE""}]","[""国内站""]",,,
+scf-integration-pay-common,"[""scfFunc""]",,集成中心微信支付模板,nodejs,js20,main,否,,cloud://lowcode-5g5llxbq5bc9299e.6c6f-lowcode-5g5llxbq5bc9299e-1300677802/weda-uploader/f275c074ff57400835263a53cad0c738-pay-common-0525.zip,集成中心小程序支付模板,,这是集成中心使用的支付模板,,,是,100,,中文,,,,,"[""国内站"",""国际站""]",,,

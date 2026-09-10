@@ -1,0 +1,11 @@
+{
+  "name": "http-php-slim",
+  "description": "Slim Framework HTTP function for CloudBase",
+  "require": {
+    "php": ">=7.4",
+    "slim/slim": "^4.0",
+    "slim/psr7": "^1.0",
+    "nyholm/psr7": "^1.0",
+    "nyholm/psr7-server": "^1.0"
+  }
+}

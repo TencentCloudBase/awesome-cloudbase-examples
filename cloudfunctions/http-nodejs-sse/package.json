@@ -1,0 +1,9 @@
+{
+  "name": "http-nodejs-sse",
+  "version": "1.0.0",
+  "description": "CloudBase HTTP 函数 SSE 示例（基于 @cloudbase/functions-framework）/ CloudBase HTTP function SSE example powered by @cloudbase/functions-framework",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/functions-framework": "latest"
+  }
+}

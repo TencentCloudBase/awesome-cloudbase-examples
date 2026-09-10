@@ -1,0 +1,57 @@
+{
+  "identifier": "scf-php-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "PHP Hello World",
+  "description": "PHP SCF cloud function blank template",
+  "tags": [
+    "php",
+    "helloworld"
+  ],
+  "sampleCode": "# PHP Cloud Function Blank Template\n\nA minimal SCF cloud function written in PHP.\n\nDeploy and invoke with any payload.",
+  "language": "Php",
+  "runtimeVersion": "Php8.0",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-php-helloworld.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-php-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-php-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-php-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-php-helloworld"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-php-helloworld.zip",
+    "zipSha": "2513d5fa889b66827a962bd25002bb9490dd80030aafd827d91a5ad4bc0b2d2c",
+    "uploadedAt": 1782878877709,
+    "legacyTags": [
+      "PHP"
+    ],
+    "onlineId": "b387ab556981cb6e00b128d4297f0045",
+    "i18nSource": "override",
+    "onlineIdentifier": "scf-php-helloworld"
+  }
+}

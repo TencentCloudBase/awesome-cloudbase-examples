@@ -1,0 +1,56 @@
+{
+  "identifier": "scf-python-helloworld",
+  "lang": "zh",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Python Hello World",
+  "description": "Python 语言 空白 helloworld 模板",
+  "tags": [
+    "python",
+    "helloworld"
+  ],
+  "sampleCode": "这是云函数 Python 语言的 空白 helloworld 模板，模板内仅包含入口文件。",
+  "language": "Python3.9",
+  "runtimeVersion": "Python3.9",
+  "isCompile": false,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-python-helloworld.zip",
+  "envParams": [],
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-python-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-python-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-python-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-python-helloworld"
+      }
+    }
+  ],
+  "displayPage": [],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-python-helloworld.zip",
+    "zipSha": "6d809bf760949659d590f90d493269e998d1a903de2c2154ad3a32749da3db12",
+    "uploadedAt": 1782878877975,
+    "legacyTags": [
+      "Python"
+    ],
+    "onlineId": "dbbce4a468b7a87000efbce93a655840",
+    "onlineIdentifier": "scf-python-helloworld"
+  }
+}

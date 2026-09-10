@@ -1,0 +1,57 @@
+{
+  "identifier": "scf-go-helloworld",
+  "lang": "en",
+  "funcTypes": [
+    "scfFunc"
+  ],
+  "title": "Go Hello World",
+  "titleIcon": "",
+  "description": "Go SCF cloud function helloworld template",
+  "tags": [
+    "go",
+    "helloworld"
+  ],
+  "sampleCode": "# Go Cloud Function Hello World\n\nA minimal SCF cloud function written in Go.\n\nBuild with `bash build.sh` to produce the `main` binary, then deploy.",
+  "language": "Go",
+  "runtimeVersion": "Go1",
+  "isCompile": true,
+  "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-go-helloworld.zip",
+  "envParams": [],
+  "linkurl": "",
+  "guide": "",
+  "targetPlatform": [
+    "default",
+    "intl"
+  ],
+  "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-go-helloworld",
+  "gitUrlList": [
+    {
+      "gitPlatform": {
+        "gitType": "github",
+        "gitUrl": "https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-go-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "gitee",
+        "gitUrl": "https://gitee.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/cloudfunctions/scf-go-helloworld"
+      }
+    },
+    {
+      "gitPlatform": {
+        "gitType": "cnb",
+        "gitUrl": "https://cnb.cool/tencent/cloud/cloudbase/awesome-cloudbase-examples/-/tree/master/cloudfunctions/scf-go-helloworld"
+      }
+    }
+  ],
+  "_source": {
+    "dir": ".",
+    "zipFilePath": "https://6c6f-lowcode-5g5llxbq5bc9299e-1300677802.tcb.qcloud.la/template/scf-go-helloworld.zip",
+    "zipSha": "533ceb7f8c8e71dcf31d4d653ba156fc82604a09362af43db6c8ce19140cb76b",
+    "uploadedAt": 1782878869685,
+    "legacyTags": [],
+    "i18nSource": "override",
+    "onlineIdentifier": "scf-go-helloworld",
+    "onlineId": "25cb905f6981bd1600b5fde77c03a870"
+  }
+}

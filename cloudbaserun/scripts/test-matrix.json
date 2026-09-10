@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "_comment": "CloudBase Run 容器模板测试矩阵。Tier 2 部署方式与 cloudfunctions 不同，需要 tcb run deploy。",
+  "functions": [
+    {
+      "name": "go-helloworld",
+      "type": "container",
+      "lang": "go",
+      "deployable": true,
+      "notes": "Go 容器模板，通过 Dockerfile 构建"
+    },
+    {
+      "name": "nodejs-helloworld",
+      "type": "container",
+      "lang": "nodejs",
+      "deployable": true,
+      "localStart": "node index.js",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Node.js 容器模板"
+    },
+    {
+      "name": "php-helloworld",
+      "type": "container",
+      "lang": "php",
+      "deployable": true,
+      "notes": "PHP 容器模板"
+    },
+    {
+      "name": "python-helloworld",
+      "type": "container",
+      "lang": "python",
+      "deployable": true,
+      "localStart": "python3 main.py",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Python 容器模板"
+    },
+    {
+      "name": "python-django",
+      "type": "container",
+      "lang": "python",
+      "deployable": true,
+      "prepare": "pip install -r requirements.txt",
+      "localStart": "python3 manage.py runserver 0.0.0.0:9000",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Django 框架容器模板"
+    },
+    {
+      "name": "python-flask",
+      "type": "container",
+      "lang": "python",
+      "deployable": true,
+      "prepare": "pip install -r requirements.txt",
+      "localStart": "gunicorn -b 0.0.0.0:9000 -w 1 app:app",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Flask 框架容器模板"
+    },
+    {
+      "name": "nodejs-express",
+      "type": "container",
+      "lang": "nodejs",
+      "deployable": true,
+      "prepare": "npm install --no-audit --no-fund",
+      "localStart": "node index.js",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Express 框架容器模板"
+    },
+    {
+      "name": "nodejs-koa",
+      "type": "container",
+      "lang": "nodejs",
+      "deployable": true,
+      "prepare": "npm install --no-audit --no-fund",
+      "localStart": "node index.js",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Koa 框架容器模板"
+    },
+    {
+      "name": "nodejs-nextjs",
+      "type": "container",
+      "lang": "nodejs",
+      "deployable": true,
+      "prepare": "npm install --no-audit --no-fund",
+      "localStart": "npm run dev -- -p 9000",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Next.js 框架容器模板"
+    },
+    {
+      "name": "nodejs-nuxt",
+      "type": "container",
+      "lang": "nodejs",
+      "deployable": true,
+      "prepare": "npm install --no-audit --no-fund",
+      "localStart": "npm run dev -- --port 9000",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Nuxt 框架容器模板"
+    },
+    {
+      "name": "php-laravel",
+      "type": "container",
+      "lang": "php",
+      "deployable": false,
+      "skipReason": "模板仅提供骨架，需要先 composer create-project laravel/laravel 拉取完整脚手架后才能部署",
+      "notes": "Laravel 框架容器模板，需先拉取完整脚手架"
+    },
+    {
+      "name": "java-springboot",
+      "type": "container",
+      "lang": "java",
+      "deployable": true,
+      "prepare": "mvn -q -DskipTests clean package",
+      "localStart": "java -jar target/*.jar --server.port=9000",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Spring Boot 框架容器模板"
+    },
+    {
+      "name": "python-sse",
+      "type": "container",
+      "lang": "python",
+      "deployable": true,
+      "prepare": "pip install -r requirements.txt",
+      "localStart": "python3 main.py",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200, "isSSE": true },
+      "notes": "Python SSE 实时推送容器模板"
+    },
+    {
+      "name": "nodejs-websocket",
+      "type": "container",
+      "lang": "nodejs",
+      "deployable": true,
+      "prepare": "npm install --no-audit --no-fund",
+      "localStart": "node index.js",
+      "localPort": 9000,
+      "http": { "path": "/", "expectStatus": 200 },
+      "notes": "Node.js WebSocket 容器模板"
+    }
+  ]
+}
