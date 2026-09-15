@@ -1,5 +1,3 @@
-<a href="https://cloud.tencent.com/developer/article/2649588" target="_blank"><img width="3094" height="654" alt="banner" src="https://github.com/user-attachments/assets/37982d04-274a-4b6c-85b8-06983c615d9a" /></a>
-
 ![awesome-cloudbase-examples](https://socialify.git.ci/TencentCloudBase/awsome-cloudbase-examples/image?font=Inter&forks=1&owner=1&pattern=Circuit+Board&stargazers=1)
 
 # Awesome CloudBase Examples
@@ -44,15 +42,16 @@
 - [五子棋实时联机对战](./web/gomoku-game) -
   一个完全通过**AI 编程**开发的实时联机对战五子棋应用，基于 Vue 3 + Vite + 腾讯云开发（CloudBase）构建，展示了 AI 辅助开发全栈应用的完整过程。 [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 - [电商管理后台](./web/ecommerce-management-backend) -
-    一个完全通过**AI 编程**开发的电商管理后台应用，基于 React + Vite + 腾讯云开发（CloudBase）构建，展示了 AI 辅助开发管理应用、包含如何连接云开发数据库的过程。[![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
+  一个完全通过**AI 编程**开发的电商管理后台应用，基于 React + Vite + 腾讯云开发（CloudBase）构建，展示了 AI 辅助开发管理应用、包含如何连接云开发数据库的过程。[![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 - [Simple CRM](./web/simple-crm) -
-    一个完全通过**AI 编程**开发的现代化客户关系管理系统，基于 React + Vite + 腾讯云开发（CloudBase）构建，展示了 AI 辅助开发全栈应用的完整过程。[![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
+  一个完全通过**AI 编程**开发的现代化客户关系管理系统，基于 React + Vite + 腾讯云开发（CloudBase）构建，展示了 AI 辅助开发全栈应用的完整过程。[![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 - [React 应用模板](./web/cloudbase-react-template) - 基于 React 的云开发应用模板 [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 - [Vue 应用模板](./web/cloudbase-vue-template) - 基于 Vue 的云开发应用模板 [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 - [文件上传下载](./web/tcb-demo-files) - 云开发文件存储示例
 - [截图工具](./web/snapshots) - 网页快照与截图工具
 
 ### 📱 小程序
+
 - [小程序商城](./miniprogram/tcb-shop-ai-generate) - 一个完全通过**AI 编程**开发，基于微信小程序云开发的电商小程序 [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 
 - [脱单课程小程序](./miniprogram/dating) - 一个完全通过**AI 编程**开发的脱单课程预约小程序，基于微信小程序 + 腾讯云开发（CloudBase）构建，展示了 AI 辅助开发全栈应用的完整过程。 [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
@@ -83,18 +82,16 @@
 - [官网模板](./miniprogram/tcb-official-website) - 基于云开发的官网模板小程序
 - [订阅消息](./miniprogram/subscription-message) - 订阅消息示例
 
-
 ### 🔄 跨端应用
 
 - [UniApp 应用模板](./universal/cloudbase-uniapp-template) - 基于 UniApp 的云开发跨端应用模板 ，可编译到 H5 、微信小程序、抖音小程序、支付宝小程序以及App端 (iOS/Android) [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi/4KjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 - [Soul Chat](./universal/soul-chat) - 基于UniApp 的随机匹配匿名聊天应用 [![AI ToolKit](https://img.shields.io/badge/AI%20ToolKit-🤖-blue?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMkM0LjY4NjMgMiAyIDQuNjg2MyAyIDhTNC42ODYzIDE0IDggMTRTMTQgMTEuMzEzNyAxNCA4UzExLjMxMzcgMiA4IDJaTTggMTJDNS43OTA5IDEyIDQgMTAuMjA5MSA0IDhTNS43OTA5IDQgOCA0UzEyIDUuNzkwOSAxMiA4UzEwLjIwOTEgMTIgOCAxMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik04IDZDNi44OTU0IDYgNiA2Ljg5NTQgNiA4UzYuODk1NCA5IDggOVM5IDguMTA0NiA5IDhTOC4xMDQ2IDYgOCA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+)](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
 
-- [React Native 应用示例](./universal/cloudbase-rn-demo) - 基于 React Native 的云开发跨端应用示例，支持 iOS 和 Android 平台 
+- [React Native 应用示例](./universal/cloudbase-rn-demo) - 基于 React Native 的云开发跨端应用示例，支持 iOS 和 Android 平台
 
 - [Flutter 应用示例](./universal/cloudbase-flutter-demo) - 基于 Flutter 的云开发跨端应用示例，支持 iOS、Android 和 Web 平台
 
 - [Cocos 应用示例](./universal/cloudbase-cocos-demo) - 基于 Cocos Creator 的云开发跨端应用示例，支持 iOS、Android 和 Web 平台
-
 
 ### ⚡ 函数型托管
 
@@ -107,7 +104,6 @@
 - [SSE 示例](./cloudbaserun/sse-demo) - 云托管使用 SSE 协议返回内容的示例
 - [Spring Cloud 示例](./cloudbaserun/spring-cloud-docker-demo) - SpringCloud 构建微服务示例
 - [云端开发环境](./cloudbaserun/deploy-code-server) - 云托管部署并运行云端开发环境示例
-
 
 ### 🤖 AI Agent 服务
 
@@ -130,7 +126,6 @@
 
 ### 🔧 低代码应用
 
-- [客户关系管理系统](./lowcode/scrm-demo) - 基于低代码平台的客户关系管理系统示例
 - [子表单场景云函数](./cloudrunfunctions/subtable-management) - 子表单场景云函数示例
 
 ## 🤝 贡献指南
@@ -147,4 +142,4 @@
 
 ## 📄 许可证
 
-[MIT](LICENSE)
+MIT
