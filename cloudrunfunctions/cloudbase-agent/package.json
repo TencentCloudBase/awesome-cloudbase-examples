@@ -32,7 +32,7 @@
     "@modelcontextprotocol/sdk": "1.11.3",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.7",
-    "ai": "4.2.6",
+    "ai": "5.0.52",
     "dotenv": "^16.4.7",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.5.1",
