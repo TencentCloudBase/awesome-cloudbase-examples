@@ -38,9 +38,24 @@
 
 官方接口文档：云开发 API 概览 https://cloud.tencent.com/document/api/876/34809 （请求域名 `tcb.tencentcloudapi.com`）；云数据库 PostgreSQL API 概览 https://cloud.tencent.com/document/api/409/16761 （请求域名 `postgres.tencentcloudapi.com`）。
 
-## 费用与套餐：变配不需要先升级套餐
+## 费用与套餐：调规格无套餐门槛，升独享有套餐门槛
 
-**改规格、升独享都没有套餐门槛。** 调用条件只有两类：实例状态可操作、目标规格合法。没有「套餐档位」「计费模式」这类前置 —— 个人版环境照样能调。
+**B1 调规格（独享实例）没有套餐门槛。** 调用条件只有两类：实例状态可操作、目标规格合法。没有「套餐档位」「计费模式」这类前置。
+
+🔴 **B2 升独享有套餐门槛，而且是硬门槛**（实测 2026-10-16）。个人版（`baas_personal`）环境调用被直接拒：
+
+```
+current package does not support upgrading to dedicated instance
+```
+
+同样的参数换到标准版（`baas_pf_standard`）环境就成功升到独享并跑到 `Succeed`。准入范围（内部口径 + 实测一致）：**标准版及以上（标准版 / 企业版 / 企业高级版）+ 集成版 / 平台版**。
+
+门槛的几个反直觉点，别用别处的经验套：
+
+- ⚠️ **不要试图从套餐字段预判**：`ResourceLimit` 里没有 `PostgreSQL.DedicatedInstance` 键并不等于不能升 —— 标准版就没有这个键，照样能升；有这个键的只有企业版 / 企业高级版。`PackageType` 也不可靠：`tcb/DescribeEnvPlans` 与 `manageEnv listPackages` 对同一档位给出的值并不一致。直接调用接口，以返回为准。
+- ⚠️ **没有可读的资格字段，也没有 DryRun**：判断某个环境能不能升，只能真调一次；调完没报套餐错就是能升。
+- ⚠️ **先复查实例再查套餐**：目标环境如果压根没开 PG，接口先报 `PG instance not found.`，压根走不到套餐那道校验。所以「报错说没实例」和「报错说套餐不行」要分开读，别把没开 PG 讲成套餐问题。
+- ⚠️ 选环境时另有坑：`manageEnv listPackages` 按新购页口径只返回 `default` 族，标准版 / 企业版（`basic` 族）不在列表里，但它们合法可建。详见 `cloudbase-platform` skill 的 `manageEnv` 一节。
 
 别把边缘加速那道门槛套到这里。边缘加速确实要求「标准版及以上套餐 + 环境处于资源点计费模式」（见 [Recipe 4](./custom-domain.md)），那是**加速能力**的准入要求；PG 变配是**实例自身**的规格调整，两件事。
 
@@ -53,7 +68,7 @@
 
 按这个口径，2 核 4 GiB + 50 GB 的独享实例是 **709 资源点/小时**（约 1.7 万/天）；从 1 核 2 GiB + 10 GB 升到它，每小时多 362 资源点。控制台提交页的「用量推算」就按这个口径给，细则可以引其中的「PostgreSQL 数据库计量说明」链接给用户。
 
-所以「要不要升套餐」只有一条判据：**资源点够不够扣**。升配后消耗变快，扣到不足时才需要升套餐或加购资源包 —— 那是**额度**问题，不是变配的前置条件。回答用户时把这两件事分开说，别让「先升套餐」变成一次白忙。
+「要不要升套餐」的判据要分开说：**B1 只看资源点够不够扣**；**B2 先过套餐准入，再看资源点**。B1 升配后消耗变快，扣到不足时才需要升套餐或加购资源包 —— 那是**额度**问题，不是 B1 的前置条件。回答用户时把这两件事分开说，别让「先升套餐」变成一次白忙。
 
 这一节的口径只适用于**独享**实例：共享实例的计费规则不同，升独享提交时的提示就是「升级后按独享实例的计费规则计量计费」。
 
@@ -112,15 +127,39 @@
 }
 ```
 
-**前置条件是硬门槛，不满足会被直接拒掉**（实测 2026-09-24）：这个接口只接受 **`shared`（多租户共享）** 形态的实例，其它形态报错且不产生任何任务：
+**B2 有两道硬门槛，不满足会被直接拒掉，且都不产生任何任务。**
+
+**门槛一：套餐。** 只有**标准版及以上（标准版 / 企业版 / 企业高级版）+ 集成版 / 平台版**才授这个能力（详见「费用与套餐」一节）。个人版实测报：
+
+```
+current package does not support upgrading to dedicated instance
+```
+
+**门槛二：实例形态。** 只接受 **`shared`（多租户共享）** 形态，其它形态报（实测 2026-09-24）：
 
 ```
 only shared (multi-tenant) instance can be upgraded to dedicated, current form: small_tenant
 ```
 
-要注意**「云开发侧写着独享」和「PG 侧是什么形态」是两套话**：实测一个 `DescribeEnvInfo` 里 `TenantType: DEDICATED` 的实例，PG 侧形态是 `small_tenant`，调这个接口就被上面那句拒了。所以动手前先看 `TenantType` —— 只有 `SHARED` 才走 B2，`DEDICATED` 走 B1 调规格。
+**报错读法：先实例、后套餐。** 三种报错对应三种原因，别混成一句「套餐不行」：
 
-**实例形态一律按 `DescribeEnvInfo` 的 `TenantType` 判断，不要按套餐名、购买页或环境新旧推断** —— 个人版默认就是**共享（多租户）**形态，「个人版 = 独享」这个印象通常是错的；反过来也确实存在 `DEDICATED` 的实例。所以每次先跑序列 A 拿到 `TenantType`，再决定走 B1 还是 B2，别让用户按购买页的表述去预期实例形态。
+| 报错 | 原因 | 下一步 |
+| --- | --- | --- |
+| `PG instance not found.` | 环境压根没开 PG（**最先触发**） | 先确认环境是否开通了 PG，与套餐无关 |
+| `current package does not support upgrading to dedicated instance` | 有 PG，但套餐不到标准版 | 升套餐到标准版及以上 / 集成版后再试 |
+| `only shared (multi-tenant) instance can be upgraded…` | 有 PG、套餐够，但形态不是共享 | 本来就不需要升，如实告诉用户 |
+
+**「云开发侧写着独享」和「PG 侧是什么形态」是两套话。** 实测一个 `DescribeEnvInfo` 里 `TenantType: DEDICATED` 的实例，PG 侧形态是 `small_tenant`，调这个接口被上面第二句拒掉。**实例形态一律按 `DescribeEnvInfo` 的 `TenantType` 判断，不要按套餐名、购买页或环境新旧推断** —— 个人版默认就是**共享（多租户）**形态，「个人版 = 独享」这个印象通常是错的；反过来也确实存在 `DEDICATED` 的实例。
+
+⚠️ **别用「新开的环境就是独享」来省掉序列 A**：实测新建的标准版环境，开出来的 PG 仍然是 `TenantType: SHARED`。
+
+**PG 侧形态字段 `DBTenantType` 有三个取值：**
+
+| 值 | 含义 | 能不能升 |
+| --- | --- | --- |
+| `tenant` | 共享多租户（可升级形态） | ✅ 实测可升 |
+| `small_tenant` | 另一种共享形态 | ❌ 被拒（见上） |
+| `instance` | 独享单实例 | 升级完成后就是它 |
 
 手上实例已经是 `DEDICATED` 时，这条链路的正确动作是**不要调**，如实告诉用户它不需要升独享 —— 别把「接口报错」讲成「升级失败」。
 
@@ -133,7 +172,16 @@ only shared (multi-tenant) instance can be upgraded to dedicated, current form: 
 
 所以序列 C 里步骤 8 看到 `Succeed` **不是终点**，还要用步骤 10 确认规格真的变了，别把 `Succeed` 直接当成「升级完成」报给用户。
 
-迁移过程中实例状态会走到 `migrated`，控制台对这个状态的注释是「**当前共享 pgdb 实例信息已过时，需重新 `DescribeEnvs` 拿迁移后的新独享实例 ID 再查**」—— 也就是说升独享**可能换实例 ID**，此时用旧 ID 查会拿到过期信息，要重走序列 A。
+**任务与耗时（实测 2026-10-16）：**
+
+- 任务详情里 `TaskType` 实测为 **`UpgradePGInstance`**。判读仍只看 `Status` / `Phase` / `Reason`，不要按 `TaskType` 做白名单过滤。
+- 任务 `Params` 里带 **`pg_task_id`**（底层 PG 任务号）与 `new_instance_id` —— 两套任务体系其实有映射，但仍然不该拿云开发 `TaskId` 去查 `postgres/DescribeTasks`。
+- **没有进度百分比，也没有 ETA 字段**。`Phase` 实测走过 `WaitMigrateDone`，结束时为 `FinishUpgrade`。
+- 耗时样本：标准版环境升到 `1 核 2 GiB` + 10 GB（`SwitchTag: 0`），从提交到 `Status = Succeed` 约 **2 分 49 秒**。
+
+**实例状态会经过几个不在别处的收尾态。** 实测顺序：`running` → `migrating` → `switching` → `rest-accessible` → `log-switching`。迁移期间 `DBRestAccessStatus` 为 `inactive`、三个内网地址 `Status: initing`，完成后回 `active`；网络端点会换血（旧的 `jnsgw` 虚拟地址消失，换成真实私有地址，如 `postgresql` 5432 / `postgrest` 3000）。**判完成只看规格字段与 `UpdateTime`，不要拿这些中间态当失败。**
+
+**实例 ID 不一定会变。** 控制台对 `migrated` 的注释是「当前共享 pgdb 实例信息已过时，需重新 `DescribeEnvs` 拿迁移后的新独享实例 ID 再查」，但实测 2026-10-16 这次**全程没出现 `migrated`、ID 也没变**（`new_instance_id == instance_id`）。会变的是 `CreateTime`：升级后它变成提交那一刻 —— 说明底层是新实例**复用了同一个 ID**，不是「变配没生效」。只有当用旧 ID 查到过期信息时才重走序列 A。
 
 ### C. 回查：任务、进度与规格
 
@@ -236,7 +284,12 @@ only shared (multi-tenant) instance can be upgraded to dedicated, current form: 
 | 在独享实例上试升独享 | `only shared (multi-tenant) instance can be upgraded to dedicated, current form: small_tenant` | 这是「不适用」，不是「升级失败」。先用步骤 1 的 `TenantType` 判断：`DEDICATED` 的实例根本没有升独享这回事，如实告诉用户不需要升 |
 | 把"提交成功"当成"已完成" | 变配 / 升独享提交后立刻去连库，规格还是旧的 | 两个入口都是异步：升独享按序列 C 步骤 8 轮询 `Status`，调规格先按步骤 9 看 `Progress`、再按步骤 10 比对规格字段与 `UpdateTime` |
 | 选了与当前相同的规格 | 前端提示「请选择与当前不同的规格」、提交按钮点不动；绕过界面直接提交，接口回 `unchanged` | 这是**没发生变更**，不是变配成功：既不产生订单、也不产生任务，别拿它去轮询进度或复查规格。提交前先把目标规格与现状比一遍（见「验证步骤」第 3 条） |
-| 以为变配要先升级套餐 | 用户问「是不是得先升套餐才能调规格 / 升独享」，于是先去推套餐、改计费模式 | 改规格与升独享都**没有套餐前置**，调用条件只有实例状态与规格合法性。费用按实例规格扣资源点（342 资源点/CU/小时 + 0.5 资源点/GB/小时）；只有资源点扣不够时才需要升套餐或加购资源包 —— 那是额度问题。详见「费用与套餐」一节 |
+| 以为变配要先升级套餐 | 用户问「是不是得先升套餐才能调规格 / 升独享」，于是先去推套餐、改计费模式 | 分开答：**B1 调规格没有套餐前置**，只看实例状态与规格合法性；**B2 升独享必须有套餐准入**（标准版及以上 / 集成版 / 平台版），个人版实测被拒。两者都按实例规格扣资源点（342 资源点/CU/小时 + 0.5 资源点/GB/小时），只有资源点扣不够时才需要加购资源包 —— 那是额度问题。详见「费用与套餐」一节 |
+| 用 `ResourceLimit` 或 `PackageType` 判断某套餐能否升独享 | 看到个人版 `ResourceLimit` 里没有 `PostgreSQL.DedicatedInstance` 键，就认定「没这个键 = 不能升」 | 这个判据不成立：标准版同样没有该键也能升（有键的只有企业版 / 企业高级版）。`PackageType` 也不可靠（`DescribeEnvPlans` 与 `listPackages` 对同档位口径不一致）。**只能直接调接口看返回** |
+| 把三类报错混成一句「套餐不行」 | 在没开 PG 的环境上调 B2 拿到 `PG instance not found.`，据此断言套餐不支持 | 校验顺序是**先实例、后套餐**。三种报错对应三种原因，见序列 B2 的「报错读法」表 |
+| 用「新开的环境就是独享」省掉序列 A | 以为新开的云开发 PG 都是独享，跳过序列 A 直接调 B2 | 实测 2026-10-16 新建的标准版环境 PG 仍是 `SHARED`。**一律先跑序列 A 看 `TenantType`** |
+| 把升独享的收尾态当失败 | 任务 `Succeed` 之后实例还在 `rest-accessible` / `log-switching`，或看到端点从 `jnsgw` 虚拟地址变成私有地址，以为出问题了 | 这是正常收尾。判完成只看 `DBInstanceCpu` / `DBInstanceMemory` / `DBInstanceStorage` 与 `UpdateTime`，见序列 B2 的「任务与耗时」 |
+| 以为升独享必然换实例 ID | 按「一定换 ID」去重跑序列 A，结果白跑 | 实测**不必然换**（`new_instance_id == instance_id`，全程没出现 `migrated`）。会变的是 `CreateTime`（变成提交时刻，说明新实例复用同名 ID）。只有用旧 ID 查到过期信息时才重走序列 A |
 | 找错控制台入口 | 在环境设置页 `#/env/env-setting` 里翻实例规格 | 规格在 PG 实例页 `#/db/postgres/setting`；任务列表在 `#/db/postgres/tasks`。`#/db/mysql/setting` 是 MySQL 的页，两者不通用 |
 
 ## 验证步骤
@@ -247,5 +300,5 @@ only shared (multi-tenant) instance can be upgraded to dedicated, current form: 
 4. **序列 B 预检**：步骤 4 的 `DryRun: true` **没有报错**即为通过；返回的 `DealName` / `BillId` 为空串表示没有产生订单。报错就改参数重来。
 5. **序列 B 正式提交后看进度**：返回 `DealName` / `BillId` 非空只代表订单已受理。立刻用步骤 9 查一次 —— `TaskSet` 里应出现一条新的 `TaskType = "ModifyInstanceSpec"`、`StartTime` 最晚的任务，且 `Status` 为运行中。一分钟后再查，`Progress` 应向前推进。查不到新任务就先确认 `DBInstanceId` 与地域传对。
 6. **序列 B 正式提交后回查规格**：步骤 10 返回的 `DBInstanceCpu` / `DBInstanceMemory` / `DBInstanceStorage` 等于目标值，且 `UpdateTime` 晚于提交时间，**这三项都对上才算变配完成**（不要拿 `Zone` 或主备角色当判据）。同时步骤 9 里那条任务的 `Status` 应为 `Success`、`Progress = 100`、`EndTime` 非空。
-7. **序列 B2（先确认前提）**：步骤 1 的 `TenantType` 必须是 `SHARED`，不是就直接停手（实测 `DEDICATED` 的实例会报 `current form: small_tenant`）。满足时 `UpgradePGInstanceToDedicated` 返回的 `TaskId` 非空；步骤 8 轮询到 `Status = Succeed` **还不是终点** —— 再按步骤 10 确认 CPU / 内存已是目标规格（云开发任务成功不等于 PG 升级完成），`Failed` 时读 `Reason` 定位。完成后重走步骤 1，`TenantType` 应变为 `DEDICATED`；期间若实例状态是 `migrated`，旧实例 ID 可能已过时，要重新 `DescribeEnvInfo` 取新 ID 再查。
+7. **序列 B2（先确认两个前提）**：先看**套餐**（须为标准版及以上 / 集成版 / 平台版，个人版会被拒 `current package does not support upgrading to dedicated instance`），再看**步骤 1 的 `TenantType`** 必须是 `SHARED`（不是就直接停手；实测 `DEDICATED` 的实例会报 `current form: small_tenant`）。环境若压根没开 PG，接口先报 `PG instance not found.` —— 那是没开通 PG，不是套餐问题。满足时 `UpgradePGInstanceToDedicated` 返回的 `TaskId` 非空；步骤 8 轮询到 `Status = Succeed` **还不是终点** —— 再按步骤 10 确认 CPU / 内存已是目标规格（云开发任务成功不等于 PG 升级完成），`Failed` 时读 `Reason` 定位。完成后重走步骤 1，`TenantType` 应变为 `DEDICATED`；实例 ID **不必然变**（实测 `new_instance_id == instance_id`），只有用旧 ID 查到过期信息时才重新 `DescribeEnvInfo` 取新 ID。
 8. 全链路的读步骤只调用 `Describe*`；写操作只有 B1 / B2 两处，各自提交前先确认真实目标环境。
