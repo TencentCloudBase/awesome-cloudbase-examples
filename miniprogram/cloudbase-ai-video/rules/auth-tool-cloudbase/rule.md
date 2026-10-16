@@ -73,6 +73,15 @@ Preferred execution order for this skill:
 3. Do not route app-side provider configuration back to the MCP `auth` tool.
 4. In existing projects with active login and register handlers, stop revisiting provider setup after the required login method and publishable key are confirmed. Move back to the active frontend handler and finish the actual user flow.
 
+### Credential scope — what each login can actually reach
+
+Read this before telling a user to "re-authorize" after a permission-shaped failure. Re-authorizing does not widen a key's scope; it just issues the same scope again.
+
+- **Account-level** (`auth(status)` → `credential_scope: account`): reaches control-plane APIs, subject to that identity's own CAM policies.
+- **Environment API Key** (`credential_scope: single_env`): scoped to **one environment's data plane** plus the fixed TCB policies. It is not an account-level credential, so control-plane calls outside that scope fail, and there is **no channel to attach additional CAM policies to a single key** — issuing the key again changes nothing. When a task needs a capability the current credential cannot have, switch to an account-level login or follow the role route rather than retrying the same key.
+
+Full identity table and how to grant what is missing: `../../cloud-api-operations/references/calling-methods.md`.
+
 ---
 
 ## Extended guide

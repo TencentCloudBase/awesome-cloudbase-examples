@@ -23,6 +23,11 @@ SDK 路径的具体形态：
 
 仅当应用是经典 TCP 客户端（mysql2 / pg / Prisma / SQLAlchemy / WordPress / Ghost 等迁移场景）且改造为 SDK 的方案被否决时，才继续往下走 VPC 流程。
 
+🔴 **前提：数据库端必须真的有 TCP 可达端点。** CloudBase PG 分**共享（shared）**与**独享（dedicated）**实例——**只有独享实例提供私网 host / TCP 直连**，共享实例只能走 SDK / 网关访问。所以在决定走这条路之前，**先确认实例类型**（`queryEnv(action="info")` 返回的 `EnvInfo.PostgreSQL[].TenantType`）：如果实例是共享的，`VpcConf` 怎么配都连不上（表现为 `ECONNREFUSED`、连接超时，网络类查询还会被平台以「资源检查失败」拒绝），需要先把实例**升级到独享**，或者改走 SDK。
+**不要向用户索要 VPC ID / 子网 ID，也不要让用户去找网络部** —— VPC 与子网从数据库实例自身的详情里读，让用户去别的部门要网络信息是一条走不通的路。
+
+**共享实例要升到独享，走现成的 recipe**：`../../cloud-api-operations/references/recipes/pg-instance-spec.md`（Recipe 3）。先看 `TenantType` 分流——`SHARED` 走「共享升独享」（`UpgradePGInstanceToDedicated`），`DEDICATED` 走调规格；提交后用返回的 `TaskId` 轮询进度，不要凭感觉估计要多久。⚠️ 该 recipe 的「共享升独享」分支**已跑通**（标准版环境 → `1 核 2 GiB` + 10 GB，约 2 分 49 秒到 `Succeed`）；recipe 整体仍标「部分实证」，因为其余分支（套餐准入逐档验证、`SwitchTag: 1` 指定时间、独享→共享）未跑，执行前先核对里面的前置条件。
+
 > ⚠️ **「无需数据库账号密码」≠「无需凭证」。** SDK / 网关路径省掉的是数据库账号密码与 `VpcConf`，但服务实例调用 CloudBase 资源（PG `app.rdb()` / NoSQL / storage）仍要带 CloudBase 资源访问凭证：由 `manageAppAuth(action="createApiKey", keyType="api_key")` 签发，经 `serverConfig.EnvParams` 注入 `CLOUDBASE_APIKEY`，不要从本地客户端登录态里取。完整步骤见 `../../cloud-functions/references/http-function-credentials.md`。
 
 ## Critical distinction

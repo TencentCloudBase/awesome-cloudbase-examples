@@ -62,6 +62,10 @@ If a referenced sibling skill file is missing from this environment, ask the use
 - Mixing Event Function code shape (`exports.main(event, context)`) with HTTP Function code shape (`req` / `res` on port `9000`).
 - Treating HTTP Access as the implementation model for HTTP Functions. HTTP Access is a gateway configuration for Event Functions, not the HTTP Function runtime model.
 - Assuming `db.collection("name").add(...)` will create a missing document-database collection automatically. Collection creation is a separate management step.
+- **Baking static content into the deployment package — media files, user uploads, or assets that change on their own cadence.** The package is uploaded on every deploy and a function package has a hard size ceiling, so large or independently-changing content makes every deploy slower and can push the package over the limit.
+  - **Media files** (`*.mp4`, large images, fonts) — go to cloud storage, referenced by URL, not into the package.
+  - **User uploads written to the function's local filesystem** — the function is ephemeral and `/tmp` is small and not shared. Uploads go to cloud storage.
+  - **Frequently-updated static resources bundled in** — every change forces a full function redeploy. Serve them from cloud storage so the function only redeploys when the *code* changes.
 - Forgetting that runtime cannot be changed after creation.
 - Using cloud functions as the first answer for Web login.
 - Forgetting that HTTP Functions must ship `scf_bootstrap`, listen on port `9000`, and include dependencies.
@@ -81,6 +85,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 
 - Read [Cloud Functions Execution Checklist](checklist.md) before deployment or runtime changes.
 - Decide whether the task is Event Function, HTTP Function, or actually CloudRun.
+- **Separate static from dynamic**: media, user uploads and frequently-updated assets live in cloud storage, not in the function package.
 - Pick the detailed reference file in [references.md](references.md) before writing implementation code.
 
 ## MCP image deployment with polling
