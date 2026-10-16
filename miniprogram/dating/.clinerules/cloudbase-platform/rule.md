@@ -231,7 +231,7 @@ When a task explicitly requires recording operation steps or results to a file (
    ```
    manageEnv(action="listPackages")
    ```
-   - ⚠️ That list follows the console's **new-purchase** view and only covers the `default` / `basic` / `trial` package families. It is **not** the full set of creatable `packageId`s: `baas_pf_standard` (标准版) never appears in it yet creates successfully, and the whitelisted `vip` family is filtered out too. Treat the list as a suggestion set; the actual create result is authoritative.
+   - ⚠️ That list is filtered to the packages the console offers in its **new-purchase / new-environment** menus: `baas_personal` (个人版), `baas_pf_standard` (标准版), `baas_pf_enterprise` (企业版), `baas_pf_enterprise_senior` (企业高级版), `baas_trial` (体验版), `baas_integration` (集成版). Package *families* (`default` / `basic` / `trial` / `vip`) do **not** map onto that set — legacy packages such as `starter` (入门版), `baas_team` (团队版) and `enterprise_basic` (企业基础版) share families with the current ones and are deliberately excluded. The platform still accepts other valid `packageId`s, so the actual create result is authoritative.
 
    **Changing plan (use a `packageId` from `listPackages`):**
    ```
