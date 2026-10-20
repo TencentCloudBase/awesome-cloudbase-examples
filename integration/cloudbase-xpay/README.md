@@ -94,8 +94,8 @@ tcb fn log xpay-common -e <环境ID>
 
 | 路由 | 鉴权 | 说明 |
 |---|---|---|
-| `POST /xpay/create_order` | ✅ | 出 `signData` + 双签名，**不下单** |
-| `POST /xpay/query_order` | ✅ | 查单兜底（前端 success 回调不可靠） |
+| `POST /xpay/create_order` | 上游网关 | 出 `signData` + 双签名，**不下单** |
+| `POST /xpay/query_order` | 上游网关 | 查单兜底（前端 success 回调不可靠） |
 | `POST /xpay/callback` | 网关验签 | 消息推送落点，按 `Event` 分发 |
 
 完整清单见 [`references/api-routes.md`](skill/cloudbase-xpay/references/api-routes.md)。

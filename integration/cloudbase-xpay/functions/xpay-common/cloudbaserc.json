@@ -25,15 +25,10 @@
         "sandboxAppKey": "{{env.sandboxAppKey}}",
         "appKey": "{{env.appKey}}",
         "notifyUrlCallbackType": "{{env.notifyUrlCallbackType}}",
-        "notifyUrlResourceType": "{{env.notifyUrlResourceType}}",
         "msgEncryptType": "{{env.msgEncryptType}}",
         "token": "{{env.token}}",
         "msgSecret": "{{env.msgSecret}}",
-        "notifyFormat": "{{env.notifyFormat}}",
-        "corsAllowOrigin": "{{env.corsAllowOrigin}}",
-        "requireCallerAuth": "{{env.requireCallerAuth}}",
-        "trustUnverifiedJwt": "{{env.trustUnverifiedJwt}}",
-        "trustPlatformHeaders": "{{env.trustPlatformHeaders}}"
+        "notifyFormat": "{{env.notifyFormat}}"
       }
     }
   ],
@@ -51,7 +46,6 @@
         "sandboxAppKey": "{{env.sandboxAppKey}}",
         "appKey": "{{env.appKey}}",
         "notifyUrlCallbackType": "{{env.notifyUrlCallbackType}}",
-        "notifyUrlResourceType": "{{env.notifyUrlResourceType}}",
         "msgEncryptType": "{{env.msgEncryptType}}",
         "token": "{{env.token}}",
         "msgSecret": "{{env.msgSecret}}"

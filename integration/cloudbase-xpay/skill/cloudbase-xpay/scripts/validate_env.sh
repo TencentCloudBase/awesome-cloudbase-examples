@@ -72,7 +72,6 @@ check_required "$(resolve appKey prodAppKey)"    "支付签名密钥"
 
 echo
 check_optional "notifyFormat"   "json / xml，默认 json"
-check_optional "corsAllowOrigin" "跨域白名单"
 
 echo
 

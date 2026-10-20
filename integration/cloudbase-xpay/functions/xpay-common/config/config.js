@@ -80,8 +80,7 @@ function getAppKey() {
 // 代码关心的候选变量名（含平台注入名、本地/旧名、大小写变体）
 const CANDIDATE_KEYS = [
     'offerId', 'appKey', 'prodAppKey', 'appId', 'appid', 'APP_ID', 'wxAppId',
-    'secret', 'appSecret', 'notifyFormat', 'corsAllowOrigin',
-    'requireCallerAuth', 'trustUnverifiedJwt',
+    'secret', 'appSecret', 'notifyFormat',
     // 回调形态声明：决定「谁负责验签解密」
     'notifyUrlCallbackType', 'notifyUrlResourceType', 'msgEncryptType',
     // 回调验签解密凭据

@@ -8,11 +8,7 @@
 | `appKey` | ✅ | 虚拟支付 → 基本配置 | 签名密钥，计算 `paySig`（旧名 `prodAppKey`） |
 | `appId` | ✅ | MP 后台 → 设置 | 换取 sessionKey / access_token |
 | `secret` | ✅ | MP 后台 → 设置 | **换取 sessionKey 必需**（旧名 `appSecret`） |
-| `notifyFormat` | 否 | — | `json`（默认）/ `xml`，**须与微信后台登记一致** |
-| `corsAllowOrigin` | 否 | — | 跨域白名单，逗号分隔 |
-| `requireCallerAuth` | 否 | 空（宽松） | 设为 `true` 收紧鉴权：不再采信裸 `x-wx-openid`，只放行可信 JWT |
-| `trustUnverifiedJwt` | 否 | 空（不采信） | 设为 `true` 才采信未验签的 JWT payload |
-| `trustPlatformHeaders` | 否 | 空（收紧模式下不采信） | 仅在确认网关会覆盖客户端同名头时设 `true` |
+| `notifyFormat` | 否 | — | `json`（默认）/ `xml`，**须与微信后台登记一致**；唯一需要写进 `cloudbaserc.json` 的变量 |
 | `notifyUrlCallbackType` | 否 | 空（未声明 = 自己验签） | `system` = 网关代验签；`ownservice` = 本函数验签 |
 
 **变量名以集成中心注入为准**：`authTypeCode=wxvirtualpay` 注入的是 `appId / secret / offerId / appKey`。本地 `.env` 与旧版文档用的 `prodAppKey` / `appSecret`，由 `config/config.js` 的 `readEnv()` 回退兼容 —— 优先平台名，两套都能跑。
@@ -31,18 +27,17 @@
 | `process.env.TENCENTCLOUD_RUNENV` | 同上（云托管） |
 | `x-tcb-integration-id` 等自定义 header | **客户端可任意伪造**，绝不能作为鉴权凭据 |
 
-因此可分三档信任级：
+因此只有一档可信身份：
 
 | 身份来源 | 信任级 | 说明 |
 |---|---|---|
-| `x-wx-openid` | **宽松模式下可信** | 平台网关注入并覆盖客户端同名头；但**云函数被公网直连时客户端可自行伪造** |
-| Bearer JWT payload | **默认不采信** | 仅 base64 编码，未验签；需 `trustUnverifiedJwt=true`，且 payload 必须是对象、身份字段要过格式白名单 |
+| `x-wx-openid` | **前提成立时可信** | 平台网关注入并覆盖客户端同名头；**云函数被公网直连时客户端可自行伪造** |
+| Bearer JWT payload | **不采信** | 仅 base64 编码、未验签，任何人都能伪造 —— 模板不再解析 |
 | 其他自定义 header | **不可信** | 不参与鉴权判断 |
 
-**若云函数会被直接暴露到公网**，设置 `requireCallerAuth=true` 收紧：
-此时无身份请求一律 401。⚠️ 收紧模式下**默认不再采信裸的 `x-wx-openid`**（该头客户端可伪造），
-只放行「显式开启 `trustUnverifiedJwt` 的 JWT」。若部署层能保证网关会剥离/覆盖客户端同名头，
-再额外设 `trustPlatformHeaders=true` 恢复对平台头的信任。
+模板不在函数内做鉴权（原 `requireCallerAuth` 三档开关已移除）：
+默认宽松放行的中间件对公网直连场景不产生任何保护，只会让人误以为有鉴权。
+**若云函数会被直接暴露到公网，请在上游（API 网关 / 云托管）完成身份校验。**
 
 ## 凭证归属说明
 
@@ -101,7 +96,7 @@ git check-ignore -v functions/xpay-common/.env
 `config/config.js` 的 `validateConfig()` 会在服务启动时校验，**只告警不阻断**：
 
 ```
-[Config] 环境变量(名=长度): offerId=10 appKey=32 prodAppKey=- appId=18 appid=- APP_ID=- secret=32 appSecret=- notifyFormat=6 corsAllowOrigin=- requireCallerAuth=- trustUnverifiedJwt=- token=4 msgSecret=43 sandboxAppKey=32
+[Config] 环境变量(名=长度): offerId=10 appKey=32 prodAppKey=- appId=18 appid=- APP_ID=- secret=32 appSecret=- notifyFormat=6 token=4 msgSecret=43 sandboxAppKey=32
 [Config] 现网(env=0) | notifyFormat=json
 ⚠️ 配置校验警告（共 4 项）:
   1. offerId 未配置（虚拟支付 → 基本配置）

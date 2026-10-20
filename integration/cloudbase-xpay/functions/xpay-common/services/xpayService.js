@@ -55,6 +55,20 @@ const XPAY_EVENTS = {
     },
 };
 
+/**
+ * 订单归属校验（纯函数，便于单测）
+ *
+ * @param {Object|undefined} order 本地记录的订单（可能因冷启动/多实例而不存在）
+ * @param {string} openid 本次请求的权威 openid（code2Session 结果，而非客户端头）
+ * @returns {string|null} 错误信息；null 表示通过
+ */
+function checkOrderOwnership(order, openid) {
+    // 查不到记录时不拦：示例用进程内 Map，冷启动后必然查不到，
+    // 拦下来会让正常的查单兜底全部失效（生产应按 openid 维度查库）
+    if (!order || !order.openid || !openid) return null;
+    return order.openid === openid ? null : '订单不属于当前用户';
+}
+
 class XpayService {
     constructor() {
         this.strategy = new XpayStrategy();
@@ -222,8 +236,25 @@ class XpayService {
             throw err;
         }
 
+        const authoritativeOpenid = sessionOpenid || openId;
+
+        // 订单归属校验：只有下单人自己能查自己的单
+        //
+        // ⚠️ 必要性：code2Session 只能证明「你是谁」，不能证明「这单是你的」。
+        //    缺了这一步，任何持有自己 code 的用户都能拿别人的 outTradeNo 去查单，
+        //    批量遍历就能探测订单是否存在、状态是什么（越权读）。
+        //
+        // ⚠️ 局限性：orders 是进程内 Map，冷启动/多实例下可能查不到记录（返回 null 即跳过）。
+        //    这里只是把「能查到的都拦住」，生产必须落库并按 openid 维度查询 —— 见 README。
+        const ownershipError = checkOrderOwnership(this.orders.get(outTradeNo), authoritativeOpenid);
+        if (ownershipError) {
+            const err = new Error(ownershipError);
+            err.status = 403;
+            throw err;
+        }
+
         return this.strategy.queryOrder(
-            { openid: sessionOpenid || openId, outTradeNo },
+            { openid: authoritativeOpenid, outTradeNo },
             sessionKey
         );
     }
@@ -244,8 +275,12 @@ class XpayService {
      * @returns {Object} 处理结果，含 iOS 退款决策
      */
     async handleCallback(body) {
-        // 网关可能把明文放在 ParsedContent（与微信支付集成保持一致）
-        const event = body?.ParsedContent || body;
+        // 网关转发明文时的两种包装形态：
+        //   ParsedContent —— 微信支付集成的写法
+        //   ParsedNotify  —— 消息推送类集成（虚拟支付走这条）的写法
+        // 认错形态的后果不是报错，而是「缺少 Event」被判成结构性错误 → 回 ErrCode=0
+        // → 微信不再重推 → 静默丢单，所以两种都必须认。
+        const event = body?.ParsedContent || body?.ParsedNotify || body;
         const eventType = event?.Event || event?.event;
         const outTradeNo = event?.OutTradeNo || event?.out_trade_no;
 
@@ -418,5 +453,6 @@ class XpayService {
 
 module.exports = XpayService;
 module.exports.XPAY_EVENTS = XPAY_EVENTS;
+module.exports.checkOrderOwnership = checkOrderOwnership;
 module.exports.MAX_TRACKED_EVENTS = MAX_TRACKED_EVENTS;
 module.exports.MAX_TRACKED_ORDERS = MAX_TRACKED_ORDERS;

@@ -4,11 +4,39 @@
 
 | 路由 | 鉴权 | 入参 | 返回 |
 |---|---|---|---|
-| `POST /xpay/create_order` | ✅ | `code`, `productId`, `goodsPrice`, `buyQuantity`, `mode`, `attach`, 可选 `outTradeNo` | `{ signData, mode, paySig, signature, outTradeNo, openid }` |
-| `POST /xpay/query_order` | ✅ | `code`, `outTradeNo` | 订单详情 |
-| `POST /xpay/callback` | ❌（网关验签） | 推送明文 | `{ ErrCode, ErrMsg }` |
+| `POST /xpay/create_order` | 上游网关 | `code`, `productId`, `goodsPrice`, `buyQuantity`, `mode`, `attach`, 可选 `outTradeNo` | `{ signData, mode, paySig, signature, outTradeNo, openid }` |
+| `POST /xpay/query_order` | 上游网关 | `code`, `outTradeNo` | 订单详情 |
+| `POST /xpay/callback` | 网关验签 | 推送明文 | `{ ErrCode, ErrMsg }` |
 
 统一响应：`{ code, msg, data }`，`code=0` 为成功。
+
+## 集成中心网关回调链路（托管形态）
+
+微信推送不直接进云函数，中间隔着集成中心网关：
+
+```
+微信 → https://<keyId>.integration-callback.tcloudbase.com/wechat/notify
+     → 集成中心网关验签 + 解密
+     → POST 云函数 /wechat/notify（明文）
+     → 云函数应答 { ErrCode: 0 }
+```
+
+| 项 | 事实 |
+|---|---|
+| 转发路径 | 虚拟支付固定 `/wechat/notify`（`CALLBACK_URL_MAP.notifyUrl`）；微信支付是 `/wechatpay/order` |
+| body 包装 | `ParsedContent`（微信支付风格）或 `ParsedNotify`（消息推送风格）—— **两种都必须认** |
+| 免验签开关 | 只有 `notifyUrlCallbackType=system`。未注入时 fail-closed 按「自己验签」处理 → 网关明文没有 `signature` → 401 |
+| 路径没注册路由 | 云 API 适配层兜底：识别出 `xpay_*` 事件后改写投递到 `/callback`，但仍强制 `req.pushVerified` |
+
+> ⚠️ **最隐蔽的失败**：`pickEvent` 认得 `ParsedNotify`（所以适配层会把请求投递到 callback），
+> 但业务取 `Event` 时只认 `ParsedContent` → 判成「缺少 Event」结构性错误 → 回 `ErrCode=0`
+> → 微信不再重推 → **静默丢单**，日志里只有一条 error，没有任何 4xx/5xx。
+
+排查顺序：
+
+1. 日志有没有 `[云API适配] 路由分发: /callback` / `[Controller] 收到回调`
+2. 看打出的 `has_parsed_content` / `has_parsed_notify` 哪个为 true
+3. 启动日志 `[Callback] 判定:` 是「网关代验签」还是「本函数验签」
 
 ## 云 API 适配
 
@@ -24,7 +52,7 @@ Event 以 xpay_ 开头            →  /callback
 > 适配层会把 `xpay_` 前缀归一化后再查白名单，所以 `create_order` 与 `xpay_create_order` 等价。
 > 非法 action 返回 `400 不支持的操作`。
 
-`ALLOWED_ACTIONS` 白名单：`xpay_create_order` / `xpay_query_order` / `xpay_callback`。
+`ALLOWED_ACTIONS` 白名单：`create_order` / `query_order` / `callback`（**归一化后**的名字，不带 `xpay_` 前缀）。
 
 ## 微信服务端接口（`/xpay/*`）
 

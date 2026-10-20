@@ -23,8 +23,6 @@ process.env.appId = APP_ID;
 process.env.secret = 'test_secret';
 process.env.token = TOKEN;
 process.env.msgSecret = AES_KEY_BASE64;
-// 安全意义：模板默认不开这个，避免让端到端测试依赖额外的鉴权头
-process.env.requireCallerAuth = '';
 
 const { sha1Signature } = require('../utils/wechatCrypto');
 const app = require('../app');
@@ -374,5 +372,37 @@ test('兼容模式：没有明文字段时，解密失败仍返回 400', async (
     } finally {
         if (saved === undefined) delete process.env.msgEncryptType;
         else process.env.msgEncryptType = saved;
+    }
+});
+
+// ---------- 集成中心网关形态（/wechat/notify + ParsedNotify） ----------
+//
+// 网关验签解密后把明文 POST 到 /wechat/notify，body 包在 ParsedNotify 里、不带签名参数。
+// 认错包装形态的后果不是报错，而是「缺少 Event」被判成结构性错误 → 回 ErrCode=0
+// → 微信不再重推 → 静默丢单，所以必须端到端覆盖。
+
+test('网关转发 /wechat/notify + ParsedNotify 包装：正常发货，不 404 不丢单', async () => {
+    const saved = process.env.notifyUrlCallbackType;
+    process.env.notifyUrlCallbackType = 'system';
+
+    try {
+        const r = await fetch(`${base}/wechat/notify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ParsedNotify: {
+                    Event: 'xpay_goods_deliver_notify',
+                    OutTradeNo: 'GATEWAY20261020001',
+                    OpenId: 'o_gateway_test_openid',
+                },
+            }),
+        });
+
+        assert.strictEqual(r.status, 200, '网关转发的明文必须被接受');
+        const payload = await r.json();
+        assert.strictEqual(payload.ErrCode, 0, '必须回成功，否则微信会重推 15 次');
+    } finally {
+        if (saved === undefined) delete process.env.notifyUrlCallbackType;
+        else process.env.notifyUrlCallbackType = saved;
     }
 });

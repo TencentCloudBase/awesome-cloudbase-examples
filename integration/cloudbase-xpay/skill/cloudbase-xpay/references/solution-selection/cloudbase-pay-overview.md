@@ -41,7 +41,7 @@
 | `_handleCallback` 的 AES-GCM 解密 | ❌ | 回调走消息推送，解密在网关完成 |
 | 凭证体系（商户号/证书序列号/APIv3 密钥） | ❌ | 换成 OfferID + AppKey |
 | `signMode` 双模 | ⚠️ 部分 | 虚拟支付**只有 gateway 模式**（通道是消息推送） |
-| Express 骨架 + 鉴权中间件 | ✅ | 直接复用 |
+| Express 骨架 | ✅ | 直接复用（鉴权依赖上游网关，不再自带中间件） |
 | 云 API 适配层 | ✅ | 复用，事件前缀换成 `xpay_` |
 | Dockerfile / scf_bootstrap | ✅ | 复用 |
 

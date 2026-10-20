@@ -43,7 +43,10 @@
 | 重复发货 | 没做幂等或用了内存去重 | 用**平台单号 `wx_order_id`** + 数据库唯一索引（别用 `OutTradeNo`，取消后重下可能复用） |
 | 一次失败后订单再也不重推 | 幂等标记先于业务处理写入，或错误全回 `ErrCode=0` | 标记后置 + 业务异常回非 0 |
 | 订单 env 校验失败 | `signData.env` / B 端 `env` 被改成非 0 | 模板固定现网，必须传 `0` |
-| 接口无需身份即可调用 | 未设 `requireCallerAuth`，或误用可伪造的 header 做鉴权 | 云函数公网暴露时设 `requireCallerAuth=true` |
+| 接口无需身份即可调用 | 误把可伪造的 header / 未验签 JWT 当鉴权凭据，或云函数被公网直连 | 模板只认平台注入的 `x-wx-openid`；公网暴露时在上游网关做身份校验 |
+| 集成中心上线后回调「没反应」，日志只有一条 error | 网关 `POST /wechat/notify` 的明文包在 `ParsedNotify` 里，业务只认 `ParsedContent` → 判「缺 Event」→ 回 `ErrCode=0` → 不重推 | 取 `Event` 时两种包装都认（`ParsedContent \|\| ParsedNotify \|\| body`）；排查看 `has_parsed_notify` |
+| 网关明文回调被 401 拒绝 | 未声明 `notifyUrlCallbackType=system`，fail-closed 走本函数验签，而网关转发不带 `signature` | 集成配置声明 `system`；确认启动日志 `[Callback] 判定: 网关代验签` |
+| 任意用户能查他人订单 | `query_order` 只校验了身份（code2Session），没校验订单归属 | 归属校验放在 code2Session 之后，用**权威 sessionOpenid** 比对（不是请求头）；生产按 `openid` 维度查库 |
 
 ## 配置
 

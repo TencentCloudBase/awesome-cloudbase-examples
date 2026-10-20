@@ -68,9 +68,10 @@ description: |
 | 9 | 该由谁验签解密搞错 | 集成中心托管 → 网关做完，业务只拿明文；**直连 HTTP 访问服务 → 必须自实现**（URL 校验 + `msg_signature` 验签 + AES 解密） | 前者重复实现、拿不到 Token/EncodingAESKey；后者不自实现 → 回调 URL 存不上、Event 解析不出来 |
 | 10 | 前端传金额给后端 | 价格必须由后端按 SKU 查出 | 攻击者可篡改为 1 分 |
 | 11 | 改了云函数随机串 | 与回调域名子域、环境变量绑定 | **改名即断回调** |
-| 12 | 把 `x-tcb-integration-id` 等自定义 header 当鉴权凭据 | 自定义 header 可伪造；云函数公网暴露时设 `requireCallerAuth=true` | 鉴权被绕过 |
+| 12 | 把 `x-tcb-integration-id` / 未验签 JWT 当鉴权凭据 | 自定义 header 与 JWT payload 都可伪造；模板只读平台注入的 `x-wx-openid`，公网暴露时在上游网关做鉴权 | 鉴权被绕过 |
 | 13 | 先写幂等标记再处理业务 | **业务成功后才落标记**，失败要抛出让微信重推 | 处理失败后重推被当重复忽略 → 永久丢单 |
 | 14 | 回调出错一律返回 `ErrCode=0` | 结构性错误回 0，**业务异常回非 0** 触发重推 | 静默丢单 |
+| 15 | 集成中心上线后回调「静默丢单」 | 网关 `POST /wechat/notify` 的明文可能包在 `ParsedNotify`，取 `Event` 要 `ParsedContent \|\| ParsedNotify \|\| body` | 只认 `ParsedContent` → 判缺 `Event` → 回 `ErrCode=0` → 微信不重推，日志只有一条 error |
 
 ---
 
@@ -78,9 +79,9 @@ description: |
 
 | 路由 | 鉴权 | 说明 |
 |---|---|---|
-| `POST /xpay/create_order` | 是 | 返回 `payData`（signData / mode / paySig / signature） |
-| `POST /xpay/query_order` | 是 | 查单，推送丢失时兜底补发货 |
-| `POST /xpay/callback` | 否（网关验签） | 所有 `xpay_*` 事件统一入口 |
+| `POST /xpay/create_order` | 上游网关 | 返回 `payData`（signData / mode / paySig / signature） |
+| `POST /xpay/query_order` | 上游网关 | 查单，推送丢失时兜底补发货 |
+| `POST /xpay/callback` | 网关验签 | 所有 `xpay_*` 事件统一入口 |
 
 ## 回调事件速查
 

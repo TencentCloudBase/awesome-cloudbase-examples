@@ -25,7 +25,7 @@ xpay-common/
 ├── index.js                 云函数入口
 ├── config/config.js         凭证 + 现网常量（env=0）
 ├── routes/xpay.js           路由表
-├── controllers/xpayController.js   鉴权 + 回调应答
+├── controllers/xpayController.js   下单/查单 + 回调应答
 ├── services/
 │   ├── xpayService.js       下单 + 6 类事件分发 + 幂等
 │   ├── signService.js       ★ 双签名（paySig + signature）
@@ -33,11 +33,22 @@ xpay-common/
 ├── utils/
 │   ├── wechatApi.js         code2Session / access_token
 │   ├── xml.js               XML 推送解析
-│   └── cloudbaseAuth.js     x-wx-openid / JWT
+│   └── cloudbaseAuth.js     读平台注入的 x-wx-openid / x-wx-appid
 └── tests/
 ```
 
 ## 环境变量
+
+变量分两类，只有一类需要写进 `cloudbaserc.json`：
+
+| 类别 | 变量 | 谁提供 |
+|---|---|---|
+| **平台注入** | `appId` `secret` `offerId` `appKey` `token` `msgSecret` `notifyUrlCallbackType` `msgEncryptType` | 集成中心创建实例后注入云函数 |
+| **本模板自己的** | 仅 `notifyFormat` | 写在 `cloudbaserc.json` 的 `functions[].envVariables` |
+
+> 🚨 `functions[].envVariables` 是**整体覆盖**（不是合并）：写了什么，函数上就只有什么。
+> 因此平台注入的变量绝不能写进 `cloudbaserc.json` —— `tcb fn deploy` 会用它覆盖函数环境变量，
+> 把集成中心注入的值冲掉（或写成 `.env` 里的空值）。
 
 | 变量（集成中心注入名） | 必填 | 说明 | 本地/旧名 |
 |---|---|---|---|
@@ -46,10 +57,6 @@ xpay-common/
 | `appId` | 是 | 小程序 AppID | — |
 | `secret` | 是 | 换取 sessionKey 必需，**只放服务端** | `appSecret` |
 | `notifyFormat` | 否 | `json`（默认）/ `xml`，**必须与微信后台登记一致** | — |
-| `corsAllowOrigin` | 否 | 跨域白名单 | — |
-| `requireCallerAuth` | 否 | 设为 `true` 收紧鉴权（云函数公网暴露时必开）：**不再采信裸 `x-wx-openid`** | — |
-| `trustUnverifiedJwt` | 否 | 设为 `true` 才采信未验签的 JWT payload（默认不采信） | — |
-| `trustPlatformHeaders` | 否 | 确认部署层会覆盖客户端同名头时设 `true`，恢复对平台头的信任 | — |
 | `notifyUrlCallbackType` | 否 | 未声明 = 本函数自己验签（fail closed）；`system` = 网关代验签 | — |
 
 **命名对齐**：集成中心（`authTypeCode=wxvirtualpay`）注入的是 `appKey` / `secret`，而本地 `.env` 与旧版文档写的是 `prodAppKey` / `appSecret`。`config/config.js` 的 `readEnv()` 优先读平台名、回退旧名，两套都能跑。
@@ -100,12 +107,14 @@ xpay-common/
 |---|---|---|
 | `notifyUrlCallbackType` | `system` | 系统内置回调地址，网关代验签/代解密 |
 | | `ownservice` | 用户自定义回调地址，本函数自己验签解密 |
-| `notifyUrlResourceType` | `function` / `cloudrun` | 回调打到云函数 / 云托管 |
+| `notifyUrlResourceType` | `function` / `cloudrun` | 回调打到云函数 / 云托管（**系统字段**，见下方说明） |
 | `msgEncryptType` | `plaintext` | 明文：只有 `signature`，无 `Encrypt` |
 | | `aes` | 安全模式：`Encrypt` + `msg_signature` |
 | | `compatible` | 兼容模式：**明文与密文同时下发**，解密失败可回退明文 |
 
 判定优先级：`ownservice` → 本函数验签；`system` → 网关代验签；都未注入 → 看 `token` 是否配置。
+
+**关于 `notifyUrlResourceType` / `notifyUrlResourceName`**：这两个是平台系统字段，由 `tcb integration create` 依据 `demoCodeFunctionName` 自动写入集成 Ext（`resourceType='function'` + `resourceName=函数名`），`tcb config init` 生成模板时也会主动跳过它们。**不要写进 `cloudbaserc.json` 或 `.env`**——手填既多余，也可能与云端校验冲突。读不到时本函数按空串处理，不影响功能。
 
 启动日志会打两行，直接看结论：
 
@@ -141,9 +150,12 @@ xpay-common/
 
 | 路由 | 鉴权 | 说明 |
 |---|---|---|
-| `POST /xpay/create_order` | 是 | 返回 `payData` 给 `wx.requestVirtualPayment` |
-| `POST /xpay/query_order` | 是 | 查单，推送丢失时兜底补发货 |
-| `POST /xpay/callback` | 否（网关代验签；自建回调时由 `app.js` 自验签解密） | 所有 `xpay_*` 事件统一入口 |
+| `POST /xpay/create_order` | 上游网关（必须带 `code`） | 返回 `payData` 给 `wx.requestVirtualPayment` |
+| `POST /xpay/query_order` | 上游网关（必须带 `code` + `x-wx-openid`） | 查单，推送丢失时兜底补发货 |
+| `POST /xpay/callback` | 网关代验签；自建回调时由 `app.js` 自验签解密 | 所有 `xpay_*` 事件统一入口 |
+
+> 函数本身不挂鉴权中间件，信任前提是「只经 `callHTTPFunction` 或集成中心网关调用」。
+> 直接暴露公网时，请在上游（API 网关 / 云托管）做身份校验 —— 见 `utils/cloudbaseAuth.js` 的信任边界说明。
 
 ## 前端调用示例
 
@@ -180,10 +192,11 @@ wx.login({
    示例用内存 Set，生产请换数据库唯一索引。
    **顺序必须是「查重 → 处理 → 落标记」**：先落标记再处理，一旦处理失败，重推会被当重复事件忽略 → 永久丢单。
 6. **回调错误要分级应答**：结构性错误（缺 `Event`）回 `ErrCode=0` 避免无效重推；业务异常回非 0 触发微信重推。全回 0 = 静默丢单。
-7. **鉴权默认信任上游网关**。`SCF_RUNTIME` 等运行时变量恒存在、自定义 header 可伪造，都不能作为鉴权依据。云函数若直接暴露公网，务必设 `requireCallerAuth=true`。
+7. **鉴权依赖上游网关，函数内不实现**。`SCF_RUNTIME` 等运行时变量恒存在、自定义 header 可伪造，都不能作为鉴权依据；未验签的 Bearer JWT 同样可伪造。因此模板只读平台注入的 `x-wx-openid`，并把「函数仅经网关调用」作为部署前提。公网暴露时必须在上游补鉴权。
 8. **命名风格两套**：C 端 signData 用驼峰（`offerId`），服务端接口用下划线（`order_id` / `offer_id`）。写错直接报参数错误。
 9. **iOS 走 Apple 支付，最低金额 1 元**（100 分）—— 低于 1 元的道具档位在 iPhone 上必然失败；开发者无法主动退款，只能应答 Apple 的退款问询（3 秒内 + `evidence` 必填）；结算周期 45–60 天，与安卓 T+3 完全不同。
 10. **`query_order` 只能查现金单**，查不了代币单（代币单靠 `query_user_balance` / 幂等重试兜底）。
+11. **`query_order` 必须校验订单归属**。`code2Session` 只证明「你是谁」，不证明「这单是你的」—— 少了归属校验，任何人拿自己的 `code` + 别人的 `outTradeNo` 就能越权查单，批量遍历还能探测订单是否存在。模板已加 `checkOrderOwnership`，但它读的是进程内 `orders` Map（冷启动/多实例查不到就跳过），**生产必须落库并按 `openid` 维度查询**。
 
 ## 回调事件
 
@@ -220,11 +233,12 @@ npm start     # 默认 3000 端口，自动加载 .env
 
 ### 环境变量从哪来
 
-| 场景 | 来源 |
-|---|---|
-| 本地开发 | `.env`（`bin/www` 通过 dotenv 加载） |
-| SCF 云函数 | 平台环境变量（集成中心注入）；无 `.env` 时 dotenv 静默跳过 |
-| 云托管 | 控制台「服务设置 → 环境变量」 |
+| 场景 | 平台注入的凭证 | `notifyFormat` |
+|---|---|---|
+| 本地开发 | `.env`（`bin/www` 通过 dotenv 加载） | `.env` |
+| 集成中心托管云函数 | 平台注入，**不需要配** | `cloudbaserc.json` → `tcb fn deploy` |
+| 直连 HTTP 访问服务自测 | `.env` → 需同时写进 `cloudbaserc.json` | 同左 |
+| 云托管 | 控制台「服务设置 → 环境变量」 | 同左 |
 
 > 🚨 **`cloudbaserc.json` 的 `{{env.X}}` 与 `.env` 的键名必须逐字一致 —— 连大小写不同都算不一致。**
 >
@@ -238,13 +252,16 @@ npm start     # 默认 3000 端口，自动加载 .env
 >
 > 实测踩过：`.env` 里叫 `appId`，占位符写的是 `{{env.APP_ID}}` → 全部解析为空。
 >
+> **这条约束当前只涉及一个键**：`cloudbaserc.json` 只引用 `notifyFormat`。
+> 平台注入的凭证不写进 `cloudbaserc.json`，因此不存在解析问题；`.env` 里出现的这些键会被脚本提示「未被占位符引用」，属**预期行为**。
+>
 > **部署前自检**（只读，不打印值）：
 >
 > ```bash
 > bash ../../skill/cloudbase-xpay/scripts/check_env_keys.sh
 > ```
 >
-> 它会列出「占位符在 .env 里找不到对应键」和「.env 里没被引用的键（多半是名字写错了）」。
+> 它会列出「占位符在 .env 里找不到对应键」（**必须为 0**）和「.env 里没被引用的键」（平台注入的凭证属正常）。
 
 > ⚠️ `.env` 含密钥，已由 `integration/cloudbase-xpay/.gitignore` 忽略。**不要 `git add -f`**。
 > 提交前可用 `git check-ignore -v functions/xpay-common/.env` 复核。

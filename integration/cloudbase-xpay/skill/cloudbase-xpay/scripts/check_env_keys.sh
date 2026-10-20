@@ -73,17 +73,26 @@ while IFS= read -r key; do
 done <<< "$KEYS"
 
 # 2) 反向检查：.env 里有、但没被占位符引用的键（多半是名字写错了）
+#
+# 例外：A 类「集成中心注入」变量由平台注入云函数，本就不该出现在
+# cloudbaserc.json 的占位符里（否则 tcb fn deploy 会用 .env 的值整体覆盖
+# 函数环境变量，把集成中心注入的值冲掉）。出现在 .env 中属于正常。
+PLATFORM_INJECTED="appId appid secret appSecret offerId appKey prodAppKey sandboxAppKey token msgSecret notifyUrlCallbackType msgEncryptType notifyUrlResourceType notifyUrlResourceName"
+
 ENV_KEYS=$(grep -oE '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*=' "$ENV_FILE" \
     | sed -E 's/^[[:space:]]*//; s/=$//' \
     | sort -u)
 
 unused=""
-while IFS= read -r key; do
+for key in $ENV_KEYS; do
     [ -n "$key" ] || continue
+    case " $PLATFORM_INJECTED " in
+        *" $key "*) continue ;;
+    esac
     if ! echo "$KEYS" | grep -qx "$key"; then
         unused="$unused $key"
     fi
-done <<< "$ENV_KEYS"
+done
 
 if [ -n "$unused" ]; then
     echo

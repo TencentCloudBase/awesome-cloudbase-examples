@@ -12,24 +12,8 @@ app.set('env', process.env.NODE_ENV || 'production');
 // 启动时校验配置（只告警不阻断）
 validateConfig();
 
-// CORS：默认不开放跨域
-app.use((req, res, next) => {
-    const allowedOrigins = process.env.corsAllowOrigin
-        ? process.env.corsAllowOrigin.split(',').map(s => s.trim())
-        : [];
-    const origin = req.headers.origin;
-
-    if (origin && allowedOrigins.includes(origin)) {
-        res.header('Access-Control-Allow-Origin', origin);
-        res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        if (req.method === 'OPTIONS') {
-            return res.sendStatus(204);
-        }
-    }
-    next();
-});
-
+// 不启用 CORS：调用方是小程序（wx.cloud.callHTTPFunction），不走浏览器同源策略。
+// 若确有 Web 端直接调用需求，请在上游网关配置跨域，而不是在函数里放开。
 app.use(logger('dev'));
 
 // 虚拟支付回调走小程序消息推送，格式可能是 JSON 或 XML（取决于集成登记）

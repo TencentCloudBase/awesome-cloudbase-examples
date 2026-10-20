@@ -6,11 +6,7 @@
 | `appKey` | ✅ | — | 支付签名密钥（旧名 `prodAppKey`） |
 | `appId` | ✅ | — | 小程序 AppID |
 | `secret` | ✅ | — | 换取 sessionKey 必需（旧名 `appSecret`） |
-| `notifyFormat` | 否 | `json` | `json` / `xml`，须与微信后台一致 |
-| `corsAllowOrigin` | 否 | 空 | 跨域白名单，逗号分隔 |
-| `requireCallerAuth` | 否 | 空 | 设为 `true` 收紧鉴权（公网暴露时必开）：不再采信裸 `x-wx-openid` |
-| `trustUnverifiedJwt` | 否 | 空 | 设为 `true` 才采信未验签的 JWT payload |
-| `trustPlatformHeaders` | 否 | 空 | 确认网关会覆盖客户端同名头时才设 `true`（收紧模式生效） |
+| `notifyFormat` | 否 | `json` | `json` / `xml`，须与微信后台一致；**唯一需要写进 `cloudbaserc.json` 的变量** |
 | `notifyUrlCallbackType` | 否 | 空 | 未声明 = 自己验签；`system` = 网关代验签 |
 
 > 变量名以**集成中心注入为准**（`authTypeCode=wxvirtualpay` → `appId / secret / offerId / appKey`），本地 `.env` 与旧文档的 `prodAppKey` / `appSecret` 由 `readEnv()` 回退兼容。

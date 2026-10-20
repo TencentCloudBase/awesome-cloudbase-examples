@@ -16,7 +16,6 @@ ENV PORT=80
 # ⚠️ secret 是小程序最高权限凭证，只放服务端环境变量，
 #    不要写进客户端代码或提交到仓库。
 # 命名与集成中心注入保持一致（appKey / secret）；本地起容器时也可用旧名 prodAppKey / appSecret。
-ENV corsAllowOrigin=""
 ENV offerId=""
 ENV appKey=""
 ENV appId=""

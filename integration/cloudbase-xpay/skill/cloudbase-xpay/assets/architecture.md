@@ -12,7 +12,7 @@
 │  xpay-common 云函数                            │
 │  ┌────────────┐   ┌────────────────────┐     │
 │  │ controller │──▶│ xpayService        │     │
-│  │ (鉴权)     │   │  ├ code2Session    │─────┼──▶ 微信 sns/jscode2session
+│  │ (下单/查单) │   │  ├ code2Session    │─────┼──▶ 微信 sns/jscode2session
 │  └────────────┘   │  ├ buildSignData   │     │         → sessionKey
 │                   │  └ signForClient   │     │
 │                   └────────────────────┘     │
@@ -51,14 +51,14 @@
 |---|---|
 | `app.js` | Express 装配，JSON + XML 双格式，云 API 适配，事件→路由映射 |
 | `config/config.js` | 凭证读取、启动自检（`env` 固定 `0`，仅现网） |
-| `routes/xpay.js` | 路由表，业务路由挂鉴权、回调路由不挂 |
-| `controllers/xpayController.js` | 鉴权中间件、回调应答、统一响应 |
+| `routes/xpay.js` | 路由表，业务路由与回调路由均不挂本地鉴权（依赖上游网关） |
+| `controllers/xpayController.js` | 下单/查单、回调应答、统一响应 |
 | `services/xpayService.js` | 下单、6 类事件分发、幂等、iOS 退款决策 |
 | `services/signService.js` | **双签名**（signData 构造 + paySig + signature） |
 | `services/strategies/xpayStrategy.js` | `/xpay/*` B 端接口封装 |
 | `utils/wechatApi.js` | code2Session、access_token（带缓存） |
 | `utils/xml.js` | XML 推送解析 |
-| `utils/cloudbaseAuth.js` | `x-wx-openid` / JWT 身份 |
+| `utils/cloudbaseAuth.js` | 读平台注入的 `x-wx-openid` / `x-wx-appid` |
 
 ## 关键设计
 

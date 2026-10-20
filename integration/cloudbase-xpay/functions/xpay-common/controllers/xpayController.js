@@ -4,9 +4,7 @@
  */
 const XpayService = require('../services/xpayService');
 const { xpayConfig } = require('../config/config');
-const {
-    parseCloudBaseAuth, getOpenId, getAppId, getPlatformOpenId, isStrictAuth,
-} = require('../utils/cloudbaseAuth');
+const { getOpenId, getAppId } = require('../utils/cloudbaseAuth');
 const { parsePayload } = require('../utils/xml');
 
 const xpayService = new XpayService();
@@ -144,8 +142,9 @@ exports.queryOrder = async (req, res) => {
 
         success(res, result);
     } catch (err) {
-        if (err && err.status === 401) {
-            return fail(res, err.message, 401);
+        // 401 身份不一致 / 403 订单不属于当前用户：都是调用方问题，原样返回
+        if (err && (err.status === 401 || err.status === 403)) {
+            return fail(res, err.message, err.status);
         }
         failInternal(res, err, '查单失败');
     }
@@ -229,8 +228,10 @@ exports.callback = async (req, res) => {
         const body = parsePayload(req.body);
 
         console.log('[Controller] 收到回调:', {
-            event: body?.Event || body?.event || body?.ParsedContent?.Event,
+            event: body?.Event || body?.event
+                || body?.ParsedContent?.Event || body?.ParsedNotify?.Event,
             has_parsed_content: !!body?.ParsedContent,
+            has_parsed_notify: !!body?.ParsedNotify,
         });
 
         const result = await xpayService.handleCallback(body);
@@ -248,43 +249,23 @@ exports.callback = async (req, res) => {
     }
 };
 
-// ========== 鉴权中间件 ==========
-
-/**
- * 鉴权中间件（回调路由不挂，由网关验签保证可信）
- *
- * 🚨 信任模型（务必理解后再上线）：
- * 模板默认「信任上游」——认为 HTTP 云函数平台网关 / 集成中心网关已完成鉴权。
- * 这是必要假设：`SCF_RUNTIME`、`TENCENTCLOUD_RUNENV` 等运行时环境变量在云函数内**恒存在**，
- * 无法用来判断「本次请求是否真的经过了网关」；而 `x-tcb-integration-id` 一类
- * 自定义 header 是客户端可任意伪造的，绝不能作为鉴权依据。
- *
- * 若云函数会被直接暴露到公网，请设置：
- *     requireCallerAuth=true
- * 此时**不再采信裸的 x-wx-openid**（客户端可以自己塞一行同名头伪造身份），
- * 只放行「显式开启 trustUnverifiedJwt 后的 JWT」。
- * 若部署层能保证网关覆盖客户端同名头，可再显式设置 trustPlatformHeaders=true。
- */
-exports.payMiddleware = (req, res, next) => {
-    const strict = isStrictAuth();
-
-    // 1) 平台注入的用户身份：格式合法且当前信任级别允许采信
-    if (getPlatformOpenId(req)) {
-        return next();
-    }
-
-    // 2) 可信 JWT：payload 未验签，仅在显式开启信任时才采信
-    const authInfo = parseCloudBaseAuth(req);
-    if (authInfo) {
-        req.cloudbaseAuth = authInfo;
-        return next();
-    }
-
-    // 3) 默认宽容：信任上游网关（requireCallerAuth=true 时关闭该分支）
-    if (!strict) {
-        return next();
-    }
-
-    console.warn('[Auth] 收紧模式拒绝匿名调用:', req.path);
-    res.status(401).json({ code: -1, msg: '未授权访问' });
-};
+// ========== 鉴权 ==========
+//
+// 不做内置鉴权中间件。模板的信任前提是「函数只经 callHTTPFunction /
+// 集成中心网关调用」，此前提下 openid 由平台头提供；而在公网直连场景下，
+// 任何「宽松放行」的中间件都不产生实际保护，只会让人误以为有鉴权。
+//
+// ⚠️ 注意：**`x-wx-openid` 非空不构成鉴权** —— 该头没有签名，公网直连时
+//    客户端可以自己塞一行别人的 openid。真正的约束在业务代码里：
+//
+//   1. 下单/查单都强制要求 `code`：它是 wx.login 签发的一次性凭证，
+//      攻击者拿不到受害者的 code，也就走不到下游查单
+//   2. `code2Session` 换出的**权威 openid** 必须与请求头 openid 一致，
+//      不一致直接 401（见 xpayService.queryOrder）
+//   3. 查单还要校验**订单归属**：只允许查自己下的单，否则 403
+//      （见 checkOrderOwnership）
+//   4. `signature` / `paySig` 的密钥是 sessionKey，只能由 secret + code 换出，
+//      伪造请求签不出合法签名
+//
+// 需要公网直连时，请在上游（API 网关 / 云托管）完成身份校验 ——
+// 本函数不提供开关式鉴权，避免被误配成「看起来有保护」。
