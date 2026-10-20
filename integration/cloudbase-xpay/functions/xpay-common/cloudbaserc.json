@@ -1,0 +1,60 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "{{env.TCB_ENV_ID}}",
+  "functions": [
+    {
+      "name": "xpay-common",
+      "dir": "./",
+      "type": "HTTP",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "memorySize": 256,
+      "installDependency": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".env",
+        "tests",
+        "*.pem"
+      ],
+      "envVariables": {
+        "appId": "{{env.appId}}",
+        "secret": "{{env.secret}}",
+        "offerId": "{{env.offerId}}",
+        "sandboxAppKey": "{{env.sandboxAppKey}}",
+        "appKey": "{{env.appKey}}",
+        "notifyUrlCallbackType": "{{env.notifyUrlCallbackType}}",
+        "notifyUrlResourceType": "{{env.notifyUrlResourceType}}",
+        "msgEncryptType": "{{env.msgEncryptType}}",
+        "token": "{{env.token}}",
+        "msgSecret": "{{env.msgSecret}}",
+        "notifyFormat": "{{env.notifyFormat}}",
+        "corsAllowOrigin": "{{env.corsAllowOrigin}}",
+        "requireCallerAuth": "{{env.requireCallerAuth}}",
+        "trustUnverifiedJwt": "{{env.trustUnverifiedJwt}}"
+      }
+    }
+  ],
+  "integrations": [
+    {
+      "keyId": "wx-test",
+      "name": "小程序虚拟支付",
+      "authTypeCode": "wxvirtualpay",
+      "description": "小程序虚拟支付（道具直购 / 代币支付）",
+      "demoCodeFunctionName": "xpay-common-0",
+      "envVariables": {
+        "appId": "{{env.appId}}",
+        "secret": "{{env.secret}}",
+        "offerId": "{{env.offerId}}",
+        "sandboxAppKey": "{{env.sandboxAppKey}}",
+        "appKey": "{{env.appKey}}",
+        "notifyUrlCallbackType": "{{env.notifyUrlCallbackType}}",
+        "notifyUrlResourceType": "{{env.notifyUrlResourceType}}",
+        "msgEncryptType": "{{env.msgEncryptType}}",
+        "token": "{{env.token}}",
+        "msgSecret": "{{env.msgSecret}}"
+      }
+    }
+  ]
+}

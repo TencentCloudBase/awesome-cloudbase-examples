@@ -1,0 +1,22 @@
+# 环境变量（含密钥，不要提交）
+.env
+.env.local
+.env.*.local
+
+# 证书 / 密钥文件
+*.pem
+*.key
+
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+build/
+
+# 小程序本地私有配置（含真实 appid / 编译设置，不要提交）
+project.private.config.json
+
+# OS
+.DS_Store
+Thumbs.db

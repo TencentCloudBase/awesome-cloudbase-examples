@@ -1,0 +1,113 @@
+page {
+  background: #f6f7f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
+.container {
+  padding: 24rpx;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+  color: #1a1a1a;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: 28rpx;
+  color: #1a1a1a;
+}
+
+.highlight {
+  color: #fa5151;
+  font-weight: 600;
+}
+
+.btn {
+  margin-top: 12rpx;
+  background: #07c160;
+  color: #fff;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+  line-height: 88rpx;
+  text-align: center;
+}
+
+.btn.secondary {
+  background: #fff;
+  color: #07c160;
+  border: 1rpx solid #07c160;
+}
+
+.btn[disabled] {
+  background: #d8d8d8;
+  color: #fff;
+  border: none;
+}
+
+.btn-group {
+  display: flex;
+  gap: 20rpx;
+}
+
+.btn-group .btn {
+  flex: 1;
+}
+
+.result {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-size: 22rpx;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 12rpx;
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+
+.tip {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.6;
+  margin-top: 12rpx;
+}
+
+.warn {
+  font-size: 24rpx;
+  color: #fa5151;
+  line-height: 1.6;
+  margin-top: 12rpx;
+}
+
+.picker {
+  font-size: 28rpx;
+}

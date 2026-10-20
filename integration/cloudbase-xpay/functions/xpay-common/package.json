@@ -1,0 +1,20 @@
+{
+  "name": "xpay-common",
+  "version": "1.0.0",
+  "private": true,
+  "description": "小程序虚拟支付云函数模板：道具直购 / 代币支付，双签名下单 + 消息推送回调 + 幂等发货",
+  "engines": {
+    "node": ">=16.0.0 <23.0.0"
+  },
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "debug": "~4.4.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "http-errors": "~2.0.0",
+    "morgan": "~1.10.0"
+  }
+}
