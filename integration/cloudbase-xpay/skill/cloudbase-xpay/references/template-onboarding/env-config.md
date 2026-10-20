@@ -10,8 +10,10 @@
 | `secret` | ✅ | MP 后台 → 设置 | **换取 sessionKey 必需**（旧名 `appSecret`） |
 | `notifyFormat` | 否 | — | `json`（默认）/ `xml`，**须与微信后台登记一致** |
 | `corsAllowOrigin` | 否 | — | 跨域白名单，逗号分隔 |
-| `requireCallerAuth` | 否 | 空（宽松） | 设为 `true` 收紧鉴权：只放行平台注入身份 |
+| `requireCallerAuth` | 否 | 空（宽松） | 设为 `true` 收紧鉴权：不再采信裸 `x-wx-openid`，只放行可信 JWT |
 | `trustUnverifiedJwt` | 否 | 空（不采信） | 设为 `true` 才采信未验签的 JWT payload |
+| `trustPlatformHeaders` | 否 | 空（收紧模式下不采信） | 仅在确认网关会覆盖客户端同名头时设 `true` |
+| `notifyUrlCallbackType` | 否 | 空（未声明 = 自己验签） | `system` = 网关代验签；`ownservice` = 本函数验签 |
 
 **变量名以集成中心注入为准**：`authTypeCode=wxvirtualpay` 注入的是 `appId / secret / offerId / appKey`。本地 `.env` 与旧版文档用的 `prodAppKey` / `appSecret`，由 `config/config.js` 的 `readEnv()` 回退兼容 —— 优先平台名，两套都能跑。
 
@@ -33,12 +35,14 @@
 
 | 身份来源 | 信任级 | 说明 |
 |---|---|---|
-| `x-wx-openid` | **可信** | 只有平台网关能注入 |
-| Bearer JWT payload | **默认不采信** | 仅 base64 编码，未验签；需 `trustUnverifiedJwt=true` |
+| `x-wx-openid` | **宽松模式下可信** | 平台网关注入并覆盖客户端同名头；但**云函数被公网直连时客户端可自行伪造** |
+| Bearer JWT payload | **默认不采信** | 仅 base64 编码，未验签；需 `trustUnverifiedJwt=true`，且 payload 必须是对象、身份字段要过格式白名单 |
 | 其他自定义 header | **不可信** | 不参与鉴权判断 |
 
 **若云函数会被直接暴露到公网**，设置 `requireCallerAuth=true` 收紧：
-此时无身份请求一律 401，只有携带 `x-wx-openid`（或显式开启信任的 JWT）才放行。
+此时无身份请求一律 401。⚠️ 收紧模式下**默认不再采信裸的 `x-wx-openid`**（该头客户端可伪造），
+只放行「显式开启 `trustUnverifiedJwt` 的 JWT」。若部署层能保证网关会剥离/覆盖客户端同名头，
+再额外设 `trustPlatformHeaders=true` 恢复对平台头的信任。
 
 ## 凭证归属说明
 

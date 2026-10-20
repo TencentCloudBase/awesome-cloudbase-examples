@@ -32,17 +32,18 @@
         "notifyFormat": "{{env.notifyFormat}}",
         "corsAllowOrigin": "{{env.corsAllowOrigin}}",
         "requireCallerAuth": "{{env.requireCallerAuth}}",
-        "trustUnverifiedJwt": "{{env.trustUnverifiedJwt}}"
+        "trustUnverifiedJwt": "{{env.trustUnverifiedJwt}}",
+        "trustPlatformHeaders": "{{env.trustPlatformHeaders}}"
       }
     }
   ],
   "integrations": [
     {
-      "keyId": "wx-test",
+      "keyId": "wxvirtualpay",
       "name": "小程序虚拟支付",
       "authTypeCode": "wxvirtualpay",
       "description": "小程序虚拟支付（道具直购 / 代币支付）",
-      "demoCodeFunctionName": "xpay-common-0",
+      "demoCodeFunctionName": "xpay-common",
       "envVariables": {
         "appId": "{{env.appId}}",
         "secret": "{{env.secret}}",

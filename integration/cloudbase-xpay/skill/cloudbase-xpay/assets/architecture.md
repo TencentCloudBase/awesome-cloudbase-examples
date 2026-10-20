@@ -81,7 +81,11 @@
 | `system` | 平台生成（集成中心托管） | 100% 在网关，业务代码只有明文 |
 | `ownservice` | 用户自己在【虚拟支付 → 基本配置 → 基础配置 → 发货推送配置】填 | 业务函数自己验，模板 `app.js` 已内置 |
 
-平台这三个声明字段（`notifyUrlCallbackType` / `notifyUrlResourceType` / `msgEncryptType`）读不到时，退回「`token` 是否配置」判断。
+平台这三个声明字段（`notifyUrlCallbackType` / `notifyUrlResourceType` / `msgEncryptType`）读不到时，**按「自己验签」处理（fail closed）**。
+
+> 🚨 不能退回「`token` 是否配置」去猜：漏配 token 是常见误操作，
+> 猜成「网关代验签」的代价是任何人都能 POST 一段 JSON 伪造发货推送。
+> 要免验签必须在平台上明确声明 `notifyUrlCallbackType=system`。
 
 > 与 Stripe 的 `signMode` 的区别：Stripe 必须显式声明模式，因为网关代验签后的 body 与自验签后的明文字段无法区分；微信这边 `Encrypt` / `echostr` / `encrypt_type` 是请求自带标记，可自动判定。
 

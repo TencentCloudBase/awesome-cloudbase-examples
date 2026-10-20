@@ -47,8 +47,10 @@ xpay-common/
 | `secret` | 是 | 换取 sessionKey 必需，**只放服务端** | `appSecret` |
 | `notifyFormat` | 否 | `json`（默认）/ `xml`，**必须与微信后台登记一致** | — |
 | `corsAllowOrigin` | 否 | 跨域白名单 | — |
-| `requireCallerAuth` | 否 | 设为 `true` 收紧鉴权：只放行平台注入身份（云函数公网暴露时必开） | — |
+| `requireCallerAuth` | 否 | 设为 `true` 收紧鉴权（云函数公网暴露时必开）：**不再采信裸 `x-wx-openid`** | — |
 | `trustUnverifiedJwt` | 否 | 设为 `true` 才采信未验签的 JWT payload（默认不采信） | — |
+| `trustPlatformHeaders` | 否 | 确认部署层会覆盖客户端同名头时设 `true`，恢复对平台头的信任 | — |
+| `notifyUrlCallbackType` | 否 | 未声明 = 本函数自己验签（fail closed）；`system` = 网关代验签 | — |
 
 **命名对齐**：集成中心（`authTypeCode=wxvirtualpay`）注入的是 `appKey` / `secret`，而本地 `.env` 与旧版文档写的是 `prodAppKey` / `appSecret`。`config/config.js` 的 `readEnv()` 优先读平台名、回退旧名，两套都能跑。
 
@@ -125,7 +127,10 @@ xpay-common/
 
 `appId` 用于解密后校验明文尾部的 AppID，不一致会抛错。
 
-切到集成中心托管后，`notifyUrlCallbackType` 会变成 `system`，无需改代码；老集成没有这三个字段时，删掉 `token` 即可平滑退化。
+切到集成中心托管后，`notifyUrlCallbackType` 会变成 `system`，无需改代码。
+
+⚠️ 老集成若读不到这三个字段，模板按「自己验签」处理（fail closed），删掉 `token` **不会**变成免验签 ——
+要免验签必须显式声明 `notifyUrlCallbackType=system`。
 
 > 微信推送的 `Content-Type` 不固定（`text/xml` / `application/xml`，偶发不带），`app.js` 用 `express.text({ type: (req) => !req.is('application/json') })` 兜住，保证密文以字符串进入解密中间件；`application/json` 的密文由 `extractEncrypt` 直接从对象里取。
 
