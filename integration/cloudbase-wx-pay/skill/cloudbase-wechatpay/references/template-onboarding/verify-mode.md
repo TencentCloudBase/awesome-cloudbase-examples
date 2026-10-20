@@ -305,4 +305,4 @@ apiV3Key=YOUR_API_V3_KEY                      # 解密下载到的加密证书
 
 ---
 
-*签名模式（SDK vs Gateway）说明见 [sign-mode.md](sign-mode.md) | 环境变量完整列表见 [env-config.md](env-config.md) | 错误排查见 [error-patterns.md](../问题排查/error-patterns.md)*
+*签名模式（SDK vs Gateway）说明见 [sign-mode.md](sign-mode.md) | 环境变量完整列表见 [env-config.md](env-config.md) | 错误排查见 [error-patterns.md](../troubleshooting/error-patterns.md)*

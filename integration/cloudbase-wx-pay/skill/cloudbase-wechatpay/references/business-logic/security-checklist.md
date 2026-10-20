@@ -148,4 +148,4 @@ payer: { openid: "victim_openid" }  // 冒充他人
 
 ---
 
-*详细排查见 [troubleshooting.md](../问题排查/troubleshooting.md) | 错误模式见 [error-patterns.md](../问题排查/error-patterns.md)*
+*详细排查见 [troubleshooting.md](../troubleshooting/troubleshooting.md) | 错误模式见 [error-patterns.md](../troubleshooting/error-patterns.md)*

@@ -45,7 +45,7 @@
 
 | 条件 | 说明 |
 |------|------|
-| pay-common 已部署到云托管 | 见 [deploy-cloud-run.md](../部署/deploy-cloud-run.md) |
+| pay-common 已部署到云托管 | 见 [deploy-cloud-run.md](../deployment/deploy-cloud-run.md) |
 | 基础库版本 ≥ 3.15.2 | `project.config.json` 中已设为 3.15.2 |
 
 > 💡 **无需额外配置**：callContainer 不需要 CloudBase Auth 身份源、不需要配置服务器域名白名单、不需要 npm 依赖。

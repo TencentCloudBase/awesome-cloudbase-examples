@@ -19,7 +19,7 @@
 |------|------|
 | Docker 环境 | 用于本地构建镜像 |
 | CloudBase CLI | `npm install -g @cloudbase/cli` |
-| .env 配置完成 | 参照 [env-config.md](../模板接入/env-config.md) |
+| .env 配置完成 | 参照 [env-config.md](../template-onboarding/env-config.md) |
 
 ---
 
@@ -144,7 +144,7 @@ transferNotifyUrl=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/wx-pay/t
 
 ### IP 白名单放行
 
-确保云托管的**安全组**放行了微信回调 IP 段（参见 [sign-mode.md](../模板接入/sign-mode.md) §IP 白名单）。
+确保云托管的**安全组**放行了微信回调 IP 段（参见 [sign-mode.md](../template-onboarding/sign-mode.md) §IP 白名单）。
 
 ---
 
@@ -171,4 +171,4 @@ transferNotifyUrl=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/wx-pay/t
 ---
 
 *其他部署方式见 [deploy-cloud-function.md](deploy-cloud-function.md) 和 [deploy-local.md](deploy-local.md)*
-*前端集成见 [miniprogram-cloud-api.md](../前端集成/miniprogram-cloud-api.md)*
+*前端集成见 [miniprogram-cloud-api.md](../frontend-integration/miniprogram-cloud-api.md)*

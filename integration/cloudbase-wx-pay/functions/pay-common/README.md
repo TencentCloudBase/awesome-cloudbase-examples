@@ -14,7 +14,7 @@
 
 ## 快速开始
 
-> 📖 **完整教程**：[skill/cloudbase-wechatpay/references/模板接入/quick-start.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/模板接入/quick-start.md)
+> 📖 **完整教程**：[skill/cloudbase-wechatpay/references/template-onboarding/quick-start.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/quick-start.md)
 
 ### ⚠️ 铁律（必须遵守）
 
@@ -41,11 +41,11 @@ npm install
 | **云托管** | 控制台 → 服务配置 → 环境变量 | ❌ |
 | **本地开发** | `export` 或启动脚本注入 | 📄 `.env.example` 仅作参考 |
 
-> 📖 **环境变量完整配置**：[env-config.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/模板接入/env-config.md)
+> 📖 **环境变量完整配置**：[env-config.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/env-config.md)
 >
-> 📖 **SDK vs 网关模式**：[sign-mode.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/模板接入/sign-mode.md)
+> 📖 **SDK vs 网关模式**：[sign-mode.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/sign-mode.md)
 >
-> 📖 **公钥验签 vs 证书验签**：[verify-mode.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/模板接入/verify-mode.md)
+> 📖 **公钥验签 vs 证书验签**：[verify-mode.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/verify-mode.md)
 
 #### 环境变量完整配置
 
@@ -140,9 +140,9 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 | 方式 | 命令 | 详细文档 |
 |------|------|---------|
-| **HTTP 云函数** | `tcb fn deploy pay-common` | [deploy-cloud-function.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/部署/deploy-cloud-function.md) |
-| **云托管** | `tcb cloudrun deploy pay-common --path .` | [deploy-cloud-run.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/部署/deploy-cloud-run.md) |
-| **本地开发** | `npm start` → `http://localhost:3000` | [deploy-local.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/部署/deploy-local.md) |
+| **HTTP 云函数** | `tcb fn deploy pay-common` | [deploy-cloud-function.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/deployment/deploy-cloud-function.md) |
+| **云托管** | `tcb cloudrun deploy pay-common --path .` | [deploy-cloud-run.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/deployment/deploy-cloud-run.md) |
+| **本地开发** | `npm start` → `http://localhost:3000` | [deploy-local.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/deployment/deploy-local.md) |
 
 > ⚠️ `cloudbaserc.json` 中 `"type": "HTTP"` 必须声明，否则无法通过 HTTP 访问服务访问。
 
@@ -150,13 +150,13 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 | 场景 | 调用方式 | 详细文档 |
 |------|---------|---------|
-| **小程序** | `callHTTPFunction`（推荐） | [miniprogram-cloud-api.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/前端集成/miniprogram-cloud-api.md) |
-| **小程序（云托管）** | `callContainer` | [miniprogram-cloud-run.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/前端集成/miniprogram-cloud-run.md) |
-| **H5（微信外浏览器）** | `fetch` → `h5_url` 跳转 | [web-h5.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/前端集成/web-h5.md) |
-| **JSAPI（微信内浏览器）** | `WeixinJSBridge.invoke` | [web-h5.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/前端集成/web-h5.md) |
-| **Native 扫码** | `fetch` → 生成二维码 | [web-native.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/前端集成/web-native.md) |
-| **APP** | 各端 SDK 调起 | [app.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/前端集成/app.md) |
-| **微搭低码** | `callHTTPFunction` | [weda-miniprogram.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/前端集成/weda-miniprogram.md) |
+| **小程序** | `callHTTPFunction`（推荐） | [miniprogram-cloud-api.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/miniprogram-cloud-api.md) |
+| **小程序（云托管）** | `callContainer` | [miniprogram-cloud-run.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/miniprogram-cloud-run.md) |
+| **H5（微信外浏览器）** | `fetch` → `h5_url` 跳转 | [web-h5.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/web-h5.md) |
+| **JSAPI（微信内浏览器）** | `WeixinJSBridge.invoke` | [web-h5.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/web-h5.md) |
+| **Native 扫码** | `fetch` → 生成二维码 | [web-native.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/web-native.md) |
+| **APP** | 各端 SDK 调起 | [app.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/app.md) |
+| **微搭低码** | `callHTTPFunction` | [weda-miniprogram.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/weda-miniprogram.md) |
 
 > 完整可运行示例：[`examples/miniprogram/`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram/)（云函数版）、[`examples/miniprogram-cloudrun/`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram-cloudrun/)（云托管版）
 
@@ -268,15 +268,15 @@ async handlePay() {
 | 调用返回 404 | 函数名或路径错误 | 检查 `name`（集成中心创建的实际名称）和 `path` |
 | 下单返回 `-1` | 金额非整数等参数错误 | 检查 `amount.total` 是否为正整数（分） |
 
-> 📖 **完整文档**：[miniprogram-cloud-api.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/前端集成/miniprogram-cloud-api.md)
+> 📖 **完整文档**：[miniprogram-cloud-api.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/miniprogram-cloud-api.md)
 
 ### Step 5：接入业务逻辑
 
 编辑 `services/orderService.js`，接入你的数据库。
 
-> 📖 **数据库集成方案**：[order-service.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/业务开发/order-service.md)
+> 📖 **数据库集成方案**：[order-service.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/business-logic/order-service.md)
 >
-> 📖 **安全红线 + 上线清单**：[security-checklist.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/业务开发/security-checklist.md)
+> 📖 **安全红线 + 上线清单**：[security-checklist.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/business-logic/security-checklist.md)
 
 #### 自定义 orderService
 
@@ -479,7 +479,7 @@ async handlerUnifiedTrigger(params) {
 | `/wxpay_transfer_bill_query` | POST | 商户单号查询 | payMiddleware |
 | `/wxpay_transfer_bill_query_by_no` | POST | 微信单号查询 | payMiddleware |
 
-> 📖 **商家转账详解**：[transfer.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/业务开发/transfer.md)
+> 📖 **商家转账详解**：[transfer.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/business-logic/transfer.md)
 
 ### 回调（无鉴权，微信支付服务器直接调用）
 
@@ -834,9 +834,9 @@ async handlerUnifiedTrigger(params) {
 | **回调超时** | 必须 5 秒内应答，否则微信重试最多 15 次（本模板已实现先应答后处理） |
 | **查单兜底** | 回调不保证 100% 送达，建议定时扫描"待支付"订单主动查单 |
 
-> 📖 **40+ 常见问题排查**：[troubleshooting.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/问题排查/troubleshooting.md)
+> 📖 **40+ 常见问题排查**：[troubleshooting.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/troubleshooting/troubleshooting.md)
 >
-> 📖 **错误模式深度分析**：[error-patterns.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/问题排查/error-patterns.md)
+> 📖 **错误模式深度分析**：[error-patterns.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/troubleshooting/error-patterns.md)
 
 ---
 
@@ -875,7 +875,7 @@ pay-common/
 | 资源 | 路径 |
 |------|------|
 | 🏗️ 架构图 | [assets/architecture.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/assets/architecture.md) |
-| 🔐 商户凭证准备 | [merchant-credentials.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/模板接入/merchant-credentials.md) |
-| 📋 方案选型指南 | [cloudbase-pay-overview.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/方案选型/cloudbase-pay-overview.md) |
-| 🛡️ 安全红线 + 上线清单 | [security-checklist.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/业务开发/security-checklist.md) |
+| 🔐 商户凭证准备 | [merchant-credentials.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/merchant-credentials.md) |
+| 📋 方案选型指南 | [cloudbase-pay-overview.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/solution-selection/cloudbase-pay-overview.md) |
+| 🛡️ 安全红线 + 上线清单 | [security-checklist.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/business-logic/security-checklist.md) |
 | 🔧 诊断脚本 | [scripts/](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/scripts/)（env 校验 / PEM 检查 / 部署配置对比 / 回调连通测试） |

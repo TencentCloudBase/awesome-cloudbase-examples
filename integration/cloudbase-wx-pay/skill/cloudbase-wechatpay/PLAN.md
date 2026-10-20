@@ -66,29 +66,37 @@
 
 ```
 cloudbase-wechatpay/
-├── SKILL.md                              # 路由表 + 决策树 + 全局规范（≤400行）
-├── references/                           # 按场景分层的详细文档
-│   ├── 方案选型/
+├── SKILL.md                                  # 路由表 + 决策树 + 全局规范（≤400行）
+├── references/                               # 按场景分层的详细文档
+│   ├── api-routes.md                         # HTTP API 路由与鉴权速查
+│   ├── solution-selection/
 │   │   └── cloudbase-pay-overview.md         # CloudBase 支付方案全景 + 选型决策树
-│   ├── 模板接入/
+│   ├── template-onboarding/
 │   │   ├── quick-start.md                    # 5 分钟快速开始（从 0 到下单成功）
 │   │   ├── env-config.md                     # 环境变量完整配置指南
-│   │   └── sign-mode.md                      # SDK 模式 vs Gateway 模式详解
-│   ├── 部署/
+│   │   ├── merchant-credentials.md           # 商户号/证书/密钥准备与校验
+│   │   ├── integration-center.md             # 集成中心开通与配置
+│   │   ├── sign-mode.md                      # SDK 模式 vs Gateway 模式详解
+│   │   └── verify-mode.md                    # 公钥验签 vs 证书验签
+│   ├── deployment/
 │   │   ├── deploy-cloud-function.md          # 部署为 HTTP 云函数
 │   │   ├── deploy-cloud-run.md               # 部署为云托管（Docker）
 │   │   └── deploy-local.md                   # 本地开发调试
-│   ├── 前端集成/
+│   ├── frontend-integration/
 │   │   ├── miniprogram-cloud-api.md          # 小程序 - 云API调用（推荐）
 │   │   ├── miniprogram-cloud-run.md          # 小程序 - 云托管直连
 │   │   ├── web-h5.md                         # H5 页面（手机浏览器）
 │   │   ├── web-native.md                     # PC 扫码支付
+│   │   ├── weda-miniprogram.md               # 微搭小程序集成
 │   │   └── app.md                            # APP 端
-│   ├── 业务开发/
+│   ├── quick-reference/
+│   │   ├── concepts.md                       # 核心概念与术语速查
+│   │   └── env-quick-ref.md                  # 环境变量速查表
+│   ├── business-logic/
 │   │   ├── order-service.md                  # orderService 数据库集成
 │   │   ├── transfer.md                       # 商家转账注意事项
 │   │   └── security-checklist.md             # 安全红线 + 上线清单
-│   └── 问题排查/
+│   └── troubleshooting/
 │       ├── troubleshooting.md                # 常见问题速查表（20+ 条目）
 │       └── error-patterns.md                 # 签名/回调/部署 错误模式详解
 ├── scripts/
@@ -123,7 +131,7 @@ L3: scripts/ 脚本执行                      ← 排障时按需调用
 | 维度 | 内容 |
 |------|------|
 | **触发 prompt** | "我要在小程序里加支付" / "pay-common 和云调用区别" / "支付方案怎么选" |
-| **加载文档** | `references/方案选型/cloudbase-pay-overview.md` |
+| **加载文档** | `references/solution-selection/cloudbase-pay-overview.md` |
 | **内容来源** | `pay-common-方案对比分析.md` + `微信支付三种方式对比报告.md` |
 | **引用关系** | 支付方式选型（JSAPI/H5/Native/APP）→ 引用 `wechatpay-basic-payment` 能力1 |
 
@@ -430,10 +438,10 @@ description: >
 | # | 任务 | 产出 | 依赖 |
 |---|------|------|------|
 | 1 | 编写 SKILL.md 主文件 | `SKILL.md` (~400行) | 无 |
-| 2 | 编写快速开始文档 | `references/模板接入/quick-start.md` | README + best-practices |
-| 3 | 编写环境变量配置文档 | `references/模板接入/env-config.md` | README + 开发注意事项 |
-| 4 | 编写签名模式文档 | `references/模板接入/sign-mode.md` | README + architecture |
-| 5 | 编写问题排查速查表 | `references/问题排查/troubleshooting.md` | 开发注意事项 §5 |
+| 2 | 编写快速开始文档 | `references/template-onboarding/quick-start.md` | README + best-practices |
+| 3 | 编写环境变量配置文档 | `references/template-onboarding/env-config.md` | README + 开发注意事项 |
+| 4 | 编写签名模式文档 | `references/template-onboarding/sign-mode.md` | README + architecture |
+| 5 | 编写问题排查速查表 | `references/troubleshooting/troubleshooting.md` | 开发注意事项 §5 |
 | 6 | 开发 .env 校验脚本 | `scripts/validate_env.sh` | env-config.md |
 | 7 | 开发 PEM 格式检查脚本 | `scripts/check_pem_format.py` | 无 |
 | 8 | 冒烟测试（加载 + 路由验证） | 测试通过 | 1-7 全部完成 |
@@ -442,11 +450,11 @@ description: >
 
 | # | 任务 | 产出 |
 |---|------|------|
-| 9 | 编写方案选型文档 | `references/方案选型/cloudbase-pay-overview.md` |
-| 10 | 编写三种部署方式文档（×3） | `references/部署/deploy-*.md` |
-| 11 | 编写前端集成文档（×5） | `references/前端集成/*.md` |
-| 12 | 编写业务开发文档（×3） | `references/业务开发/*.md` |
-| 13 | 编写错误模式详解 | `references/问题排查/error-patterns.md` |
+| 9 | 编写方案选型文档 | `references/solution-selection/cloudbase-pay-overview.md` |
+| 10 | 编写三种部署方式文档（×3） | `references/deployment/deploy-*.md` |
+| 11 | 编写前端集成文档（×5） | `references/frontend-integration/*.md` |
+| 12 | 编写业务开发文档（×3） | `references/business-logic/*.md` |
+| 13 | 编写错误模式详解 | `references/troubleshooting/error-patterns.md` |
 | 14 | 开发部署配置检查脚本 | `scripts/check_deploy_config.py` |
 | 15 | 开发回调 URL 测试脚本 | `scripts/test_callback_url.sh` |
 | 16 | 编写架构图 | `assets/architecture.md` |
@@ -490,11 +498,11 @@ description: >
 
 | 扩展方向 | 预留入口 | 时机 |
 |---------|---------|------|
-| CLI 集成中心创建 | `references/部署/cli-integration.md` | CLI 集成中心上线后 |
+| CLI 集成中心创建 | `references/deployment/cli-integration.md` | CLI 集成中心上线后 |
 | Git 模板仓库上架 | `quick-start.md` 中预留"从模板仓库创建"章节 | 模板上架后 |
-| 小程序云调用方案 | `references/方案选型/` 预留 `cloud-call.md` | 功能开发后 |
+| 小程序云调用方案 | `references/solution-selection/` 预留 `cloud-call.md` | 功能开发后 |
 | 数据库集成示例 | `order-service.md` 预留 CloudBase 数据库 SDK 示例 | 有需求时 |
-| 更多前端框架 | `references/前端集成/` 可扩展 Vue/React 示例 | 有 Demo 后 |
+| 更多前端框架 | `references/frontend-integration/` 可扩展 Vue/React 示例 | 有 Demo 后 |
 
 ---
 

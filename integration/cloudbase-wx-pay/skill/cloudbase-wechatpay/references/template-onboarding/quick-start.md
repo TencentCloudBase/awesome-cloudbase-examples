@@ -411,7 +411,7 @@ tcb fn list
 tcb cloudrun deploy pay-common --path .
 ```
 
-> 详细部署步骤见 `references/部署/deploy-cloud-function.md` 或 `deploy-cloud-run.md`。
+> 详细部署步骤见 `references/deployment/deploy-cloud-function.md` 或 `deploy-cloud-run.md`。
 
 ### 4.2 开启 HTTP 访问服务并配置路由 ⭐⭐
 
@@ -628,7 +628,7 @@ python3 scripts/check_deploy_config.py /path/to/pay-common
 
 ## Step 5：接入前端（小程序示例）
 
-> 完整版代码见 [miniprogram-cloud-api.md](../前端集成/miniprogram-cloud-api.md)，以下为关键摘要。
+> 完整版代码见 [miniprogram-cloud-api.md](../frontend-integration/miniprogram-cloud-api.md)，以下为关键摘要。
 
 ### 5.1 配置 app.js（无需安装 SDK）
 
@@ -762,7 +762,7 @@ Page({
 > 完整小程序 Demo 见 [GitHub 官方示例](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram)。
 > 云托管版 Demo 见 `examples/miniprogram-cloudrun/`（使用 `wx.cloud.callContainer`，同样无需 SDK 和登录流程）。
 > Web 测试页（React）见本地 `examples/react/`。
-> H5 / Native 端接入见 `references/前端集成/` 对应文档。
+> H5 / Native 端接入见 `references/frontend-integration/` 对应文档。
 
 ## Step 6：接入业务逻辑（可选）
 
@@ -803,7 +803,7 @@ class OrderService {
 }
 ```
 
-> 详细的数据库集成方案见 `references/业务开发/order-service.md`。
+> 详细的数据库集成方案见 `references/business-logic/order-service.md`。
 
 ---
 

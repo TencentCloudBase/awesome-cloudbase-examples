@@ -25,8 +25,8 @@ description: |
 1. **定位项目**：确认用户的 pay-common 项目路径
 2. **检查配置**：查找 `.env` / `cloudbaserc.json` 是否存在
 3. **选择模式**：
-   - 有集成中心 → 加载 `references/模板接入/integration-center.md`
-   - 无集成中心 → 加载 `references/模板接入/quick-start.md`
+   - 有集成中心 → 加载 `references/template-onboarding/integration-center.md`
+   - 无集成中心 → 加载 `references/template-onboarding/quick-start.md`
 4. **验证配置**：引导运行 `scripts/validate_env.sh`
 
 ---
@@ -80,34 +80,34 @@ description: |
 graph TD
     A{用户要接微信支付} --> B{想了解什么?}
     B -->|JSAPI/H5/Native 区别| C[→ wechatpay-basic-payment]
-    B -->|CloudBase 部署方案选择| D[→ references/方案选型/cloudbase-pay-overview.md]
-    B -->|集成中心一键创建| IC[→ references/模板接入/integration-center.md]
-    B -->|商户凭证怎么配| M[→ references/模板接入/merchant-credentials.md]
+    B -->|CloudBase 部署方案选择| D[→ references/solution-selection/cloudbase-pay-overview.md]
+    B -->|集成中心一键创建| IC[→ references/template-onboarding/integration-center.md]
+    B -->|商户凭证怎么配| M[→ references/template-onboarding/merchant-credentials.md]
     B -->|已决定用 pay-common| E[进入模板接入]
     E --> F{需要做什么?}
-    F -->|快速上手| G[→ references/模板接入/quick-start.md]
-    F -->|环境变量配置| H[→ references/模板接入/env-config.md]
-    F -->|SDK vs Gateway 签名| I[→ references/模板接入/sign-mode.md]
-    F -->|部署到云端| J[→ references/部署/deploy-*.md]
-    F -->|前端调起支付| K[→ references/前端集成/*.md]
-    F -->|微搭低码接入| W[→ references/前端集成/weda-miniprogram.md]
-    F -->|报错排查| L[→ references/问题排查/troubleshooting.md]
+    F -->|快速上手| G[→ references/template-onboarding/quick-start.md]
+    F -->|环境变量配置| H[→ references/template-onboarding/env-config.md]
+    F -->|SDK vs Gateway 签名| I[→ references/template-onboarding/sign-mode.md]
+    F -->|部署到云端| J[→ references/deployment/deploy-*.md]
+    F -->|前端调起支付| K[→ references/frontend-integration/*.md]
+    F -->|微搭低码接入| W[→ references/frontend-integration/weda-miniprogram.md]
+    F -->|报错排查| L[→ references/troubleshooting/troubleshooting.md]
 ```
 
 ## 能力路由表
 
 | # | 能力 | 触发关键词 | 加载文档 |
 |---|------|-----------|---------|
-| 1 | 方案选型 | 支付方案怎么选 / pay-common 和云调用区别 | `references/方案选型/cloudbase-pay-overview.md` |
-| 2 | 集成中心接入 | 集成中心 / 一键创建 / gateway 模式 / MISSING_CREDENTIALS | `references/模板接入/integration-center.md` |
-| 3 | 模板接入 | 怎么用 pay-common / 环境变量 / SDK Gateway 区别 | `references/模板接入/{quick-start,env-config,sign-mode}.md` |
-| 4 | 商户凭证准备 | 商户号怎么配 / 证书下载 / APIv3 密钥 / 公钥 | `references/模板接入/merchant-credentials.md` |
-| 5 | 部署 | 云函数 / 云托管 / 本地调试 / HTTP 访问服务 / 环境变量同步 | `references/部署/deploy-{cloud-function,cloud-run,local}.md` |
-| 6 | 前端集成 | 小程序调起支付 / H5 / PC 扫码 / React Web / 微搭 | `references/前端集成/{miniprogram-*,web-*,weda-*}.md` |
+| 1 | 方案选型 | 支付方案怎么选 / pay-common 和云调用区别 | `references/solution-selection/cloudbase-pay-overview.md` |
+| 2 | 集成中心接入 | 集成中心 / 一键创建 / gateway 模式 / MISSING_CREDENTIALS | `references/template-onboarding/integration-center.md` |
+| 3 | 模板接入 | 怎么用 pay-common / 环境变量 / SDK Gateway 区别 | `references/template-onboarding/{quick-start,env-config,sign-mode}.md` |
+| 4 | 商户凭证准备 | 商户号怎么配 / 证书下载 / APIv3 密钥 / 公钥 | `references/template-onboarding/merchant-credentials.md` |
+| 5 | 部署 | 云函数 / 云托管 / 本地调试 / HTTP 访问服务 / 环境变量同步 | `references/deployment/deploy-{cloud-function,cloud-run,local}.md` |
+| 6 | 前端集成 | 小程序调起支付 / H5 / PC 扫码 / React Web / 微搭 | `references/frontend-integration/{miniprogram-*,web-*,weda-*}.md` |
 | 7 | API 路由速查 | 下单/查单/退款/转账路由 / 请求响应格式 | `references/api-routes.md` |
-| 8 | 环境变量速查 | SDK vs Gateway 配置对比 / 变量列表 | `references/核心速查/env-quick-ref.md` |
-| 9 | 核心概念速查 | prepay_id 有效期 / 三种调用方式 / 双通道架构 | `references/核心速查/concepts.md` |
-| 10 | 问题排查 | 签名失败 / 回调收不到 / 502 / 转账报错 / NOT_ENOUGH | `references/问题排查/{troubleshooting,error-patterns}.md` |
+| 8 | 环境变量速查 | SDK vs Gateway 配置对比 / 变量列表 | `references/quick-reference/env-quick-ref.md` |
+| 9 | 核心概念速查 | prepay_id 有效期 / 三种调用方式 / 双通道架构 | `references/quick-reference/concepts.md` |
+| 10 | 问题排查 | 签名失败 / 回调收不到 / 502 / 转账报错 / NOT_ENOUGH | `references/troubleshooting/{troubleshooting,error-patterns}.md` |
 
 > 每次只加载用户当前场景需要的 **1-2 篇**参考文档，不要全部加载。
 
@@ -148,25 +148,25 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 
 | 文档 | 何时加载 |
 |------|---------|
-| 方案选型/cloudbase-pay-overview | 用户问方案对比 |
-| 模板接入/integration-center | 集成中心模式接入/排查 |
-| 模板接入/merchant-credentials | 新手首次接入/凭证报错 |
-| 模板接入/quick-start | **新手必读**，覆盖部署全链路 |
-| 模板接入/env-config | 配置 .env 时 |
-| 模板接入/sign-mode | 选签名模式/回调不通 |
-| 模板接入/verify-mode | 公钥验签 vs 证书验签 |
-| 部署/deploy-* | 部署到云端 |
-| 前端集成/miniprogram-* | 接入小程序前端 |
-| 前端集成/weda-miniprogram | 微搭/低码接入 |
-| 前端集成/web-* | H5/Native/APP |
-| 业务开发/order-service | 对接业务系统 |
-| 业务开发/transfer | 商家转账 |
-| 业务开发/security-checklist | 上线前检查 |
-| 问题排查/troubleshooting | 出问题时 |
-| 问题排查/error-patterns | 深度排查 |
+| solution-selection/cloudbase-pay-overview | 用户问方案对比 |
+| template-onboarding/integration-center | 集成中心模式接入/排查 |
+| template-onboarding/merchant-credentials | 新手首次接入/凭证报错 |
+| template-onboarding/quick-start | **新手必读**，覆盖部署全链路 |
+| template-onboarding/env-config | 配置 .env 时 |
+| template-onboarding/sign-mode | 选签名模式/回调不通 |
+| template-onboarding/verify-mode | 公钥验签 vs 证书验签 |
+| deployment/deploy-* | 部署到云端 |
+| frontend-integration/miniprogram-* | 接入小程序前端 |
+| frontend-integration/weda-miniprogram | 微搭/低码接入 |
+| frontend-integration/web-* | H5/Native/APP |
+| business-logic/order-service | 对接业务系统 |
+| business-logic/transfer | 商家转账 |
+| business-logic/security-checklist | 上线前检查 |
+| troubleshooting/troubleshooting | 出问题时 |
+| troubleshooting/error-patterns | 深度排查 |
 | **api-routes** | 查路由/请求格式 |
-| **核心速查/env-quick-ref** | 查环境变量配置 |
-| **核心速查/concepts** | 查核心概念 |
+| **quick-reference/env-quick-ref** | 查环境变量配置 |
+| **quick-reference/concepts** | 查核心概念 |
 
 ---
 

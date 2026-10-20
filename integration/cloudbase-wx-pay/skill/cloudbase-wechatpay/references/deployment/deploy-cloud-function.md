@@ -1,6 +1,6 @@
 # 部署为 HTTP 云函数
 
-> 本文档是 [`../模板接入/quick-start.md`](../模板接入/quick-start.md) Step 4 的**详细补充**。
+> 本文档是 [`../template-onboarding/quick-start.md`](../template-onboarding/quick-start.md) Step 4 的**详细补充**。
 >
 > **阅读顺序**：先走完 quick-start.md 的 Step 4.0~4.5（含 cloudbaserc.json 配置、HTTP 访问服务、环境变量同步），再回到本文查看 Gateway 模式特殊配置、进阶排查、脚本工具。
 
@@ -21,7 +21,7 @@
 | Node.js 16+ 环境 | pay-common 运行时要求 |
 | CloudBase CLI | `npm install -g @cloudbase/cli` |
 | CloudBase 环境 | 已开通，记录 envId |
-| .env 配置完成 | 参照 [env-config.md](../模板接入/env-config.md) |
+| .env 配置完成 | 参照 [env-config.md](../template-onboarding/env-config.md) |
 
 ---
 
@@ -184,5 +184,5 @@ pay-common/                          # 项目根目录
 ---
 
 *其他部署方式见 [deploy-cloud-run.md](deploy-cloud-run.md) 和 [deploy-local.md](deploy-local.md)*
-*环境变量完整说明见 [env-config.md](../模板接入/env-config.md)，同步操作见 `quick-start.md` Step 4.4*
+*环境变量完整说明见 [env-config.md](../template-onboarding/env-config.md)，同步操作见 `quick-start.md` Step 4.4*
 *cloudbaserc.json 完整配置 + HTTP 访问服务 + 回调 URL 组装 → 统一见 `quick-start.md` Step 4.1~4.3*

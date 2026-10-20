@@ -1,6 +1,6 @@
 # 环境变量速查
 
-> 完整配置说明见 `references/模板接入/env-config.md`。
+> 完整配置说明见 `references/template-onboarding/env-config.md`。
 
 ---
 
@@ -14,7 +14,7 @@
 | `merchantSerialNumber` | 必填 | 必填 | API 证书序列号 |
 | `apiV3Key` | 必填 | 必填 | APIv3 密钥（32 字节） |
 | `privateKey` | 必填 | 必填 | 商户 API 私钥（PEM，换行用 `\n`） |
-| `wxPayPublicKey` | 条件必填* | 不需要 | 微信支付公钥（非商户公钥！）。详见 [verify-mode.md](../模板接入/verify-mode.md) |
+| `wxPayPublicKey` | 条件必填* | 不需要 | 微信支付公钥（非商户公钥！）。详见 [verify-mode.md](../template-onboarding/verify-mode.md) |
 | `wxPayPublicKeyId` | 条件必填* | 不需要 | 微信支付公钥 ID（与 wxPayPublicKey 成对） |
 | `notifyURLPayURL` | 自己的域名（含完整 path） | 集成中心自动生成 | 支付回调地址 |
 | `notifyURLRefundsURL` | 自己的域名（含完整 path） | 集成中心自动生成 | 退款回调地址 |

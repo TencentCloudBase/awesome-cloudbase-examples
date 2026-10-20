@@ -33,7 +33,7 @@
 | 条件 | 说明 |
 |------|------|
 | CloudBase 环境 | 已开通，记录 ENV_ID |
-| pay-common 已部署 | 部署为 HTTP 云函数（见 [deploy-cloud-function.md](../部署/deploy-cloud-function.md)）|
+| pay-common 已部署 | 部署为 HTTP 云函数（见 [deploy-cloud-function.md](../deployment/deploy-cloud-function.md)）|
 | 基础库版本 ≥ 3.15.2 | `project.config.json` 中 `libVersion` 设为 3.15.2 或更高 |
 | 微信开发者工具 | 最新稳定版 |
 
@@ -286,7 +286,7 @@ await callPayCommon('wxpay_transfer', {
 
 ## 安全注意事项
 
-> 详见 [security-checklist.md](../业务开发/security-checklist.md)。
+> 详见 [security-checklist.md](../business-logic/security-checklist.md)。
 
 1. **openid 安全可信**：callHTTPFunction 模式下，`x-wx-openid` 由平台注入、客户端无法伪造，比旧方案更安全
 2. **金额必须来自后端**：示例中金额写在前端仅供测试，生产环境必须从业务系统查询

@@ -165,7 +165,7 @@
 | 2 | 证书序列号不匹配 | 复制时遗漏或多复制了字符 | 重新从商户平台复制完整的 40 位十六进制序列号 |
 | 3 | APIv3 密钥长度错误 | 不足或超过 32 字节 | 重新在商户平台设置 |
 | 4 | 公钥 ID 与公钥不匹配 | 混用了不同时期的公钥 | 确保公钥文件和公钥 ID 来自同一次操作 |
-| 5 | NOT_ENOUGH / 平台证书过期 | 商户已切换到公钥模式 | 切换为公钥模式并填写公钥 ID，详见 [troubleshooting.md](../问题排查/troubleshooting.md) §3.7 |
+| 5 | NOT_ENOUGH / 平台证书过期 | 商户已切换到公钥模式 | 切换为公钥模式并填写公钥 ID，详见 [troubleshooting.md](../troubleshooting/troubleshooting.md) §3.7 |
 
 ---
 

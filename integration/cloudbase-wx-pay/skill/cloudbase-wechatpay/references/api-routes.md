@@ -59,7 +59,7 @@
 >
 > **对比 Gateway 模式**：回调地址由集成中心自动生成，直接复制填入即可，无特殊部署约束。
 >
-> 详细操作步骤见 `references/模板接入/quick-start.md` Step 4.2-4.5
+> 详细操作步骤见 `references/template-onboarding/quick-start.md` Step 4.2-4.5
 
 ---
 

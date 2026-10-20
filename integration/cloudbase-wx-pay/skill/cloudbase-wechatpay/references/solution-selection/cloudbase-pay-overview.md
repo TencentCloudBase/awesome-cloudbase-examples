@@ -93,7 +93,7 @@ CloudBase 微信支付生态
 
 ## 四、SDK 模式 vs Gateway 模式对比
 
-> 完整说明见 [sign-mode.md](../模板接入/sign-mode.md)。
+> 完整说明见 [sign-mode.md](../template-onboarding/sign-mode.md)。
 
 | 维度 | SDK 模式 (`signMode=sdk`) | Gateway 模式 (`signMode=gateway`) |
 |------|:------------------------:|:-------------------------------:|
@@ -158,4 +158,4 @@ CloudBase 微信支付生态
 
 ---
 
-*部署详情见 [deploy-cloud-function.md](../部署/deploy-cloud-function.md) | 快速开始见 [quick-start.md](../模板接入/quick-start.md)*
+*部署详情见 [deploy-cloud-function.md](../deployment/deploy-cloud-function.md) | 快速开始见 [quick-start.md](../template-onboarding/quick-start.md)*

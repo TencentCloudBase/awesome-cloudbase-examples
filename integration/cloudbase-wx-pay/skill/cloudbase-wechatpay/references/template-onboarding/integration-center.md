@@ -11,7 +11,7 @@
 
 1. 控制台创建集成，填入 7 项凭证 → [第二步](#第二步在-cloudbase-创建集成)
 2. `app.js` 中填入 `ENV_ID` + `FUNCTION_NAME`（集成生成的真实函数名）
-3. 复制下单代码，改 `description` 和 `amount` → [miniprogram-cloud-api.md](../前端集成/miniprogram-cloud-api.md)
+3. 复制下单代码，改 `description` 和 `amount` → [miniprogram-cloud-api.md](../frontend-integration/miniprogram-cloud-api.md)
 4. 真机调试，完成支付 ✅
 
 ---
@@ -140,11 +140,11 @@
 
 | 前端场景 | 参考文档 |
 |---------|---------|
-| 小程序（推荐 `callHTTPFunction`） | [miniprogram-cloud-api.md](../前端集成/miniprogram-cloud-api.md) |
-| 微搭低码小程序 | [weda-miniprogram.md](../前端集成/weda-miniprogram.md) |
-| H5 支付 | [web-h5.md](../前端集成/web-h5.md) |
-| Native 扫码 | [web-native.md](../前端集成/web-native.md) |
-| APP 支付 | [app.md](../前端集成/app.md) |
+| 小程序（推荐 `callHTTPFunction`） | [miniprogram-cloud-api.md](../frontend-integration/miniprogram-cloud-api.md) |
+| 微搭低码小程序 | [weda-miniprogram.md](../frontend-integration/weda-miniprogram.md) |
+| H5 支付 | [web-h5.md](../frontend-integration/web-h5.md) |
+| Native 扫码 | [web-native.md](../frontend-integration/web-native.md) |
+| APP 支付 | [app.md](../frontend-integration/app.md) |
 
 ⚠️ **函数名注意**：前端代码中的函数名必须使用**集成创建后生成的真实函数名**（形如 `miniapp-wxpay-rwmx67sc`），而非默认的 `pay-common`。在控制台 → 集成中心 → 对应集成详情页中查看。
 
@@ -183,7 +183,7 @@ pay-common/
 └── tests/                        单元/集成测试
 ```
 
-**业务对接位置**：在 `services/orderService.js` 中实现回调处理方法，其他文件通常无需修改。详见 [order-service.md](../业务开发/order-service.md)。
+**业务对接位置**：在 `services/orderService.js` 中实现回调处理方法，其他文件通常无需修改。详见 [order-service.md](../business-logic/order-service.md)。
 
 ---
 
@@ -191,7 +191,7 @@ pay-common/
 
 ### Q1：创建集成报 NOT_ENOUGH / 平台证书已过期失效
 
-详见 [troubleshooting.md §3.7 集成创建问题](../问题排查/troubleshooting.md)
+详见 [troubleshooting.md §3.7 集成创建问题](../troubleshooting/troubleshooting.md)
 
 ### Q2：下单返回 MISSING_CREDENTIALS
 
