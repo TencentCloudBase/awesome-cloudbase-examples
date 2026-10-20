@@ -293,7 +293,7 @@ async handlePay() {
 
 | 方法 | 触发时机 | 你要做什么 | 幂等要求 |
 |------|---------|-----------|:--------:|
-| `handlerUnified(params)` | 下单成功后 | 创建订单记录到数据库 | — |
+| `handlerUnified(params, identity)` | 下单成功后 | 创建订单记录到数据库（归属取 `identity.openid`，无 openid 用 `identity.uid`） | — |
 | `handlerUnifiedTrigger(params)` | 支付回调通知 | 更新订单为"已支付"、发货等 | **必须** |
 | `handlerRefund(params)` | 退款申请成功后 | 更新订单为"退款中" | — |
 | `handlerRefundTrigger(params)` | 退款回调通知 | 更新退款最终结果 | **必须** |
@@ -355,16 +355,25 @@ async handlerUnifiedTrigger(params) {
 **每个方法接收的参数**：
 
 <details>
-<summary>handlerUnified(params) — 下单参数</summary>
+<summary>handlerUnified(params, identity) — 下单参数 + 登录身份</summary>
 
 ```js
+// params：下单参数
 {
     out_trade_no: 'ORDER202604130001',  // 商户订单号
     description: '测试商品',              // 商品描述
     amount: { total: 100, currency: 'CNY' }, // 金额（分）
     payer: { openid: 'oUpF8...' }        // 支付者（JSAPI 必传）
 }
+
+// identity：登录身份（来自鉴权中间件，controller 单独传入，不在 params 里）
+{ openid: 'oUpF8...', uid: 'uid_xxx' }   // H5 微信外登录时 openid 可能为 null，只剩 uid
 ```
+
+> ⚠️ 归属标识由 `orderService.resolveOwner(params, identity)` 统一解析：
+> `identity.openid` → `identity.uid` → `params.payer.openid`，每个候选都要过格式校验。
+> **三者都取不到合法值时下单直接失败**（抛「订单缺少归属身份」），不会创建无主订单 ——
+> 无归属订单会让后续查单 / 退款的归属校验退化成 `{ owner: null }`，存在越权风险。
 </details>
 
 <details>
@@ -516,7 +525,9 @@ async handlerUnifiedTrigger(params) {
 | `payMiddleware` | 必须有 openid | `getOpenId(req)` |
 | `h5SecurityMiddleware` | openid 或 UID 任一非空 | 有 openid 用 `getOpenId(req)`，只有 UID 用 `getUid(req)` |
 
-H5 是唯一允许「只有 UID」的路由：H5（MWEB）常在微信外浏览器发起，CloudBase Auth 凭证只有 `sub`、没有 `provider_sub`。这类订单的归属按 UID 记录（`payController.unifiedOrderH5` 把 `{ openid, uid }` 透传给 `orderService.handlerUnified`），控制器不依赖 openid 落库。
+H5 是唯一允许「只有 UID」的路由：H5（MWEB）常在微信外浏览器发起，CloudBase Auth 凭证只有 `sub`、没有 `provider_sub`。这类订单的归属按 UID 记录，控制器不依赖 openid 落库。
+
+三个下单入口（JSAPI / H5 / Native）都会把 `{ openid, uid }` 作为 `identity` 透传给 `payService.unifiedOrder` → `orderService.handlerUnified`，归属口径完全一致；`identity` 不会塞进 `req.body`（body 会原样发给微信支付 API）。
 
 ### H5 路由（`/wxpay_order_h5`）
 

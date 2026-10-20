@@ -104,9 +104,13 @@ function loadControllerWithMockSdk(customMocks = {}, overrides = {}) {
 
 describe('Controller - unifiedOrder (JSAPI)', () => {
 
+    // JSAPI 路由受 payMiddleware 保护：放行 ⇒ openid 一定有值，测试要还原这个前提
+    const LOGIN_IDENTITY = { openid: 'o_login_openid_123456', uid: 'uid_login_123456' };
+
     it('合法 body → success + 含 prepay_id / paySign 等调起参数', async () => {
         const ctrl = loadControllerWithMockSdk();
         const { req, res } = mockReqRes({ description: '测试商品', amount: { total: 100 }, payer: { openid: 'oUpF8xxx' } });
+        req.user = { ...LOGIN_IDENTITY };
         await ctrl.unifiedOrder(req, res);
         assert.strictEqual(res._getStatusCode(), 200);
         const b = res._getBody();
@@ -143,6 +147,7 @@ describe('Controller - unifiedOrder (JSAPI)', () => {
             transactions_jsapi: async () => ({ status: 500, data: { code: 'PARAM_ERROR' } }),
         });
         const { req, res } = mockReqRes({ description: '商品', amount: { total: 100 } });
+        req.user = { ...LOGIN_IDENTITY };
         await ctrl.unifiedOrder(req, res);
         assert.strictEqual(res._getStatusCode(), 200);
         assert.strictEqual(res._getBody().code, 0);
@@ -153,11 +158,45 @@ describe('Controller - unifiedOrder (JSAPI)', () => {
             transactions_jsapi: async () => { throw new Error('网络超时'); },
         });
         const { req, res } = mockReqRes({ description: '商品', amount: { total: 100 } });
+        req.user = { ...LOGIN_IDENTITY };
         await ctrl.unifiedOrder(req, res);
         // Controller catch 块调用 fail(res, err.message) 未指定 statusCode，默认为 400
         assert.strictEqual(res._getStatusCode(), 400);
         assert.strictEqual(res._getBody().code, -1);
         assert.ok(res._getBody().msg.includes('网络超时'));
+    });
+
+    it('⚠️ JSAPI 必须把登录身份传给订单服务（归属不能只靠 H5 一路传）', async () => {
+        const ctrl = loadControllerWithMockSdk();
+        const OrderService = require('../services/orderService');
+        const origHandler = OrderService.prototype.handlerUnified;
+        let capturedIdentity = null;
+        OrderService.prototype.handlerUnified = async function(params, identity) {
+            capturedIdentity = identity;
+            return true;
+        };
+
+        try {
+            const { req, res } = mockReqRes({ description: '商品', amount: { total: 100 } });
+            req.user = { ...LOGIN_IDENTITY };
+            await ctrl.unifiedOrder(req, res);
+            assert.strictEqual(res._getStatusCode(), 200);
+            assert.deepStrictEqual(
+                capturedIdentity,
+                { openid: 'o_login_openid_123456', uid: 'uid_login_123456' },
+                'JSAPI 下单必须传 identity，否则订单归属为空'
+            );
+        } finally {
+            OrderService.prototype.handlerUnified = origHandler;
+        }
+    });
+
+    it('⛔ 无登录身份 → 400（拒绝创建无主订单，不再静默落库）', async () => {
+        const ctrl = loadControllerWithMockSdk();
+        const { req, res } = mockReqRes({ description: '商品', amount: { total: 100 } });
+        await ctrl.unifiedOrder(req, res);
+        assert.strictEqual(res._getStatusCode(), 400);
+        assert.ok(res._getBody().msg.includes('归属身份'));
     });
 });
 
@@ -172,6 +211,8 @@ describe('Controller - unifiedOrderH5', () => {
             description: 'H5 商品', amount: { total: 100 },
             scene_info: { payer_client_ip: '1.2.3.4', h5_info: { type: 'Wap' } },
         });
+        // H5 中间件放行 ⇒ openid 或 uid 至少有一个
+        req.user = { openid: 'o_login_openid_123456', uid: 'uid_login_123456', source: 'bearer' };
         await ctrl.unifiedOrderH5(req, res);
         assert.strictEqual(res._getStatusCode(), 200);
         assert.strictEqual(res._getBody().code, 0);
@@ -228,11 +269,38 @@ describe('Controller - unifiedOrderNative', () => {
     it('合法 body → success + code_url', async () => {
         const ctrl = loadControllerWithMockSdk();
         const { req, res } = mockReqRes({ description: '扫码商品', amount: { total: 100 } });
+        // Native 路由同样受 payMiddleware 保护：放行 ⇒ openid 有值
+        req.user = { openid: 'o_login_openid_123456', uid: 'uid_login_123456' };
         await ctrl.unifiedOrderNative(req, res);
         assert.strictEqual(res._getStatusCode(), 200);
         assert.strictEqual(res._getBody().code, 0);
         // Native strategy 直接返回 SDK 原始结果：{status:200, data:{code_url}}
         assert.ok(res._getBody().data?.data?.code_url);
+    });
+
+    it('⚠️ Native 也要把登录身份传给订单服务（扫码下单同样要有归属）', async () => {
+        const ctrl = loadControllerWithMockSdk();
+        const OrderService = require('../services/orderService');
+        const origHandler = OrderService.prototype.handlerUnified;
+        let capturedIdentity = null;
+        OrderService.prototype.handlerUnified = async function(params, identity) {
+            capturedIdentity = identity;
+            return true;
+        };
+
+        try {
+            const { req, res } = mockReqRes({ description: '扫码商品', amount: { total: 100 } });
+            req.user = { openid: 'o_login_openid_123456', uid: 'uid_login_123456' };
+            await ctrl.unifiedOrderNative(req, res);
+            assert.strictEqual(res._getStatusCode(), 200);
+            assert.deepStrictEqual(
+                capturedIdentity,
+                { openid: 'o_login_openid_123456', uid: 'uid_login_123456' },
+                'Native 下单必须传 identity，不能让订单无归属'
+            );
+        } finally {
+            OrderService.prototype.handlerUnified = origHandler;
+        }
     });
 });
 

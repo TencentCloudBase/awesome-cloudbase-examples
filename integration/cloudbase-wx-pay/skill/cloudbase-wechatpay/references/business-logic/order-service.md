@@ -36,9 +36,11 @@ class OrderService {
   /**
    * 下单成功回调 - 写入待支付订单
    * @param {object} params - 下单参数（description, out_trade_no, amount, payer 等）
+   * @param {?object} identity - 登录身份 { openid, uid }（来自鉴权中间件，三个下单入口都会传）
    * @returns {boolean} 是否成功
+   * @throws {Error} resolveOwner 取不到合法归属标识时必须抛错，不要创建无主订单
    */
-  async handlerUnified(params) {}
+  async handlerUnified(params, identity) {}
 
   /**
    * 支付回调处理 - 更新订单状态为已支付
@@ -78,14 +80,19 @@ class OrderService {
   /**
    * Step 1: 下单成功 → 写入待支付订单
    */
-  async handlerUnified(params) {
+  async handlerUnified(params, identity) {
+    // 归属标识：identity.openid → identity.uid → params.payer.openid，取不到就是无主订单
+    // resolveOwner 由模板 services/orderService.js 提供，自己实现时保留这个方法即可复用
+    const owner = this.resolveOwner(params, identity)
+    if (!owner) throw new Error('订单缺少归属身份，拒绝创建无主订单')
+
     try {
       const orderData = {
         out_trade_no: params.out_trade_no,          // 商户订单号
         description: params.description,             // 商品描述
         amount_total: params.amount.total,           // 订单金额（分）
         currency: params.amount.currency || 'CNY',   // 币种
-        openid: params.payer?.openid || '',          // 用户 openid
+        owner,                                       // ⭐ 订单归属（openid 或 uid），不要留空
         status: 'NOTPAY',                            // 初始状态：待支付
         created_at: new Date(),                      // 创建时间
         expire_at: new Date(Date.now() + 30 * 60 * 1000),  // 30 分钟过期
@@ -247,13 +254,17 @@ class OrderService {
     })
   }
 
-  async handlerUnified(params) {
+  async handlerUnified(params, identity) {
+    // 同上：resolveOwner 由模板提供，别直接拿 params.payer?.openid 当归属
+    const owner = this.resolveOwner(params, identity)
+    if (!owner) throw new Error('订单缺少归属身份，拒绝创建无主订单')
+
     const conn = await this.pool.getConnection()
     try {
       await conn.execute(
-        `INSERT INTO orders (out_trade_no, description, amount, openid, status, created_at)
+        `INSERT INTO orders (out_trade_no, description, amount, owner, status, created_at)
          VALUES (?, ?, ?, ?, 'NOTPAY', NOW())`,
-        [params.out_trade_no, params.description, params.amount.total, params.payer?.openid]
+        [params.out_trade_no, params.description, params.amount.total, owner]
       )
       return true
     } finally {

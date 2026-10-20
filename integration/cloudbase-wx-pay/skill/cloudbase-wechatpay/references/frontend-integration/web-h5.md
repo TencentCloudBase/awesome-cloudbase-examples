@@ -60,7 +60,12 @@ async function h5Pay(description, amountFen) {
 
   const res = await fetch(`${BACKEND_URL}/wx-pay/wxpay_order_h5`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      // ⚠️ 必填：H5 路由要求登录态（跨站请求拿不到 token，即 CSRF 防护）
+      // 服务端还要配环境变量 corsAllowOrigin 白名单，否则 403
+      Authorization: `Bearer ${await getCloudBaseAccessToken()}`,
+    },
     body: JSON.stringify({
       description: description,
       out_trade_no: 'H5' + Date.now(),

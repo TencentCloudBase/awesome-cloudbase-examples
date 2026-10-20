@@ -41,7 +41,10 @@ exports.unifiedOrder = async (req, res) => {
         const errors = validateOrderParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.unifiedOrder(req.body, 'jsapi');
+        // 身份单独传给订单服务落库：不能塞进 req.body（body 会原样发给微信支付 API）
+        // JSAPI 路由受 payMiddleware 保护，openid 一定有值；uid 一并返回，
+        // 保证三个下单入口的归属口径完全一致（此前只有 H5 传，JSAPI/Native 归属丢失）。
+        const result = await payService.unifiedOrder(req.body, 'jsapi', { openid, uid: getUid(req) });
         success(res, result);
     } catch (err) {
         console.error('[Controller] unifiedOrder error:', err);
@@ -63,7 +66,9 @@ exports.unifiedOrderH5 = async (req, res) => {
         //    所以这里必须取 UID 作为订单归属，否则就是「放行但身份取不到」。
         const uid = getUid(req);
         if (!openid && !uid) {
-            console.warn('[Controller] H5 下单既无 openid 也无 UID（匿名/本地联调），订单无归属身份');
+            // 匿名放行只在 ALLOW_ANONYMOUS_H5=true 时发生（本地联调）。
+            // 归属为空会被 orderService 视为「无主订单」直接拒绝下单，不再静默落库。
+            console.warn('[Controller] H5 下单既无 openid 也无 UID（匿名/本地联调），订单将被归属校验拒绝');
         }
 
         if (openid) {
@@ -94,7 +99,12 @@ exports.unifiedOrderNative = async (req, res) => {
         const errors = validateOrderParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.unifiedOrder(req.body, 'native');
+        // Native 路由同样受 payMiddleware 保护，openid 一定有值（扫码场景下
+        // 下单人是已登录用户，不是匿名终端）。身份只用于订单归属落库，不进 req.body。
+        const result = await payService.unifiedOrder(req.body, 'native', {
+            openid: getOpenId(req),
+            uid: getUid(req),
+        });
         success(res, result);
     } catch (err) {
         console.error('[Controller] unifiedOrderNative error:', err);

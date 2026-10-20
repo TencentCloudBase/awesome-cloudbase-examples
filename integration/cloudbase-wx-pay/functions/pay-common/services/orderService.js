@@ -17,6 +17,42 @@
  * 3. 回调中应核验支付金额与下单金额是否一致（防篡改）。
  */
 
+const { normalizeOpenId, normalizeUid } = require('../utils/cloudbaseAuth');
+
+/**
+ * 解析订单归属标识（唯一权威入口：controller / service / 落库都只认这一份口径）
+ *
+ * 优先 identity.openid，其次 identity.uid，最后才是 params.payer.openid。
+ * 每个候选值都要过格式校验（复用 cloudbaseAuth 的 openid / uid 正则），
+ * 挡住非字符串、空串、超长值和特殊字符，避免把脏数据写成归属标识。
+ *
+ * 🚨 取不到合法标识时返回 null，**调用方必须按失败处理**：
+ *    不能用 null 当「未知」写进归属字段 —— null 会参与下游的相等比对
+ *    （查单 / 退款归属校验），退化成 { owner: null } 后可能命中其他同样
+ *    缺失归属的历史订单，导致越权查单 / 退款。
+ *
+ * @param {Object} params - 下单参数
+ * @param {Object|null} [identity] - 登录身份 { openid, uid }
+ * @returns {string|null} 合法的归属标识，取不到返回 null
+ */
+function resolveOwner(params, identity) {
+    const candidates = [
+        { value: identity?.openid, kind: 'identity.openid', normalize: normalizeOpenId },
+        { value: identity?.uid, kind: 'identity.uid', normalize: normalizeUid },
+        // 客户端可填，controller 已用登录身份覆盖；仍然过一遍格式校验，防止污染落库
+        { value: params?.payer?.openid, kind: 'params.payer.openid', normalize: normalizeOpenId },
+    ];
+
+    for (const candidate of candidates) {
+        if (candidate.value === undefined || candidate.value === null) continue;
+        const normalized = candidate.normalize(candidate.value);
+        if (normalized) return normalized;
+        console.warn('[OrderService] 归属候选值格式非法，已丢弃:', candidate.kind, typeof candidate.value);
+    }
+
+    return null;
+}
+
 class OrderService {
     constructor() {}
 
@@ -34,12 +70,27 @@ class OrderService {
      * @param {Object} [params.payer] - 支付者信息 { openid }
      * @param {Object|null} [identity] - 登录身份 { openid, uid }（来自鉴权中间件）
      * @returns {boolean}
+     * @throws {Error} 取不到合法归属标识时抛错，拒绝创建无主订单
      */
     async handlerUnified(params, identity = null) {
-        // TODO: 插入订单到数据库，归属字段取 identity?.openid || identity?.uid
-        const owner = identity?.openid || identity?.uid || params.payer?.openid || null;
+        // TODO: 插入订单到数据库，归属字段直接用下面的 owner（不要再自己拼一遍）
+        const owner = this.resolveOwner(params, identity);
+        if (!owner) {
+            console.error('[OrderService] handlerUnified - 订单缺少归属身份，拒绝创建无主订单:', params?.out_trade_no);
+            throw new Error('订单缺少归属身份：identity.openid / identity.uid 均为空，无法落库归属');
+        }
         console.info('[OrderService] handlerUnified - 订单创建:', params.out_trade_no, '归属:', owner);
         return true;
+    }
+
+    /**
+     * 订单归属解析（供 service 层下单前预检复用，口径同 handlerUnified）
+     * @param {Object} params - 下单参数
+     * @param {Object|null} [identity] - 登录身份 { openid, uid }
+     * @returns {string|null}
+     */
+    resolveOwner(params, identity = null) {
+        return resolveOwner(params, identity);
     }
 
     /**

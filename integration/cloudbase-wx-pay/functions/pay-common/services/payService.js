@@ -45,6 +45,13 @@ class PayService {
             // 根据支付类型设置回调 URL
             params.notify_url = params.notify_url || payConfig.jsapiNotifyUrl;
 
+            // 归属预检：必须在调微信下单【之前】失败。
+            // 放到下单后再判会出现「微信侧订单已创建、本地因无归属落库失败」的不一致状态，
+            // 且无主订单会让后续查单 / 退款的归属校验失效。
+            if (!this.orderService.resolveOwner(params, identity)) {
+                throw new Error('订单缺少归属身份：identity.openid / identity.uid 均为空，已拒绝下单');
+            }
+
             // 根据支付类型调不同接口
             let result;
             switch (payType) {
