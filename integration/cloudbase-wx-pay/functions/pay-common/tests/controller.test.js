@@ -176,6 +176,52 @@ describe('Controller - unifiedOrderH5', () => {
         assert.strictEqual(res._getStatusCode(), 200);
         assert.strictEqual(res._getBody().code, 0);
     });
+
+    it('⚠️ 只有 UID（H5 微信外登录）：不采信客户端 payer.openid，归属按 UID 落库', async () => {
+        const ctrl = loadControllerWithMockSdk();
+
+        // controller 重新 require 过 payService/orderService，这里取到的是同一个实例
+        const OrderService = require('../services/orderService');
+        const origHandler = OrderService.prototype.handlerUnified;
+        let capturedIdentity = null;
+        OrderService.prototype.handlerUnified = async function(params, identity) {
+            capturedIdentity = identity;
+            return true;
+        };
+
+        try {
+            const { req, res } = mockReqRes({
+                description: 'H5 商品', amount: { total: 100 },
+                payer: { openid: 'o_forged_client_openid' },
+            });
+            // 中间件放行后挂载的身份：只有 UID、没有 openid
+            req.user = { openid: null, uid: 'uid_only_123456', source: 'bearer' };
+
+            await ctrl.unifiedOrderH5(req, res);
+            assert.strictEqual(res._getStatusCode(), 200);
+            assert.strictEqual(req.body.payer?.openid, undefined, '客户端传的 openid 必须被移除');
+            assert.deepStrictEqual(
+                capturedIdentity,
+                { openid: null, uid: 'uid_only_123456' },
+                '放行后必须把 UID 传给订单服务，不能丢了归属'
+            );
+        } finally {
+            OrderService.prototype.handlerUnified = origHandler;
+        }
+    });
+
+    it('有 openid 时用 openid 覆盖客户端传入值', async () => {
+        const ctrl = loadControllerWithMockSdk();
+        const { req, res } = mockReqRes({
+            description: 'H5 商品', amount: { total: 100 },
+            payer: { openid: 'o_forged_client_openid' },
+        });
+        req.user = { openid: 'o_login_openid_123456', uid: 'uid_123456', source: 'platform-header' };
+
+        await ctrl.unifiedOrderH5(req, res);
+        assert.strictEqual(res._getStatusCode(), 200);
+        assert.strictEqual(req.body.payer.openid, 'o_login_openid_123456');
+    });
 });
 
 describe('Controller - unifiedOrderNative', () => {

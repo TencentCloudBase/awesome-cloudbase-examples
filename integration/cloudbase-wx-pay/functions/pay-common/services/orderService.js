@@ -22,16 +22,23 @@ class OrderService {
 
     /**
      * 下单成功后创建/记录订单
+     *
+     * ⚠️ 订单归属：优先用 `identity.openid`，没有 openid 时**必须**用 `identity.uid`。
+     *    H5（微信外浏览器）用 CloudBase Auth 登录时凭证里只有 UID、没有微信 openid，
+     *    此时若只按 openid 落库，订单会丢失归属，后续查单 / 退款的归属校验全部失效。
+     *
      * @param {Object} params - 下单参数
      * @param {string} params.out_trade_no - 商户订单号
      * @param {string} params.description - 商品描述
      * @param {Object} params.amount - 订单金额 { total, currency }
      * @param {Object} [params.payer] - 支付者信息 { openid }
+     * @param {Object|null} [identity] - 登录身份 { openid, uid }（来自鉴权中间件）
      * @returns {boolean}
      */
-    async handlerUnified(params) {
-        // TODO: 插入订单到数据库
-        console.info('[OrderService] handlerUnified - 订单创建:', params.out_trade_no);
+    async handlerUnified(params, identity = null) {
+        // TODO: 插入订单到数据库，归属字段取 identity?.openid || identity?.uid
+        const owner = identity?.openid || identity?.uid || params.payer?.openid || null;
+        console.info('[OrderService] handlerUnified - 订单创建:', params.out_trade_no, '归属:', owner);
         return true;
     }
 

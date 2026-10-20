@@ -21,11 +21,12 @@ class PayService {
 
     /**
      * 统一下单
-     * @param {Object} params - 下单参数
+     * @param {Object} params - 下单参数（会原样发给微信支付 API，不要塞业务字段）
      * @param {string} payType - 支付类型: jsapi | h5 | native
+     * @param {Object|null} [identity] - 登录身份 { openid, uid }，仅用于订单落库归属
      * @returns {Object} 微信支付返回结果
      */
-    async unifiedOrder(params, payType = 'jsapi') {
+    async unifiedOrder(params, payType = 'jsapi', identity = null) {
         try {
             // 注入通用参数
             // 根据 useServiceAccount 参数选择 appId（支持服务号/小程序双账号）
@@ -60,7 +61,7 @@ class PayService {
             }
 
             if (result.status === 200 && result.data) {
-                await this.orderService.handlerUnified(params);
+                await this.orderService.handlerUnified(params, identity);
                 return result;
             } else {
                 console.error(`[PayService] ${payType} 下单失败: status=${result?.status}, code=${result?.data?.code}, message=${result?.data?.message}`);

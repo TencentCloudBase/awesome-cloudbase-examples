@@ -5,7 +5,7 @@
 const PayService = require('../services/payService');
 const config = require('../config/config');
 const { validateOrderParams, validateRefundParams, validateTransferParams } = require('../utils/validator');
-const { getOpenId } = require('../utils/cloudbaseAuth');
+const { getOpenId, getUid } = require('../utils/cloudbaseAuth');
 const payService = new PayService();
 
 // ========== 统一响应格式 ==========
@@ -25,13 +25,17 @@ function fail(res, msg, statusCode = 400) {
  */
 exports.unifiedOrder = async (req, res) => {
     try {
-        // 自动注入 payer.openid（如果前端没传，从 JWT / x-wx-openid header 中解析）
-        if (!req.body.payer?.openid) {
-            const openid = getOpenId(req);
-            if (openid) {
-                req.body.payer = { ...req.body.payer, openid };
-                console.info('[Controller] 自动注入 payer.openid:', openid);
+        // 自动注入 payer.openid
+        //
+        // ⚠️ 客户端传的 payer.openid 不可信：鉴权通过后以服务端身份为准覆盖，
+        //    否则攻击者拿自己的 token 就能以他人 openid 下单 / 查单。
+        const openid = getOpenId(req);
+        if (openid) {
+            if (req.body.payer?.openid && req.body.payer.openid !== openid) {
+                console.warn('[Controller] 客户端传入的 payer.openid 与登录身份不一致，已用登录身份覆盖');
             }
+            req.body.payer = { ...req.body.payer, openid };
+            console.info('[Controller] 注入 payer.openid:', openid);
         }
 
         const errors = validateOrderParams(req.body);
@@ -50,10 +54,31 @@ exports.unifiedOrder = async (req, res) => {
  */
 exports.unifiedOrderH5 = async (req, res) => {
     try {
+        // H5 支付本身不需要 openid，但**不能采信客户端传的 payer.openid**：
+        // 有 openid 就用登录身份，没有就删掉该字段，避免以他人身份下单
+        const openid = getOpenId(req);
+
+        // ⚠️ H5 常在微信外浏览器发起，CloudBase Auth 凭证可能只有 UID、没有 openid
+        //    （JWT 无 provider_sub）。h5SecurityMiddleware 允许这类身份放行，
+        //    所以这里必须取 UID 作为订单归属，否则就是「放行但身份取不到」。
+        const uid = getUid(req);
+        if (!openid && !uid) {
+            console.warn('[Controller] H5 下单既无 openid 也无 UID（匿名/本地联调），订单无归属身份');
+        }
+
+        if (openid) {
+            req.body.payer = { ...req.body.payer, openid };
+        } else if (req.body.payer?.openid) {
+            console.warn('[Controller] H5 下单无登录身份，移除客户端传入的 payer.openid');
+            const { openid: _clientOpenid, ...restPayer } = req.body.payer;
+            req.body.payer = restPayer;
+        }
+
         const errors = validateOrderParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.unifiedOrder(req.body, 'h5');
+        // 身份单独传给订单服务落库：不能塞进 req.body（body 会原样发给微信支付 API）
+        const result = await payService.unifiedOrder(req.body, 'h5', { openid, uid });
         success(res, result);
     } catch (err) {
         console.error('[Controller] unifiedOrderH5 error:', err);

@@ -453,7 +453,7 @@ async handlerUnifiedTrigger(params) {
 | 路由 | 方法 | 说明 | 鉴权 |
 |------|------|------|------|
 | `/wxpay_order` | POST | JSAPI/小程序下单 | payMiddleware |
-| `/wxpay_order_h5` | POST | H5 下单 | h5SecurityMiddleware |
+| `/wxpay_order_h5` | POST | H5 下单 | h5SecurityMiddleware（Origin/Referer 白名单 + 登录态） |
 | `/wxpay_order_native` | POST | Native 扫码下单 | payMiddleware |
 
 ### 查询
@@ -496,16 +496,48 @@ async handlerUnifiedTrigger(params) {
 | 来源 | 谁注入 | 前提 |
 |---|---|---|
 | `x-wx-openid` | `wx.cloud.callHTTPFunction` / `callContainer` 的平台网关 | 请求确实经过平台网关 |
-| `Authorization: Bearer <JWT>` | 云 API 网关（已验签） | 网关验签后才转发，函数内只解码 |
+| `Authorization: Bearer <JWT>` | 云 API 网关（已验签） | 网关验签后才转发，函数内只解码 + 校验 payload |
 
 > 🚨 以下来源**不能**作为鉴权依据，代码里已全部删除：
 > - `x-tcb-integration-id` 等自定义 header：客户端可任意添加
 > - `x-wx-source` / `x-authmethod`：同样是可伪造的普通 header（虽然平台会注入，但直连时客户端也能塞）
 > - `TENCENTCLOUD_RUNENV` / `SCF_RUNTIME`：云函数内**恒存在**，放行等于中间件无条件通过
+> - `body.payer.openid`：请求体字段，客户端可填别人的 openid（默认关闭）
 
-H5 路由（`/wxpay_order_h5`）是唯一例外：H5 没有平台注入的身份头，身份来自自建 OAuth 的 `body.payer.openid`，**该值客户端可伪造**，这一层只做 Origin 白名单。生产必须换成服务端 session 校验。
+**Bearer 分支的边界**：函数内不验签（没有公钥），只校验 payload 内容——必须含 `sub` / `provider_sub`、`exp` 未过期、`iss` 符合预期（配了 `AUTH_EXPECTED_ISSUER` 才校验）。所以：
 
-实现见 `middleware/auth.js`，回归测试见 `tests/auth.test.js`。
+1. 支付写接口（`/wxpay_order`、`/wxpay_refund`、`/wxpay_transfer`、`/wxpay_close_order` 等）要求 payload 里有 `provider_sub`（微信 openid）；只有 `sub`（CloudBase UID）的 token 直接 401 —— 放行后取不到 openid 只会在参数校验层变成「参数错误」，把未授权误报成参数问题。
+2. **必须确认前置网关强制验签，且禁止公网直连函数端口。** Dockerfile 暴露的 80 端口只允许网关 / 容器内网访问；公网直连时任何人都能伪造 Bearer 与 `x-wx-openid`。
+
+**放行契约**（两个中间件口径一致，不存在「放行但取不到身份」）：
+
+| 中间件 | 放行条件 | 放行后取身份 |
+|---|---|---|
+| `payMiddleware` | 必须有 openid | `getOpenId(req)` |
+| `h5SecurityMiddleware` | openid 或 UID 任一非空 | 有 openid 用 `getOpenId(req)`，只有 UID 用 `getUid(req)` |
+
+H5 是唯一允许「只有 UID」的路由：H5（MWEB）常在微信外浏览器发起，CloudBase Auth 凭证只有 `sub`、没有 `provider_sub`。这类订单的归属按 UID 记录（`payController.unifiedOrderH5` 把 `{ openid, uid }` 透传给 `orderService.handlerUnified`），控制器不依赖 openid 落库。
+
+### H5 路由（`/wxpay_order_h5`）
+
+H5 拿不到平台注入的 `x-wx-openid`，只靠 Origin 白名单是不够的——浏览器同源 POST 可能不带 `Origin`，跨站请求也拿不到本站 token。因此该路由三件事缺一不可：
+
+| 检查 | 不通过的结果 | 说明 |
+|---|---|---|
+| `corsAllowOrigin` 已配置 | 403 | 没配白名单 = 不知道该信谁，不静默放行 |
+| `Origin` / `Referer` 在白名单内 | 403 | 两者都没有 → 拒绝（Referer 只作 Origin 缺失时的兜底） |
+| 登录态（Bearer / `x-wx-openid`） | 401 | 跨站伪造请求拿不到 token，即 CSRF 防护；微信外浏览器登录只有 UID（无 openid）也算已登录，订单归属按 UID 记 |
+
+相关环境变量（**默认都是关闭/拒绝**，只在明确知道后果时开启）：
+
+| 变量 | 默认 | 作用 |
+|---|---|---|
+| `corsAllowOrigin` | 空 | H5 来源白名单，逗号分隔；为空则 H5 路由直接 403 |
+| `ALLOW_ANONYMOUS_H5` | 关 | `true` 时允许未登录调用 H5 下单（仅本地联调） |
+| `ALLOW_BODY_OPENID` | 关 | `true` **且**已配 `corsAllowOrigin` 时，才允许从 `body.payer.openid` 取身份（演示用，生产禁止） |
+| `AUTH_EXPECTED_ISSUER` | 空 | 配了就强校验 JWT 的 `iss` |
+
+实现见 `middleware/auth.js` / `utils/cloudbaseAuth.js`，回归测试见 `tests/auth.test.js`。
 
 ---
 
@@ -574,6 +606,10 @@ H5 路由（`/wxpay_order_h5`）是唯一例外：H5 没有平台注入的身份
 | `scene_info.payer_client_ip` | string | ✅ | 用户客户端 IP |
 | `scene_info.h5_info` | object | ✅ | H5 信息，`{ type: 'Wap', wap_url: 'https://...', wap_name: '网页名称' }` |
 | `notify_url` | string | ❌ | 支付回调 URL |
+
+> ⚠️ H5 支付本身不需要 `payer.openid`。若请求里带了 `payer.openid`，**必须与登录身份一致**，
+> 没有登录身份时该字段会被后端直接丢弃 —— 不允许客户端自己指定「我是谁」。
+> 调用方需带 `Authorization: Bearer <CloudBase Auth token>`，并在服务端配置 `corsAllowOrigin`。
 
 **出参**（成功）：
 
