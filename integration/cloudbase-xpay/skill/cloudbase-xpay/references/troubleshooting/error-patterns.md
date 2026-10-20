@@ -47,6 +47,7 @@
 | 集成中心上线后回调「没反应」，日志只有一条 error | 网关 `POST /wechat/notify` 的明文包在 `ParsedNotify` 里，业务只认 `ParsedContent` → 判「缺 Event」→ 回 `ErrCode=0` → 不重推 | 取 `Event` 时两种包装都认（`ParsedContent \|\| ParsedNotify \|\| body`）；排查看 `has_parsed_notify` |
 | 网关明文回调被 401 拒绝 | 未声明 `notifyUrlCallbackType=system`，fail-closed 走本函数验签，而网关转发不带 `signature` | 集成配置声明 `system`；确认启动日志 `[Callback] 判定: 网关代验签` |
 | 任意用户能查他人订单 | `query_order` 只校验了身份（code2Session），没校验订单归属 | 归属校验放在 code2Session 之后，用**权威 sessionOpenid** 比对（不是请求头）；生产按 `openid` 维度查库 |
+| 服务端带 Bearer access_token 调用，取不到 openid | 模板默认不采信未验签的 JWT（payload 可 base64 伪造） | 确认云函数**只经云 API 网关暴露**后设 `trustBearerIdentity=true`，才会从 `provider_sub` 取身份 |
 
 ## 配置
 
