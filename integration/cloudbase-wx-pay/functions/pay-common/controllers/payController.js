@@ -292,80 +292,13 @@ exports.queryTransferBillByNo = async (req, res) => {
 exports.transferTrigger = (req, res) => _handleCallback(req, res, payService.handleTransferCallback, 'transferTrigger');
 
 // ========== 鉴权中间件 ==========
+//
+// 实现在 middleware/auth.js：独立文件，不依赖 service → wechatpay-node-v3，
+// 便于单独跑鉴权回归测试。
 
-const { parseCloudBaseAuth } = require('../utils/cloudbaseAuth');
+const { payMiddleware, h5SecurityMiddleware } = require('../middleware/auth');
 
-/**
- * 鉴权中间件
- * 兼容多种部署方式：云 API 网关、集成中心网关、HTTP 云函数、云托管、本地开发
- */
-exports.payMiddleware = (req, res, next) => {
-    // ⚠️ 开发环境提示（不跳过鉴权，仅打印日志辅助排查）
-    if (process.env.NODE_ENV === 'development') {
-        console.warn('[鉴权] 开发环境 — 鉴权仍然生效，如需测试请携带有效 header（Bearer token / X-WX-SOURCE 等）');
-    }
-
-    // 云 API 网关模式：请求带有 Bearer token（CloudBase Auth accessToken）
-    // 网关已验证 token 有效性，这里解析 JWT 获取用户信息
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-        const authInfo = parseCloudBaseAuth(req);
-        if (authInfo) {
-            req.cloudbaseAuth = authInfo;
-            return next();
-        }
-    }
-
-    // 集成中心网关模式
-    // 安全前提：集成中心网关会剥离客户端传入的 x-tcb-integration-id，仅网关自身注入
-    if (req.headers['x-tcb-integration-id']) {
-        return next();
-    }
-
-    // 云托管模式（callContainer）
-    // 安全前提：云托管入口会剥离客户端传入的 X-WX-SOURCE / X-Authmethod
-    const authMethod = req.headers['x-authmethod'] || req.headers['X-Authmethod'];
-    const wxSource = req.headers['x-wx-source'];
-    if (wxSource === 'wx_devtools' || wxSource === 'wx_client' || authMethod === 'WX_SERVER_AUTH') {
-        return next();
-    }
-
-    // HTTP 云函数模式
-    // 安全前提：这些环境变量仅存在于 SCF 运行时，外部无法伪造
-    if (process.env.TENCENTCLOUD_RUNENV || process.env.SCF_RUNTIME) {
-        return next();
-    }
-
-    res.status(401).json({ code: -1, msg: '未授权访问' });
-};
-
-/**
- * H5 安全中间件
- * 先走 payMiddleware 鉴权，再做 H5 特有的安全校验（Origin 白名单等）
- */
-exports.h5SecurityMiddleware = (req, res, next) => {
-    // 先经过通用鉴权
-    exports.payMiddleware(req, res, (err) => {
-        if (err) return next(err);
-
-        // H5 Origin 白名单校验（微信支付安全规范要求）
-        // 从环境变量 corsAllowOrigin 读取（与 app.js CORS 中间件共用同一配置）
-        const allowedOrigins = process.env.corsAllowOrigin
-            ? process.env.corsAllowOrigin.split(',').map(s => s.trim())
-            : [];
-        const origin = req.headers.origin;
-
-        if (origin && allowedOrigins.length > 0 && !allowedOrigins.includes(origin)) {
-            console.warn('[H5Security] Origin 被拒绝:', origin, '白名单:', allowedOrigins);
-            return res.status(403).json({ code: -1, msg: 'Origin 不在白名单内' });
-        }
-
-        // 如果未配置白名单（allowedOrigins 为空），放行并打印警告
-        if (allowedOrigins.length === 0 && origin) {
-            console.warn('[H5Security] ⚠️ 未配置 Origin 白名单，所有来源均放行。建议设置环境变量 corsAllowOrigin');
-        }
-
-        next();
-    });
-};
+exports.payMiddleware = payMiddleware;
+exports.h5SecurityMiddleware = h5SecurityMiddleware;
 
 

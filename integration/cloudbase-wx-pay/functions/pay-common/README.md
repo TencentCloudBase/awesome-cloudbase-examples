@@ -489,6 +489,24 @@ async handlerUnifiedTrigger(params) {
 | `/refundTrigger` | POST | 退款回调通知 |
 | `/transferTrigger` | POST | 商家转账回调通知 |
 
+### 鉴权模型
+
+业务路由（上表中标注中间件的）只认两个身份来源，其余一律 401：
+
+| 来源 | 谁注入 | 前提 |
+|---|---|---|
+| `x-wx-openid` | `wx.cloud.callHTTPFunction` / `callContainer` 的平台网关 | 请求确实经过平台网关 |
+| `Authorization: Bearer <JWT>` | 云 API 网关（已验签） | 网关验签后才转发，函数内只解码 |
+
+> 🚨 以下来源**不能**作为鉴权依据，代码里已全部删除：
+> - `x-tcb-integration-id` 等自定义 header：客户端可任意添加
+> - `x-wx-source` / `x-authmethod`：同样是可伪造的普通 header（虽然平台会注入，但直连时客户端也能塞）
+> - `TENCENTCLOUD_RUNENV` / `SCF_RUNTIME`：云函数内**恒存在**，放行等于中间件无条件通过
+
+H5 路由（`/wxpay_order_h5`）是唯一例外：H5 没有平台注入的身份头，身份来自自建 OAuth 的 `body.payer.openid`，**该值客户端可伪造**，这一层只做 Origin 白名单。生产必须换成服务端 session 校验。
+
+实现见 `middleware/auth.js`，回归测试见 `tests/auth.test.js`。
+
 ---
 
 ## API 文档（入参/出参）
