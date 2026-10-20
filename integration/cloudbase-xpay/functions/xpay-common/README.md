@@ -209,6 +209,33 @@ wx.login({
 | `xpay_wxpay_callback_notify` | 记录风控，按需申诉 |
 | `xpay_subscribe_ios_refund_query_notify` | 3 秒内应答退款决策 |
 
+### 发货所需字段
+
+`handleCallback` 的返回值里带了 `goods`，业务侧不必自己再解析一遍推送结构：
+
+```js
+{
+  ok: true,
+  eventType: 'xpay_goods_deliver_notify',
+  biz: 'deliver',
+  outTradeNo: 'ORDER20261020001',
+  wxOrderId: 'WXORDER...',
+  openid: 'o_xxx',
+  goods: {
+    productId: 'goods_001',   // 发哪件道具（GoodsInfo.ProductId / XML 平铺的 ProductId）
+    quantity: 2,              // 发几个（缺失或非法时按 1，不整单失败）
+    attach: 'uid=123',        // 下单时透传的业务数据
+  },
+}
+```
+
+> ⚠️ 只拿到 `outTradeNo` 是发不了货的 —— 不知道该发哪件、几个。这三个字段此前没有解析，是发货链路的必要条件。
+> `quantity` 缺失时按 1 发放：宁可少发触发对账告警，也不能因解析异常导致整单不发货。
+
+### 兜底查单建议
+
+推送可能丢失（微信重推 15 次仍失败、网关抖动）。建议用**定时触发器每 5 分钟**调一次 `/xpay/query_order`，查到已支付就补发货 —— 模板只提供接口，定时任务需自行配置。
+
 ## 集成边界（改造时绕开）
 
 - **云函数随机串不可改** —— 与回调域名子域、内置环境变量绑定，改名即断回调

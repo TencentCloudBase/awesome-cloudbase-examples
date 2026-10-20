@@ -284,6 +284,24 @@ class XpayService {
         const eventType = event?.Event || event?.event;
         const outTradeNo = event?.OutTradeNo || event?.out_trade_no;
 
+        // 发货所需：发什么（ProductId）、发多少（Quantity）、透传数据（Attach）
+        //
+        // ⚠️ 这是发货链路的必要输入：只拿到 outTradeNo 无法知道该发哪件道具、几个。
+        //    三种形态都要认（XML 推送时 xmlToObject 只做一层提取，嵌套字段会被平铺）：
+        //      ① JSON 推送：GoodsInfo.ProductId / GoodsInfo.Quantity（官方形态）
+        //      ② XML 推送：ProductId / Quantity 被平铺到顶层
+        //      ③ 商家透传：attach（下单时传入，原样返回）
+        const goodsInfo = event?.GoodsInfo || {};
+        const productId = goodsInfo.ProductId || goodsInfo.productId
+            || event?.ProductId || event?.product_id || null;
+        const rawQuantity = goodsInfo.Quantity ?? goodsInfo.quantity
+            ?? event?.Quantity ?? event?.quantity;
+        // 数量缺失或非法时按 1 发：宁可少发触发对账告警，也不能因解析异常整单不发货
+        const quantity = Number.isInteger(Number(rawQuantity)) && Number(rawQuantity) > 0
+            ? Number(rawQuantity)
+            : 1;
+        const attach = event?.Attach ?? event?.attach ?? null;
+
         // 平台单号（wx_order_id）：官方口径以它做幂等去重，比商家单号权威
         // 三种形态都要认：
         //   ① JSON 推送：WeChatPayInfo.MchOrderNo（嵌套）
@@ -346,9 +364,10 @@ class XpayService {
 
         // 业务处理：抛错则原样冒泡，由 controller 返回非 0 触发微信重推
         // TODO(业务侧)：在此对接自己的订单表与道具/代币余额
-        //   1. deliver  → 幂等发货，并可选调 /xpay/notify_provide_goods 通知完成
-        //   2. coin     → 更新代币余额
-        //   3. refund   → 更新订单状态 + 回收道具
+        //   1. deliver  → 按 goods.productId + goods.quantity 幂等发货，
+        //                 并可选调 /xpay/notify_provide_goods 通知完成
+        //   2. coin     → 更新代币余额（数量见 goods.quantity）
+        //   3. refund   → 更新订单状态 + 按 goods 回收道具
         //   4. complaint→ 记录投诉，人工跟进
         //   5. risk     → 记录风控事件，按需申诉
         switch (semantic.biz) {
@@ -377,6 +396,12 @@ class XpayService {
             outTradeNo,
             wxOrderId,
             openid: event?.OpenId || event?.openid,
+            // 发货所需：发什么 / 发多少 / 透传数据
+            goods: {
+                productId,
+                quantity,
+                attach,
+            },
         };
     }
 

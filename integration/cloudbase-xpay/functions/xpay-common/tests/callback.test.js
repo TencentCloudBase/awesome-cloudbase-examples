@@ -38,6 +38,54 @@ test('发货事件：解析为 deliver 语义并更新订单状态', async () =>
     assert.strictEqual(result.openid, 'o_user_001');
 });
 
+// ---------- 发货字段（官方口径：GoodsInfo.ProductId / GoodsInfo.Quantity） ----------
+//
+// 只拿到 outTradeNo 无法发货：不知道发哪件道具、发几个。
+
+test('发货字段：JSON 推送的嵌套 GoodsInfo 被正确解析', async () => {
+    const s = svc();
+    const result = await s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020001', {
+        GoodsInfo: { ProductId: 'goods_001', Quantity: 3 },
+    }));
+
+    assert.strictEqual(result.goods.productId, 'goods_001');
+    assert.strictEqual(result.goods.quantity, 3);
+});
+
+test('发货字段：XML 推送平铺到顶层的 ProductId / Quantity 也要认', async () => {
+    const s = svc();
+    const result = await s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020002', {
+        ProductId: 'goods_002',
+        Quantity: '2',
+    }));
+
+    assert.strictEqual(result.goods.productId, 'goods_002');
+    assert.strictEqual(result.goods.quantity, 2, '字符串数量要转成数字');
+});
+
+test('发货字段：数量缺失或非法时按 1 发放，不整单失败', async () => {
+    const s = svc();
+    const noQty = await s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020003', {
+        GoodsInfo: { ProductId: 'goods_001' },
+    }));
+    const badQty = await s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020004', {
+        GoodsInfo: { ProductId: 'goods_001', Quantity: 'abc' },
+    }));
+
+    assert.strictEqual(noQty.goods.quantity, 1);
+    assert.strictEqual(badQty.goods.quantity, 1);
+});
+
+test('发货字段：attach 原样透传（下单时传入的业务数据）', async () => {
+    const s = svc();
+    const result = await s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020005', {
+        GoodsInfo: { ProductId: 'goods_001', Quantity: 1 },
+        Attach: 'uid=123',
+    }));
+
+    assert.strictEqual(result.goods.attach, 'uid=123');
+});
+
 test('幂等：同一 OutTradeNo 重复投递被忽略', async () => {
     const s = svc();
     const body = makeEvent('xpay_goods_deliver_notify', 'DUP20261014001');

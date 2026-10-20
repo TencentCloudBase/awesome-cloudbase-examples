@@ -9,6 +9,26 @@
 
 模板示例用内存 `Set` 去重，**但云函数冷启动会丢失内存状态**，生产环境必须落库。
 
+## 发货需要的三个字段
+
+`outTradeNo` 只回答「哪一单」，**发不了货**。必须从推送里再取三个字段：
+
+| 字段 | 官方路径 | XML 平铺 | 用途 |
+|---|---|---|---|
+| 道具 ID | `GoodsInfo.ProductId` | `ProductId` | 发哪件 |
+| 数量 | `GoodsInfo.Quantity` | `Quantity` | 发几个（**按数量发放，不是发一个**） |
+| 透传数据 | `Attach` | `Attach` | 下单时传入的 `attach` 原样返回，可带 uid / SKU |
+
+模板已在 `handleCallback` 里解析好，业务侧直接用：
+
+```js
+const result = await xpayService.handleCallback(body);
+result.goods; // { productId: 'goods_001', quantity: 2, attach: 'uid=123' }
+```
+
+> ⚠️ 数量缺失或非法时按 **1** 发放。宁可少发触发对账告警，也不能因一个字段畸形导致整单不发货
+> —— 微信重推 15 次后照样丢单，而且日志里只有一条解析错误。
+
 ## 幂等键：平台单号优先
 
 ```js
