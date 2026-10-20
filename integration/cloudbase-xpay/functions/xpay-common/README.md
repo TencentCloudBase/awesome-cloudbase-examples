@@ -224,14 +224,25 @@ wx.login({
   openid: 'o_xxx',
   goods: {
     productId: 'goods_001',   // 发哪件道具（GoodsInfo.ProductId / XML 平铺的 ProductId）
-    quantity: 2,              // 发几个（缺失或非法时按 1，不整单失败）
+    quantity: 2,              // 发几个
     attach: 'uid=123',        // 下单时透传的业务数据
   },
+  goodsValid: true,           // false = 商品信息不全（如 Quantity 缺失按 1 兜底），需走对账
+  missingFields: [],          // 缺了哪些字段
 }
 ```
 
 > ⚠️ 只拿到 `outTradeNo` 是发不了货的 —— 不知道该发哪件、几个。这三个字段此前没有解析，是发货链路的必要条件。
-> `quantity` 缺失时按 1 发放：宁可少发触发对账告警，也不能因解析异常导致整单不发货。
+
+**商品信息不全时的处理口径**（不能一律回 `ok: true`，否则微信不再重推 → 订单永久丢发货且无错误信号）：
+
+| 事件 | 缺 `ProductId` | `Quantity` 缺失 | `Quantity` 非法（0 / 小数 / "2 个"） |
+|---|---|---|---|
+| `xpay_goods_deliver_notify` | 标记订单 `GOODS_MISSING` + 抛 `nonRetryable`（重推也补不上） | 按 **1** 发放，返回 `goodsValid: false` | **抛错**（可重试）：绝不静默改成 1，否则「买了 5 件只发 1 件」是无感知资损 |
+| `xpay_coin_pay_notify` / `xpay_refund_notify` | 状态照常流转，记 error 日志 + `missingFields`，走对账 | 同上（`goods.quantity` 按 **1** 兜底） | 状态照常流转 + 记 error 日志 + `goodsValid: false` / `missingFields: ['Quantity']`，`goods.quantity` 返回 **null**（不静默按 1：买了 5 个代币只入账 1 个 = 无感知资损），走对账 |
+
+> `GOODS_MISSING` 不在「权益已发放」状态集合里 —— iOS 退款问询遇到它会放过退款（权益确实没发出去）。
+> 生产环境要做的：把这些异常订单落库，并加定时对账任务扫描 `GOODS_MISSING` 与 `goodsValid: false` 的事件。
 
 ### 兜底查单建议
 

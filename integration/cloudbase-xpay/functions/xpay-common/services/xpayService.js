@@ -34,6 +34,47 @@ const MAX_TRACKED_ORDERS = 5000;
 const ENTITLEMENT_GRANTED_STATES = new Set(['DELIVERED', 'COIN_PAID', 'REFUNDED']);
 
 /**
+ * 「权益已发放」之外的异常状态：发不出货、等人工对账
+ *
+ * 不在 ENTITLEMENT_GRANTED_STATES 里 —— iOS 退款问询遇到它应放过退款（权益没发出去）。
+ */
+const GOODS_MISSING_STATE = 'GOODS_MISSING';
+
+/**
+ * 缺少商品信息就**无法发货**的业务语义
+ * 这类事件缺 productId 时必须显式失败：回 ok:true 会让微信停止重推 → 订单永久丢发货且无感知
+ */
+const GOODS_REQUIRED_BIZ = new Set(['deliver']);
+
+/**
+ * 商品信息用于「发/收什么」但不阻断状态流转的业务语义（退款状态必须先更新）
+ * 缺失时不阻断，但仍要记 error 日志 + 在返回体里标记，供对账发现
+ */
+const GOODS_RELEVANT_BIZ = new Set(['coin', 'refund']);
+
+/**
+ * 解析发货数量
+ *
+ * ⚠️ 必须区分两种情形：
+ *   - 字段缺失 → 按 1 发放（微信不会再推一次，这是唯一能拿到的信息）
+ *   - 字段存在但非法 → **不能静默改成 1**：用户买了 5 件只发 1 件 = 资损，
+ *     而且应答 ok:true 不会触发重推，也不会进对账，事后无从发现
+ *
+ * @param {*} raw - 推送里的 Quantity（可能是 number / string / 垃圾值）
+ * @returns {{value: number|null, valid: boolean, missing: boolean}}
+ */
+function parseQuantity(raw) {
+    if (raw === undefined || raw === null || raw === '') {
+        return { value: 1, valid: true, missing: true };
+    }
+    const num = Number(raw);
+    if (typeof raw === 'boolean' || !Number.isInteger(num) || num <= 0) {
+        return { value: null, valid: false, missing: false };
+    }
+    return { value: num, valid: true, missing: false };
+}
+
+/**
  * 6 类回调事件 → 业务语义
  * 与微信支付普通回调（TRANSACTION.SUCCESS 等）完全不同，走的是小程序消息推送通道
  */
@@ -296,10 +337,7 @@ class XpayService {
             || event?.ProductId || event?.product_id || null;
         const rawQuantity = goodsInfo.Quantity ?? goodsInfo.quantity
             ?? event?.Quantity ?? event?.quantity;
-        // 数量缺失或非法时按 1 发：宁可少发触发对账告警，也不能因解析异常整单不发货
-        const quantity = Number.isInteger(Number(rawQuantity)) && Number(rawQuantity) > 0
-            ? Number(rawQuantity)
-            : 1;
+        const quantityInfo = parseQuantity(rawQuantity);
         const attach = event?.Attach ?? event?.attach ?? null;
 
         // 平台单号（wx_order_id）：官方口径以它做幂等去重，比商家单号权威
@@ -326,6 +364,63 @@ class XpayService {
         }
 
         console.info(`[XpayService] 事件 ${eventType} → ${semantic.desc}`);
+
+        // ========== 商品信息可用性校验 ==========
+        //
+        // ⚠️ 只拿到 outTradeNo 发不了货：不知道发哪件道具、发几个。
+        //    以前是「缺什么都兜底、一律回 ok:true」，结果是微信不再重推、
+        //    订单永久丢发货，日志里连一条错误都没有。这里改成显式失败 + 标记异常。
+        const goodsChecked = GOODS_REQUIRED_BIZ.has(semantic.biz)
+            || GOODS_RELEVANT_BIZ.has(semantic.biz);
+        const missingFields = [];
+        // ⚠️ 非法（0 / 小数 / "2 个"）与缺失一样要留痕。
+        //    只记缺失的话，非法值既进不了 missingFields、也不抛错，
+        //    末尾被静默兜底成 1，还对外宣称 goodsValid: true
+        //    → 买了 5 个代币只入账 1 个，对账扫不到、微信也不重推。
+        const quantityInvalid = goodsChecked && !quantityInfo.valid;
+        if (goodsChecked) {
+            if (!productId) missingFields.push('ProductId');
+            if (quantityInfo.missing || quantityInvalid) missingFields.push('Quantity');
+        }
+
+        if (GOODS_REQUIRED_BIZ.has(semantic.biz)) {
+            if (missingFields.includes('ProductId')) {
+                // 标记异常订单：对账任务扫这个状态就能发现「钱收了、货没发」
+                this._updateOrderState(outTradeNo, GOODS_MISSING_STATE);
+                console.error('[XpayService] 🚨 回调缺少 ProductId，无法发货，已标记异常订单待人工对账:', {
+                    eventType, outTradeNo, wxOrderId, productId, missingFields,
+                });
+                const err = new Error(`回调缺少发货信息: ${missingFields.join(', ')}`);
+                err.missingFields = missingFields;
+                // 结构性缺失：重推也不会补上字段，避免微信 15 次无效重推
+                err.nonRetryable = true;
+                throw err;
+            }
+
+            if (!quantityInfo.valid) {
+                console.error('[XpayService] 🚨 回调 Quantity 非法，拒绝按默认值 1 发货:', {
+                    eventType, outTradeNo, wxOrderId, rawQuantity,
+                });
+                const err = new Error(
+                    `回调 Quantity 非法: ${String(rawQuantity)}，需为正整数`
+                );
+                // 静默改成 1 会让「买了 5 件只发 1 件」变成无感知资损，宁可交给微信重推
+                throw err;
+            }
+        } else if (GOODS_RELEVANT_BIZ.has(semantic.biz)) {
+            if (quantityInvalid) {
+                // 退款/代币：状态流转必须完成（否则钱退了订单还是已发货），
+                // 但数量不可信 —— 绝不能按 1 入账/回收，必须留痕交给对账
+                console.error('[XpayService] 🚨 回调 Quantity 非法，代币/回收数量不可信，请走对账:', {
+                    eventType, outTradeNo, wxOrderId, productId, rawQuantity,
+                });
+            } else if (missingFields.length > 0) {
+                // 商品信息缺失要留痕，让业务侧走对账确认「回收/发放了什么」
+                console.error('[XpayService] 🚨 回调商品信息不完整（不影响状态流转，请走对账）:', {
+                    eventType, outTradeNo, wxOrderId, productId, rawQuantity, missingFields,
+                });
+            }
+        }
 
         // iOS 退款问询：必须 3 秒内应答，且要带决策凭据
         if (semantic.quickResponse) {
@@ -399,9 +494,17 @@ class XpayService {
             // 发货所需：发什么 / 发多少 / 透传数据
             goods: {
                 productId,
-                quantity,
+                // 缺失 → 按 1 兜底（微信不会再推一次，这是唯一能拿到的信息）；
+                // 非法 → null：**不静默改成 1**，业务侧按 goodsValid:false 走对账
+                quantity: quantityInfo.valid
+                    ? quantityInfo.value
+                    : (quantityInfo.missing ? 1 : null),
                 attach,
             },
+            // 商品信息是否可信：false = 数量缺失按 1 兜底、或数量非法（quantity 为 null），
+            // 业务侧应走对账确认
+            goodsValid: missingFields.length === 0,
+            missingFields,
         };
     }
 
@@ -481,3 +584,5 @@ module.exports.XPAY_EVENTS = XPAY_EVENTS;
 module.exports.checkOrderOwnership = checkOrderOwnership;
 module.exports.MAX_TRACKED_EVENTS = MAX_TRACKED_EVENTS;
 module.exports.MAX_TRACKED_ORDERS = MAX_TRACKED_ORDERS;
+module.exports.GOODS_MISSING_STATE = GOODS_MISSING_STATE;
+module.exports.parseQuantity = parseQuantity;

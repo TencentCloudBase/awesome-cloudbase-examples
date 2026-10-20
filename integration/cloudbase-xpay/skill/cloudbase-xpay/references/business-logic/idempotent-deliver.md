@@ -26,8 +26,27 @@ const result = await xpayService.handleCallback(body);
 result.goods; // { productId: 'goods_001', quantity: 2, attach: 'uid=123' }
 ```
 
-> ⚠️ 数量缺失或非法时按 **1** 发放。宁可少发触发对账告警，也不能因一个字段畸形导致整单不发货
-> —— 微信重推 15 次后照样丢单，而且日志里只有一条解析错误。
+### 商品信息不全时的口径
+
+「缺什么都兜底、一律回 `ok: true`」是最坏的组合：微信不再重推、订单永久丢发货，日志里连一条错误都没有。现在的处理是：
+
+| 情形 | 处理 |
+|---|---|
+| `ProductId` 缺失（发货事件） | 标记订单 `GOODS_MISSING` + 抛 `nonRetryable`：重推也补不上字段，但异常订单留在库里等对账 |
+| `Quantity` **字段缺失** | 按 **1** 发放，返回 `goodsValid: false` / `missingFields: ['Quantity']` |
+| `Quantity` **存在但非法**（0 / 1.5 / "2 个"） | 发货事件**抛错触发微信重推**：静默改成 1 = 用户买了 5 件只发 1 件，钱已收、货少发，还没有任何告警 |
+| 退款 / 代币事件缺商品信息 | 状态照常流转（退款状态不更新是更大资损）+ 记 error 日志 + `missingFields`，走对账 |
+| 退款 / 代币事件 `Quantity` **非法** | 状态照常流转 + 记 error 日志 + `goodsValid: false` / `missingFields: ['Quantity']`，`goods.quantity` 为 **null**（不静默按 1），走对账 |
+
+业务侧拿到结果后应判断：
+
+```js
+const result = await xpayService.handleCallback(body);
+if (!result.goodsValid) {
+  // 商品信息不全：落异常表 / 告警，人工对账确认「该发什么、发几个」
+  reportAnomaly(result.outTradeNo, result.wxOrderId, result.missingFields);
+}
+```
 
 ## 幂等键：平台单号优先
 

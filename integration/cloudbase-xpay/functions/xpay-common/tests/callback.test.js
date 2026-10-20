@@ -8,7 +8,11 @@ process.env.appId = 'wx_test_appid';
 process.env.secret = 'test_secret';
 
 const XpayService = require('../services/xpayService');
-const { MAX_TRACKED_EVENTS } = require('../services/xpayService');
+const {
+    MAX_TRACKED_EVENTS,
+    GOODS_MISSING_STATE,
+    parseQuantity,
+} = require('../services/xpayService');
 
 function svc() {
     // 每个用例独立实例：幂等集合是实例级的
@@ -25,6 +29,8 @@ function makeEvent(event, outTradeNo, extra = {}) {
         OpenId: 'o_user_001',
         OutTradeNo: outTradeNo,
         Env: 0,
+        // 默认带发货信息：真实推送里发货事件一定带 GoodsInfo
+        GoodsInfo: { ProductId: 'goods_default', Quantity: 1 },
         ...extra,
     };
 }
@@ -55,6 +61,8 @@ test('发货字段：JSON 推送的嵌套 GoodsInfo 被正确解析', async () =
 test('发货字段：XML 推送平铺到顶层的 ProductId / Quantity 也要认', async () => {
     const s = svc();
     const result = await s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020002', {
+        // XML 形态：没有嵌套 GoodsInfo，字段被平铺到顶层
+        GoodsInfo: {},
         ProductId: 'goods_002',
         Quantity: '2',
     }));
@@ -63,17 +71,105 @@ test('发货字段：XML 推送平铺到顶层的 ProductId / Quantity 也要认
     assert.strictEqual(result.goods.quantity, 2, '字符串数量要转成数字');
 });
 
-test('发货字段：数量缺失或非法时按 1 发放，不整单失败', async () => {
+test('发货字段：数量字段缺失时按 1 发放，并在返回体里标记待对账', async () => {
     const s = svc();
     const noQty = await s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020003', {
         GoodsInfo: { ProductId: 'goods_001' },
     }));
-    const badQty = await s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020004', {
-        GoodsInfo: { ProductId: 'goods_001', Quantity: 'abc' },
+
+    assert.strictEqual(noQty.goods.quantity, 1, '字段完全缺失时按 1 兜底');
+    assert.strictEqual(noQty.goodsValid, false, '必须让业务侧知道数量是兜底来的');
+    assert.deepStrictEqual(noQty.missingFields, ['Quantity']);
+});
+
+test('⚠️ 发货字段：数量非法时抛错（不能静默改成 1 造成少发货资损）', async () => {
+    const s = svc();
+    const badCases = ['abc', '2 个', 1.5, 0, -3, {}];
+
+    for (const raw of badCases) {
+        await assert.rejects(
+            () => s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'GOODS20261020004', {
+                GoodsInfo: { ProductId: 'goods_001', Quantity: raw },
+            })),
+            (err) => {
+                assert.ok(/Quantity 非法/.test(err.message), `Quantity=${JSON.stringify(raw)} 应被拒绝`);
+                assert.strictEqual(err.nonRetryable, undefined, '形态问题交给微信重推，不是结构性错误');
+                return true;
+            }
+        );
+    }
+});
+
+test('⚠️ 发货字段：缺少 ProductId 时抛 nonRetryable，并标记异常订单待对账', async () => {
+    const s = svc();
+    const tradeNo = 'NOPRODUCT20261020001';
+
+    await assert.rejects(
+        () => s.handleCallback(makeEvent('xpay_goods_deliver_notify', tradeNo, {
+            GoodsInfo: { Quantity: 2 },
+        })),
+        (err) => {
+            assert.strictEqual(err.nonRetryable, true, '重推也补不上字段，不要刷 15 次');
+            assert.deepStrictEqual(err.missingFields, ['ProductId']);
+            return true;
+        }
+    );
+
+    // 必须留下「钱收了、货没发」的痕迹，供对账任务扫描
+    assert.strictEqual(s.orders.get(tradeNo)?.state, GOODS_MISSING_STATE);
+});
+
+test('退款事件：商品信息缺失也要更新状态，但标记 missingFields 供对账', async () => {
+    const s = svc();
+    const result = await s.handleCallback(makeEvent('xpay_refund_notify', 'REFUND20261020001', {
+        GoodsInfo: {},
     }));
 
-    assert.strictEqual(noQty.goods.quantity, 1);
-    assert.strictEqual(badQty.goods.quantity, 1);
+    // 退款状态必须流转（钱已退、订单还写着已发货 = 更大资损）
+    assert.strictEqual(result.biz, 'refund');
+    assert.strictEqual(s.orders.get('REFUND20261020001')?.state, 'REFUNDED');
+    // 但「回收了什么」不知道，要留痕
+    assert.strictEqual(result.goodsValid, false);
+    assert.deepStrictEqual(result.missingFields, ['ProductId', 'Quantity']);
+});
+
+// 代币 / 退款事件此前对「Quantity 非法」完全漏判：missingFields 只记缺失、不记非法，
+// 于是 missingFields 为空 → 既不记 error 日志也不抛错，末尾又被 `valid ? value : 1`
+// 静默改成 1，还对外宣称 goodsValid: true（对账扫不到，微信也不重推）。
+test('⚠️ 退款事件：Quantity 非法时不能静默按 1 回收，须标记 goodsValid=false 供对账', async () => {
+    const s = svc();
+    const tradeNo = 'REFUND20261020002';
+    const result = await s.handleCallback(makeEvent('xpay_refund_notify', tradeNo, {
+        GoodsInfo: { ProductId: 'goods_001', Quantity: 1.5 },
+    }));
+
+    // 退款状态必须照常流转（钱已退、订单还写着已发货 = 更大资损）
+    assert.strictEqual(s.orders.get(tradeNo)?.state, 'REFUNDED');
+    // 但数量不可信：绝不能静默按 1 回收
+    assert.strictEqual(result.goods.quantity, null, '非法数量必须显式为 null，不能兜底成 1');
+    assert.strictEqual(result.goodsValid, false, '必须让对账任务扫到');
+    assert.deepStrictEqual(result.missingFields, ['Quantity']);
+});
+
+test('⚠️ 代币事件：Quantity 非法时不能静默入账 1 个代币', async () => {
+    const s = svc();
+    const result = await s.handleCallback(makeEvent('xpay_coin_pay_notify', 'COIN20261020002', {
+        GoodsInfo: { ProductId: 'coin_pack_001', Quantity: '2 个' },
+    }));
+
+    assert.strictEqual(s.orders.get('COIN20261020002')?.state, 'COIN_PAID');
+    assert.strictEqual(result.goods.quantity, null);
+    assert.strictEqual(result.goodsValid, false);
+    assert.deepStrictEqual(result.missingFields, ['Quantity']);
+});
+
+test('parseQuantity：区分缺失与非法', () => {
+    assert.deepStrictEqual(parseQuantity(undefined), { value: 1, valid: true, missing: true });
+    assert.deepStrictEqual(parseQuantity(''), { value: 1, valid: true, missing: true });
+    assert.deepStrictEqual(parseQuantity('5'), { value: 5, valid: true, missing: false });
+    assert.deepStrictEqual(parseQuantity(0), { value: null, valid: false, missing: false });
+    assert.deepStrictEqual(parseQuantity(1.5), { value: null, valid: false, missing: false });
+    assert.deepStrictEqual(parseQuantity('abc'), { value: null, valid: false, missing: false });
 });
 
 test('发货字段：attach 原样透传（下单时传入的业务数据）', async () => {
