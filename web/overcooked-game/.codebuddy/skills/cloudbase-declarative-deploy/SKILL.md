@@ -46,29 +46,57 @@ missing constraints (or to install the missing skill). Do **not** HTTP-fetch rem
 - In-app SDK integration (web/miniprogram/node) → the matching SDK skill.
 - Console UI operations.
 
-## Cloud mode
+## Cloud mode: deploy through the two-step upload channel
 
 `deployBuild` / `deployPlan` / `deployApply` in this skill are the **local-form declarative
-executor**. In cloud-hosted MCP mode these tools are intentionally not registered
-(filtered at tool registration), because that runtime has no local `cwd` /
-filesystem-bound execution path.
+executor**. In cloud-hosted MCP mode they are intentionally not registered, because that
+runtime has no local `cwd` and no filesystem-bound execution path.
 
-If you are in cloud mode and do not see `deployBuild` / `deployPlan` / `deployApply` in the
-tool list, this is expected behavior.
+This is an **execution-channel switch, not a capability gap**. Everything still deploys, but
+the artifact is uploaded first and the build runs in the cloud. If those three tools are
+missing from the tool list, that is expected — pick the channel that matches the resource.
 
-Use the cloud upload-channel path instead:
+### Cloud functions — two-phase zip
 
-1. `queryApps(action=getUploadUrl)` to get `uploadUrl`, `uploadHeaders`, `unixTimestamp`
-2. Upload source/build zip to `uploadUrl` with returned headers
-   - If cloud build requires private/offline dependencies, package `node_modules` explicitly
-   - For public dependencies, uploading `package.json` + lockfile is typically enough
+1. `queryFunctions(action=getFunctionUploadUrl, functionName?)` returns `uploadUrl`,
+   `uploadHeaders`, `cosBucketName`, `cosBucketRegion`, `cosObjectName`, `expiresInSeconds`
+2. `PUT` the function zip to `uploadUrl` with `uploadHeaders`
+3. `manageFunctions(action=createFunction|updateFunctionCode, code={cosBucketName,
+   cosObjectName, cosBucketRegion?})` — phase B deploys from the environment's own COS bucket
+   (`deployMode=cos`); pass the triple through unchanged, the schema is strict
+
+`contentPath` (a local directory) is rejected in cloud mode. For layer contents use
+`base64Content`; for code use the two-phase path above.
+
+### CloudApp — two-step upload plus a cloud pipeline
+
+1. `queryApps(action=getUploadUrl, serviceName=...)` returns `uploadUrl`, `uploadHeaders`,
+   `unixTimestamp`
+2. Upload the source/build zip to `uploadUrl` with the returned headers
+   (`Content-Type: application/zip`)
+   - Public dependencies resolvable from a lockfile: `package.json` plus lockfile is enough
+   - Private or offline dependencies: package `node_modules` explicitly
 3. `manageApps(action=deployApp, cosTimestamp=<unixTimestamp>, installCmd?, buildCmd?, deployCmd?)`
-   - `installCmd` / `buildCmd` / `deployCmd` are pipeline declarations executed in cloud container
-   - Agent passes data + declarations; it does not execute local shell commands
+   - `installCmd` / `buildCmd` / `deployCmd` are pipeline declarations executed in the cloud
+     container; you pass data and declarations, you do not run local shell commands
 
-Planned cloud declarative path (incremental roadmap): upload `cloudbaserc` as a data
-artifact, then run server-side plan/apply orchestration. `deployApply` remains the
-local-form executor of the same declarative spec.
+### Static hosting — route through CloudApp
+
+`manageHosting(action=upload)` is blocked in cloud mode because it needs a local path.
+Deploy a static site through the CloudApp two-step upload above (upload the prebuilt
+artifact, exclude `node_modules`). Uploading or downloading an already-hosted file has no
+remote substitute and needs local mode. The other hosting actions (`delete`,
+`setWebsiteDocument`, `enableService`, `bindDomain`, `unbindDomain`, `updateDomain`) remain
+available.
+
+### What cloud mode does not give you
+
+- **No dry-run.** There is no `deployPlan` against a local `cloudbaserc`. Do not claim a plan
+  was generated or reviewed in cloud mode; state what is about to be deployed and what the
+  upload contains. Roadmap: upload `cloudbaserc` as a data artifact, then run server-side
+  plan/apply orchestration.
+- **No local project context.** `mode` / `envOverrides` resolution from a project file does
+  not apply; pass the target environment explicitly.
 
 For parameter details, see `references/plan-and-apply.md` (`Cloud-hosted upload pipeline path`).
 

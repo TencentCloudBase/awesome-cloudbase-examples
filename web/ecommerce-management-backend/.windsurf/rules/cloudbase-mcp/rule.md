@@ -51,7 +51,17 @@ The hostname decides the site. Remote URLs do not take a `site` query parameter.
 - CI: add `env_id` and headers `X-TencentCloud-SecretId` / `X-TencentCloud-SecretKey`.
 - Local stdio for the international site: `TCB_SITE=intl` and `TCB_REGION=ap-singapore`.
 
-Remote mode cannot upload local files or download templates. The international site does not expose NoSQL tools.
+Pick the mode by these rules:
+
+- **Remote** — the default. Interactive sign-in (browser OAuth) plus anything that runs entirely in the cloud.
+- **Local** — when any one of these applies:
+  - the account signs in with a CloudBase API key (`CLOUDBASE_API_KEY`); remote has no API-key path, it accepts OAuth or Tencent Cloud SecretId/SecretKey only
+  - one session has to cover both the domestic and the international site; a remote URL is bound to a single site, while local switches with `TCB_SITE`
+  - the task needs a tool that remote does not register: `manageStorage` for uploading or downloading local files, `downloadTemplate`, `manageCloudRun`, or the declarative `deployBuild` / `deployPlan` / `deployApply` set
+
+**Deploying functions or apps does not require local mode.** Remote deploys through the two-step upload: `queryFunctions(action="getFunctionUploadUrl")` or `queryApps(action="getUploadUrl")` → `PUT` the zip → `manageFunctions` with the `code` triple or `manageApps(action="deployApp", cosTimestamp=…)`. What remote lacks is the declarative `cloudbaserc` executor and a dry-run before applying.
+
+The international site does not expose NoSQL tools in either mode.
 
 ## Calling tools with mcporter
 
