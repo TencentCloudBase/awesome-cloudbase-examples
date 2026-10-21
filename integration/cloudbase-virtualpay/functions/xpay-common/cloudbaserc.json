@@ -7,7 +7,7 @@
       "dir": "./",
       "type": "HTTP",
       "timeout": 30,
-      "runtime": "Nodejs18.15",
+      "runtime": "Nodejs24.11",
       "handler": "index.main",
       "memorySize": 256,
       "installDependency": true,

@@ -34,8 +34,19 @@ MP 后台 → 虚拟支付 → 基本配置：
 ```bash
 cd integration/cloudbase-virtualpay/functions/xpay-common
 npm install
-npm test        # 70 个单元测试
+npm test        # 109 个单元测试
 ```
+
+> ⚠️ 部署实测注意（2026-10）：
+> 1. `npm test` 必须是 glob 写法（`node --test tests/*.test.js`）；目录参数形式
+>    `node --test tests/` 在 Node 22+ 会把目录当模块路径，直接 `MODULE_NOT_FOUND`。
+> 2. HTTP 云函数 runtime 用 `Nodejs24.11`；`Nodejs18.15` 已被创建链路拒绝
+>    （SCF 报 `Unsupported runtime`）。
+> 3. 扩展连库等场景新增自定义环境变量时：`TCB_*` 前缀与 `NODE_ENV` 是**平台保留变量**，
+>    写入函数配置报 `Reserved environment variables cannot be modified`，请自定义前缀。
+>    且 HTTP(Web) 函数运行时**不会**自动注入 CloudBase 凭证（Event 函数才有），
+>    需显式配置环境 API Key / 密钥；`@cloudbase/node-sdk` v3 的 `init()` 为
+>    **平铺参数** `{ secretId, secretKey, sessionToken }`，嵌套 `credentials` 会被忽略。
 
 在云函数环境变量中配置（**不要写进代码**）：
 

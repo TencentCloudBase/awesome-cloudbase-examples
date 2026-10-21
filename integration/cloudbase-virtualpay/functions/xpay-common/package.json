@@ -4,11 +4,11 @@
   "private": true,
   "description": "小程序虚拟支付云函数模板：道具直购 / 代币支付，双签名下单 + 消息推送回调 + 幂等发货",
   "engines": {
-    "node": ">=16.0.0 <23.0.0"
+    "node": ">=16.0.0"
   },
   "scripts": {
     "start": "node ./bin/www",
-    "test": "node --test tests/"
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "debug": "~4.4.0",

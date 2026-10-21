@@ -269,7 +269,7 @@ cp .env.example .env
 # 部署前自检：占位符 ↔ .env 键名是否对得上（见下方说明）
 bash ../../skill/cloudbase-xpay/scripts/check_env_keys.sh
 
-npm test      # 36 个单元测试（含官方签名基准向量）
+npm test      # 109 个单元测试（含官方签名基准向量）
 npm start     # 默认 3000 端口，自动加载 .env
 ```
 
