@@ -155,14 +155,22 @@ exports.queryOrder = async (req, res) => {
 // ========== 异步回调 ==========
 
 /**
- * 判断应答格式
- * ⚠️ 以「实际推送格式」为准（content-type），notifyFormat 仅作兜底。
+ * 判断应答格式：**只跟随请求本身**，不依赖任何配置
+ *
+ * 1. content-type 带 xml / json → 直接照办（正常链路，平台推送一定带头）
+ * 2. 没有 content-type（少见）→ 看请求体是不是 <xml 开头
+ * 3. 都没有 → 默认 JSON
+ *
+ * ⚠️ 应答格式必须与推送格式一致，否则平台会重推最多 15 次。
+ *    这件事由请求自己说明，不需要再配一个 notifyFormat（已删除）。
  */
 function isXmlRequest(req) {
     const ct = req.headers['content-type'] || '';
     if (/xml/i.test(ct)) return true;
     if (/json/i.test(ct)) return false;
-    return xpayConfig.notifyFormat === 'xml';
+
+    const raw = req.rawBody ? String(req.rawBody) : '';
+    return raw.trimStart().startsWith('<xml');
 }
 
 /**

@@ -71,16 +71,6 @@ check_required "$(resolve secret appSecret)"     "换取 sessionKey 必需"
 check_required "$(resolve appKey prodAppKey)"    "支付签名密钥"
 
 echo
-check_optional "notifyFormat"   "json / xml，默认 json"
-
-echo
-
-# 一致性校验
-if [ -n "${notifyFormat:-}" ] && [ "$notifyFormat" != "json" ] && [ "$notifyFormat" != "xml" ]; then
-    printf "${RED}✗${NC} notifyFormat 取值非法：%s（只能是 json 或 xml）\n" "$notifyFormat"
-    missing=$((missing + 1))
-fi
-
 echo "=== 结果 ==="
 if [ "$missing" -gt 0 ]; then
     printf "${RED}缺失必填项 %s 个${NC}，下单会失败。\n" "$missing"

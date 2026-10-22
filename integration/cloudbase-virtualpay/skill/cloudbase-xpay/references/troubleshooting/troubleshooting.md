@@ -77,7 +77,7 @@
 正常链路应看到：
 
 ```
-[Config] 现网(env=0) | notifyFormat=json
+[Config] 现网(env=0) | 应答格式跟随请求 content-type（默认 JSON）
 [Controller] 收到回调: { event: 'xpay_goods_deliver_notify', ... }
 [XpayService] 事件 xpay_goods_deliver_notify → 道具发货（核心事件）
 ```

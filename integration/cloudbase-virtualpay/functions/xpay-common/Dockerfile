@@ -20,7 +20,6 @@ ENV offerId=""
 ENV appKey=""
 ENV appId=""
 ENV secret=""
-ENV notifyFormat="json"
 
 # 唯一的联调闸门（on / off）：
 #   on  → 订单归属 / iOS 退款问询按 fail closed 校验，生产态

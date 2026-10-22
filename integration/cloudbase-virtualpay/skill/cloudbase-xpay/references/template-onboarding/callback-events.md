@@ -49,14 +49,18 @@
 
 **格式不对或返回非 0 ⇒ 微信重新推送，最多 15 次**，重试间隔指数退避（2、4、8、16…）。
 
-模板实现：以**实际请求的 content-type** 判断应答格式，`notifyFormat` 环境变量仅作兜底。
+模板实现：**只跟随请求本身**判断应答格式，不依赖配置（原先的 `notifyFormat` 已删除）——
+先看 `content-type`，没有该头时看请求体是否 `<xml` 开头，其余一律 JSON。
 
 ```js
 function isXmlRequest(req) {
     const ct = req.headers['content-type'] || '';
     if (/xml/i.test(ct)) return true;
     if (/json/i.test(ct)) return false;
-    return xpayConfig.notifyFormat === 'xml';
+
+    // 没有 content-type（少见）：看请求体形态，不读配置
+    const raw = req.rawBody ? String(req.rawBody) : '';
+    return raw.trimStart().startsWith('<xml');
 }
 ```
 

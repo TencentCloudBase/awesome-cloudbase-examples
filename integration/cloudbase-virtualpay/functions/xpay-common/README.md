@@ -44,7 +44,7 @@ xpay-common/
 | 类别 | 变量 | 谁提供 |
 |---|---|---|
 | **平台注入** | `appId` `secret` `offerId` `appKey` `token` `msgSecret` `notifyUrlCallbackType` `msgEncryptType` `sandboxAppKey` | 集成中心创建实例时注入，并**覆盖**云函数上的同名变量 |
-| **本模板自己的** | `notifyFormat` `trustBearerIdentity` | 平台不注入，只能由 `cloudbaserc.json` / 控制台提供 |
+| **本模板自己的** | `XPAY_GUARD` `trustBearerIdentity` | 平台不注入，只能由 `cloudbaserc.json` / 控制台提供 |
 
 > ✅ 平台注入的变量写进 `cloudbaserc.json` 是**允许的**：它和平台注入的是**同一份信息**。
 > `tcb fn deploy` 先按 `.env` 把占位符解析成值写进函数，创建/更新集成时平台再按集成配置覆盖回正确值，两边不会打架。
@@ -59,7 +59,6 @@ xpay-common/
 | `appKey` | 是 | 支付签名密钥，计算 `paySig` | `prodAppKey` |
 | `appId` | 是 | 小程序 AppID | — |
 | `secret` | 是 | 换取 sessionKey 必需，**只放服务端** | `appSecret` |
-| `notifyFormat` | 否 | `json`（默认）/ `xml`，**必须与微信后台登记一致** | — |
 | `notifyUrlCallbackType` | 否 | 未声明 = 本函数自己验签（fail closed）；`system` = 网关代验签 | — |
 
 **命名对齐**：集成中心（`authTypeCode=wxvirtualpay`）注入的是 `appKey` / `secret`，而本地 `.env` 与旧版文档写的是 `prodAppKey` / `appSecret`。`config/config.js` 的 `readEnv()` 优先读平台名、回退旧名，两套都能跑。
@@ -187,7 +186,7 @@ wx.login({
 ## ⚠️ 关键坑
 
 1. **signData 必须按原样字符串签名**。任何 `JSON.parse` → `stringify` 重排键顺序都会让签名失效。`signService.js` 所有签名入口只接收字符串，就是为了从接口上杜绝这个坑。
-2. **应答格式必须与推送格式一致**（`notifyFormat`）。格式不对或非 0 → 微信重推最多 15 次，指数退避。
+2. **应答格式必须与推送格式一致**：按请求 `content-type` 决定（XML 回 XML，其余回 JSON），格式不对或非 0 → 微信重推最多 15 次，指数退避。
 3. **iOS 退款问询必须 3 秒内应答**，且 `evidence` 必填。3 次都超时 → 结果标记为「不确定」，决定权交给 Apple。
 4. **发货以推送为主、查单兜底**。前端 `success` 回调不可靠（用户异常退出即丢），不能作为发货依据。
 5. **幂等键是平台单号 `wx_order_id`**（推送里的 `WeChatPayInfo.MchOrderNo`），缺失时回退商家单号 `OutTradeNo`。
@@ -279,9 +278,9 @@ npm start     # 默认 3000 端口，自动加载 .env
 
 ### 环境变量从哪来
 
-| 场景 | 平台注入的凭证 | `notifyFormat` |
+| 场景 | 平台注入的凭证 | `XPAY_GUARD` / 其他模板变量 |
 |---|---|---|
-| 本地开发 | `.env`（`bin/www` 通过 dotenv 加载） | `.env` |
+| 本地开发 | `.env`（bin/www 通过 dotenv 加载） | `.env`（`npm run dev` 自动设 `XPAY_GUARD=off`） |
 | 集成中心托管云函数 | 平台注入，**不需要配** | `cloudbaserc.json` → `tcb fn deploy` |
 | 直连 HTTP 访问服务自测 | `.env` → 需同时写进 `cloudbaserc.json` | 同左 |
 | 云托管 | 控制台「服务设置 → 环境变量」 | 同左 |
@@ -298,9 +297,9 @@ npm start     # 默认 3000 端口，自动加载 .env
 >
 > 实测踩过：`.env` 里叫 `appId`，占位符写的是 `{{env.APP_ID}}` → 全部解析为空。
 >
-> **`cloudbaserc.json` 当前引用了全部键**：平台注入的 `appId` / `secret` / `offerId` / `appKey` / `token` / `msgSecret` / `notifyUrlCallbackType` / `msgEncryptType` / `sandboxAppKey`，加上模板自己的 `notifyFormat` / `trustBearerIdentity`。
+> **`cloudbaserc.json` 当前引用了全部键**：平台注入的 `appId` / `secret` / `offerId` / `appKey` / `token` / `msgSecret` / `notifyUrlCallbackType` / `msgEncryptType` / `sandboxAppKey`，加上模板自己的 `XPAY_GUARD` / `trustBearerIdentity`。
 > 所以 `.env` 里每个键都要有、名字逐字一致（本地自测场景）。
-> 只走集成中心时，可以只在 `.env` 填 `TCB_ENV_ID` + `notifyFormat` 后创建集成，其余由平台覆盖 —— 但别在凭证为空的状态下单独 `tcb fn deploy`。
+> 只走集成中心时，可以只在 `.env` 填 `TCB_ENV_ID` 后创建集成，其余由平台覆盖 —— 但别在凭证为空的状态下单独 `tcb fn deploy`。
 >
 > **部署前自检**（只读，不打印值）：
 >

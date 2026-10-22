@@ -57,7 +57,6 @@ offerId=你的OfferID
 appKey=你的AppKey
 appId=你的小程序AppID
 secret=你的AppSecret
-notifyFormat=json               # json / xml，须与微信后台登记一致
 ```
 
 然后部署（HTTP 云函数 / 云托管均可）。

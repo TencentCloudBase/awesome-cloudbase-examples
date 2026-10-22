@@ -6,7 +6,6 @@
 | `appKey` | ✅ | — | 支付签名密钥（旧名 `prodAppKey`） |
 | `appId` | ✅ | — | 小程序 AppID |
 | `secret` | ✅ | — | 换取 sessionKey 必需（旧名 `appSecret`） |
-| `notifyFormat` | 否 | `json` | `json` / `xml`，须与微信后台一致；平台不注入，只能由 `cloudbaserc.json` 提供 |
 | `notifyUrlCallbackType` | 否 | 空 | 未声明 = 自己验签；`system` = 网关代验签 |
 | `trustBearerIdentity` | 否 | 空 | 采信 Bearer JWT 身份，仅当函数只经云 API 网关暴露时开 |
 | `XPAY_GUARD` | 否 | 未设（= `on`） | **全模板唯一的联调开关**（与 wx-pay 的 `PAY_GUARD` 同一套心智）。`off` = 「本地查不到订单」时放行查单 + iOS 退款问询 `result_code=0`；`on` 或不设 = 全部拒绝/拦截。本地 `npm run dev` 已带 `off`；云上 + `off` 会拒绝启动，确需云上联调再加 `PAY_ALLOW_INSECURE_BOOT=true` |

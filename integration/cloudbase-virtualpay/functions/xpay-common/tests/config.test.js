@@ -6,7 +6,7 @@ const CONFIG_PATH = require.resolve('../config/config');
 // config.js 在模块加载时读 process.env，所以每次都要清缓存重新加载
 const ENV_KEYS = [
     'appKey', 'prodAppKey', 'secret', 'appSecret',
-    'offerId', 'appId', 'appid', 'APP_ID', 'WX_APP_ID', 'notifyFormat',
+    'offerId', 'appId', 'appid', 'APP_ID', 'WX_APP_ID',
 ];
 
 /**

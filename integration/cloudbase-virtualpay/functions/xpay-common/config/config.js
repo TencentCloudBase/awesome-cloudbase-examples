@@ -53,10 +53,6 @@ const config = {
         // AppSecret：平台注入 secret，本地/旧名 appSecret
         appSecret: readEnv('secret', 'appSecret'),
 
-        // 回调推送的数据格式：json | xml
-        // ⚠️ 应答体格式必须与推送格式一致，否则微信会重推最多 15 次
-        notifyFormat: (process.env.notifyFormat || 'json').toLowerCase(),
-
         // 业务单号长度约束（虚拟支付官方要求 8-32 位）
         outTradeNoMinLen: 8,
         outTradeNoMaxLen: 32,
@@ -80,7 +76,7 @@ function getAppKey() {
 // 代码关心的候选变量名（含平台注入名、本地/旧名、大小写变体）
 const CANDIDATE_KEYS = [
     'offerId', 'appKey', 'prodAppKey', 'appId', 'appid', 'APP_ID', 'wxAppId',
-    'secret', 'appSecret', 'notifyFormat',
+    'secret', 'appSecret',
     // 回调形态声明：决定「谁负责验签解密」
     'notifyUrlCallbackType', 'notifyUrlResourceType', 'msgEncryptType',
     // 回调验签解密凭据
@@ -280,11 +276,7 @@ function validateConfig() {
         errors.push('appKey 未配置（平台注入名 appKey / 本地名 prodAppKey）');
     }
 
-    if (!['json', 'xml'].includes(c.notifyFormat)) {
-        errors.push(`notifyFormat 无效: "${c.notifyFormat}"，仅支持 json 或 xml`);
-    }
-
-    console.info(`[Config] 现网(env=0) | notifyFormat=${c.notifyFormat}`);
+    console.info('[Config] 现网(env=0) | 应答格式跟随请求 content-type（默认 JSON）');
 
     // XPAY_GUARD 拼错（非空且既不是 on 也不是 off）→ 静默落到安全侧，但必须让人看见
     const guardRaw = (process.env.XPAY_GUARD || '').trim();

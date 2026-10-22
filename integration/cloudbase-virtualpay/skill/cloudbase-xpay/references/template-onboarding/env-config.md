@@ -8,7 +8,6 @@
 | `appKey` | ✅ | 虚拟支付 → 基本配置 | 签名密钥，计算 `paySig`（旧名 `prodAppKey`） |
 | `appId` | ✅ | MP 后台 → 设置 | 换取 sessionKey / access_token |
 | `secret` | ✅ | MP 后台 → 设置 | **换取 sessionKey 必需**（旧名 `appSecret`） |
-| `notifyFormat` | 否 | — | `json`（默认）/ `xml`，**须与微信后台登记一致**；平台不注入，只能由 `cloudbaserc.json` 提供 |
 | `notifyUrlCallbackType` | 否 | 空（未声明 = 自己验签） | `system` = 网关代验签；`ownservice` = 本函数验签 |
 | `trustBearerIdentity` | 否 | 空（关闭） | 是否采信 `Authorization: Bearer` 的 JWT 身份；仅当函数只经云 API 网关暴露时开 |
 
@@ -101,8 +100,8 @@ git check-ignore -v functions/xpay-common/.env
 `config/config.js` 的 `validateConfig()` 会在服务启动时校验，**只告警不阻断**：
 
 ```
-[Config] 环境变量(名=长度): offerId=10 appKey=32 prodAppKey=- appId=18 appid=- APP_ID=- secret=32 appSecret=- notifyFormat=6 token=4 msgSecret=43 sandboxAppKey=32
-[Config] 现网(env=0) | notifyFormat=json
+[Config] 环境变量(名=长度): offerId=10 appKey=32 prodAppKey=- appId=18 appid=- APP_ID=- secret=32 appSecret=- token=4 msgSecret=43 sandboxAppKey=32
+[Config] 现网(env=0) | 应答格式跟随请求 content-type（默认 JSON）
 ⚠️ 配置校验警告（共 4 项）:
   1. offerId 未配置（虚拟支付 → 基本配置）
   2. appId 未配置（平台注入名 appId；下单时也可由请求头 x-wx-appid 提供）

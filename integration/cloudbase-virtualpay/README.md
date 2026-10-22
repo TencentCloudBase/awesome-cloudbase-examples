@@ -41,12 +41,15 @@ cloudbase-virtualpay/
 | `appId` | MP 后台 → 设置 → 基本设置 | 换 sessionKey / access_token |
 | `secret` | 同上 | AppSecret，换 sessionKey 必需，只放服务端 |
 
-**模板侧（2 个，只能自己配）**：
+**模板侧（只能自己配）**：
 
 | 变量 | 必填 | 说明 |
 |---|---|---|
 | `TCB_ENV_ID` | 是 | 云开发环境 ID，`cloudbaserc.json` 的 `envId`，为空会导致部署失败 |
-| `notifyFormat` | 是 | `json`（默认）/ `xml`，**必须与 MP 后台「消息推送 → 数据格式」一致**，不一致微信会重推 15 次 |
+| `XPAY_GUARD` | 否 | 联调开关，不设即 `on`（校验全部生效）。`off` = 查不到订单时放行查单 / 放过退款，云上带 `off` 会拒绝启动 |
+| `trustBearerIdentity` | 否 | 是否采信 `Authorization: Bearer` 的 JWT 身份；仅当函数只经云 API 网关暴露时开 |
+
+> 应答格式不需要配置：跟随请求 `content-type`（XML 回 XML，其余回 JSON），无该头时看请求体是否 `<xml` 开头。
 
 **回调验签 / 解密（只有自建回调才需要）**：
 
@@ -78,7 +81,7 @@ cd functions/xpay-common
 npm install
 npm test                          # 单元测试
 
-cp .env.example .env              # 按上表填写；自测要填全，只走集成中心可只填 TCB_ENV_ID + notifyFormat
+cp .env.example .env              # 按上表填写；自测要填全，只走集成中心可只填 TCB_ENV_ID
 bash ../../skill/cloudbase-xpay/scripts/check_env_keys.sh
 ```
 
