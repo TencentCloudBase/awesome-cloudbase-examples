@@ -60,7 +60,6 @@ xpay-common/
 | `notifyUrlResourceType` | 平台系统字段 | 否 | `function` / `cloudrun`，由 `tcb integration create` 写进集成 Ext，**不进函数环境变量**；代码按空串兜底（真被注入且为 `cloudrun` 时启动告警） | — |
 | `sandboxAppKey` | 平台注入 | 否 | 沙箱密钥。本模板只走现网（`env` 固定 0），**代码不读**，留空即可 | — |
 | `XPAY_GUARD` | 模板自有 | 否 | 联调开关：`on`（默认，校验全生效）/ `off`（查不到订单时放行查单、放过退款）。云上带 `off` 拒绝启动 | — |
-| `trustBearerIdentity` | 模板自有 | 否 | 是否采信 `Authorization: Bearer` 的 JWT 身份，默认关闭；仅当函数只经云 API 网关暴露时开 | — |
 | `TCB_ENV_ID` | 部署侧 | 是（部署用） | `cloudbaserc.json` 的 `envId`，为空会导致部署失败；**不进函数环境变量** | — |
 | `PORT` | 仅本地 | 否 | 本地开发端口（云函数固定 9000、云托管 80） | — |
 
@@ -202,7 +201,7 @@ wx.login({
    **顺序必须是「查重 → 处理 → 落标记」**：先落标记再处理，一旦处理失败，重推会被当重复事件忽略 → 永久丢单。
 6. **回调错误要分级应答**：结构性错误（缺 `Event`）回 `ErrCode=0` 避免无效重推；业务异常回非 0 触发微信重推。全回 0 = 静默丢单。
 7. **鉴权依赖上游网关，函数内不实现**。`SCF_RUNTIME` 等运行时变量恒存在、自定义 header 可伪造，都不能作为鉴权依据；未验签的 Bearer JWT 同样可伪造。因此模板默认只读平台注入的 `x-wx-openid`，并把「函数仅经网关调用」作为部署前提。公网暴露时必须在上游补鉴权。
-8. **服务端 Bearer 调用需显式开启**。iWiki 里「服务端带 access_token 调用」的入口要求 `trustBearerIdentity=true` 才会从 JWT 的 `provider_sub` 取身份（默认关闭）。开启前提是该环境的云函数**只经云 API 网关暴露**，否则等于允许伪造 Bearer 冒充任意用户。
+8. **Bearer 一律不采信**。JWT payload 只是 base64 编码，任何人都能伪造；虚拟支付只在小程序内发起，平台一定注入 `x-wx-openid`，没有需要读 Bearer 的场景。历史的 `trustBearerIdentity` 开关已删除 —— 要支持服务端调用，正确做法是在函数内验证 JWT 签名（拉 CloudBase Auth 公钥），而不是开一个「假定网关已验签」的开关。
 9. **命名风格两套**：C 端 signData 用驼峰（`offerId`），服务端接口用下划线（`order_id` / `offer_id`）。写错直接报参数错误。
 10. **iOS 走 Apple 支付，最低金额 1 元**（100 分）—— 低于 1 元的道具档位在 iPhone 上必然失败；开发者无法主动退款，只能应答 Apple 的退款问询（3 秒内 + `evidence` 必填）；结算周期 45–60 天，与安卓 T+3 完全不同。
 11. **`query_order` 只能查现金单**，查不了代币单（代币单靠 `query_user_balance` / 幂等重试兜底）。
@@ -304,7 +303,7 @@ npm start     # 默认 3000 端口，自动加载 .env
 >
 > 实测踩过：`.env` 里叫 `appId`，占位符写的是 `{{env.APP_ID}}` → 全部解析为空。
 >
-> **`cloudbaserc.json` 当前引用了全部键**：平台注入的 `appId` / `secret` / `offerId` / `appKey` / `token` / `msgSecret` / `notifyUrlCallbackType` / `msgEncryptType` / `sandboxAppKey`，加上模板自己的 `XPAY_GUARD` / `trustBearerIdentity`。
+> **`cloudbaserc.json` 当前引用了全部键**：平台注入的 `appId` / `secret` / `offerId` / `appKey` / `token` / `msgSecret` / `notifyUrlCallbackType` / `msgEncryptType` / `sandboxAppKey`，加上模板自己的 `XPAY_GUARD`。
 > 所以 `.env` 里每个键都要有、名字逐字一致（本地自测场景）。
 > 只走集成中心时，可以只在 `.env` 填 `TCB_ENV_ID` 后创建集成，其余由平台覆盖 —— 但别在凭证为空的状态下单独 `tcb fn deploy`。
 >

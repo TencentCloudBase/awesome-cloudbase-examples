@@ -41,7 +41,7 @@ cloudbase-virtualpay/
 | `secret` | MP 后台 → 设置 → 基本设置 | AppSecret，换 sessionKey 必需，只放服务端 |
 | `appId` | 同上 | 换 sessionKey / access_token；**只走小程序调用时可不配**（平台注入的请求头 `x-wx-appid` 优先） |
 
-**完整环境变量表**见 [`functions/xpay-common/README.md#环境变量`](functions/xpay-common/README.md#环境变量)：平台注入 9 个、模板自有 2 个（`XPAY_GUARD` / `trustBearerIdentity`）、部署侧 `TCB_ENV_ID`、本地 `PORT`，含必填性与本地/旧名对照（`prodAppKey` / `appSecret`）。
+**完整环境变量表**见 [`functions/xpay-common/README.md#环境变量`](functions/xpay-common/README.md#环境变量)：平台注入 9 个、模板自有 1 个（`XPAY_GUARD`）、部署侧 `TCB_ENV_ID`、本地 `PORT`，含必填性与本地/旧名对照（`prodAppKey` / `appSecret`）。
 
 三条要点：
 

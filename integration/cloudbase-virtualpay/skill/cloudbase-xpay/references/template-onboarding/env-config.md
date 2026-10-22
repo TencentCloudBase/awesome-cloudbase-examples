@@ -15,7 +15,6 @@
 | `notifyUrlResourceType` | 否 | 空 | 平台系统字段，写进集成 Ext、**不进函数环境变量**；`cloudrun` = 回调打云托管、本函数收不到 |
 | `sandboxAppKey` | 否 | 空 | 沙箱密钥；本模板只走现网，代码不读 |
 | `XPAY_GUARD` | 否 | 未设（= `on`） | 联调开关；`off` = 查不到订单时放行查单 / 放过退款，云上带 `off` 拒绝启动 |
-| `trustBearerIdentity` | 否 | 空（关闭） | 是否采信 `Authorization: Bearer` 的 JWT 身份；仅当函数只经云 API 网关暴露时开 |
 
 **变量名以集成中心注入为准**：`authTypeCode=wxvirtualpay` 注入的是 `appId / secret / offerId / appKey`。本地 `.env` 与旧版文档用的 `prodAppKey` / `appSecret`，由 `config/config.js` 的 `readEnv()` 回退兼容 —— 优先平台名，两套都能跑。
 

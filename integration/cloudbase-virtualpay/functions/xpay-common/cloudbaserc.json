@@ -28,7 +28,6 @@
         "msgEncryptType": "{{env.msgEncryptType}}",
         "token": "{{env.token}}",
         "msgSecret": "{{env.msgSecret}}",
-        "trustBearerIdentity": "{{env.trustBearerIdentity}}",
         "XPAY_GUARD": "on"
       }
     }

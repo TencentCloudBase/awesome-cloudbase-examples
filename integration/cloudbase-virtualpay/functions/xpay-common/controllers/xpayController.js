@@ -286,7 +286,7 @@ exports.callback = async (req, res) => {
 //   4. `signature` / `paySig` 的密钥是 sessionKey，只能由 secret + code 换出，
 //      伪造请求签不出合法签名
 //
-// 服务端 / 第三方带 access_token 调用：设 `trustBearerIdentity=true` 后，
+// 服务端 / 第三方调用：Bearer 一律不采信（无法验签），身份只认平台注入的 x-wx-openid；
 // getOpenId 才会从 JWT 的 provider_sub 取身份（默认关闭，因为 payload 可伪造）。
 // 开启前提是该环境的云函数只经云 API 网关暴露。
 //
