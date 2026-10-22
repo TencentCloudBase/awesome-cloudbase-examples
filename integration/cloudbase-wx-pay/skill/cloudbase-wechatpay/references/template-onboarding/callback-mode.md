@@ -14,7 +14,7 @@
 代码判定（`payService._resolveCallbackPayload`）：
 
 ```javascript
-const trustsGateway = notifyUrlCallbackType === 'system';
+const trustsGateway = notifyUrlCallbackType === 'system';  // config 导出的属性名（驼峰）
 // system  → 采信 body.ParsedContent（网关已解密）；仍做「时间戳必须有且在 5 分钟内」+ 结构校验
 // 其它    → strategy.verifySign() + AES-GCM 解密，验不过直接拒
 ```
@@ -25,8 +25,9 @@ const trustsGateway = notifyUrlCallbackType === 'system';
 |---|---|
 | 微信支付（本模板） | `notifyURLCallbackType`（URL 全大写） |
 
-> 代码里对 `notifyUrlCallbackType`（驼峰）做了兜底读取，但那只是兼容旧写法，**不要手工填**。
-> 不同集成注入的名字不同（例如小程序虚拟支付用的是驼峰），按各自集成的实际注入名为准。
+> **环境变量名一律用大写 URL**（`notifyURLCallbackType`）；`config/config.js` 导出的属性名是驼峰
+> `notifyUrlCallbackType`，代码里读环境变量时对大写名优先、小写名兜底 —— 兜底只用于兼容旧写法，**不要手工填小写**。
+> 不同集成注入的名字可能不同，按各自集成的实际注入名为准。
 
 ## 两条部署路径
 
