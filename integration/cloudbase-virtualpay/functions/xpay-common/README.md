@@ -55,8 +55,8 @@ xpay-common/
 | `appKey` | 平台注入 | 是 | 支付签名密钥，计算 `paySig` | `prodAppKey` |
 | `appId` | 平台注入 | 否 | 小程序 AppID，换 sessionKey / access_token；下单链路优先用请求头 `x-wx-appid`，只走小程序调用时可不配 | `appid` / `APP_ID` / `wxAppId` / `WX_APP_ID` |
 | `secret` | 平台注入 | 是 | AppSecret，换 sessionKey 必需，**只放服务端** | `appSecret` |
-| `token` | 平台注入 | 自建回调必填 | 消息推送 Token，验签用；托管回调由网关使用 | — |
-| `msgSecret` | 平台注入 | 自建回调必填 | EncodingAESKey（43 位），安全模式解密用 | — |
+| `token` | 平台注入 | 自建回调必填 | 消息推送 Token，验签用。托管（`system`）时由网关使用，平台注入后**函数不参与验签** | — |
+| `msgSecret` | 平台注入 | 自建回调必填 | EncodingAESKey（43 位），安全模式解密用。托管（`system`）时由网关解密 | — |
 | `msgEncryptType` | 平台注入 | 否 | `plaintext` / `aes` / `compatible`，**须与后台「消息推送 → 加密方式」一致** | — |
 | `notifyURLCallbackType` | 平台注入 | 否 | `system` = 网关代验签解密；未声明 / `ownservice` = 本函数自验签（fail closed） | — |
 | `notifyURLResourceType` | 平台系统字段 | 否 | `function` / `cloudrun`，由 `tcb integration create` 写进集成 Ext，**不进函数环境变量**；代码按空串兜底（真被注入且为 `cloudrun` 时启动告警） | — |

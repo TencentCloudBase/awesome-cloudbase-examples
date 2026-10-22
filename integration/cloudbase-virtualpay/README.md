@@ -36,7 +36,7 @@ cloudbase-virtualpay/
 
 ### 1. 拿齐凭证
 
-**凭证（集成中心会自动注入；本地自测自己填）**：
+**凭证（集成中心会自动注入并覆盖；本地自测才自己填）**：
 
 | 凭证 | 出处 | 用途 |
 |---|---|---|
@@ -44,7 +44,10 @@ cloudbase-virtualpay/
 | `appKey` | 同上 | 支付签名密钥，算 `paySig`，只放服务端 |
 | `secret` | MP 后台 → 设置 → 基本设置 | AppSecret，换 sessionKey 必需，只放服务端 |
 | `appId` | 同上 | 换 sessionKey / access_token；**只走小程序调用时可不配**（平台注入的请求头 `x-wx-appid` 优先） |
-| `token` / `msgSecret` | MP 后台 → 开发管理 → 消息推送 | 自建回调必填：验签 Token + EncodingAESKey（43 位）；集成中心托管时由网关使用 |
+| `token` / `msgSecret` | MP 后台 → 开发管理 → 消息推送（创建集成时填同一份值） | **自建回调（`ownservice`）必需**：验签 Token + EncodingAESKey（43 位）。**托管（`system`）不用管**：网关用它验签解密，平台注入到函数后函数也不读取 |
+
+> 用集成中心时**不要手工往云函数塞这些值**：创建集成时按表单填一次，平台注入并覆盖同名环境变量。
+> 只有在「直连 HTTP 访问服务自测」或「自建回调（`ownservice`）」时才需要本地 `.env` 里配全。
 
 > `notifyURLCallbackType` / `msgEncryptType` 由平台注入；本地自测需手填，且 `msgEncryptType`
 > 必须与后台「消息推送 → 加密方式」一致，否则实际收到的形态与声明不符（表现为验签失败 / 解密失败）。
