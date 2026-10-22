@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "test": "node --test tests/"
+    "test": "node --test tests/",
+    "dev": "PAY_GUARD=off node ./bin/www"
   },
   "dependencies": {
     "debug": "~4.4.0",

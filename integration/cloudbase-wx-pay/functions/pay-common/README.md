@@ -162,14 +162,71 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 普通微信支付按**请求金额**收款，微信不核对商品值多少钱：请求体写 `amount: { total: 1 }` 就是一笔 1 分钱订单，付完回调照样 `SUCCESS`。
 
-模板会调用两个业务钩子（`services/orderService.js`），**默认返回 `null` = 不校验**（模板没有商品表，演示优先）：
+模板会调用两个业务钩子（`services/orderService.js`），**默认拒绝交易（fail closed）**——返回 `{ ok: false }`，不是返回 `null` 静默放行：
 
-| 钩子 | 调用时机 | 实现要点 |
+| 钩子 | 调用时机 | 默认行为 | 实现要点 |
+|---|---|---|---|
+| `verifyAmount(params)` | 下单前（调微信**之前**） | `{ ok: false }` 拒绝 | 按 `product_id` 查真实价格，与 `amount.total` 比对，一致时返回 `{ ok: true }` |
+| `verifyRefundAmount(params)` | 退款前（调微信**之前**） | `{ ok: false }` 拒绝 | 以落库订单金额 / 已退金额为上限，通过时返回 `{ ok: true }`。`validator.js` 只保证 `refund <= total`，而两个数都来自请求体 |
+
+调用方（`payService`）**只认 `{ ok: true }`**：钩子返回 `null` / `{ ok: false }` 一律抛错中断。
+早期版本把 `null` 当成「不校验」放行 —— 那等于把收款金额 / 退款金额的决定权完全交给客户端，对每一笔交易 100% 生效。
+
+中断发生在调用微信**之前**，不会出现「微信侧已下单、本地金额错」的不一致状态。
+
+> 本地联调（还没有商品表 / 订单表）用 `PAY_GUARD=off` 一次性放行，见下方。
+
+##### 联调开关：`PAY_GUARD`（全模板只有这一个变量）
+
+模板默认拒绝交易（fail closed），所以**刚拉下来不改代码，下单 400、查单/退款 403** —— 这是预期行为，不是配置错了。
+`PAY_GUARD` 只有两个取值，决定 `orderService` 的 4 个业务钩子是否启用：
+
+| 钩子 | `on` / 不设（默认） | `off` |
 |---|---|---|
-| `verifyAmount(params)` | 下单前（调微信**之前**） | 按 `product_id` 查真实价格，与 `amount.total` 比对，不一致返回 `{ ok: false, reason }` |
-| `verifyRefundAmount(params)` | 退款前（调微信**之前**） | 以落库订单金额 / 已退金额为上限。`validator.js` 只保证 `refund <= total`，而两个数都来自请求体 |
+| `verifyAmount` | 下单 400「服务端未核定订单金额」 | 放行 |
+| `verifyRefundAmount` | 退款 400「服务端未核定可退金额」 | 放行 |
+| `verifyOrderOwner` | 查单 / 关单 / 退款 / 查退款 403 | 放行 |
+| `verifyTransferAllowed` | 转账 / 查转账单 403 | 放行 |
 
-返回 `{ ok: false }` 会直接中断请求，不会出现「微信侧已下单、本地金额错」的不一致状态。
+**联调 / 部署就靠这一个值切换：**
+
+| 场景 | 怎么跑 | `PAY_GUARD` | 钩子 |
+|---|---|---|---|
+| 本地联调 | `npm run dev`（脚本已带 `PAY_GUARD=off`） | `off` | 跳过 |
+| 云上联调 | 控制台环境变量加 `PAY_GUARD=off` | `off` | 跳过 |
+| 正式部署（CLI） | `cloudbaserc.json` 已预置 `"PAY_GUARD": "on"` | `on` | 全部拒绝 |
+| 正式部署（云托管） | `Dockerfile` 已预置 `ENV PAY_GUARD=on` | `on` | 全部拒绝 |
+| 漏配 | 什么都不设 | 未设（= `on`） | 全部拒绝（安全默认） |
+
+> 失败是**安全侧**的：只有显式写 `off` 才放开，写 `dev`、`false`、`0` 这类值都不等于 `off`，
+> 一律按开启处理，会继续 400 / 403。
+>
+> ⚠️ 代码只读 `process.env`，**没有 dotenv**，`.env` 文件不会自动加载；本地用 `npm run dev` 即可。
+
+**上线前必须做的两件事：**
+
+1. 确认 `PAY_GUARD=on`（`cloudbaserc.json` / `Dockerfile` 已预置；最稳的是不设这个变量）
+   —— 只要不是 `off`，4 个钩子就一定是拒绝状态
+2. 在 `verifyAmount` / `verifyRefundAmount` / `verifyOrderOwner` / `verifyTransferAllowed` 里接数据库，
+   核定通过时返回 `{ ok: true }`
+   （参考 `services/orderService.js` 里的示例实现，或 `skill/cloudbase-wechatpay/references/business-logic/order-service.md`）
+
+#### 归属校验（查单 / 关单 / 退款 / 转账）
+
+鉴权中间件只回答「你是谁」，**不回答「这单是不是你的」**。以下接口在调微信之前要求归属钩子放行，
+默认一律返回 `403`（`orderService` 没有订单表，答不了归属问题）：
+
+| 接口 | 缺归属校验的后果 | 钩子 |
+|---|---|---|
+| `/wxpay_query_order_by_out_trade_no`、`/wxpay_query_order_by_transaction_id` | 拿别人的单号越权查单，批量遍历可探测订单是否存在与状态 | `verifyOrderOwner` |
+| `/wxpay_close_order` | 关掉别人还没支付的订单 | `verifyOrderOwner` |
+| `/wxpay_refund`、`/wxpay_refund_query` | 对别人的订单发起退款 / 查退款进度 | `verifyOrderOwner` |
+| `/wxpay_transfer` | 收款 `openid` 与 `transfer_amount` 都由请求体决定 → 把商户余额转给任意人 | `verifyTransferAllowed` |
+
+两个钩子都**只认 `{ ok: true }`**：返回 `null` / `{ ok: false }` 一律 403，且不会调用微信。
+
+> 联调时同样用上面那**一个** `PAY_GUARD=off`，不额外区分金额与归属。
+> ⚠️ 生产设成 `off` = 任何登录用户都能操作别人的订单、把商户余额转给任意 openid。
 
 同时 `appid` / `mchid` / `notify_url` **一律由服务端赋值**，请求体里传了会被忽略（否则客户端能换掉商户号或把回调结果导流到自己的服务器）。
 
@@ -192,8 +249,9 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 | **H5（微信外浏览器）** | `fetch` → `h5_url` 跳转 | [web-h5.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/web-h5.md) |
 | **JSAPI（微信内浏览器）** | `WeixinJSBridge.invoke` | [web-h5.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/web-h5.md) |
 | **Native 扫码** | `fetch` → 生成二维码 | [web-native.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/web-native.md) |
-| **APP** | 各端 SDK 调起 | [app.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/app.md) |
 | **微搭低码** | `callHTTPFunction` | [weda-miniprogram.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/weda-miniprogram.md) |
+
+> APP 支付（原生 iOS/Android App）**不在本模板范围内**：它需要微信开放平台的「移动应用」AppID（与小程序/公众号 AppID 不同）、`transactions_app` 接口与 `Sign=WXPay` 专用签名字段，还要客户端原生集成微信 SDK。本模板只覆盖小程序 / 公众号 JSAPI、H5、Native 扫码。
 
 > 完整可运行示例：[`examples/miniprogram/`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram/)（云函数版）、[`examples/miniprogram-cloudrun/`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram-cloudrun/)（云托管版）
 
@@ -408,8 +466,9 @@ async handlerUnifiedTrigger(params) {
 ```
 
 > ⚠️ 归属标识由 `orderService.resolveOwner(params, identity)` 统一解析：
-> `identity.openid` → `identity.uid` → `params.payer.openid`，每个候选都要过格式校验。
-> **三者都取不到合法值时下单直接失败**（抛「订单缺少归属身份」），不会创建无主订单 ——
+> **只认登录身份** `identity.openid` → `identity.uid`，每个候选都要过格式校验。
+> `params.payer.openid`（请求体字段）**已不再作为归属候选** —— 客户端可填别人的 openid。
+> **identity 取不到合法值时下单直接失败**（抛「订单缺少归属身份」），不会创建无主订单 ——
 > 无归属订单会让后续查单 / 退款的归属校验退化成 `{ owner: null }`，存在越权风险。
 </details>
 
@@ -506,23 +565,25 @@ async handlerUnifiedTrigger(params) {
 
 | 路由 | 方法 | 说明 | 鉴权 |
 |------|------|------|------|
-| `/wxpay_query_order_by_out_trade_no` | POST | 商户订单号查单 | payMiddleware |
-| `/wxpay_query_order_by_transaction_id` | POST | 微信订单号查单 | payMiddleware |
-| `/wxpay_close_order` | POST | 关闭订单 | payMiddleware |
+| `/wxpay_query_order_by_out_trade_no` | POST | 商户订单号查单 | payMiddleware + 归属钩子 |
+| `/wxpay_query_order_by_transaction_id` | POST | 微信订单号查单 | payMiddleware + 归属钩子 |
+| `/wxpay_close_order` | POST | 关闭订单 | payMiddleware + 归属钩子 |
+
+> 归属钩子 = `orderService.verifyOrderOwner`，默认 `{ ok: false }` → 403（见「归属校验」小节）
 
 ### 退款
 
 | 路由 | 方法 | 说明 | 鉴权 |
 |------|------|------|------|
-| `/wxpay_refund` | POST | 申请退款 | payMiddleware |
-| `/wxpay_refund_query` | POST | 查询退款 | payMiddleware |
+| `/wxpay_refund` | POST | 申请退款 | payMiddleware + 归属钩子 + 金额钩子 |
+| `/wxpay_refund_query` | POST | 查询退款 | payMiddleware + 归属钩子 |
 
 ### 商家转账
 
 | 路由 | 方法 | 说明 | 鉴权 |
 |------|------|------|------|
-| `/wxpay_transfer` | POST | 发起商家转账 | payMiddleware |
-| `/wxpay_transfer_bill_query` | POST | 商户单号查询 | payMiddleware |
+| `/wxpay_transfer` | POST | 发起商家转账 | payMiddleware + 转账权限钩子 |
+| `/wxpay_transfer_bill_query` | POST | 商户单号查询 | payMiddleware + 转账权限钩子 |
 | `/wxpay_transfer_bill_query_by_no` | POST | 微信单号查询 | payMiddleware |
 
 > 📖 **商家转账详解**：[transfer.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/business-logic/transfer.md)
@@ -548,21 +609,22 @@ async handlerUnifiedTrigger(params) {
 > - `x-tcb-integration-id` 等自定义 header：客户端可任意添加
 > - `x-wx-source` / `x-authmethod`：同样是可伪造的普通 header（虽然平台会注入，但直连时客户端也能塞）
 > - `TENCENTCLOUD_RUNENV` / `SCF_RUNTIME`：云函数内**恒存在**，放行等于中间件无条件通过
-> - `body.payer.openid`：请求体字段，客户端可填别人的 openid（默认关闭）
+> - `body.payer.openid`：请求体字段，客户端可填别人的 openid（**连同 `ALLOW_BODY_OPENID` 开关已整层删除**）
 
 **Bearer 分支的边界**：函数内不验签（没有公钥），只校验 payload 内容——必须含 `sub` / `provider_sub`、`exp` 未过期、`iss` 符合预期（配了 `AUTH_EXPECTED_ISSUER` 才校验）。所以：
 
-1. 支付写接口（`/wxpay_order`、`/wxpay_refund`、`/wxpay_transfer`、`/wxpay_close_order` 等）要求 payload 里有 `provider_sub`（微信 openid）；只有 `sub`（CloudBase UID）的 token 直接 401 —— 放行后取不到 openid 只会在参数校验层变成「参数错误」，把未授权误报成参数问题。
+1. 只有 `sub`（CloudBase UID）、没有 `provider_sub`（微信 openid）的 token 仍可鉴权通过，身份按 UID 记（与 H5 口径一致）；但 **JSAPI 下单（`/wxpay_order`）必须有 openid**，这条路由由 `requireWechatOpenId` 拦截并回 **403**（`凭证缺 provider_sub`），**不会**混成 401 匿名。
 2. **必须确认前置网关强制验签，且禁止公网直连函数端口。** Dockerfile 暴露的 80 端口只允许网关 / 容器内网访问；公网直连时任何人都能伪造 Bearer 与 `x-wx-openid`。
 
 **放行契约**（两个中间件口径一致，不存在「放行但取不到身份」）：
 
 | 中间件 | 放行条件 | 放行后取身份 |
 |---|---|---|
-| `payMiddleware` | 必须有 openid | `getOpenId(req)` |
+| `payMiddleware` | openid 或 UID 任一非空 | 有 openid 用 `getOpenId(req)`，只有 UID 用 `getUid(req)` |
+| `requireWechatOpenId`（仅 `/wxpay_order`） | 必须有 openid | 缺失回 403，`msg` 指明缺 `provider_sub` |
 | `h5SecurityMiddleware` | openid 或 UID 任一非空 | 有 openid 用 `getOpenId(req)`，只有 UID 用 `getUid(req)` |
 
-H5 是唯一允许「只有 UID」的路由：H5（MWEB）常在微信外浏览器发起，CloudBase Auth 凭证只有 `sub`、没有 `provider_sub`。这类订单的归属按 UID 记录，控制器不依赖 openid 落库。
+两条路由的放行口径现在一致：H5（MWEB）常在微信外浏览器发起，CloudBase Auth 凭证只有 `sub`、没有 `provider_sub`，这类身份在两条路由上都能通过，订单归属按 UID 记录，控制器不依赖 openid 落库。唯一例外是 JSAPI 下单 —— 它必须知道付款人的微信身份，所以在路由层多挂一个 `requireWechatOpenId`。
 
 三个下单入口（JSAPI / H5 / Native）都会把 `{ openid, uid }` 作为 `identity` 透传给 `payService.unifiedOrder` → `orderService.handlerUnified`，归属口径完全一致；`identity` 不会塞进 `req.body`（body 会原样发给微信支付 API）。
 
@@ -582,8 +644,14 @@ H5 拿不到平台注入的 `x-wx-openid`，只靠 Origin 白名单是不够的�
 |---|---|---|
 | `corsAllowOrigin` | 空 | H5 来源白名单，逗号分隔；为空则 H5 路由直接 403 |
 | `ALLOW_ANONYMOUS_H5` | 关 | `true` 时允许未登录调用 H5 下单（仅本地联调） |
-| `ALLOW_BODY_OPENID` | 关 | `true` **且**已配 `corsAllowOrigin` 时，才允许从 `body.payer.openid` 取身份（演示用，生产禁止） |
+| `PAY_GUARD` | 未设（= `on`） | **全模板唯一的联调开关**。`off` = 跳过金额核定 + 订单归属 / 转账权限校验（4 个钩子）；其余任何值（含不设）= 全部生效拒绝。`cloudbaserc.json` / `Dockerfile` 已预置 `on` |
 | `AUTH_EXPECTED_ISSUER` | 空 | 配了就强校验 JWT 的 `iss` |
+
+> 🚨 曾经还有 `ALLOW_BODY_OPENID`（开启后可从 `body.payer.openid` 取身份），**已整层删除**。
+> 身份只从两个服务端可验证来源取，按路由区分：
+> **小程序路由**（`/wxpay_order`、`/wxpay_order_native`、退款、转账）= 平台注入的 `x-wx-openid`；
+> **Web / App 路由**（`/wxpay_order_h5`）= 网关验过的 `Authorization: Bearer <JWT>`。
+> `orderService.resolveOwner` 也只认登录身份，不再把 `params.payer.openid` 当归属候选。
 
 实现见 `middleware/auth.js` / `utils/cloudbaseAuth.js`，回归测试见 `tests/auth.test.js`。
 
@@ -713,6 +781,9 @@ H5 拿不到平台注入的 `x-wx-openid`，只靠 Origin 白名单是不够的�
 ---
 
 ### 2. 查询
+
+> ⚠️ 查单 / 关单 / 退款 / 查退款 / 转账都会先过**归属钩子**（`verifyOrderOwner` / `verifyTransferAllowed`），
+> 默认返回 `403`。联调时设 `PAY_GUARD=off`，上线前实现钩子。见「归属校验」小节。
 
 #### 2.1 商户订单号查单
 

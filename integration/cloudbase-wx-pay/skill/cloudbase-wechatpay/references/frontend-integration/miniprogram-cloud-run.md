@@ -235,7 +235,6 @@ const openid = req.headers['x-wx-openid']
 | JSAPI 下单 | `/wx-pay/wxpay_order` | 小程序/公众号支付 |
 | H5 下单 | `/wx-pay/wxpay_order_h5` | 手机浏览器支付 |
 | Native 下单 | `/wx-pay/wxpay_order_native` | PC 扫码支付 |
-| APP 下单 | `/wx-pay/wxpay_order_app` | APP 支付 |
 | 查单（商户号） | `/wx-pay/wxpay_query_order_by_out_trade_no` | 按 out_trade_no 查 |
 | 查单（微信号） | `/wx-pay/wxpay_query_order_by_transaction_id` | 按 transaction_id 查 |
 | 关闭订单 | `/wx-pay/wxpay_close_order` | 关闭未支付订单 |

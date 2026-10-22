@@ -229,4 +229,4 @@ CREATE(创建) → NOTPAY(待支付) → SUCCESS(支付成功)
 
 ---
 
-*H5 支付见 [web-h5.md](web-h5.md) | APP 支付见 [app.md](app.md)*
+*H5 支付见 [web-h5.md](web-h5.md)。APP 支付不在本模板范围内（需开放平台移动应用 AppID 与原生 SDK 集成）。*

@@ -8,7 +8,6 @@ graph TB
         MP["小程序<br/>miniprogram"]
         H5["H5 页面<br/>web-h5"]
         NATIVE["PC 扫码<br/>web-native"]
-        APP["移动 APP<br/>app"]
     end
 
     subgraph PayCommon["pay-common 后端"]
@@ -40,7 +39,6 @@ graph TB
     MP -->|"POST /wx-pay/*"| Router
     H5 -->|"POST /wxpay_order_h5"| Router
     NATIVE -->|"POST /wxpay_order_native"| Router
-    APP -->|"POST /wxpay_order_app"| Router
 
     %% 内部流转
     Router --> Validator
@@ -153,14 +151,6 @@ graph TD
         N3 --> N4["生成二维码展示"]
         N4 --> N5["用户扫码支付"]
         N5 --> N6["每 2-3 秒轮询查单<br/>直到 SUCCESS/CLOSED/TIMEOUT"]
-    end
-
-    subgraph APAY["APP 支付"]
-        A1["无需 openid"] --> A2["后端下单 /wxpay_order_app"]
-        A2 --> A3["返回 APP 专用签名<br/>package=Sign+WXPay<br/>sign 非 paySign"]
-        A3 --> A4["OpenSDK 发起支付"]
-        A4 --> A5["微信弹窗"]
-        A5 --> A6["SDK onResp 回调"]
     end
 ```
 

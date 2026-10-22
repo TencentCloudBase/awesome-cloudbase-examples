@@ -92,6 +92,7 @@ signMode=sdk appId=YOUR_APP_ID merchantId=YOUR_MERCHANT_ID npm start
 | 变量名 | 必填 | 默认值 | 说明 |
 |--------|:----:|--------|------|
 | `corsAllowOrigin` | 否 | 空（允许所有来源）| CORS 允许的前端域名，多个逗号分隔。生产环境建议填写 |
+| `PAY_GUARD` | 否 | `on`（部署配置已预置）| **全模板唯一的开关**。`off` = 一次性跳过 `orderService` 的 4 个钩子（`verifyAmount` / `verifyRefundAmount` / `verifyOrderOwner` / `verifyTransferAllowed`）；`on` 或不设 = 全部拒绝（下单退款 400、查单 / 关单 / 退款 / 转账 403）。本地联调用 `npm run dev`。详见 [order-service.md](../business-logic/order-service.md) |
 
 ---
 

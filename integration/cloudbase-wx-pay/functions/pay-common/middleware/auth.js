@@ -17,10 +17,7 @@
  *     该分支永远命中，等于中间件无条件放行
  */
 
-const {
-    resolveAuthIdentity,
-    isBodyOpenIdFallbackEnabled,
-} = require('../utils/cloudbaseAuth');
+const { resolveAuthIdentity } = require('../utils/cloudbaseAuth');
 
 /**
  * 解析请求来源：Origin 优先，缺失时回退 Referer 的 origin 部分
@@ -49,27 +46,52 @@ function resolveRequestOrigin(req) {
 /**
  * 业务路由鉴权
  *
- * ⚠️ 放行契约：放行时一定把身份挂到 `req.user.openid`，
- *    保证「中间件放行」与 `getOpenId(req)` 取到身份是一致的。
- *    Bearer 凭证里没有微信 openid（provider_sub）时直接 401 —— 支付写接口
- *    必须有 openid，放行后再在参数校验层失败只会把「未授权」误报成「参数错误」。
+ * ⚠️ 放行契约：放行时 `req.user` 一定挂上 `openid` 与 `uid`（缺的那个为 null），
+ *    且至少有一个非空 —— 与 h5SecurityMiddleware 的口径保持一致，
+ *    避免「同一个 Bearer token 在 H5 路由能用、在小程序路由被判成匿名」。
+ *
+ * Bearer 凭证只有微信渠道登录才带 `provider_sub`（openid）；H5 / Web / App
+ * 渠道登录只有 `sub`（UID）。这类身份在支付写接口上仍然合法（归属按 UID 记），
+ * 因此这里不拦，由各路由按自身需要取舍：例如 JSAPI 下单必须有 openid，
+ * 就在控制器里回 403 并说明原因，而不是把「身份类型不满足」混成 401 匿名。
  */
 function payMiddleware(req, res, next) {
-    const identity = resolveAuthIdentity(req, { allowBodyOpenid: false });
+    const identity = resolveAuthIdentity(req);
 
-    if (identity.openid) {
-        req.user = { openid: identity.openid, source: identity.source };
+    if (identity.openid || identity.uid) {
+        req.user = {
+            openid: identity.openid || null,
+            uid: identity.uid || null,
+            source: identity.source,
+        };
         if (identity.authInfo) req.cloudbaseAuth = identity.authInfo;
+        if (!identity.openid) {
+            console.info('[鉴权] 凭证不含 provider_sub，本次以 UID 作为身份:', identity.uid);
+        }
         return next();
-    }
-
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-        console.warn('[鉴权] Bearer 凭证不含有效微信 openid（provider_sub），不能用于支付写接口');
     }
 
     console.warn('[鉴权] 拒绝匿名调用:', req.method, req.path,
         '（需平台注入 x-wx-openid 或 CloudBase Auth Bearer token）');
     return res.status(401).json({ code: -1, msg: '未授权访问' });
+}
+
+/**
+ * JSAPI / 小程序下单专用：必须有微信 openid（`provider_sub`）
+ *
+ * payMiddleware 允许「只有 UID」的身份通过（与 H5 路由口径一致），但 JSAPI 下单
+ * 必须知道付款人的微信身份，否则只能等参数校验报「参数错误」。
+ * 这里在路由层把它拦成 **403 + 明确原因**：有凭证但身份类型不满足 ≠ 未登录。
+ */
+function requireWechatOpenId(req, res, next) {
+    if (req.user?.openid) return next();
+
+    console.warn('[鉴权] JSAPI 下单缺少微信 openid（provider_sub），拒绝:', req.method, req.path,
+        '（uid =', req.user?.uid || '无', '）');
+    return res.status(403).json({
+        code: -1,
+        msg: 'JSAPI 下单需要微信 openid（凭证缺 provider_sub），请使用微信渠道登录',
+    });
 }
 
 /**
@@ -79,7 +101,8 @@ function payMiddleware(req, res, next) {
  * 因此这里做三件事，缺一不可：
  *   1. Origin / Referer 白名单（**缺失即拒绝**，浏览器同源 POST 不带 Origin 时走 Referer）
  *   2. 登录态：必须有 CloudBase Auth Bearer 凭证（跨站请求拿不到 token，即 CSRF 防护）
- *   3. 身份只从服务端可验证来源取，不再无条件采信 body.payer.openid
+ *   3. 身份只从服务端可验证来源取：平台注入 header 或 Bearer JWT，
+ *      **body.payer.openid 已彻底移除**（客户端可填别人的 openid）
  *
  * ⚠️ 放行口径（与 payMiddleware 的**唯一**差别）：
  *   - payMiddleware：必须有 openid（JSAPI / 退款 / 转账要知道微信身份）
@@ -89,8 +112,11 @@ function payMiddleware(req, res, next) {
  *   - 因此放行契约是：**放行 ⇒ getOpenId(req) 或 getUid(req) 至少取到一个**。
  *     只有 UID 时订单归属按 UID 记录，控制器不得依赖 openid 落库。
  *
- * 演示用途要放开匿名调用，必须显式设 `ALLOW_ANONYMOUS_H5=true`（默认关闭）；
- * 要放开 body.payer.openid 回退，必须显式设 `ALLOW_BODY_OPENID=true` **且** 配置 `corsAllowOrigin`。
+ * 演示用途要放开匿名调用，必须显式设 `ALLOW_ANONYMOUS_H5=true`（默认关闭）。
+ *
+ * 🚨 曾经还有一层 `ALLOW_BODY_OPENID` + `corsAllowOrigin` 的 body.payer.openid 回退，
+ *    **已整层删除**：身份只从「平台注入 header」或「网关验过的 Bearer」取，
+ *    两套场景按路由分开（小程序路由 = x-wx-openid；H5/Web = Bearer），不在一处做优先级合并。
  */
 function h5SecurityMiddleware(req, res, next) {
     // ① 来源白名单：未配置白名单 = 不知道该信谁，一律拒绝（不静默放行）
@@ -121,9 +147,7 @@ function h5SecurityMiddleware(req, res, next) {
     }
 
     // ② 登录态：H5 没有平台注入头，必须有服务端可验证的身份（Bearer / x-wx-openid）
-    const identity = resolveAuthIdentity(req, {
-        allowBodyOpenid: isBodyOpenIdFallbackEnabled(),
-    });
+    const identity = resolveAuthIdentity(req);
 
     if (!identity.openid && !identity.uid) {
         if (process.env.ALLOW_ANONYMOUS_H5 !== 'true') {
@@ -150,10 +174,8 @@ function h5SecurityMiddleware(req, res, next) {
         uid: identity.uid,
         source: identity.source,
     };
-    // 只有「确无其它身份来源 + 显式开关」时才是 body 回退，供 getOpenId 识别
-    req.allowBodyOpenid = identity.source === 'body';
 
     return next();
 }
 
-module.exports = { payMiddleware, h5SecurityMiddleware, resolveRequestOrigin };
+module.exports = { payMiddleware, h5SecurityMiddleware, requireWechatOpenId, resolveRequestOrigin };

@@ -144,7 +144,6 @@
 | 微搭低码小程序 | [weda-miniprogram.md](../frontend-integration/weda-miniprogram.md) |
 | H5 支付 | [web-h5.md](../frontend-integration/web-h5.md) |
 | Native 扫码 | [web-native.md](../frontend-integration/web-native.md) |
-| APP 支付 | [app.md](../frontend-integration/app.md) |
 
 ⚠️ **函数名注意**：前端代码中的函数名必须使用**集成创建后生成的真实函数名**（形如 `miniapp-wxpay-rwmx67sc`），而非默认的 `pay-common`。在控制台 → 集成中心 → 对应集成详情页中查看。
 

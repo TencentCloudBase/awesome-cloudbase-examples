@@ -18,6 +18,18 @@ function fail(res, msg, statusCode = 400) {
     res.status(statusCode).json({ code: -1, msg, data: null });
 }
 
+/**
+ * 当前登录身份（中间件已解析并挂到 req.user，缺失时兜底再解析一次）
+ *
+ * 查单 / 关单 / 退款 / 转账的归属校验都靠它，身份为空时钩子会直接拒绝。
+ * @param {Object} req
+ * @returns {{openid: ?string, uid: ?string}}
+ */
+function currentIdentity(req) {
+    if (req.user) return req.user;
+    return { openid: getOpenId(req), uid: getUid(req) };
+}
+
 // ========== 下单 ==========
 
 /**
@@ -120,11 +132,11 @@ exports.unifiedOrderNative = async (req, res) => {
 exports.queryOrderByOutTradeNo = async (req, res) => {
     try {
         if (!req.body.out_trade_no) return fail(res, 'out_trade_no 必填');
-        const result = await payService.queryOrderByOutTradeNo(req.body);
+        const result = await payService.queryOrderByOutTradeNo(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryOrderByOutTradeNo error:', err);
-        fail(res, err.message || '查单失败');
+        fail(res, err.message || '查单失败', err.status || 400);
     }
 };
 
@@ -134,11 +146,11 @@ exports.queryOrderByOutTradeNo = async (req, res) => {
 exports.queryOrderByTransactionId = async (req, res) => {
     try {
         if (!req.body.transaction_id) return fail(res, 'transaction_id 必填');
-        const result = await payService.queryOrderByTransactionId(req.body);
+        const result = await payService.queryOrderByTransactionId(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryOrderByTransactionId error:', err);
-        fail(res, err.message || '查单失败');
+        fail(res, err.message || '查单失败', err.status || 400);
     }
 };
 
@@ -150,11 +162,11 @@ exports.queryOrderByTransactionId = async (req, res) => {
 exports.closeOrder = async (req, res) => {
     try {
         if (!req.body.out_trade_no) return fail(res, 'out_trade_no 必填');
-        const result = await payService.closeOrder(req.body);
+        const result = await payService.closeOrder(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] closeOrder error:', err);
-        fail(res, err.message || '关闭订单失败');
+        fail(res, err.message || '关闭订单失败', err.status || 400);
     }
 };
 
@@ -168,11 +180,11 @@ exports.refund = async (req, res) => {
         const errors = validateRefundParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.refund(req.body);
+        const result = await payService.refund(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] refund error:', err);
-        fail(res, err.message || '退款失败');
+        fail(res, err.message || '退款失败', err.status || 400);
     }
 };
 
@@ -182,11 +194,11 @@ exports.refund = async (req, res) => {
 exports.queryRefund = async (req, res) => {
     try {
         if (!req.body.out_refund_no) return fail(res, 'out_refund_no 必填');
-        const result = await payService.queryRefund(req.body);
+        const result = await payService.queryRefund(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryRefund error:', err);
-        fail(res, err.message || '退款查询失败');
+        fail(res, err.message || '退款查询失败', err.status || 400);
     }
 };
 
@@ -269,19 +281,22 @@ exports.refundTrigger = (req, res) => _handleCallback(req, res, payService.handl
  */
 exports.transfer = async (req, res) => {
     try {
-        // 自动注入 openid（如果前端没传，从 JWT / x-wx-openid header 中解析）
+        // ⚠️ 收款人 openid 与 transfer_amount 都来自请求体：
+        //    - openid 只在前端没传时才用当前登录身份兜底（「给自己提现」的场景）
+        //    - 传了别人的 openid 也不会被改写，所以**权限判断必须靠
+        //      orderService.verifyTransferAllowed 钩子**，不能只看「已登录」
         if (!req.body.openid) {
             const openid = getOpenId(req);
             if (openid) {
                 req.body.openid = openid;
-                console.info('[Controller] 转账自动注入 openid:', openid);
+                console.info('[Controller] 转账未传 openid，使用当前登录身份:', openid);
             }
         }
 
         const errors = validateTransferParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.transfer(req.body);
+        const result = await payService.transfer(req.body, currentIdentity(req));
         // 把 mchId 注入 result.data 中透传给前端（wx.requestMerchantTransfer 需要）
         if (result && result.data) {
             result.data.mchId = config.payConfig.mchId;
@@ -289,7 +304,7 @@ exports.transfer = async (req, res) => {
         success(res, result);
     } catch (err) {
         console.error('[Controller] transfer error:', err);
-        fail(res, err.message || '商家转账失败');
+        fail(res, err.message || '商家转账失败', err.status || 400);
     }
 };
 
@@ -299,11 +314,11 @@ exports.transfer = async (req, res) => {
 exports.queryTransferBill = async (req, res) => {
     try {
         if (!req.body.out_bill_no) return fail(res, 'out_bill_no（商户单号）必填');
-        const result = await payService.queryTransferBill(req.body);
+        const result = await payService.queryTransferBill(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryTransferBill error:', err);
-        fail(res, err.message || '查询转账单失败');
+        fail(res, err.message || '查询转账单失败', err.status || 400);
     }
 };
 
@@ -313,11 +328,11 @@ exports.queryTransferBill = async (req, res) => {
 exports.queryTransferBillByNo = async (req, res) => {
     try {
         if (!req.body.transfer_bill_no) return fail(res, 'transfer_bill_no（微信转账单号）必填');
-        const result = await payService.queryTransferBillByNo(req.body);
+        const result = await payService.queryTransferBillByNo(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryTransferBillByNo error:', err);
-        fail(res, err.message || '查询转账单失败');
+        fail(res, err.message || '查询转账单失败', err.status || 400);
     }
 };
 
@@ -331,9 +346,10 @@ exports.transferTrigger = (req, res) => _handleCallback(req, res, payService.han
 // 实现在 middleware/auth.js：独立文件，不依赖 service → wechatpay-node-v3，
 // 便于单独跑鉴权回归测试。
 
-const { payMiddleware, h5SecurityMiddleware } = require('../middleware/auth');
+const { payMiddleware, h5SecurityMiddleware, requireWechatOpenId } = require('../middleware/auth');
 
 exports.payMiddleware = payMiddleware;
 exports.h5SecurityMiddleware = h5SecurityMiddleware;
+exports.requireWechatOpenId = requireWechatOpenId;
 
 

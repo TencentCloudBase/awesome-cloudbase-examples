@@ -29,6 +29,12 @@ ENV notifyURLPayURL=""
 ENV notifyURLRefundsURL=""
 ENV transferNotifyUrl=""
 
+# 唯一的防护闸门（on / off）：
+#   on  → orderService 的 4 个钩子全部生效（下单退款 400、查单退款转账 403），生产态
+#   off → 跳过 4 个钩子，金额与订单归属全由客户端决定（仅本地联调）
+# 不设即 on。⚠️ 不要改成 off —— 镜像一旦这么部署，任何人都能改金额、操作别人的订单。
+ENV PAY_GUARD=on
+
 # 拷贝包管理文件
 COPY package*.json /app/
 

@@ -106,7 +106,6 @@ miniprogram-cloudrun/
 | `/wxpay_order` | POST | JSAPI / 小程序支付下单 |
 | `/wxpay_order_h5` | POST | H5 支付下单 |
 | `/wxpay_order_native` | POST | Native 扫码支付 |
-| `/wxpay_order_app` | POST | APP 支付下单 |
 | `/wxpay_query_order_by_out_trade_no` | POST | 查询订单（商户单号） |
 | `/wxpay_query_order_by_transaction_id` | POST | 查询订单（微信单号） |
 | `/wxpay_close_order` | POST | 关闭订单 |

@@ -34,6 +34,36 @@ pay-common 模板架构
 ```javascript
 class OrderService {
   /**
+   * 下单前金额核定（⭐ 必做，不实现 = 一律拒单）
+   * @param {object} params - 下单参数（amount.total 来自客户端，不可信）
+   * @returns {{ok: boolean, reason?: string}} 只有 { ok: true } 才放行
+   */
+  async verifyAmount(params) {}
+
+  /**
+   * 退款前可退金额核定（⭐ 必做，不实现 = 一律拒绝退款）
+   * @param {object} params - 退款参数（amount.refund / amount.total 都来自客户端）
+   * @returns {{ok: boolean, reason?: string}} 只有 { ok: true } 才放行
+   */
+  async verifyRefundAmount(params) {}
+
+  /**
+   * 查单 / 关单 / 退款 / 查退款 前的归属校验（⭐ 必做，不实现 = 403）
+   * @param {object} params - out_trade_no / transaction_id / out_refund_no
+   * @param {?object} identity - 登录身份 { openid, uid }
+   * @returns {{ok: boolean, reason?: string}} 只有 { ok: true } 才放行
+   */
+  async verifyOrderOwner(params, identity) {}
+
+  /**
+   * 发起商家转账前的权限校验（⭐ 必做，不实现 = 403）
+   * @param {object} params - 收款 openid / transfer_amount 都来自请求体
+   * @param {?object} identity - 登录身份 { openid, uid }
+   * @returns {{ok: boolean, reason?: string}} 只有 { ok: true } 才放行
+   */
+  async verifyTransferAllowed(params, identity) {}
+
+  /**
    * 下单成功回调 - 写入待支付订单
    * @param {object} params - 下单参数（description, out_trade_no, amount, payer 等）
    * @param {?object} identity - 登录身份 { openid, uid }（来自鉴权中间件，三个下单入口都会传）
@@ -60,6 +90,85 @@ class OrderService {
 
 ---
 
+## 金额钩子：默认拒绝（fail closed）
+
+`verifyAmount` / `verifyRefundAmount` 模板默认 `return { ok: false }`，
+调用方 `payService` **只认 `{ ok: true }`** —— 返回 `null` / `{ ok: false }` 都会在**调用微信之前**抛错中断。
+
+| 现象 | 原因 |
+|---|---|
+| 下单返回 `400 订单金额校验失败：服务端未核定订单金额` | 预期行为：`verifyAmount` 还没实现 |
+| 退款返回 `400 退款金额校验失败：服务端未核定可退金额` | 预期行为：`verifyRefundAmount` 还没实现 |
+
+### 联调总开关：`PAY_GUARD=off`
+
+还没有商品表 / 订单表时，开这**一个**开关就能把整条链路跑通 —— 它一次跳过全部 4 个钩子
+（`verifyAmount` / `verifyRefundAmount` / `verifyOrderOwner` / `verifyTransferAllowed`）：
+
+| 使用方式 | 加在哪 | 生效时机 |
+|---|---|---|
+| 集成中心创建云函数 → 下载 example 联调 | 控制台 → 函数管理 → `pay-common` → 函数配置 → 环境变量 | 保存即生效，无需重新部署 |
+| example 代码 → CLI 部署 → 绑定后联调 | `cloudbaserc.json` → `functions[0].envVariables` | 部署时写入，改完需重新 deploy |
+| 云托管 | 控制台 → 服务配置 → 环境变量 | 保存后重启实例 |
+| 本地联调 | `npm run dev`（脚本已带 `PAY_GUARD=off`） | 启动即生效 |
+
+> 🔒 **只有 `PAY_GUARD=off` 才放行**，其它任何值（含 `on`、不设、拼错）都按生产处理。
+> `cloudbaserc.json` / `Dockerfile` 已预置 `PAY_GUARD=on`，部署后即使忘了改也保持拒绝。
+>
+> ⚠️ `off` 下金额与订单归属完全由客户端决定，**生产环境严禁使用**。
+
+**上线前必须**：① 确认 `PAY_GUARD=on` ② 实现全部 4 个钩子并返回 `{ ok: true }`。
+
+---
+
+## 归属钩子：默认拒绝（fail closed）
+
+鉴权中间件只回答「你是谁」，**不回答「这单是不是你的」**。下面这些接口在调微信之前都要过归属钩子，
+默认 `{ ok: false }` → 返回 **403**，且**不会调用微信**：
+
+| 接口 | 钩子 | 不校验的后果 |
+|---|---|---|
+| 查单（`out_trade_no` / `transaction_id`） | `verifyOrderOwner` | 拿别人的单号越权查单，批量遍历可探测订单是否存在与状态 |
+| 关单 | `verifyOrderOwner` | 关掉别人还没支付的订单 |
+| 退款 / 查退款 | `verifyOrderOwner` | 对别人的订单发起退款、查退款进度 |
+| 商家转账 | `verifyTransferAllowed` | 收款 `openid` 与金额都由请求体决定 → 把商户余额转给任意人 |
+
+```javascript
+// 参考实现：接自己的订单表
+async verifyOrderOwner(params, identity) {
+  const owner = this.resolveOwner(params, identity);   // 只认登录身份
+  if (!owner) return { ok: false, reason: '缺少登录身份' };
+
+  const where = params.out_trade_no
+    ? { out_trade_no: params.out_trade_no }
+    : { transaction_id: params.transaction_id };
+  const order = await db.collection('orders').where(where).get();
+  if (!order.data?.length) return { ok: false, reason: '订单不存在' };
+  if (order.data[0].owner !== owner) return { ok: false, reason: '订单不属于当前用户' };
+  return { ok: true };
+}
+
+async verifyTransferAllowed(params, identity) {
+  const operator = await db.collection('operators').where({ uid: identity?.uid }).get();
+  if (!operator.data?.length) return { ok: false, reason: '无转账权限' };
+  return { ok: true };
+}
+```
+
+### 报错与联调
+
+| 现象 | 原因 |
+|---|---|
+| `403 查单被拒绝：服务端未校验订单归属…` | 预期行为：`verifyOrderOwner` 还没实现 |
+| `403 转账被拒绝：服务端未校验转账权限…` | 预期行为：`verifyTransferAllowed` 还没实现 |
+
+联调用上面那**一个** `PAY_GUARD=off`，不额外区分金额与归属。
+> ⚠️ `off` 下 = 任何登录用户都能操作别人的订单、把商户余额转给任意 openid。
+
+**上线前必须**：① 确认 `PAY_GUARD=on` ② 实现 `verifyOrderOwner` / `verifyTransferAllowed`。
+
+---
+
 ## CloudBase 数据库参考实现
 
 ### 方案一：使用 CloudBase SDK（推荐）
@@ -81,7 +190,8 @@ class OrderService {
    * Step 1: 下单成功 → 写入待支付订单
    */
   async handlerUnified(params, identity) {
-    // 归属标识：identity.openid → identity.uid → params.payer.openid，取不到就是无主订单
+    // 归属标识：只认登录身份 identity.openid → identity.uid，取不到就是无主订单
+    // ⚠️ params.payer.openid 不再参与归属（请求体由客户端控制，可填别人的 openid）
     // resolveOwner 由模板 services/orderService.js 提供，自己实现时保留这个方法即可复用
     const owner = this.resolveOwner(params, identity)
     if (!owner) throw new Error('订单缺少归属身份，拒绝创建无主订单')
@@ -255,7 +365,7 @@ class OrderService {
   }
 
   async handlerUnified(params, identity) {
-    // 同上：resolveOwner 由模板提供，别直接拿 params.payer?.openid 当归属
+    // 同上：resolveOwner 由模板提供；只认 identity，别拿 params.payer?.openid 当归属
     const owner = this.resolveOwner(params, identity)
     if (!owner) throw new Error('订单缺少归属身份，拒绝创建无主订单')
 

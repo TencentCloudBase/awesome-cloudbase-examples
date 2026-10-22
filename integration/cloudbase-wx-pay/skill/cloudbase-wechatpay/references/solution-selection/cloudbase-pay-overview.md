@@ -64,18 +64,22 @@ CloudBase 微信支付生态
 
 ## 三、四种支付方式对比
 
-> 详细 API 层面对比见 [wechatpay-basic-payment](../wechatpay-basic-payment) skill。
+> 详细 API 层面对比见 `wechatpay-basic-payment` skill（独立技能包，不在本仓库）。
 
-| 维度 | JSAPI | H5 | Native（扫码） | APP |
-|------|:-----:|:--:|:-------------:|:---:|
-| **使用端** | 微信内（小程序/公众号） | 手机浏览器（非微信内） | PC 网页 | 移动 APP |
-| **必传 openid** | 是 | 否 | 否 | 否 |
-| **场景信息** | 可选 | **必填**（IP + h5_type） | IP 可选 | - |
-| **授权目录** | 不需要 | **必须配置** | - | - |
-| **AppID 类型** | 小程序/公众号 | 公众号 | 小程序或公众号 | 移动应用 |
-| **调起方式** | `wx.requestPayment` | 跳转微信中间页 | 展示二维码 | `wx.requestPayment`(APP) |
-| **结果确认** | 前端回调 | 前端回调 | **需轮询查单** | 前端回调 |
-| **pay-common 支持** | ✅ `/wxpay_order` | ✅ `/wxpay_order_h5` | ✅ `/wxpay_order_native` | ✅ `/wxpay_order_app` |
+| 维度 | JSAPI | H5 | Native（扫码） |
+|------|:-----:|:--:|:-------------:|
+| **使用端** | 微信内（小程序/公众号） | 手机浏览器（非微信内） | PC 网页 |
+| **必传 openid** | 是 | 否 | 否 |
+| **场景信息** | 可选 | **必填**（IP + h5_type） | IP 可选 |
+| **授权目录** | 不需要 | **必须配置** | - |
+| **AppID 类型** | 小程序/公众号 | 公众号 | 小程序或公众号 |
+| **调起方式** | `wx.requestPayment` | 跳转微信中间页 | 展示二维码 |
+| **结果确认** | 前端回调 | 前端回调 | **需轮询查单** |
+| **pay-common 支持** | ✅ `/wxpay_order` | ✅ `/wxpay_order_h5` | ✅ `/wxpay_order_native` |
+
+> 微信还有第四种「APP 支付」（原生 iOS/Android App），**不在本模板范围内**：
+> 它需要微信开放平台的「移动应用」AppID、`transactions_app` 接口、`Sign=WXPay` 专用签名字段，
+> 以及客户端原生集成微信 SDK。本模板只覆盖上表三种。
 
 ### AppID 类型对应关系
 
@@ -85,7 +89,6 @@ CloudBase 微信支付生态
 | JSAPI（公众号 H5） | 公众号 AppID | 微信公众平台 |
 | H5 | 公众号 AppID | 微信公众平台 |
 | Native 扫码 | 公众号或小程序 AppID | 均可 |
-| APP | 移动应用 AppID | 微信开放平台 |
 
 > **注意**：AppID 必须已在[商户平台](https://pay.weixin.qq.com/)绑定关联。
 
@@ -130,7 +133,6 @@ CloudBase 微信支付生态
 | JSAPI 下单 | ✅ | 小程序/公众号内支付 |
 | H5 下单 | ✅ | 含 Origin 白名单安全中间件 |
 | Native 扫码下单 | ✅ | 返回 code_url |
-| APP 下单 | ✅ | 独立签名格式（sign 非 paySign） |
 | 订单查询（商户单号/微信单号） | ✅ | 双路查询 |
 | 关闭订单 | ✅ | 自动检查状态防误关 |
 | 申请退款 | ✅ | 支持部分退款 |

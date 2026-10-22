@@ -2,13 +2,18 @@
 
 > 基于 `pay-common/README.md` §路由表。下单/查询/退款/转账路由前缀为 `/wxpay_*`，回调路由为 `/*Trigger`。
 
+> ⚠️ **查询 / 关单 / 退款 / 查退款 / 转账 / 转账单查询** 在鉴权之后还要过归属钩子
+> （`verifyOrderOwner` / `verifyTransferAllowed`），模板默认 `{ ok: false }` → **403**。
+> 联调设 `PAY_GUARD=off`；上线前实现钩子并返回 `{ ok: true }`。
+> 只有下单路由不受影响。
+
 ---
 
 ## 下单路由
 
 | 路由 | 方法 | 说明 | 必传字段 |
 |------|------|------|---------|
-| `/wxpay_order` | POST | JSAPI/小程序下单 | description, out_trade_no, amount.total(CNY分), payer.openid |
+| `/wxpay_order` | POST | JSAPI/小程序下单 | description, out_trade_no, amount.total(CNY分)；`payer.openid` **不需要传**，由平台注入的 `x-wx-openid` 覆盖 |
 | `/wxpay_order_h5` | POST | H5 下单 | 同上 + scene_info(payer_client_ip, h5_info) |
 | `/wxpay_order_native` | POST | Native 扫码下单 | 同上 + scene_info(payer_client_ip)，无需 openid |
 

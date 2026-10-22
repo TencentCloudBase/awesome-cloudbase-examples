@@ -255,17 +255,6 @@ H5 支付被拒根因
 └── h5_info.type 缺失或非法 → 必须是 Wap/iOS/Android/PC 之一
 ```
 
-### 模式 I：APP「支付签名错误」（APP 特有）
-
-> APP 支付签名与 JSAPI **完全不同**，详见 [app.md](../frontend-integration/app.md)。
-
-| 错误表现 | 可能原因 | 检查点 |
-|---------|---------|--------|
-| 调起支付界面闪退 | package 字段错误 | 是否为 `Sign=WXPay`？ |
-| 提示"签名错误" | sign 字段错误 | 是否叫 `sign`（非 `paySign`）？ |
-| 提示"参数错误" | 缺少 appId/partnerId | 这两个字段是否传递？ |
-| iOS 无法回调 | Universal Links 未配置 | 检查 Associated Domains |
-
 ---
 
 ## 五、转账类错误模式

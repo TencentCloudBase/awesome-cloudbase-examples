@@ -52,9 +52,50 @@ npm install
 
 ---
 
+#### ⭐ 联调必看：默认全部拒绝，开一个开关才能跑通
+
+`orderService` 的 4 个钩子**默认全部返回 `{ ok: false }`**（fail closed），所以不改代码直接跑会得到：
+
+| 操作 | 默认结果 |
+|---|---|
+| 下单 | `400 订单金额校验失败` |
+| 退款 | `400 退款金额校验失败` |
+| 查单 / 关单 / 退款 / 查退款 | `403 查单被拒绝…` |
+| 转账 / 查转账单 | `403 转账被拒绝…` |
+
+**这是预期行为**，不是配置错了 —— 模板没有商品表 / 订单表，核定不了金额与归属。
+
+联调阶段只要把 `PAY_GUARD` 设成 `off`（**全模板唯一的开关**）就能一次放行全部 4 个钩子。
+
+| `PAY_GUARD` | 4 个钩子 | 谁在用 |
+|---|---|---|
+| `off` | 全部跳过 | 本地 `npm run dev`；云上联调在控制台加 |
+| `on` | 全部拒绝 | `cloudbaserc.json` / `Dockerfile` 已预置 |
+| 不设 / 其他值 | 全部拒绝 | 安全默认（拼错也不会放开） |
+
+| 使用方式 | 开关加在哪 | 生效时机 |
+|---|---|---|
+| **① 控制台用集成中心创建云函数 → 下载 example 本地联调** | 控制台 → 函数管理 → `pay-common` → 函数配置 → 环境变量 → 新增 `PAY_GUARD=off` | 保存即生效，无需重新部署 |
+| **② 从 example 拿代码 → CLI 部署 → 绑定云函数后联调** | `cloudbaserc.json` → `functions[0].envVariables` 把 `"PAY_GUARD"` 改成 `"off"` → `tcb fn deploy pay-common` | 部署时写入；改完必须重新 deploy |
+| 云托管部署 | 控制台 → 服务配置 → 环境变量 | 保存后重启实例 |
+| 本地联调 | `npm run dev`（脚本已带 `PAY_GUARD=off`） | 启动即生效 |
+
+> ⚠️ 仓库自带的 `cloudbaserc.json` / `Dockerfile` **不预置该开关**（保持为空），
+> 避免别人直接部署就把金额与订单归属都交给客户端。需要联调的人按上表自己加。
+>
+> 🚨 开启后金额完全由客户端请求体决定（`amount.total` / `amount.refund`），订单归属也不再校验，
+> **生产环境严禁开启**：任何人都能下 1 分钱订单、发起任意金额退款、操作别人的订单。
+
+**上线前必须做两件事**：
+1. 确认 `PAY_GUARD=on`（部署配置已预置，只要不是 `off` 即可）
+2. 在 `verifyAmount` / `verifyRefundAmount` / `verifyOrderOwner` / `verifyTransferAllowed` 里接数据库核定，
+   通过时返回 `{ ok: true }`（参考 [order-service.md](../business-logic/order-service.md)）
+
+---
+
 #### 集成中心用户：跳过以下内容，直接到 Step 3
 
-集成中心会自动填写所有环境变量并部署。
+集成中心会自动填写所有商户凭证变量并部署（**但不会替你打开联调开关**，见上方一节）。
 
 #### CLI 部署 / 本地测试：变量列表参考
 
@@ -154,6 +195,10 @@ curl -X POST http://localhost:3000/wx-pay/wxpay_order \
 ```json
 {"code": 0, "msg": "success", "data": {"prepay_id": "wx201410272009395522657a690389285100", ...}}
 ```
+
+> ⚠️ 如果返回 `{"code": -1, "msg": "订单金额校验失败：服务端未核定订单金额…"}` —— 这不是配置错误，
+> 而是**金额校验的 fail closed 默认值**。联调阶段先按 Step 2 开 `PAY_GUARD=off`，
+> 再重新执行本请求。
 
 如果返回 `code: -1`，检查环境变量是否正确。可运行诊断脚本：
 
@@ -767,7 +812,62 @@ Page({
 > Web 测试页（React）见本地 `examples/react/`。
 > H5 / Native 端接入见 `references/frontend-integration/` 对应文档。
 
-## Step 6：接入业务逻辑（可选）
+## Step 6：接入业务逻辑（金额钩子必做，其余可选）
+
+> 🚨 **上线前必须**：确认 `PAY_GUARD=on`（不是 `off` 即可），并实现下面 4 个钩子。
+> 只做 `handlerUnifiedTrigger`（落库）而漏掉 `verifyAmount`，等于收款金额由客户端决定。
+
+### 6.1 金额钩子（必做，不实现 = 拒单）
+
+```javascript
+// services/orderService.js —— 默认返回 { ok: false }，必须自己实现
+async verifyAmount(params) {
+  const product = await db.collection('products').doc(params.product_id).get()
+  if (!product || !product.data?.length) return { ok: false, reason: '商品不存在' }
+  const expected = product.data[0].price * (params.quantity || 1)
+  if (params.amount?.total !== expected) {
+    return { ok: false, reason: `amount.total 应为 ${expected} 分` }
+  }
+  return { ok: true }          // ⚠️ 只有 { ok: true } 才放行，返回 null 也会被拒
+}
+
+async verifyRefundAmount(params) {
+  const order = await db.collection('orders').where({ out_trade_no: params.out_trade_no }).get()
+  if (!order.data?.length) return { ok: false, reason: '订单不存在' }
+  const refundable = order.data[0].amount - (order.data[0].refunded || 0)
+  if (params.amount.refund > refundable) {
+    return { ok: false, reason: `最多可退 ${refundable} 分` }
+  }
+  return { ok: true }
+}
+```
+
+### 6.2 归属钩子（必做，不实现 = 403）
+
+```javascript
+// 查单 / 关单 / 退款 / 查退款前：这单是不是你的
+async verifyOrderOwner(params, identity) {
+  const owner = this.resolveOwner(params, identity)      // 只认登录身份
+  if (!owner) return { ok: false, reason: '缺少登录身份' }
+
+  const where = params.out_trade_no
+    ? { out_trade_no: params.out_trade_no }
+    : { transaction_id: params.transaction_id }
+  const order = await db.collection('orders').where(where).get()
+  if (!order.data?.length) return { ok: false, reason: '订单不存在' }
+  if (order.data[0].owner !== owner) return { ok: false, reason: '订单不属于当前用户' }
+  return { ok: true }
+}
+
+// 商家转账前：这个人能不能发起转账（收款 openid / 金额都来自请求体）
+async verifyTransferAllowed(params, identity) {
+  const operator = await db.collection('operators').where({ uid: identity?.uid }).get()
+  if (!operator.data?.length) return { ok: false, reason: '无转账权限' }
+  return { ok: true }
+}
+```
+
+### 6.3 落库 / 发货（可选）
 
 编辑 `services/orderService.js`，将支付结果写入你的数据库：
 

@@ -1,6 +1,5 @@
 {
   "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
-  "version": "2.0",
   "envId": "{{env.TCB_ENV_ID}}",
   "functions": [
     {
@@ -13,6 +12,7 @@
       "installDependency": true,
       "dir": "./",
       "envVariables": {
+        "PAY_GUARD": "on",
         "signMode": "{{env.SIGN_MODE}}",
         "appId": "{{env.WX_APP_ID}}",
         "service_app_id": "{{env.SERVICE_APP_ID}}",

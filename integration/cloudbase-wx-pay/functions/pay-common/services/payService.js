@@ -7,9 +7,6 @@ const { signMode, verifyMode, payConfig, notifyUrlCallbackType } = require('../c
 const SdkStrategy = require('./strategies/sdkStrategy');
 const OrderService = require('./orderService');
 
-/** 金额校验钩子未实现时只提示一次，避免每笔订单刷屏 */
-let amountHookWarned = false;
-
 /**
  * 用服务端配置覆盖客户端可传的关键字段
  *
@@ -143,26 +140,23 @@ class PayService {
     /**
      * 下单前的金额校验（调用业务钩子 orderService.verifyAmount）
      *
-     * ⚠️ 模板默认放行：这是**演示模板**，没有商品表可供查价。
+     * 🚨 只认 `{ ok: true }`，其余一律拒绝（fail closed）。
+     *    早期实现只判断 `check.ok === false`，钩子返回 null 会被当成「不校验」放行 ——
+     *    而 amount.total 完全来自客户端，写 1 就是 1 分钱订单。
+     *
      *    接入数据库后必须在 `orderService.verifyAmount` 里按 product_id 查真实价格，
-     *    与 `params.amount.total` 比对，不一致返回 `{ ok: false, reason }`。
-     *    返回 `{ ok: false }` 时本方法抛错，下单在**调用微信之前**失败，
+     *    与 `params.amount.total` 比对，一致时返回 `{ ok: true }`。
+     *    校验不通过时本方法抛错，下单在**调用微信之前**失败，
      *    不会留下「微信侧已下单、本地金额错」的不一致状态。
      *
      * @param {Object} params - 下单参数
-     * @throws {Error} 钩子判定金额不合法时
+     * @throws {Error} 钩子未放行（返回 null / { ok: false }）时
      */
     async _verifyAmountBeforeOrder(params) {
         const check = await this.orderService.verifyAmount(params);
 
-        if (check && check.ok === false) {
-            throw new Error(`订单金额校验失败：${check.reason || 'amount.total 与商品价格不一致'}`);
-        }
-
-        if (!amountHookWarned) {
-            amountHookWarned = true;
-            console.warn('[PayService] ⚠️ 金额校验钩子未实现（orderService.verifyAmount），'
-                + 'amount.total 仍由客户端决定。上线前请按商品表覆盖，详见 README「金额校验」');
+        if (!check || check.ok !== true) {
+            throw new Error(`订单金额校验失败：${check?.reason || 'amount.total 与商品价格不一致'}`);
         }
     }
 
@@ -173,13 +167,17 @@ class PayService {
      * `refund <= total`（两个数都来自请求体），无法防「多退」。
      * 业务侧应按落库订单金额做上限校验。
      *
+     * 🚨 与下单侧同样只认 `{ ok: true }`：钩子返回 null 时不能当成「不校验」放行，
+     *    否则等于允许按客户端指定的任意金额多退。
+     *
      * @param {Object} params - 退款参数
-     * @throws {Error} 钩子判定退款金额不合法时
+     * @throws {Error} 钩子未放行（返回 null / { ok: false }）时
      */
     async _verifyRefundAmountBeforeRefund(params) {
         const check = await this.orderService.verifyRefundAmount(params);
-        if (check && check.ok === false) {
-            throw new Error(`退款金额校验失败：${check.reason || '退款金额超过订单可退金额'}`);
+
+        if (!check || check.ok !== true) {
+            throw new Error(`退款金额校验失败：${check?.reason || '退款金额超过订单可退金额'}`);
         }
     }
 
@@ -294,26 +292,91 @@ class PayService {
         return refundResult;
     }
 
+    // ========== 归属校验（查单 / 关单 / 退款 / 转账）==========
+
+    /**
+     * 订单归属校验（调用业务钩子 orderService.verifyOrderOwner）
+     *
+     * 🚨 鉴权中间件只回答「你是谁」，这里才回答「这单是不是你的」。
+     *    只认 `{ ok: true }`，其余一律抛 403 —— 包括钩子返回 null（= 未实现），
+     *    否则任何登录用户拿别人的 out_trade_no 就能查单 / 关单 / 退款。
+     *
+     * @param {Object} params - 请求参数（out_trade_no / transaction_id / out_refund_no）
+     * @param {Object|null} identity - 登录身份 { openid, uid }
+     * @param {string} action - 动作名，用于错误信息
+     * @throws {Error} status=403 的错误
+     */
+    async _verifyOrderOwnerBefore(params, identity, action) {
+        const check = await this.orderService.verifyOrderOwner(params, identity);
+
+        if (!check || check.ok !== true) {
+            const err = new Error(`${action}被拒绝：${check?.reason || '订单不属于当前用户'}`);
+            err.status = 403;
+            throw err;
+        }
+    }
+
+    /**
+     * 转账权限校验（调用业务钩子 orderService.verifyTransferAllowed）
+     *
+     * 收款人 openid 与金额都来自请求体，必须由业务侧判断调用者是否有权发起转账。
+     *
+     * @param {Object} params - 转账参数
+     * @param {Object|null} identity - 登录身份
+     * @throws {Error} status=403 的错误
+     */
+    async _verifyTransferAllowedBefore(params, identity) {
+        const check = await this.orderService.verifyTransferAllowed(params, identity);
+
+        if (!check || check.ok !== true) {
+            const err = new Error(`转账被拒绝：${check?.reason || '无转账权限'}`);
+            err.status = 403;
+            throw err;
+        }
+    }
+
+    /**
+     * 转账单查询的权限校验（同一套转账权限钩子，避免「能发起不能查 / 能查别人」）
+     * @param {Object} params - 转账单查询参数
+     * @param {Object|null} identity - 登录身份
+     * @throws {Error} status=403 的错误
+     */
+    async _verifyTransferQueryBefore(params, identity) {
+        const check = await this.orderService.verifyTransferAllowed(params, identity);
+
+        if (!check || check.ok !== true) {
+            const err = new Error(`查询转账单被拒绝：${check?.reason || '无查询权限'}`);
+            err.status = 403;
+            throw err;
+        }
+    }
+
     // ========== 查询 ==========
 
-    async queryOrderByOutTradeNo(params) {
+    async queryOrderByOutTradeNo(params, identity = null) {
+        await this._verifyOrderOwnerBefore(params, identity, '查单');
         return this.strategy.query(params);
     }
 
-    async queryOrderByTransactionId(params) {
+    async queryOrderByTransactionId(params, identity = null) {
+        await this._verifyOrderOwnerBefore(params, identity, '查单');
         return this.strategy.query(params);
     }
 
     // ========== 关闭订单 ==========
 
-    async closeOrder(params) {
+    async closeOrder(params, identity = null) {
+        await this._verifyOrderOwnerBefore(params, identity, '关闭订单');
         return this.strategy.close(params);
     }
 
     // ========== 退款 ==========
 
-    async refund(params) {
+    async refund(params, identity = null) {
         try {
+            // 归属校验：先确认这单是当前用户的，再谈金额
+            await this._verifyOrderOwnerBefore(params, identity, '退款');
+
             // 回调地址由服务端赋值，客户端不可指定
             forceServerValue(params, 'notify_url', payConfig.refundNotifyUrl);
 
@@ -335,7 +398,8 @@ class PayService {
         }
     }
 
-    async queryRefund(params) {
+    async queryRefund(params, identity = null) {
+        await this._verifyOrderOwnerBefore(params, identity, '查询退款');
         return this.strategy.queryRefund(params);
     }
 
@@ -350,8 +414,11 @@ class PayService {
      * 2. 系统错误/资金不足/频率超限时，必须用相同参数重试，勿更换单号
      * 3. user_name 字段规则：< 0.3元不填，≥ 2000元必填
      */
-    async transfer(params) {
+    async transfer(params, identity = null) {
         try {
+            // 转账权限校验：收款 openid 与金额都来自请求体，不能只看「已登录」
+            await this._verifyTransferAllowedBefore(params, identity);
+
             // 注入通用参数（appid / 回调地址由服务端赋值，客户端不可指定）
             // 根据 useServiceAccount 参数选择 appId（支持服务号/小程序双账号）
             if (params.useServiceAccount) {
@@ -387,14 +454,16 @@ class PayService {
     /**
      * 商户单号查询转账单（升级版）
      */
-    async queryTransferBill(params) {
+    async queryTransferBill(params, identity = null) {
+        await this._verifyTransferQueryBefore(params, identity);
         return this.strategy.queryTransferBill(params);
     }
 
     /**
      * 微信单号查询转账单（升级版）
      */
-    async queryTransferBillByNo(params) {
+    async queryTransferBillByNo(params, identity = null) {
+        await this._verifyTransferQueryBefore(params, identity);
         return this.strategy.queryTransferBillByNo(params);
     }
 

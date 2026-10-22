@@ -1,6 +1,5 @@
 {
   "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
-  "version": "2.0",
   "envId": "{{env.TCB_ENV_ID}}",
 
   "_comment": "此文件仅作为项目元数据索引，实际部署请进入各子目录使用独立的 cloudbaserc.json",

@@ -49,6 +49,9 @@ function loadControllerWithMockSdk(customMocks = {}, overrides = {}) {
     ].forEach(mod => { try { delete require.cache[require.resolve(mod)]; } catch {} });
 
     // 默认环境变量（可被 overrides 覆盖）
+    // PAY_GUARD=off 打开联调模式：4 个业务钩子默认 fail closed，
+    // 多数用例只测参数校验、字段覆盖、SDK 调用形态，与被拦的那一层无关。
+    // 「默认拒绝」的行为由下方 fail closed 用例单独覆盖。
     const baseEnv = {
         appId: 'wx_test_appid_123456',
         merchantId: '1234567890',
@@ -57,6 +60,7 @@ function loadControllerWithMockSdk(customMocks = {}, overrides = {}) {
         privateKey: TEST_PRIVATE_KEY,
         signMode: 'sdk',
         notifyURLPayURL: 'https://example.com/callback',
+        PAY_GUARD: 'off',
     };
     const envToSet = { ...baseEnv, ...overrides };
 
@@ -326,6 +330,99 @@ describe('Controller - 金额校验钩子 & 服务端字段覆盖', () => {
     });
 });
 
+describe('Controller - 金额校验 fail closed（未核定金额 = 拒绝交易）', () => {
+
+    const LOGIN_IDENTITY = { openid: 'o_login_openid_123456', uid: 'uid_login_123456' };
+
+    it('⛔ 默认（未开演示开关）：amount.total=1 的下单被拒，且不调用微信下单', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { transactions_jsapi: async () => { called = true; return { status: 200, data: { prepay_id: 'x' } }; } },
+            { PAY_GUARD: 'on' },
+        );
+
+        const { req, res } = mockReqRes({ description: '测试商品', amount: { total: 1 } });
+        req.user = { ...LOGIN_IDENTITY };
+        await ctrl.unifiedOrder(req, res);
+
+        assert.strictEqual(res._getStatusCode(), 400);
+        assert.ok(res._getBody().msg.includes('金额校验失败'));
+        assert.strictEqual(called, false, '金额未经服务端核定前不得调用微信下单');
+    });
+
+    it('⛔ 默认（未开演示开关）：refund={refund:999999,total:999999} 被拒，且不调用微信退款', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { refunds: async () => { called = true; return { status: 200, data: { refund_id: 'x' } }; } },
+            { PAY_GUARD: 'on' },
+        );
+
+        // 归属钩子排在金额钩子前面，这里单独放行归属，才测得到金额这一层
+        const OrderService = require('../services/orderService');
+        const origOwner = OrderService.prototype.verifyOrderOwner;
+        OrderService.prototype.verifyOrderOwner = async () => ({ ok: true });
+
+        try {
+            const { req, res } = mockReqRes({
+                out_trade_no: 'O001',
+                out_refund_no: 'R001',
+                amount: { refund: 999999, total: 999999 },
+            });
+            await ctrl.refund(req, res);
+
+            assert.strictEqual(res._getStatusCode(), 400);
+            assert.ok(res._getBody().msg.includes('退款金额校验失败'));
+            assert.strictEqual(called, false, '可退金额未经服务端核定前不得调用微信退款');
+        } finally {
+            OrderService.prototype.verifyOrderOwner = origOwner;
+        }
+    });
+
+    it('⛔ 业务钩子返回 null（"不校验"）也必须被拒：null 不等于放行', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { transactions_jsapi: async () => { called = true; return { status: 200, data: { prepay_id: 'x' } }; } },
+            { PAY_GUARD: 'on' },
+        );
+
+        const OrderService = require('../services/orderService');
+        const origVerify = OrderService.prototype.verifyAmount;
+        OrderService.prototype.verifyAmount = async () => null;
+
+        try {
+            const { req, res } = mockReqRes({ description: '测试商品', amount: { total: 100 } });
+            req.user = { ...LOGIN_IDENTITY };
+            await ctrl.unifiedOrder(req, res);
+            assert.strictEqual(res._getStatusCode(), 400);
+            assert.strictEqual(called, false, '钩子返回 null 时调用方必须按失败处理');
+        } finally {
+            OrderService.prototype.verifyAmount = origVerify;
+        }
+    });
+
+    it('✅ 业务钩子返回 { ok: true } 才放行', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { transactions_jsapi: async () => { called = true; return { status: 200, data: { prepay_id: 'x' } }; } },
+            { PAY_GUARD: 'on' },
+        );
+
+        const OrderService = require('../services/orderService');
+        const origVerify = OrderService.prototype.verifyAmount;
+        OrderService.prototype.verifyAmount = async () => ({ ok: true });
+
+        try {
+            const { req, res } = mockReqRes({ description: '测试商品', amount: { total: 100 } });
+            req.user = { ...LOGIN_IDENTITY };
+            await ctrl.unifiedOrder(req, res);
+            assert.strictEqual(res._getStatusCode(), 200);
+            assert.strictEqual(called, true);
+        } finally {
+            OrderService.prototype.verifyAmount = origVerify;
+        }
+    });
+});
+
 describe('Controller - unifiedOrderNative', () => {
     it('合法 body → success + code_url', async () => {
         const ctrl = loadControllerWithMockSdk();
@@ -361,6 +458,154 @@ describe('Controller - unifiedOrderNative', () => {
             );
         } finally {
             OrderService.prototype.handlerUnified = origHandler;
+        }
+    });
+});
+
+// ============================================================
+//  归属校验 fail closed（鉴权 ≠ 授权）
+// ============================================================
+
+describe('Controller - 归属校验 fail closed（403）', () => {
+
+    const SELF = { openid: 'o_login_openid_123456', uid: 'uid_login_123456' };
+    const DENY = { PAY_GUARD: 'on' };
+
+    it('⛔ 查单：默认拒绝，且不调用微信', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { query: async () => { called = true; return { status: 200, data: {} }; } },
+            DENY,
+        );
+        const { req, res } = mockReqRes({ out_trade_no: 'OTHER_USER_ORDER' });
+        req.user = { ...SELF };
+
+        await ctrl.queryOrderByOutTradeNo(req, res);
+
+        assert.strictEqual(res._getStatusCode(), 403);
+        assert.ok(res._getBody().msg.includes('查单被拒绝'));
+        assert.strictEqual(called, false, '归属未确认前不得调用微信');
+    });
+
+    it('⛔ 关单：默认拒绝，别人的待支付单关不掉', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { close: async () => { called = true; return { status: 200, data: {} }; } },
+            DENY,
+        );
+        const { req, res } = mockReqRes({ out_trade_no: 'OTHER_USER_ORDER' });
+        req.user = { ...SELF };
+
+        await ctrl.closeOrder(req, res);
+
+        assert.strictEqual(res._getStatusCode(), 403);
+        assert.strictEqual(called, false);
+    });
+
+    it('⛔ 退款：默认拒绝，且金额钩子不会被触发', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { refunds: async () => { called = true; return { status: 200, data: {} }; } },
+            DENY,
+        );
+        const { req, res } = mockReqRes({
+            out_trade_no: 'OTHER_USER_ORDER',
+            out_refund_no: 'R001',
+            amount: { refund: 50, total: 100 },
+        });
+        req.user = { ...SELF };
+
+        await ctrl.refund(req, res);
+
+        assert.strictEqual(res._getStatusCode(), 403);
+        assert.ok(res._getBody().msg.includes('退款被拒绝'));
+        assert.strictEqual(called, false);
+    });
+
+    it('⛔ 查退款：默认拒绝', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { find_refunds: async () => { called = true; return { status: 200, data: {} }; } },
+            DENY,
+        );
+        const { req, res } = mockReqRes({ out_refund_no: 'OTHER_USER_REFUND' });
+        req.user = { ...SELF };
+
+        await ctrl.queryRefund(req, res);
+
+        assert.strictEqual(res._getStatusCode(), 403);
+        assert.strictEqual(called, false);
+    });
+
+    it('⛔ 转账：收款 openid 与金额由请求体决定，默认拒绝', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { transfer: async () => { called = true; return { status: 200, data: {} }; } },
+            DENY,
+        );
+        const { req, res } = mockReqRes({
+            out_bill_no: 'BILL001',
+            transfer_scene_id: '1000',
+            openid: 'o_victim_openid_1234',
+            transfer_amount: 2000,
+            transfer_remark: '备注',
+            transfer_scene_report_infos: [{ info_type: 'ACTIVITY_NAME', info_value: '测试' }],
+        });
+        req.user = { ...SELF };
+
+        await ctrl.transfer(req, res);
+
+        assert.strictEqual(res._getStatusCode(), 403);
+        assert.ok(res._getBody().msg.includes('转账被拒绝'));
+        assert.strictEqual(called, false, '权限未确认前不得发起转账');
+    });
+
+    it('⛔ 查询转账单：默认拒绝（能查别人转账记录同属越权）', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { queryTransferBill: async () => { called = true; return { status: 200, data: {} }; } },
+            DENY,
+        );
+        const { req, res } = mockReqRes({ out_bill_no: 'BILL001' });
+        req.user = { ...SELF };
+
+        await ctrl.queryTransferBill(req, res);
+
+        assert.strictEqual(res._getStatusCode(), 403);
+        assert.strictEqual(called, false);
+    });
+
+    it('⛔ PAY_GUARD=on（部署配置默认值）：查单仍 403', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk(
+            { query: async () => { called = true; return { status: 200, data: {} }; } },
+            { PAY_GUARD: 'on' },
+        );
+        const { req, res } = mockReqRes({ out_trade_no: 'ORDER001' });
+        req.user = { ...SELF };
+
+        await ctrl.queryOrderByOutTradeNo(req, res);
+
+        assert.strictEqual(res._getStatusCode(), 403, '生产环境即使误配开关也必须拒绝');
+        assert.strictEqual(called, false);
+    });
+
+    it('✅ 钩子返回 { ok: true } 才放行（查单 200）', async () => {
+        const ctrl = loadControllerWithMockSdk(
+            { query: async () => ({ status: 200, data: { trade_state: 'SUCCESS' } }) },
+            DENY,
+        );
+        const OrderService = require('../services/orderService');
+        const orig = OrderService.prototype.verifyOrderOwner;
+        OrderService.prototype.verifyOrderOwner = async () => ({ ok: true });
+
+        try {
+            const { req, res } = mockReqRes({ out_trade_no: 'ORDER001' });
+            req.user = { ...SELF };
+            await ctrl.queryOrderByOutTradeNo(req, res);
+            assert.strictEqual(res._getStatusCode(), 200);
+        } finally {
+            OrderService.prototype.verifyOrderOwner = orig;
         }
     });
 });

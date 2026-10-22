@@ -87,8 +87,7 @@ cloudbase-wechatpay/
 │   │   ├── miniprogram-cloud-run.md          # 小程序 - 云托管直连
 │   │   ├── web-h5.md                         # H5 页面（手机浏览器）
 │   │   ├── web-native.md                     # PC 扫码支付
-│   │   ├── weda-miniprogram.md               # 微搭小程序集成
-│   │   └── app.md                            # APP 端
+│   │   └── weda-miniprogram.md               # 微搭小程序集成
 │   ├── quick-reference/
 │   │   ├── concepts.md                       # 核心概念与术语速查
 │   │   └── env-quick-ref.md                  # 环境变量速查表
@@ -365,7 +364,7 @@ description: >
 | `miniprogram-cloud-run.md` | cloudrun Demo README + `examples/miniprogram-cloudrun/` | - |
 | `web-h5.md` | README + `examples/react/` | 三种方式对比 |
 | `web-native.md` | README + `examples/react/` | 三种方式对比 |
-| `app.md` | README APP 支付章节 | wechatpay-basic-payment 引用 |
+
 | `order-service.md` | README Step 6 + 方案对比分析（数据库设计） | - |
 | `transfer.md` | README 商家转账 + 商家转账分析 + 开发注意事项 §2.5 | - |
 | `security-checklist.md` | 开发注意事项 §6 安全红线 | - |

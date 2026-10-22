@@ -1,12 +1,13 @@
 /**
  * CloudBase Auth 工具
  *
- * 身份来源只有两个，其余一概不认：
+ * 身份来源只有两个，其余一概不认（按路由区分用哪一个，不做多来源合并）：
  *
- *   1. `x-wx-openid` —— 小程序经 `wx.cloud.callHTTPFunction` / `callContainer`
- *      调用时由平台网关注入。前提：请求确实经过平台网关（公网直连时可伪造）。
- *   2. `Authorization: Bearer <JWT>` —— 云 API 网关已验证签名后转发，
- *      函数内只解码 payload，不再验签（也没有公钥可验）。
+ *   1. 小程序路由（`/wxpay_order`、`/wxpay_order_native`、退款、转账）：
+ *      `x-wx-openid` —— `wx.cloud.callHTTPFunction` / `callContainer` 由平台网关注入。
+ *      前提：请求确实经过平台网关（公网直连时可伪造）。
+ *   2. Web / App 路由（`/wxpay_order_h5`）：`Authorization: Bearer <JWT>` —— 云 API 网关
+ *      已验证签名后转发，函数内只解码 payload，不再验签（也没有公钥可验）。
  *
  * ⚠️ 「不验签」不等于「不校验」：payload 必须含主体标识、exp 未过期、
  *    iss 符合预期（如配置），否则任何人拼一个 `Bearer a.<base64('{}')>.b` 就能过鉴权。
@@ -15,7 +16,10 @@
  *   - `x-tcb-integration-id` 等自定义 header：客户端可任意添加
  *   - `SCF_RUNTIME` / `TENCENTCLOUD_RUNENV`：云函数内恒存在，无法证明「本次请求经过了网关」
  *   - `x-wx-source` / `x-authmethod`：同样是客户端可伪造的普通 header
- *   - `body.payer.openid`：请求体字段，客户端可填别人的 openid（默认关闭，见下）
+ *   - `body.payer.openid`：请求体字段，客户端可填别人的 openid
+ *     （**已连同 `ALLOW_BODY_OPENID` 开关一并删除**：请求体由调用方完全控制，
+ *      采信它等于「允许调用方自己指定我是谁」，且 `orderService.resolveOwner`
+ *      也曾把它当归属候选，会污染落库的订单归属）
  */
 
 /** CloudBase openid 形态：10-64 位安全字符，避免把任意字符串当身份往下传 */
@@ -50,21 +54,6 @@ function normalizeUid(value) {
     if (typeof value !== 'string') return null;
     const trimmed = value.trim();
     return UID_RE.test(trimmed) ? trimmed : null;
-}
-
-/**
- * body.payer.openid 回退开关（**默认关闭**）
- *
- * 🚨 该值由客户端填写，开启等于「允许调用方自己指定我是谁」。
- *    必须同时满足两个条件才生效：
- *      1. `ALLOW_BODY_OPENID === 'true'`（显式开启，不能靠默认值）
- *      2. 已配置 `corsAllowOrigin`（说明是可控的浏览器来源，而非公网匿名直连）
- *
- * @returns {boolean}
- */
-function isBodyOpenIdFallbackEnabled() {
-    return process.env.ALLOW_BODY_OPENID === 'true'
-        && !!(process.env.corsAllowOrigin || '').trim();
 }
 
 /**
@@ -158,17 +147,18 @@ function parseCloudBaseAuth(req) {
 /**
  * 解析请求身份（唯一入口：中间件与 getOpenId 都用这一份契约）
  *
- * 优先级：
- *   1. 平台注入的 `x-wx-openid`
+ * 只认两个服务端可验证来源：
+ *   1. 平台注入的 `x-wx-openid`（小程序调用，网关注入）
  *   2. Bearer JWT 的 `provider_sub`（微信 openid），`sub` 作为 CloudBase UID
- *   3. `body.payer.openid` —— **仅当调用方显式允许**（见 isBodyOpenIdFallbackEnabled）
+ *
+ * 🚨 已经没有第三层「body.payer.openid 回退」：
+ *    请求体由调用方完全控制，采信它 = 允许调用方自己指定我是谁。
+ *    订单归属同理，`orderService.resolveOwner` 只认 identity，不看 `params.payer`。
  *
  * @param {Object} req - Express request 对象
- * @param {Object} [options]
- * @param {boolean} [options.allowBodyOpenid=false] - 是否允许 body 回退
  * @returns {{openid: string|null, uid: string|null, source: string|null, authInfo: Object|null}}
  */
-function resolveAuthIdentity(req, options = {}) {
+function resolveAuthIdentity(req) {
     // 1) 平台注入：callHTTPFunction / callContainer，最直接可信
     const wxOpenId = normalizeOpenId(req.headers['x-wx-openid']);
     if (wxOpenId) {
@@ -184,15 +174,6 @@ function resolveAuthIdentity(req, options = {}) {
             source: 'bearer',
             authInfo,
         };
-    }
-
-    // 3) body 回退：客户端可伪造，必须显式开关 + 已配置 Origin 白名单
-    if (options.allowBodyOpenid && isBodyOpenIdFallbackEnabled()) {
-        const bodyOpenId = normalizeOpenId(req.body?.payer?.openid);
-        if (bodyOpenId) {
-            console.warn('[CloudBaseAuth] ⚠️ 采信 body.payer.openid（ALLOW_BODY_OPENID 已开启，生产不应开启）');
-            return { openid: bodyOpenId, uid: null, source: 'body', authInfo: null };
-        }
     }
 
     return { openid: null, uid: null, source: null, authInfo: null };
@@ -214,7 +195,7 @@ function getOpenId(req) {
     const mounted = normalizeOpenId(req.user?.openid);
     if (mounted) return mounted;
 
-    const identity = resolveAuthIdentity(req, { allowBodyOpenid: !!req.allowBodyOpenid });
+    const identity = resolveAuthIdentity(req);
     return identity.openid;
 }
 
@@ -235,14 +216,13 @@ function getUid(req) {
     const mounted = normalizeUid(req.user?.uid);
     if (mounted) return mounted;
 
-    const identity = resolveAuthIdentity(req, { allowBodyOpenid: false });
+    const identity = resolveAuthIdentity(req);
     return identity.uid;
 }
 
 module.exports = {
     parseCloudBaseAuth,
     resolveAuthIdentity,
-    isBodyOpenIdFallbackEnabled,
     getOpenId,
     getUid,
     normalizeOpenId,

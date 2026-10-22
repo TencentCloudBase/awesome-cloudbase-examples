@@ -9,13 +9,15 @@
  * 以及三类「看起来有校验、实际可绕过」的问题：
  *   - Bearer 只 base64 解码不校验内容（`Bearer a.<base64('{}')>.b`）
  *   - H5 缺少 Origin 时直接放行（浏览器同源 POST 不带 Origin）
- *   - 无条件采信 body.payer.openid
+ *
+ * 另有一层已**整层删除**：body.payer.openid 作为身份来源（含 ALLOW_BODY_OPENID 开关）。
+ * 现在身份只从「平台注入 x-wx-openid」或「网关验过的 Bearer」取，下面的用例把这一点钉住。
  */
 
 const { test } = require('node:test');
 const assert = require('node:assert');
 
-const { payMiddleware, h5SecurityMiddleware } = require('../middleware/auth');
+const { payMiddleware, h5SecurityMiddleware, requireWechatOpenId } = require('../middleware/auth');
 const { getOpenId, getUid } = require('../utils/cloudbaseAuth');
 
 function mockReq({ headers = {}, body = {}, path = '/wxpay_order' } = {}) {
@@ -104,11 +106,14 @@ test('⚠️ Bearer 已过期：拒绝', () => {
     assert.strictEqual(res.statusCode, 401);
 });
 
-test('⚠️ Bearer 只有 sub 没有 provider_sub：拒绝（支付写接口必须有 openid）', () => {
+test('Bearer 只有 sub 没有 provider_sub：放行，身份按 UID（与 H5 路由口径一致）', () => {
     const req = mockReq({ headers: { authorization: bearer({ sub: 'uid_only_123456' }) } });
-    const { passed, res } = run(payMiddleware, req);
-    assert.strictEqual(passed, false, '放行后 getOpenId 取不到 openid，会在参数校验层变成「参数错误」');
-    assert.strictEqual(res.statusCode, 401);
+    const { passed } = run(payMiddleware, req);
+    assert.strictEqual(passed, true, '同一个 token 不能在 H5 放行、在小程序路由被判成匿名');
+    assert.strictEqual(req.user.openid, null);
+    assert.strictEqual(req.user.uid, 'uid_only_123456');
+    assert.strictEqual(getOpenId(req), null);
+    assert.strictEqual(getUid(req), 'uid_only_123456');
 });
 
 test('⚠️ Bearer iss 与预期不符：拒绝', () => {
@@ -119,13 +124,30 @@ test('⚠️ Bearer iss 与预期不符：拒绝', () => {
     assert.strictEqual(passed, false);
 });
 
-test('⚠️ payMiddleware 不接受 body.payer.openid（即使开了开关）', () => {
+test('⚠️ payMiddleware 不接受 body.payer.openid（该来源与开关均已删除）', () => {
     const req = mockReq({
         body: { payer: { openid: 'o_forged_openid_1234' } },
         headers: { authorization: bearer({ sub: 'uid_only_123456' }) },
     });
-    const { passed } = withEnv({ ALLOW_BODY_OPENID: 'true', corsAllowOrigin: 'https://a.com' }, () => run(payMiddleware, req));
-    assert.strictEqual(passed, false, '高风险写接口不能采信客户端传的 openid');
+    // 即使残留 ALLOW_BODY_OPENID / corsAllowOrigin 配置也不再有任何效果
+    withEnv({ ALLOW_BODY_OPENID: 'true', corsAllowOrigin: 'https://a.com' }, () => run(payMiddleware, req));
+    assert.strictEqual(req.user.openid, null, '高风险写接口不能采信客户端传的 openid');
+    assert.strictEqual(getOpenId(req), null);
+});
+
+test('JSAPI 下单：只有 UID 时 403 且说明缺 provider_sub（不是 401 匿名）', () => {
+    const req = mockReq({ headers: { authorization: bearer({ sub: 'uid_only_123456' }) } });
+    run(payMiddleware, req);
+    const { passed, res } = run(requireWechatOpenId, req);
+    assert.strictEqual(passed, false);
+    assert.strictEqual(res.statusCode, 403);
+    assert.match(res.body.msg, /provider_sub/);
+});
+
+test('JSAPI 下单：有 openid 时放行', () => {
+    const req = mockReq({ headers: { authorization: bearer({ provider_sub: 'o_from_jwt_123456' }) } });
+    run(payMiddleware, req);
+    assert.strictEqual(run(requireWechatOpenId, req).passed, true);
 });
 
 test('⚠️ 回归：伪造 x-tcb-integration-id 不再放行', () => {
@@ -217,7 +239,7 @@ test('H5：Bearer 只有 sub（无 provider_sub）→ 放行，归属用 UID', (
     assert.strictEqual(getOpenId(req), null, '没有 openid 就是没有，不能拿 UID 冒充');
 });
 
-test('⚠️ H5：UID-only 身份不触发 body.payer.openid 回退', () => {
+test('⚠️ H5：UID-only 身份不被 body.payer.openid 顶替', () => {
     const req = mockReq({
         headers: { origin: H5_ORIGIN, authorization: bearer({ sub: 'uid_only_123456' }) },
         body: { payer: { openid: 'o_forged_openid_1234' } },
@@ -228,8 +250,8 @@ test('⚠️ H5：UID-only 身份不触发 body.payer.openid 回退', () => {
         () => run(h5SecurityMiddleware, req)
     );
     assert.strictEqual(passed, true);
-    assert.strictEqual(req.allowBodyOpenid, false, '已有 Bearer 身份，不能再用 body 里的 openid 覆盖');
     assert.strictEqual(getOpenId(req), null, 'body.openid 不能变成登录身份');
+    assert.strictEqual(getUid(req), 'uid_only_123456', '身份仍以 Bearer 的 sub 为准');
 });
 
 test('H5：匿名调用默认拒绝，ALLOW_ANONYMOUS_H5=true 才放行', () => {
@@ -255,45 +277,41 @@ test('⚠️ H5：默认不采信 body.payer.openid（客户端可伪造）', ()
     assert.strictEqual(passed, false, '没有登录态就必须 401，不能拿 body 里的 openid 当身份');
 });
 
-test('H5：ALLOW_BODY_OPENID=true + 已配 Origin 白名单 才允许 body 回退', () => {
+test('⛔ H5：body.payer.openid 永不作为身份来源（ALLOW_BODY_OPENID 开关已删除）', () => {
     const build = () => mockReq({
         headers: { origin: H5_ORIGIN },
         body: { payer: { openid: 'o_h5_openid_123456' } },
         path: '/wxpay_order_h5',
     });
 
-    const opened = withEnv(
+    // 残留的旧开关配置也不再生效：只有 Origin、没有登录态 ⇒ 401
+    for (const env of [
         { corsAllowOrigin: H5_ORIGIN, ALLOW_BODY_OPENID: 'true' },
-        () => run(h5SecurityMiddleware, build())
-    );
-    assert.strictEqual(opened.passed, true);
-
-    const closed = withEnv(
         { corsAllowOrigin: H5_ORIGIN, ALLOW_BODY_OPENID: undefined },
-        () => run(h5SecurityMiddleware, build())
-    );
-    assert.strictEqual(closed.passed, false, '默认关闭：body.openid 不能作为身份来源');
+    ]) {
+        const { passed, res } = withEnv(env, () => run(h5SecurityMiddleware, build()));
+        assert.strictEqual(passed, false, 'body.openid 不能作为身份来源');
+        assert.strictEqual(res.statusCode, 401);
+    }
 });
 
 // ========== getOpenId ==========
 
-test('getOpenId：默认不采信 body.payer.openid（客户端可伪造）', () => {
+test('getOpenId：body.payer.openid 一律不采信（客户端可伪造）', () => {
     const req = mockReq({ body: { payer: { openid: 'o_forged_openid_1234' } } });
     assert.strictEqual(getOpenId(req), null);
 });
 
-test('getOpenId：body 回退需要显式开关 ALLOW_BODY_OPENID + corsAllowOrigin', () => {
+test('getOpenId：即使残留 ALLOW_BODY_OPENID + corsAllowOrigin 也取不到 body 身份', () => {
     const build = () => {
         const req = mockReq({ body: { payer: { openid: 'o_h5_openid_123456' } } });
+        // 旧版本靠这个字段把 body 回退放行，现在它已被忽略
         req.allowBodyOpenid = true;
         return req;
     };
 
     const opened = withEnv({ ALLOW_BODY_OPENID: 'true', corsAllowOrigin: H5_ORIGIN }, () => getOpenId(build()));
-    assert.strictEqual(opened, 'o_h5_openid_123456');
-
-    const closed = withEnv({ ALLOW_BODY_OPENID: undefined, corsAllowOrigin: H5_ORIGIN }, () => getOpenId(build()));
-    assert.strictEqual(closed, null, '只置 allowBodyOpenid 不够，必须显式开环境变量');
+    assert.strictEqual(opened, null, 'body 回退已整层删除');
 });
 
 test('getOpenId：中间件放行后必能取到身份（契约一致）', () => {
