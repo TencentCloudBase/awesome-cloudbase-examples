@@ -42,8 +42,8 @@
 
 | # | 规则 | 说明 |
 |---|------|------|
-| 13 | **金额必须来自后端** | 前端不可传金额，应由服务端根据商品 ID 从数据库查询确定 |
-| 14 | **回调金额校验** | `orderService.handlerUnifiedTrigger` 中比对回调金额与订单金额，防止篡改 |
+| 13 | **金额必须来自后端** | 前端不可传金额，应由服务端根据商品 ID 从数据库查询确定。模板已提供下单前钩子 `orderService.verifyAmount(params)`（**默认返回 null = 不校验**，必须在接入商品表后实现），返回 `{ ok: false }` 会拒绝下单 |
+| 14 | **回调金额校验** | `orderService.handlerUnifiedTrigger` 中比对回调金额与订单金额，防止篡改（模板该方法目前是空实现，需自行补齐） |
 | 15 | **转账 mchId 动态获取** | 不得硬编码，必须从后端转账接口返回值中获取 |
 | 16 | **APP 签名字段正确** | APP 支付 package=`Sign=WXPay`、sign（非 paySign）、必传 appId + partnerId |
 | 17 | **H5 场景信息完整** | H5 支付必传 `scene_info.payer_client_ip` + `h5_info.type` |
@@ -57,6 +57,7 @@
 
 - [ ] `.env` 所有必填变量已填入生产值
 - [ ] `signMode` 与部署方式匹配（云函数+集成中心=gateway；云托管=sdk）
+- [ ] gateway 模式已设 `TRUST_GATEWAY_CALLBACK=true`，且**函数无公网入口**（回调只经集成中心转发）；不设则回调走自验签、会因缺签名头 400
 - [ ] 回调 URL 正确（SDK→自己的域名，Gateway→集成中心域名）
 - [ ] `privateKey` 格式验证通过（运行 `check_pem_format.py`）
 - [ ] `wxPayPublicKey` 是**微信支付公钥**（不是商户 API 公钥）
@@ -77,7 +78,7 @@
 ### 5.3 部署验证 ☑️
 
 - [ ] 部署命令执行成功（`tcb fn deploy` / `tcb cloudrun deploy`）
-- [ ] 云函数已开启 **HTTP 访问服务**
+- [ ] 云函数已开启 **HTTP 访问服务**（⚠️ 仅 `signMode=sdk` 自建公网回调需要；`gateway` + `TRUST_GATEWAY_CALLBACK=true` 时**不要**开放公网入口，否则等于暴露一个免签名的「支付成功」接口）
 - [ ] 环境变量生效（可通过健康接口或日志确认）
 - [ ] `validate_env.sh` 脚本全部 PASS
 - [ ] 测试下单接口返回 `code: 0`
@@ -122,9 +123,11 @@
 
 ```
 攻击者修改前端请求:
-amount: { total: 1 } → amount: { total: 1 }   // 将 100 分改为 1 分
+amount: { total: 100 } → amount: { total: 1 }   // 将 100 分改为 1 分
 
-防御: orderService.handlerUnifiedTrigger 中比对回调金额与原始订单金额
+防御（两层）:
+1. 下单前：orderService.verifyAmount 按 product_id 查真实价格比对（模板已留钩子，默认不校验）
+2. 回调时：orderService.handlerUnifiedTrigger 比对回调金额与原始订单金额
 ```
 
 ### 案例 2：回调重放导致双重发货

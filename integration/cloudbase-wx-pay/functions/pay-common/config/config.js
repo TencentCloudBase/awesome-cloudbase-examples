@@ -10,6 +10,22 @@ const config = {
     // 注意：两种模式下，主动请求（下单/退款/转账）都走 SDK 自签名直连微信
     signMode: process.env.signMode || 'gateway',
 
+    /**
+     * 是否信任「集成中心网关已验签并解密」的回调明文（body.ParsedContent）
+     *
+     * 🚨 默认 false。曾经的漏洞：只要请求体里有 ParsedContent 就直接采信明文，
+     *    连 verifySign 里的 5 分钟时间戳检查都一起跳过 —— 任何能访问函数端口的人
+     *    发 {"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}
+     *    就是一笔「支付成功」。
+     *
+     * 开启前提（两个都要满足）：
+     *   1. 回调只经集成中心网关转发，**函数没有公网入口**（不要为它开 HTTP 访问服务）
+     *   2. 确认集成中心确实代验签（signMode=gateway 的场景）
+     *
+     * 不开启时：gateway 模式退化为「自验签 → 解密」，明文只作为忽略日志输出。
+     */
+    trustGatewayCallback: process.env.TRUST_GATEWAY_CALLBACK === 'true',
+
     // 验签方式：根据是否配置 wxPayPublicKey 自动推断（无需手动设置）
     // 有公钥 → publickey（公钥验签，兼容旧配置）
     // 无公钥 → certificate（SDK 内置证书管理，自动拉取/刷新平台证书）
@@ -88,6 +104,15 @@ function validateConfig() {
     // signMode 值校验
     if (!['sdk', 'gateway'].includes(signMode)) {
         errors.push(`signMode 值无效: "${signMode}"，仅支持 "sdk" 或 "gateway"`);
+    }
+
+    // gateway 模式但未显式信任网关明文：回调会走自验签，属于安全默认，但要提示
+    // （集成中心只传明文、不带签名头时，回调会 400 —— 让配置者立刻看见原因）
+    if (signMode === 'gateway' && !config.trustGatewayCallback) {
+        errors.push(
+            'signMode=gateway 但未开启 TRUST_GATEWAY_CALLBACK：回调将走自验签（安全默认）。'
+            + '若回调只经集成中心转发且函数无公网入口，请设 TRUST_GATEWAY_CALLBACK=true'
+        );
     }
 
     // 公钥模式：配置了公钥则公钥 ID 也必填

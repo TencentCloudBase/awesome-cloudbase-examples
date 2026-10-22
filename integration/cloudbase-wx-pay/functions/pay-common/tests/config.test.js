@@ -167,6 +167,34 @@ describe('validateConfig', () => {
         assert.ok(errors.some(e => e.includes('signMode') && e.includes('无效')));
     });
 
+    // ========== 网关回调信任开关 ==========
+
+    it('signMode=gateway 但未开 TRUST_GATEWAY_CALLBACK → 提示将走自验签', () => {
+        process.env.appId = 'wx_test';
+        process.env.merchantId = '1234567890';
+        process.env.apiV3Key = 'test_key_32_bytes_long!!';
+        process.env.merchantSerialNumber = 'ABC123';
+        process.env.privateKey = 'test_key';
+        process.env.signMode = 'gateway';
+        delete process.env.TRUST_GATEWAY_CALLBACK;
+
+        const errors = loadConfig().validateConfig();
+        assert.ok(errors.some(e => e.includes('TRUST_GATEWAY_CALLBACK')));
+    });
+
+    it('signMode=gateway + TRUST_GATEWAY_CALLBACK=true → 无此提示', () => {
+        process.env.appId = 'wx_test';
+        process.env.merchantId = '1234567890';
+        process.env.apiV3Key = 'test_key_32_bytes_long!!';
+        process.env.merchantSerialNumber = 'ABC123';
+        process.env.privateKey = 'test_key';
+        process.env.signMode = 'gateway';
+        process.env.TRUST_GATEWAY_CALLBACK = 'true';
+
+        const errors = loadConfig().validateConfig();
+        assert.ok(!errors.some(e => e.includes('TRUST_GATEWAY_CALLBACK')));
+    });
+
     // ========== 公钥模式关联校验 ==========
 
     it('公钥模式：配置了 wxPayPublicKey 但未配置 wxPayPublicKeyId → 报错', () => {

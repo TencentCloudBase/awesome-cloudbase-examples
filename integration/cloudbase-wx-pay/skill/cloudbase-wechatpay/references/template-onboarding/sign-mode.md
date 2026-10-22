@@ -22,7 +22,7 @@ pay-common 通过环境变量 `signMode` 切换两种签名模式。**两种模�
 |------|--------------------------|-------------------------------|
 | **主动请求签名** | SDK 自签名 → 直连微信 | SDK 自签名 → 直连微信（相同） |
 | **回调接收方** | 自己的服务器 | CloudBase 集成中心 |
-| **回调验签** | 自己验签 + AES-GCM 解密 | 集成中心已解密，读取明文即可 |
+| **回调验签** | 自己验签 + AES-GCM 解密 | 集成中心已解密，读取明文即可（需 `TRUST_GATEWAY_CALLBACK=true`） |
 | **回调 URL** | 指向自己的服务域名 | 指向集成中心域名 |
 | **适用场景** | 自己部署云函数 / 云托管 / 自建服务器 | **CloudBase 控制台 → 集成中心创建（主流）** |
 | **运维复杂度** | 需管理证书和验签逻辑 | 集成中心统一管理，开箱即用 |
@@ -152,7 +152,7 @@ transferNotifyUrl=https://你的域名/wx-pay/transferTrigger
         ↓
         ④ 根据 ParsedNotify.event_type 自动路由到对应 Trigger
         ↓
-        ⑤ 直接读 body.ParsedContent 明文（无需验签和解密）
+        ⑤ 直接读 body.ParsedContent 明文（需 TRUST_GATEWAY_CALLBACK=true，函数无公网入口）
         ↓
         ⑥ 业务处理
         ↓
@@ -163,11 +163,19 @@ transferNotifyUrl=https://你的域名/wx-pay/transferTrigger
 
 ```env
 signMode=gateway
+# ⚠️ 采信集成中心明文必须显式开启（默认关闭）：
+#    前提是函数没有公网入口，回调只经集成中心转发。
+#    不开启时回调走自验签，缺少签名头会被拒绝（安全默认）。
+TRUST_GATEWAY_CALLBACK=true
 # 回调指向集成中心（由它代为验签解密）
 notifyURLPayURL=https://integration-xxx.tcloudbase.com/wechatpay/order
 notifyURLRefundsURL=https://integration-xxx.tcloudbase.com/wechatpay/refund
 transferNotifyUrl=https://integration-xxx.tcloudbase.com/wechatpay/transfer
 ```
+
+> 🚨 为什么需要这个开关：回调路由本身没有鉴权。若「请求体里有 `ParsedContent` 就跳过验签」，
+> 任何能访问函数端口的人发一句 `{"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}`
+> 就是一笔「支付成功」，连 5 分钟时间戳检查都不会执行。
 
 ### 优缺点
 

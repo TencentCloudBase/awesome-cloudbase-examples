@@ -56,6 +56,7 @@ npm install
 | 变量名 | 必填 | 示例值 | 说明 |
 |--------|:----:|--------|------|
 | `signMode` | 是 | `sdk` / `gateway` | 签名模式。`sdk`=自己验签；`gateway`=集成中心代验签（**默认值**） |
+| `TRUST_GATEWAY_CALLBACK` | gateway 模式必填 | `true` | 是否采信 `body.ParsedContent` 明文（**默认关闭**）。开启前提：函数无公网入口、回调只经集成中心转发 |
 | `appId` | 是 | `wx1234567890abcdef` | 小程序 / 公众号 AppID，需已在商户平台绑定 |
 | `merchantId` | 是 | `1900009191` | 微信支付商户号（10 位数字） |
 | `merchantSerialNumber` | 是 | `40位十六进制` | API 证书序列号 |
@@ -135,6 +136,36 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 |------|---------|---------|---------|
 | `sdk` | SDK 自签名 → 直连微信 | 自己验签解密 | 自部署（**必须开 HTTP 访问服务 + 关闭回调路由认证**） |
 | `gateway` | SDK 自签名 → 直连微信 | 集成中心已解密 | 控制台集成中心创建（主流） |
+
+#### 回调安全（必读）
+
+`signMode=gateway` **不等于**无条件采信请求体里的 `body.ParsedContent`。采信网关明文还要求 `TRUST_GATEWAY_CALLBACK=true`，否则回调会退回「自验签 → 解密」，验不过就 400：
+
+| `signMode` | `TRUST_GATEWAY_CALLBACK` | 回调行为 |
+|---|---|---|
+| `gateway` | `true` | 采信 `ParsedContent` 明文 + 结构校验（**函数必须无公网入口**） |
+| `gateway` | 空（默认） | 忽略明文，走自验签；无签名头 → 拒绝 |
+| `sdk` | 任意 | 一律自验签 + 解密 |
+
+> 🚨 为什么默认关闭：普通回调路由是没有鉴权的。只要请求体里有 `ParsedContent` 就跳过验签，等于开放了一个免签名的「支付成功」入口 —— 任何人都能发 `{"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}`。
+>
+> 集成中心（官方推荐）部署时：**不要为 `pay-common` 开 HTTP 访问服务**，并在控制台设 `TRUST_GATEWAY_CALLBACK=true`。
+> 自建公网回调（备选）时：保持关闭或直接用 `signMode=sdk`，同时按微信要求配置平台证书 / 支付公钥。
+
+#### 金额校验（上线前必须实现）
+
+普通微信支付按**请求金额**收款，微信不核对商品值多少钱：请求体写 `amount: { total: 1 }` 就是一笔 1 分钱订单，付完回调照样 `SUCCESS`。
+
+模板会调用两个业务钩子（`services/orderService.js`），**默认返回 `null` = 不校验**（模板没有商品表，演示优先）：
+
+| 钩子 | 调用时机 | 实现要点 |
+|---|---|---|
+| `verifyAmount(params)` | 下单前（调微信**之前**） | 按 `product_id` 查真实价格，与 `amount.total` 比对，不一致返回 `{ ok: false, reason }` |
+| `verifyRefundAmount(params)` | 退款前（调微信**之前**） | 以落库订单金额 / 已退金额为上限。`validator.js` 只保证 `refund <= total`，而两个数都来自请求体 |
+
+返回 `{ ok: false }` 会直接中断请求，不会出现「微信侧已下单、本地金额错」的不一致状态。
+
+同时 `appid` / `mchid` / `notify_url` **一律由服务端赋值**，请求体里传了会被忽略（否则客户端能换掉商户号或把回调结果导流到自己的服务器）。
 
 ### Step 3：部署
 

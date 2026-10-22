@@ -265,6 +265,67 @@ describe('Controller - unifiedOrderH5', () => {
     });
 });
 
+describe('Controller - 金额校验钩子 & 服务端字段覆盖', () => {
+
+    it('⚠️ verifyAmount 判定金额不合法 → 400，且不调用微信下单', async () => {
+        let called = false;
+        const ctrl = loadControllerWithMockSdk({
+            transactions_jsapi: async () => {
+                called = true;
+                return { status: 200, data: { prepay_id: 'prepay_test' } };
+            },
+        });
+
+        const OrderService = require('../services/orderService');
+        const origVerify = OrderService.prototype.verifyAmount;
+        OrderService.prototype.verifyAmount = async () => ({
+            ok: false,
+            reason: 'amount.total 应为 100 分（客户端传了 1 分）',
+        });
+
+        try {
+            const { req, res } = mockReqRes(
+                { description: '测试商品', amount: { total: 1 }, payer: { openid: 'o_login_openid_123456' } },
+                { 'x-wx-openid': 'o_login_openid_123456' },
+            );
+            await ctrl.unifiedOrder(req, res);
+            assert.strictEqual(res._getStatusCode(), 400);
+            assert.ok(res._getBody().msg.includes('金额校验失败'));
+            assert.strictEqual(called, false, '金额不合法时必须在下单前失败');
+        } finally {
+            OrderService.prototype.verifyAmount = origVerify;
+        }
+    });
+
+    it('⚠️ 客户端传的 appid / mchid / notify_url 被服务端配置覆盖', async () => {
+        let captured = null;
+        const ctrl = loadControllerWithMockSdk({
+            transactions_jsapi: async (params) => {
+                captured = params;
+                return { status: 200, data: { prepay_id: 'prepay_test' } };
+            },
+        });
+
+        const { req, res } = mockReqRes(
+            {
+                description: '测试商品',
+                amount: { total: 100 },
+                payer: { openid: 'o_login_openid_123456' },
+                appid: 'wx_attacker_appid',
+                mchid: '9999999999',
+                notify_url: 'https://attacker.example/notify',
+            },
+            { 'x-wx-openid': 'o_login_openid_123456' },
+        );
+
+        await ctrl.unifiedOrder(req, res);
+        assert.strictEqual(res._getStatusCode(), 200);
+        assert.strictEqual(captured.appid, 'wx_test_appid_123456', 'AppID 不能被请求体改掉');
+        assert.strictEqual(captured.mchid, '1234567890', '商户号不能被请求体改掉');
+        assert.strictEqual(captured.notify_url, 'https://example.com/callback', '回调地址不能被请求体改掉');
+    });
+});
+
 describe('Controller - unifiedOrderNative', () => {
     it('合法 body → success + code_url', async () => {
         const ctrl = loadControllerWithMockSdk();
@@ -392,10 +453,10 @@ describe('Controller - refund & queryRefund', () => {
 
 describe('Controller - _handleCallback', () => {
 
-    it('网关模式有 ParsedContent → SUCCESS', async () => {
-        // 通过 overrides 参数设置 signMode=gateway，让回调走网关分支
-        // 集成中心系统内置回调：解密结果在 body.ParsedContent
-        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway' });
+    it('网关模式 + 显式 TRUST_GATEWAY_CALLBACK=true 有 ParsedContent → SUCCESS', async () => {
+        // 集成中心系统内置回调：解密结果在 body.ParsedContent。
+        // 采信明文必须显式声明「函数无公网入口、回调只经集成中心转发」。
+        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', TRUST_GATEWAY_CALLBACK: 'true' });
         const { req, res } = mockReqRes(
             {
                 event_type: 'TRANSACTION.SUCCESS',
@@ -407,6 +468,26 @@ describe('Controller - _handleCallback', () => {
         await ctrl.unifiedOrderTrigger(req, res);
         assert.strictEqual(res._getStatusCode(), 200);
         assert.strictEqual(res._getBody().code, 'SUCCESS');
+    });
+
+    it('⚠️ 网关模式未开 TRUST_GATEWAY_CALLBACK：伪造 ParsedContent 一律拒绝', async () => {
+        // 回归「请求体带 ParsedContent 就跳过验签」的旁路
+        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway' });
+        const { req, res } = mockReqRes(
+            { ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' } },
+            {},
+        );
+        await ctrl.unifiedOrderTrigger(req, res);
+        assert.notStrictEqual(res._getStatusCode(), 200, '未声明信任上游时不能采信明文');
+        assert.strictEqual(res._getBody().code, 'FAIL');
+    });
+
+    it('⚠️ 开了 TRUST 但明文缺必需字段：仍然拒绝', async () => {
+        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', TRUST_GATEWAY_CALLBACK: 'true' });
+        const { req, res } = mockReqRes({ ParsedContent: { foo: 'bar' } }, {});
+        await ctrl.unifiedOrderTrigger(req, res);
+        assert.strictEqual(res._getStatusCode(), 400);
+        assert.strictEqual(res._getBody().code, 'FAIL');
     });
 
     it('handlerFn 抛异常 → 500 FAIL', async () => {

@@ -56,6 +56,57 @@ function resolveOwner(params, identity) {
 class OrderService {
     constructor() {}
 
+    // ========== 金额校验钩子（模板默认放行，上线前必须实现）==========
+
+    /**
+     * 下单前校验订单金额
+     *
+     * 🚨 普通微信支付按**请求金额**收款，微信不核对商品到底值多少钱。
+     *    模板里 `amount.total` 由客户端传，请求体写 `amount: { total: 1 }`
+     *    就是一笔 1 分钱订单，付完回调照样是 SUCCESS —— 这是模板最大的业务风险。
+     *
+     * 接入数据库后在这里实现（返回 `{ ok: false, reason }` 会直接拒绝下单）：
+     *
+     * ```js
+     * async verifyAmount(params) {
+     *     const product = await db.collection('products').doc(params.product_id).get();
+     *     if (!product) return { ok: false, reason: '商品不存在' };
+     *     const expected = product.price * (params.quantity || 1);
+     *     if (params.amount?.total !== expected) {
+     *         return { ok: false, reason: `amount.total 应为 ${expected} 分` };
+     *     }
+     *     return { ok: true };
+     * }
+     * ```
+     *
+     * 更彻底的做法是下单接口只收 `product_id` + `quantity`，金额完全由服务端算，
+     * 客户端连传 `amount` 的机会都没有。
+     *
+     * @param {Object} params - 下单参数（amount.total 来自客户端，不可信）
+     * @returns {Promise<{ok: boolean, reason?: string}>|null} 返回 null/undefined = 不校验
+     */
+    async verifyAmount(params) {
+        // TODO: 按 product_id 查真实价格并与 params.amount.total 比对
+        console.warn('[OrderService] verifyAmount 未实现，当前不校验订单金额:', params?.out_trade_no);
+        return null;
+    }
+
+    /**
+     * 退款前校验退款金额上限
+     *
+     * `validateRefundParams` 只检查 `amount.refund <= amount.total`，
+     * 而这两个数都来自请求体 —— 改成 `{ refund: 999999, total: 999999 }` 就绕过了。
+     * 正确做法是以**落库订单金额 / 已退金额**为上限。
+     *
+     * @param {Object} params - 退款参数
+     * @returns {Promise<{ok: boolean, reason?: string}>|null} 返回 null/undefined = 不校验
+     */
+    async verifyRefundAmount(params) {
+        // TODO: 查落库订单，校验 params.amount.refund <= 订单可退金额
+        console.warn('[OrderService] verifyRefundAmount 未实现，当前不校验退款上限:', params?.out_refund_no);
+        return null;
+    }
+
     /**
      * 下单成功后创建/记录订单
      *
