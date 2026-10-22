@@ -50,8 +50,7 @@
         "notifyUrlCallbackType": "{{env.notifyUrlCallbackType}}",
         "msgEncryptType": "{{env.msgEncryptType}}",
         "token": "{{env.token}}",
-        "msgSecret": "{{env.msgSecret}}",
-        "XPAY_GUARD": "on"
+        "msgSecret": "{{env.msgSecret}}"
       }
     }
   ]

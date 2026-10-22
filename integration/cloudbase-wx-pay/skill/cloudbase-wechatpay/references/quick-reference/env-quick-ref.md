@@ -50,6 +50,10 @@
 
 > 仓库自带的 `cloudbaserc.json` / `Dockerfile` 已预置 `PAY_GUARD=on`（不设也是 on），
 > 直接部署不会把金额与订单归属交给客户端；要联调只能显式改成 `off`。
+>
+> 🚨 `PAY_GUARD` **不是集成中心注入的变量**：集成创建只产生 `appId / secret` 这类凭据。
+> 它属于**函数自己的环境变量**，由 `cloudbaserc.json` 的 `functions[].envVariables` / `Dockerfile` 的 `ENV`
+> 或控制台函数配置提供；缺省即 `on`，不影响正常部署。
 
 **上线前必须**：① 删除该变量 ② 在 `verifyAmount` / `verifyRefundAmount` / `verifyOrderOwner` /
 `verifyTransferAllowed` 里接数据库核定并返回 `{ ok: true }`。

@@ -11,6 +11,10 @@
 | `trustBearerIdentity` | 否 | 空 | 采信 Bearer JWT 身份，仅当函数只经云 API 网关暴露时开 |
 | `XPAY_GUARD` | 否 | 未设（= `on`） | **全模板唯一的联调开关**（与 wx-pay 的 `PAY_GUARD` 同一套心智）。`off` = 「本地查不到订单」时放行查单 + iOS 退款问询 `result_code=0`；`on` 或不设 = 全部拒绝/拦截。本地 `npm run dev` 已带 `off`；云上 + `off` 会拒绝启动，确需云上联调再加 `PAY_ALLOW_INSECURE_BOOT=true` |
 
+> 🚨 `XPAY_GUARD` **不是集成中心注入的变量**：集成创建只产生 `appId / secret / offerId / appKey` 这类凭据，
+> 不会创建它。它属于**函数自己的环境变量**，由 `cloudbaserc.json` 的 `functions[].envVariables` / `Dockerfile` 的 `ENV`
+> 或控制台函数配置提供；缺省即 `on`，不影响正常部署。
+>
 > 变量名以**集成中心注入为准**（`authTypeCode=wxvirtualpay` → `appId / secret / offerId / appKey`），本地 `.env` 与旧文档的 `prodAppKey` / `appSecret` 由 `readEnv()` 回退兼容。
 > 集成中心还注入 `token` / `msgSecret`（消息推送 Token 与 EncodingAESKey）。
 > - 集成中心托管（网关代验签/代解密）：业务代码**不读取**。
