@@ -199,9 +199,9 @@ wx.requestMerchantTransfer({
 
 | 路由 | 方法 | 说明 |
 |------|------|------|
-| `/wx-pay/transferTrigger` | POST | 转账结果通知（SDK 模式） |
+| `/wx-pay/transferTrigger` | POST | 转账结果通知（自建回调模式） |
 
-> SDK 模式下回调走 HTTP 访问服务，Gateway 模式回调地址指向集成中心（控制台自动生成）。
+> 自建回调模式下回调走 HTTP 访问服务，集成中心托管模式回调地址指向集成中心（控制台自动生成）。
 
 ### 回调处理要点
 

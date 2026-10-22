@@ -36,7 +36,7 @@ function mockReqRes(body = {}, headers = {}) {
 /**
  * 加载 Controller（带 mocked SDK）
  * @param {Object} customMocks - 覆盖 MockWxPay.prototype 方法
- * @param {Object} overrides - 覆盖默认环境变量（如 signMode）
+ * @param {Object} overrides - 覆盖默认环境变量（如 notifyURLCallbackType）
  */
 function loadControllerWithMockSdk(customMocks = {}, overrides = {}) {
     // 清除依赖链缓存
@@ -58,7 +58,6 @@ function loadControllerWithMockSdk(customMocks = {}, overrides = {}) {
         apiV3Key: 'abcdefghijklmnopqrstuvwxyz123456',
         merchantSerialNumber: 'ABC123DEF45678901234',
         privateKey: TEST_PRIVATE_KEY,
-        signMode: 'sdk',
         notifyURLPayURL: 'https://example.com/callback',
         PAY_GUARD: 'off',
     };
@@ -701,24 +700,45 @@ describe('Controller - _handleCallback', () => {
     it('平台声明 notifyURLCallbackType=system + ParsedContent → SUCCESS', async () => {
         // 集成中心系统内置回调：解密结果在 body.ParsedContent。
         // 采信明文以平台注入的 notifyURLCallbackType=system 为准（证明回调托管在网关）。
-        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', notifyURLCallbackType: 'system' });
+        const ctrl = loadControllerWithMockSdk({}, { notifyURLCallbackType: 'system' });
         const { req, res } = mockReqRes(
             {
                 event_type: 'TRANSACTION.SUCCESS',
                 ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' },
                 ParsedNotify: { event_type: 'TRANSACTION.SUCCESS' },
             },
-            {},
+            { 'wechatpay-timestamp': String(Math.floor(Date.now() / 1000)) },
         );
         await ctrl.unifiedOrderTrigger(req, res);
         assert.strictEqual(res._getStatusCode(), 200);
         assert.strictEqual(res._getBody().code, 'SUCCESS');
     });
 
+    it('⛔ system 声明但缺 wechatpay-timestamp：拒绝（重放校验 fail closed）', async () => {
+        const ctrl = loadControllerWithMockSdk({}, { notifyURLCallbackType: 'system' });
+        const { req, res } = mockReqRes(
+            { ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' } },
+            {},
+        );
+        await ctrl.unifiedOrderTrigger(req, res);
+        assert.strictEqual(res._getStatusCode(), 400, '缺时间戳 = 无法排除重放，不能放过');
+    });
+
+    it('⛔ system 声明但时间戳过期（>5 分钟）：拒绝', async () => {
+        const ctrl = loadControllerWithMockSdk({}, { notifyURLCallbackType: 'system' });
+        const stale = String(Math.floor(Date.now() / 1000) - 3600);
+        const { req, res } = mockReqRes(
+            { ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' } },
+            { 'wechatpay-timestamp': stale },
+        );
+        await ctrl.unifiedOrderTrigger(req, res);
+        assert.strictEqual(res._getStatusCode(), 400);
+    });
+
     it('⚠️ 平台未声明 system（ownservice / 空）：伪造 ParsedContent 一律拒绝', async () => {
         // 回归「请求体带 ParsedContent 就跳过验签」的旁路
         for (const type of [undefined, 'ownservice']) {
-            const env = { signMode: 'gateway' };
+            const env = {};
             if (type !== undefined) env.notifyURLCallbackType = type;
             const ctrl = loadControllerWithMockSdk({}, env);
             const { req, res } = mockReqRes(
@@ -731,23 +751,8 @@ describe('Controller - _handleCallback', () => {
         }
     });
 
-    it('⚠️ signMode=sdk 且残留 system 声明：仍按自验签，伪造明文被拒', async () => {
-        // sdk 模式下函数必须开公网入口，此时绝不能因为残留声明跳过验签
-        const ctrl = loadControllerWithMockSdk(
-            {},
-            { signMode: 'sdk', notifyURLCallbackType: 'system' },
-        );
-        const { req, res } = mockReqRes(
-            { ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' } },
-            {},
-        );
-        await ctrl.unifiedOrderTrigger(req, res);
-        assert.notStrictEqual(res._getStatusCode(), 200, 'sdk 模式有公网入口，不能采信明文');
-        assert.strictEqual(res._getBody().code, 'FAIL');
-    });
-
     it('⚠️ 声明了 system 但明文缺必需字段：仍然拒绝', async () => {
-        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', notifyURLCallbackType: 'system' });
+        const ctrl = loadControllerWithMockSdk({}, { notifyURLCallbackType: 'system' });
         const { req, res } = mockReqRes({ ParsedContent: { foo: 'bar' } }, {});
         await ctrl.unifiedOrderTrigger(req, res);
         assert.strictEqual(res._getStatusCode(), 400);

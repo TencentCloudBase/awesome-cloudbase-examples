@@ -53,7 +53,7 @@
 ├── ⑤ 环境变量未生效（占比 ~10%）
 │   ├── 修改了 .env 但未重启
 │   ├── 云函数环境变量覆盖了 cloudbaserc.json
-│   └── 排查：重启服务；检查启动日志打印的 signMode
+│   └── 排查：重启服务；检查启动日志打印的 notifyURLCallbackType
 │
 └── 其他（极少）
     └── 时间偏差过大（服务器时间不准）
@@ -98,10 +98,10 @@ bash scripts/validate_env.sh .env
 │   ├── Gzip 压缩导致解析异常
 │   └── 排查：打印回调原始 body 对比
 │
-├── Gateway/SDK 模式混用
-│   ├── signMode=sdk 但回调走了集成中心
-│   ├── signMode=gateway 但回调直连了自己
-│   └── 排查：确认 signMode 与三个 notifyURL 方向一致
+├── Gateway/自建回调模式混用
+│   ├── 未声明 notifyURLCallbackType（自建回调）但回调走了集成中心
+│   ├── notifyURLCallbackType=system（集成中心托管） 但回调直连了自己
+│   └── 排查：确认 notifyURLCallbackType 与三个 notifyURL 方向一致
 │
 └── AES-GCM 解密密钥(apiV3Key)错误
     ├── 长度不是 32 字节
@@ -138,10 +138,10 @@ bash scripts/validate_env.sh .env
 │   ├── 服务崩溃/OOM → 502
 │   └── 排查：对照 SKILL.md 回调路由表检查路径
 │
-├── signMode 配置错误
+├── notifyURLCallbackType 配置错误
 │   ├── sdk 模式但 notifyURL 指向集成中心
 │   ├── gateway 模式但 notifyURL 指向自己
-│   └── 排查：sign-mode.md 决策树
+│   └── 排查：callback-mode.md 决策树
 │
 └── 商户平台配置
     ├── 回调地址未配置或配置错误
@@ -280,7 +280,7 @@ H5 支付被拒根因
 ```
 Step 1: 收集基础信息
 ├── 完整错误信息（JSON / 截图）
-├── signMode 值
+├── notifyURLCallbackType 值
 ├── 部署方式（云函数 / 云托管 / 本地）
 ├── 支付方式（JSAPI / H5 / Native / APP）
 └── 操作步骤描述

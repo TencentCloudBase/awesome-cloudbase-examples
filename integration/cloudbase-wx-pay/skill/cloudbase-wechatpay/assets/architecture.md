@@ -90,11 +90,11 @@ graph LR
 
 ---
 
-## 两种签名模式
+## 两种回调处理模式
 
 ```mermaid
 graph TB
-    subgraph SDK["SDK 模式 (signMode=sdk)"]
+    subgraph SDK["自建回调模式（未声明 notifyURLCallbackType）"]
         direction TB
         SDK_REQ["主动请求<br/>SDK 自签 → 直连微信"] --> WXS
         WXS["微信服务器"] -->|"加密回调"| SDK_CB
@@ -102,7 +102,7 @@ graph TB
         SDK_BIZ["业务处理"] -->|"5秒内返回 SUCCESS"| WXS
     end
 
-    subgraph GW["Gateway 模式 (signMode=gateway)"]
+    subgraph GW["集成中心托管模式 (notifyURLCallbackType=system（集成中心托管）)"]
         direction TB
         GW_REQ["主动请求<br/>SDK 自签 → 直连微信"] --> WXG
         WXG["微信服务器"] -->|"加密回调"| IC
@@ -114,7 +114,7 @@ graph TB
 
 **关键差异总结**：
 
-| 维度 | SDK 模式 | Gateway 模式 |
+| 维度 | 自建回调模式 | 集成中心托管模式 |
 |------|---------|-------------|
 | 主动请求签名 | 相同：SDK 直连 | 相同：SDK 直连 |
 | 回调接收方 | 自己的服务器 | 集成中心 |

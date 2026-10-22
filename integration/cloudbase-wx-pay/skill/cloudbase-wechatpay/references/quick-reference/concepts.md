@@ -46,7 +46,7 @@
 
 需在防火墙/安全组放行微信回调 IP 段（上海/深圳/广州腾讯云）。
 
-## SDK 模式双通道架构
+## 自建回调模式双通道架构
 
 小程序 Demo 走两条通道：
 1. 前端 → `callHTTPFunction`/`callContainer`（主动请求，平台自动注入 openid）

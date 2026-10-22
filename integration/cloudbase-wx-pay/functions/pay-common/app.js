@@ -23,15 +23,22 @@ if (configErrors.unsafe) {
 }
 
 // 证书模式启动时预热：提前拉取平台证书，避免首次回调时证书未就绪导致验签失败
-if (config.signMode === 'sdk' && config.verifyMode === 'certificate') {
+// （主动请求永远走 SDK 自签名，验签方式只看 verifyMode，与回调由谁验签无关）
+if (config.verifyMode === 'certificate') {
     const SdkStrategy = require('./services/strategies/sdkStrategy');
     const strategy = new SdkStrategy(config.payConfig);
-    strategy.wxPay.getCertificates?.().then(certs => {
-        const count = Array.isArray(certs) ? certs.length : 0;
-        console.log(`[Startup] 平台证书预加载成功，共 ${count} 张`);
-    }).catch(err => {
-        console.warn('[Startup] 平台证书预加载失败（将在首次验签时自动重试）:', err.message);
-    });
+    // ⚠️ SDK 只导出 get_certificates（下划线），没有 getCertificates；
+    //    而且它在缺 publicKey / 参数时可能**同步**抛错 —— 必须用 Promise.resolve().then 包住，
+    //    否则异常在进入 Promise 链之前就抛出，.catch 接不到，直接把启动搞挂。
+    Promise.resolve()
+        .then(() => strategy.wxPay.get_certificates(config.payConfig.mchAPIv3Key))
+        .then((certs) => {
+            const count = certs ? Object.keys(certs).length : 0;
+            console.log(`[Startup] 平台证书预加载成功，共 ${count} 张`);
+        })
+        .catch((err) => {
+            console.warn('[Startup] 平台证书预加载失败（将在首次验签时自动重试）:', err.message);
+        });
 }
 
 

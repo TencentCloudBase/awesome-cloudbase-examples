@@ -6,9 +6,9 @@
 
 ## 变量速查表
 
-| 变量 | SDK 模式 | Gateway 模式 | 说明 |
+| 变量 | 自建回调模式 | 集成中心托管模式 | 说明 |
 |------|---------|-------------|------|
-| `signMode` | `sdk` | `gateway` | 签名模式切换 |
+| `notifyURLCallbackType` | 未声明（自验签） | `system`（网关验签） | 回调由谁验签（平台注入） |
 | `appId` | 必填 | 必填 | 小程序/公众号 AppID |
 | `merchantId` | 必填 | 必填 | 商户号（10 位数字） |
 | `merchantSerialNumber` | 必填 | 必填 | API 证书序列号 |
@@ -63,13 +63,13 @@
 
 ## 关键差异
 
-- **凭证基本相同**，但 SDK 模式下 `wxPayPublicKey` / `wxPayPublicKeyId` 可选（不配则自动走证书验签）
+- **凭证基本相同**，但 自建回调模式下 `wxPayPublicKey` / `wxPayPublicKeyId` 可选（不配则自动走证书验签）
 - 区别主要在于**回调 URL 和部署要求**
-- **SDK 模式**：回调指向自己的服务（HTTP 访问服务域名，**必须包含路由 Path**）；回调路由不能开身份认证；回调不能走云 API 网关
+- **自建回调模式**：回调指向自己的服务（HTTP 访问服务域名，**必须包含路由 Path**）；回调路由不能开身份认证；回调不能走云 API 网关
   - URL 组装公式：`{HTTP访问服务域名}/{路由Path}/{API路径}`
   - 真实示例：`https://test-wxpay-xxx.ap-shanghai.app.tcloudbase.com/pay/wx-pay/unifiedOrderTrigger`
   - 详见 `quick-start.md` Step 4.2-4.3
-- **Gateway 模式**：回调地址指向集成中心，由控制台自动生成，**直接复制填入即可**；无特殊部署约束；前端可走云 API 网关
+- **集成中心托管模式**：回调地址指向集成中心，由控制台自动生成，**直接复制填入即可**；无特殊部署约束；前端可走云 API 网关
 
 ---
 

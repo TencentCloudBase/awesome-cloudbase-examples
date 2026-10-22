@@ -25,14 +25,13 @@
 
 ```bash
 # 方式一：export 后启动
-export signMode=sdk
 export appId=YOUR_APP_ID
 export merchantId=YOUR_MERCHANT_ID
 # ... 其他必填变量
 npm start
 
 # 方式二：一行搞定
-signMode=sdk appId=YOUR_APP_ID merchantId=YOUR_MERCHANT_ID npm start
+appId=YOUR_APP_ID merchantId=YOUR_MERCHANT_ID npm start
 
 # 方式三：用 envfile 工具加载 .env 文件（可选安装）
 # npm install -g envfile
@@ -49,8 +48,7 @@ signMode=sdk appId=YOUR_APP_ID merchantId=YOUR_MERCHANT_ID npm start
 
 | 变量名 | 必填 | 示例值 | 说明 |
 |--------|:----:|--------|------|
-| `signMode` | 是 | `sdk` \| `gateway` | 签名模式。`sdk`=SDK 自验签（自己部署时用）；`gateway`=集成中心代签（控制台创建时用，**也是代码级默认值**）。详见 [sign-mode.md](sign-mode.md) |
-| `notifyURLCallbackType` | 集成中心自动注入 | `system` | 平台声明回调由谁验签。`system`=网关代验签，采信 `body.ParsedContent` 明文；`ownservice`/空=本函数自己验签（fail closed）。**不要手工覆盖** |
+| `notifyURLCallbackType` | 平台注入 | `system` / `ownservice` / 空 | 回调由谁验签。`system`=集成中心网关代验签解密；空或 `ownservice`=本函数自验签（fail closed）。**不要手工填**，详见 [callback-mode.md](callback-mode.md) |
 | **`verifyMode`** | **否**（自动推断） | **`publickey`** \| **`certificate`** | **验签方式。配了 `wxPayPublicKey` → 公钥验签；未配 → 证书自动下载验签。详见 [verify-mode.md](verify-mode.md)** |
 | `appId` | 是 | `YOUR_APP_ID` | 小程序/公众号 AppID，需已在商户平台绑定 |
 | `merchantId` | 是 | `YOUR_MERCHANT_ID` | 微信支付商户号（10 位数字） |
@@ -157,14 +155,14 @@ python3 scripts/check_pem_format.py '你的privateKey值'
 
 ### 各模式的回调 URL 差异
 
-| signMode | notifyURLPayURL 指向 | 谁来验签/解密 |
+| notifyURLCallbackType | notifyURLPayURL 指向 | 谁来验签/解密 |
 |----------|-------------------|-------------|
-| `sdk` | 你自己的服务域名（从控制台「HTTP 访问服务」获取，替换 `<YOUR_HTTP_DOMAIN>`） | 你的服务自行验签 + AES-GCM 解密 |
-| `gateway` | 集成中心域名（如 `https://integration-xxx.tcloudbase.com/wechatpay/order`） | 集成中心验签解密后，通过云函数调用把明文放到 `body.ParsedContent` 传给你的服务 |
+| 未声明 / `ownservice` | 你自己的服务域名（从控制台「HTTP 访问服务」获取，替换 `<YOUR_HTTP_DOMAIN>`） | 本函数自行验签 + AES-GCM 解密 |
+| `system` | 集成中心域名（如 `https://integration-xxx.tcloudbase.com/wechatpay/order`） | 集成中心验签解密后，把明文放到 `body.ParsedContent` 转发给函数 |
 
 ---
 
-## SDK 模式 vs Gateway 模式配置对比
+## 自建回调模式 vs 集成中心托管模式配置对比
 
 ### 相同点
 
@@ -172,14 +170,14 @@ python3 scripts/check_pem_format.py '你的privateKey值'
 
 ### 不同点
 
-| 配置项 | SDK 模式 | Gateway 模式 |
+| 配置项 | 自建回调模式 | 集成中心托管模式 |
 |--------|---------|-------------|
-| `signMode` | `sdk` | `gateway` |
+| `notifyURLCallbackType` | 未声明 | `system` |
 | 回调 URL | 指向自己的服务 | 指向集成中心 |
 | 回调处理 | 自己验签 + AES-GCM 解密 | 读集成中心转发过来的明文 |
 | 适用场景 | 自己部署云函数 / 云托管 / 自建服务器 | **控制台 → 集成中心创建（主流）** |
 
-> 详细对比见 [sign-mode.md](sign-mode.md)。
+> 详细对比见 [callback-mode.md](callback-mode.md)。
 
 ---
 
@@ -190,10 +188,9 @@ python3 scripts/check_pem_format.py '你的privateKey值'
 > - 控制台部署 → 按此列表逐项填写
 > - 本地调试 → `export` 这些变量或写入 `.env` 后用 `envfile` 加载
 
-### 最小可用配置（SDK 模式，仅支付功能）
+### 最小可用配置（自建回调模式，仅支付功能）
 
 ```env
-signMode=sdk
 appId=YOUR_APP_ID
 merchantId=YOUR_MERCHANT_ID
 merchantSerialNumber=YOUR_SERIAL_NUMBER
@@ -229,9 +226,9 @@ bash scripts/validate_env.sh /path/to/your/.env
 
 脚本会检查：
 - 所有必填变量是否存在
-- `signMode` 是否为合法值（`sdk`/`gateway`）
+- `notifyURLCallbackType` 是否为 `system` / 空 / `ownservice`
 - `privateKey` 和 `wxPayPublicKey` 是否符合 PEM 格式
 - 回调 URL 是否为 HTTPS 格式
 - `appId` 和 `merchantId` 格式是否合理
 
-*签名模式深度说明见 [sign-mode.md](sign-mode.md)*
+*回调处理模式深度说明见 [callback-mode.md](callback-mode.md)*

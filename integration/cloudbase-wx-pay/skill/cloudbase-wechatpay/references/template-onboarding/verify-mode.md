@@ -1,7 +1,7 @@
 # 证书验签 vs 公钥验签详解
 
 > 基于 `config/config.js` §verifyMode + `services/strategies/sdkStrategy.js` 整理。
-> 本文档仅适用于 **SDK 模式（`signMode=sdk`）**。Gateway 模式的回调验签由集成中心完成，不涉及本篇内容。
+> 本文档仅适用于 **自建回调模式（未声明 `notifyURLCallbackType`（自建回调））**。集成中心托管模式的回调验签由集成中心完成，不涉及本篇内容。
 
 ---
 
@@ -301,8 +301,8 @@ apiV3Key=YOUR_API_V3_KEY                      # 解密下载到的加密证书
 | **SDK bug 影响** | 无 | 有（wechatpay-node-v3@2.2.x 缓存 bug） |
 | **排查难度** | 低（日志清晰） | 中高（多层嵌套调用） |
 | **适用场景** | 推荐**默认使用** | 内网无法联网时不适用 |
-| **Gateway 模式相关吗** | ❌ 不相关（Gateway 由集成中心验签） | ❌ 不相关 |
+| **集成中心托管模式相关吗** | ❌ 不相关（回调由集成中心验签，本函数不参与验签） | ❌ 不相关 |
 
 ---
 
-*签名模式（SDK vs Gateway）说明见 [sign-mode.md](sign-mode.md) | 环境变量完整列表见 [env-config.md](env-config.md) | 错误排查见 [error-patterns.md](../troubleshooting/error-patterns.md)*
+*回调由谁验签（`system` vs 未声明）说明见 [callback-mode.md](callback-mode.md) | 环境变量完整列表见 [env-config.md](env-config.md) | 错误排查见 [error-patterns.md](../troubleshooting/error-patterns.md)*

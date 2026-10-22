@@ -13,7 +13,6 @@
       "dir": "./",
       "envVariables": {
         "PAY_GUARD": "on",
-        "signMode": "{{env.SIGN_MODE}}",
         "appId": "{{env.WX_APP_ID}}",
         "service_app_id": "{{env.SERVICE_APP_ID}}",
         "merchantId": "{{env.MCH_ID}}",

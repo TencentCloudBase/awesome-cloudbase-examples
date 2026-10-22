@@ -19,13 +19,16 @@ import re
 import sys
 
 REQUIRED_ENV_VARS = [
-    "signMode", "appId", "merchantId", "merchantSerialNumber",
+    "appId", "merchantId", "merchantSerialNumber",
     "apiV3Key", "privateKey", "wxPayPublicKey", "wxPayPublicKeyId",
     "notifyURLPayURL",
 ]
 
+# notifyURLCallbackType 不在必填里：它是平台按集成类型注入的「声明型」变量，
+# 自建公网回调 / 本地联调的正确形态就是「不声明」（= 走自验签）。
+# 填了才校验取值，见 validate_callback_declaration。
 OPTIONAL_ENV_VARS = [
-    "notifyURLRefundsURL", "transferNotifyUrl", "corsAllowOrigin",
+    "notifyURLCallbackType", "notifyURLRefundsURL", "transferNotifyUrl", "corsAllowOrigin",
 ]
 
 
@@ -87,14 +90,18 @@ def validate_env_keys(env_vars):
     return issues
 
 
-def validate_sign_mode(env_vars):
-    """检查 signMode 值"""
-    sign_mode = env_vars.get("signMode", "")
-    if sign_mode not in ("sdk", "gateway"):
+def validate_callback_declaration(env_vars):
+    """检查 notifyURLCallbackType（平台注入的回调声明）
+
+    合法值：system（集成中心托管）/ ownservice（自建回调）/ 空（未声明，按自验签处理）
+    这个值由平台按集成类型注入，不同集成注入名可能不同（微信支付是 URL 全大写）。
+    """
+    declared = env_vars.get("notifyURLCallbackType", "")
+    if declared not in ("system", "ownservice", ""):
         return [{
             "type": "invalid_value",
-            "key": "signMode",
-            "message": f"signMode 应为 'sdk' 或 'gateway'，当前值: '{sign_mode}'",
+            "key": "notifyURLCallbackType",
+            "message": f"notifyURLCallbackType 应为 'system' / 'ownservice' 或留空，当前值: '{declared}'",
         }]
     return []
 
@@ -234,7 +241,7 @@ def main():
     # 执行所有检查
     all_issues = []
     all_issues.extend(validate_env_keys(env_vars))
-    all_issues.extend(validate_sign_mode(env_vars))
+    all_issues.extend(validate_callback_declaration(env_vars))
     all_issues.extend(validate_notify_urls(env_vars))
 
     if cbc_vars is not None:

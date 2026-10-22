@@ -62,9 +62,9 @@ description: |
 | 1 | `amount.total` 单位以为是元 | **单位是分！** 传 1 = ¥0.01 | 金额错误，用户付错价 |
 | 2 | `privateKey` 换行用真换行 | 必须用字面 `\n`（两个字符），代码会 `.replace(/\\n/g, '\n')` | PEM 解析失败 → 签名失败 |
 | 3 | `wxPayPublicKey` 填了商户公钥 | 必须是**微信支付公钥**（商户平台→API安全→微信支付公钥），不是商户 API 公钥 | 验签永远失败 |
-| 4 | 回调 URL 漏写路由 Path | SDK 模式 URL 必须含完整路径：`{域名}/{路由Path}/{API路径}` | 回调 404，收不到通知 |
+| 4 | 回调 URL 漏写路由 Path | 自建回调模式 URL 必须含完整路径：`{域名}/{路由Path}/{API路径}` | 回调 404，收不到通知 |
 | 5 | APIv3 密钥没设 | 必须在商户平台设置 32 字节 APIv3 密钥 | **所有回调丢失**（不会报错，只是收不到） |
-| 6 | 回调路由开了身份认证 | SDK 模式回调路由**不能开鉴权**，微信回调不带 Token | 回调被 401/403 拦截 |
+| 6 | 回调路由开了身份认证 | 自建回调模式回调路由**不能开鉴权**，微信回调不带 Token | 回调被 401/403 拦截 |
 | 7 | 退款重试换了 `out_refund_no` | 重试必须复用同一个 `out_refund_no` | 换新号 = 多退钱 |
 | 8 | 模拟器测试真实支付 | `wx.requestPayment` 必须真机测试（需要输密码） | 模拟器无法完成支付 |
 | 9 | `callHTTPFunction` 基础库版本低 | 需基础库 ≥ 3.15.2 | 报 `is not a function` |
@@ -87,7 +87,7 @@ graph TD
     E --> F{需要做什么?}
     F -->|快速上手| G[→ references/template-onboarding/quick-start.md]
     F -->|环境变量配置| H[→ references/template-onboarding/env-config.md]
-    F -->|SDK vs Gateway 签名| I[→ references/template-onboarding/sign-mode.md]
+    F -->|SDK vs Gateway 签名| I[→ references/template-onboarding/callback-mode.md]
     F -->|部署到云端| J[→ references/deployment/deploy-*.md]
     F -->|前端调起支付| K[→ references/frontend-integration/*.md]
     F -->|微搭低码接入| W[→ references/frontend-integration/weda-miniprogram.md]
@@ -137,7 +137,7 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 帮助用户成功解决支付问题后，存储摘要记忆：
 
 - 用户的部署方式（云函数/云托管/集成中心）
-- 签名模式（sdk/gateway）
+- 回调处理模式（sdk/gateway）
 - 已踩过的坑（避免重复排查）
 
 下次加载时读取最近记忆，跳过已确认的步骤。
@@ -153,7 +153,7 @@ skill_run(skill="cloudbase-wechatpay", command="python3 scripts/check_pem_format
 | template-onboarding/merchant-credentials | 新手首次接入/凭证报错 |
 | template-onboarding/quick-start | **新手必读**，覆盖部署全链路 |
 | template-onboarding/env-config | 配置 .env 时 |
-| template-onboarding/sign-mode | 选签名模式/回调不通 |
+| template-onboarding/sign-mode | 选回调处理模式/回调不通 |
 | template-onboarding/verify-mode | 公钥验签 vs 证书验签 |
 | deployment/deploy-* | 部署到云端 |
 | frontend-integration/miniprogram-* | 接入小程序前端 |

@@ -18,28 +18,22 @@ const PAY_GUARD_VALUE = PAY_GUARD_RAW.toLowerCase();
 const PAY_GUARD_OFF = PAY_GUARD_VALUE === 'off';
 
 const config = {
-    // 回调处理模式: 'sdk' | 'gateway'
-    // sdk: 回调自己验签 + AES-GCM 解密
-    // gateway: 回调由集成中心解密，转发明文（body.ParsedContent）
-    // 注意：两种模式下，主动请求（下单/退款/转账）都走 SDK 自签名直连微信
-    signMode: process.env.signMode || 'gateway',
-
     /**
      * 平台声明的回调类型（**由集成中心创建实例时自动注入，不要手工填**）
      *
-     * 变量名以平台真实注入的 `notifyURLCallbackType` 为准（URL 全大写）；
-     * 小写写法 `notifyUrlCallbackType` 仅作兼容兜底，不要写进文档。
+     * 这是「谁负责验签解密」的唯一依据 —— 没有第二个开关。
+     * 回调地址在哪一侧，由这个值直接决定：
      *
      *   system      → 回调地址托管在集成中心，网关代验签 + 代解密，转发 body.ParsedContent
-     *   ownservice  → 回调指向本函数，验签解密由本函数完成
+     *   ownservice  → 回调指向本函数（自己配的公网回调），验签解密由本函数完成
      *   空          → 未声明，按「自己验签」处理（fail closed）
      *
-     * 🚨 为什么要看这个变量而不是只看 signMode：
-     *    signMode 是「部署意图」，任何人都能往函数端口发
-     *    {"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}，
-     *    光凭 signMode=gateway 无法证明请求真来自网关。
-     *    notifyURLCallbackType 是平台在实例创建时注入的声明，只有真走集成中心
-     *    托管回调才等于 system —— 这才是「明文可以免验签」的依据。
+     * 🚨 曾经还有一个 `signMode`（sdk / gateway）用来表达同一件事，**已删除**：
+     *    它只是对部署方式的猜测，且与平台声明一旦不一致，就变成「配置自相矛盾 → 全拒」。
+     *    平台既然会注入这个声明，就没必要再让人手工维护一份副本。
+     *
+     * ⚠️ 变量名以平台真实注入的 `notifyURLCallbackType` 为准（微信支付集成用 URL 全大写）；
+     *    小写写法 `notifyUrlCallbackType` 仅作兼容兜底，不要写进文档。
      */
     notifyUrlCallbackType: (process.env.notifyURLCallbackType || process.env.notifyUrlCallbackType || '')
         .trim()
@@ -131,7 +125,7 @@ const config = {
 
 /**
  * 校验配置完整性
- * 根据 signMode 检查必填项，启动时调用
+ * 检查必填项与平台声明的一致性，启动时调用
  *
  * 两级输出：
  *   - errors：配置缺失 / 矛盾 → console.warn（模板保持可启动，便于看清整份清单）
@@ -141,7 +135,7 @@ const config = {
 function validateConfig() {
     const errors = [];
     const risky = [];
-    const { payConfig, signMode } = config;
+    const { payConfig } = config;
 
     // PAY_GUARD 拼错（非空且既不是 on 也不是 off）→ 静默落到安全侧，但必须让人看见
     if (PAY_GUARD_RAW && PAY_GUARD_VALUE !== 'on' && PAY_GUARD_VALUE !== 'off') {
@@ -182,30 +176,8 @@ function validateConfig() {
         }
     });
 
-    // signMode 值校验
-    if (!['sdk', 'gateway'].includes(signMode)) {
-        errors.push(`signMode 值无效: "${signMode}"，仅支持 "sdk" 或 "gateway"`);
-    }
-
-    // 免验签的两个条件必须同时成立：signMode=gateway（回调指向网关） + 平台声明 system
-    // 只满足其一都会被认定为「声明与实际配置不一致」，此时代码按自验签处理（fail closed）
+    // 免验签的唯一依据：平台声明 system（= 回调地址托管在集成中心）
     const declaredGateway = config.notifyUrlCallbackType === 'system';
-
-    if (signMode === 'gateway' && !declaredGateway) {
-        errors.push(
-            `signMode=gateway 但平台未声明 notifyURLCallbackType=system（当前: "${config.notifyUrlCallbackType || '空'}"）：`
-            + '回调将走自验签（安全默认）。集成中心创建实例会自动注入该变量；'
-            + '自建公网回调请保持不填，或改用 signMode=sdk'
-        );
-    }
-
-    if (declaredGateway && signMode !== 'gateway') {
-        errors.push(
-            `notifyURLCallbackType=system（网关代验签）但 signMode=${signMode}：`
-            + '回调地址指向本函数、函数必须开公网入口，因此网关明文不会被采信（按自验签处理）。'
-            + '请把 signMode 改为 gateway，或清掉残留的 system 声明'
-        );
-    }
 
     // 声明「回调托管在网关」时，回调地址必须真的配好并指向网关分配的那个地址。
     // 三个地址全空 = 声明与配置自相矛盾（多半是切部署方式时只改了一半）。

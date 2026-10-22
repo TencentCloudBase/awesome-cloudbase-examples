@@ -1,9 +1,11 @@
 /**
  * 支付服务（策略入口）
  * 主动请求（下单/退款/转账）永远走 SDK 自签名直连微信
- * 回调处理根据 signMode 决定：自己验签解密 或 读取集成中心已解密的明文
+ * 回调处理根据平台声明 notifyURLCallbackType 决定：
+ *   system → 回调托管在集成中心，网关已验签解密，读 body.ParsedContent 明文
+ *   其它    → 回调直达本函数，自己验签 + 解密（fail closed）
  */
-const { signMode, verifyMode, payConfig, notifyUrlCallbackType } = require('../config/config');
+const { verifyMode, payConfig, notifyUrlCallbackType } = require('../config/config');
 const SdkStrategy = require('./strategies/sdkStrategy');
 const OrderService = require('./orderService');
 
@@ -64,7 +66,8 @@ class PayService {
 
         // 永远使用 SDK 策略（自己签名直连微信）
         this.strategy = new SdkStrategy(payConfig);
-        console.log(`[PayService] 签名模式: SDK | 回调处理: ${signMode} | 验签方式: ${verifyMode}`);
+        console.log(`[PayService] 回调处理: ${notifyUrlCallbackType === 'system' ? '网关代验签' : '本函数自验签'}`
+            + ` | 验签方式: ${verifyMode}`);
     }
 
     // ========== 统一下单（支持多平台）==========
@@ -191,14 +194,15 @@ class PayService {
      *    发 `{"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}`
      *    就是一笔「支付成功」。
      *
-     * 现在的判定：
-     *   1. 采信网关明文 = `signMode=gateway` **且** 平台声明
-     *      `notifyURLCallbackType=system`（集成中心创建实例时自动注入）
-     *   2. 其余情况（sdk / 未声明 / ownservice）一律自验签 + 解密，验不过就拒绝
+     * 现在的判定（唯一依据是平台声明，没有第二个开关）：
+     *   1. 采信网关明文 = 平台声明 `notifyURLCallbackType=system`
+     *      （集成中心创建实例时自动注入；此时回调地址在网关，函数不该有公网回调入口）
+     *   2. 其余情况（未声明 / ownservice）一律自验签 + 解密，验不过就拒绝
      *   3. 无论哪条路径，明文都要过结构校验
      *
-     * ⚠️ 为什么不再用 signMode 判定：signMode 只是部署意图，
-     *    任何人都能往函数端口发 {"ParsedContent":{...}}，它证明不了来源。
+     * ⚠️ 为什么不能靠「配置」判定：任何人都能往函数端口发 {"ParsedContent":{...}}，
+     *    声明只能证明「这个实例的回调托管在网关」，证明不了「本次请求来自网关」。
+     *    所以 system 模式下**不要给函数开公网入口** —— 这是部署约束，代码强制不了。
      *
      * @param {Object} callbackParams - 回调参数
      * @param {string} label - 日志标识
@@ -206,19 +210,20 @@ class PayService {
      * @returns {Promise<Object|null>} 明文；不可信或结构不合法返回 null
      */
     async _resolveCallbackPayload(callbackParams, label, requiredFields) {
-        // 两个条件必须同时成立才免验签：
-        //   signMode=gateway    → 部署事实：回调地址指向集成中心，函数没有公网回调入口
-        //   system 声明         → 平台声明：这次回调由网关代验签解密
-        // 只认其中一个都会漏：sdk 模式下函数必须开公网入口（任何人都能 POST），
-        // 此时即便残留 system 声明也不能跳过验签；反之只有 gateway 却无 system
-        // 声明时，请求体里自己塞的 ParsedContent 同样不可信。
-        const trustsGateway = signMode === 'gateway' && notifyUrlCallbackType === 'system';
+        const trustsGateway = notifyUrlCallbackType === 'system';
 
         if (trustsGateway && callbackParams.decryptedData) {
-            // 网关转发的请求若带时间戳头，仍然做重放窗口校验（带不了就无从判断，只能靠网络隔离）
-            const headerTs = parseInt(callbackParams.timestamp, 10);
-            if (Number.isFinite(headerTs)
-                && Math.abs(Math.floor(Date.now() / 1000) - headerTs) > 300) {
+            // 🔒 重放窗口校验必须 fail closed：网关会转发原始的 wechatpay-timestamp，
+            //    缺头 / 非数字（被篡改）都不能当成「无从判断所以放过」——
+            //    那不叫没信息，那叫请求形态不对。过期同理。
+            const rawTs = callbackParams.timestamp;
+            const headerTs = parseInt(rawTs, 10);
+            if (!Number.isFinite(headerTs)) {
+                console.warn(`[PayService] ${label}回调缺少/非法 wechatpay-timestamp（当前: ${rawTs ?? '无'}），`
+                    + '无法排除重放，拒绝处理（见 README「回调安全」）');
+                return null;
+            }
+            if (Math.abs(Math.floor(Date.now() / 1000) - headerTs) > 300) {
                 console.warn(`[PayService] ${label}回调时间戳过期，拒绝处理。callback_ts:`, headerTs);
                 return null;
             }
@@ -228,9 +233,8 @@ class PayService {
         }
 
         if (callbackParams.decryptedData && !trustsGateway) {
-            console.warn(`[PayService] ${label}收到网关明文（ParsedContent），但未同时满足 `
-                + `signMode=gateway 与 notifyURLCallbackType=system`
-                + `（当前: signMode=${signMode}, notifyURLCallbackType="${notifyUrlCallbackType || '空'}"），`
+            console.warn(`[PayService] ${label}收到网关明文（ParsedContent），但平台未声明 `
+                + `notifyURLCallbackType=system（当前: "${notifyUrlCallbackType || '空'}"），`
                 + '已忽略明文并走自验签（见 README「回调安全」）');
         }
 

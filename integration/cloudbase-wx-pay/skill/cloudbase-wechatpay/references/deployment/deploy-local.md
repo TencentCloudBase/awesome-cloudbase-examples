@@ -37,7 +37,7 @@ cp .env.example .env
 # 编辑 .env，填入你的商户参数（详见 env-config.md）
 ```
 
-> **本地开发推荐使用 SDK 模式**（`signMode=sdk`），因为无法使用集成中心。
+> **本地开发推荐使用 自建回调模式**（未声明 `notifyURLCallbackType`（自建回调）），因为无法使用集成中心。
 
 ### Step 3：启动服务
 
@@ -52,7 +52,7 @@ node app.js
 启动日志示例：
 ```
 [pay-common] 服务启动于 http://localhost:3000
-[Config Debug] signMode: sdk
+[Config Debug] 回调处理: 本函数自验签（未声明 notifyURLCallbackType）
 [Config Debug] privateKey 包含真换行: false  ← 正确！应为 false
 [Config Debug] 回调 URL: http://localhost:3000/wx-pay/unifiedOrderTrigger
 [Router] 注册 18 个路由
@@ -202,7 +202,7 @@ curl -X POST http://localhost:3000/wx-pay/unifiedOrderTrigger \
 
 | # | 检查项 | 本地 | 云端 |
 |---|:------:|:----:|:----:|
-| 1 | `.env` 中的 `signMode` | sdk | sdk 或 gateway |
+| 1 | `.env` 中的 `notifyURLCallbackType` | 未声明 | 本地联调不需要声明（= 自验签） |
 | 2 | 回调 URL | ngrok 地址（临时） | 正式 HTTPS 域名 |
 | 3 | `corsAllowOrigin` | `*`（宽松） | 前端实际域名 |
 | 4 | 日志级别 | DEBUG | info 或 warn |

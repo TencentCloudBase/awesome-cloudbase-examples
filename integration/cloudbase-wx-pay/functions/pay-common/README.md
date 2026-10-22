@@ -1,6 +1,6 @@
 # pay-common 微信支付通用模板
 
-微信支付 V3 API 的 Express 通用模板，支持多种部署方式和签名模式。
+微信支付 V3 API 的 Express 通用模板，支持多种部署方式和回调处理模式。
 
 ## 特性
 
@@ -43,7 +43,7 @@ npm install
 
 > 📖 **环境变量完整配置**：[env-config.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/env-config.md)
 >
-> 📖 **SDK vs 网关模式**：[sign-mode.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/sign-mode.md)
+> 📖 **SDK vs 网关模式**：[callback-mode.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/callback-mode.md)
 >
 > 📖 **公钥验签 vs 证书验签**：[verify-mode.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/template-onboarding/verify-mode.md)
 
@@ -55,7 +55,6 @@ npm install
 
 | 变量名 | 必填 | 示例值 | 说明 |
 |--------|:----:|--------|------|
-| `signMode` | 是 | `sdk` / `gateway` | 签名模式。`sdk`=自己验签；`gateway`=集成中心代验签（**默认值**） |
 | `notifyURLCallbackType` | 集成中心自动注入 | `system` | 平台声明回调由谁验签。`system`=网关代验签，采信 `body.ParsedContent`；`ownservice`/空=本函数自己验签。**不要手工覆盖** |
 | `appId` | 是 | `wx1234567890abcdef` | 小程序 / 公众号 AppID，需已在商户平台绑定 |
 | `merchantId` | 是 | `1900009191` | 微信支付商户号（10 位数字） |
@@ -98,10 +97,9 @@ privateKey=-----BEGIN PRIVATE KEY-----\nMIIEvgIBADA...\n-----END PRIVATE KEY----
 </details>
 
 <details>
-<summary>⚡ 最小可用配置（SDK 模式，复制即用）</summary>
+<summary>⚡ 最小可用配置（自建回调模式，复制即用）</summary>
 
 ```env
-signMode=sdk
 appId=YOUR_APP_ID
 merchantId=YOUR_MERCHANT_ID
 merchantSerialNumber=YOUR_SERIAL_NUMBER
@@ -130,7 +128,7 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 </details>
 
-**签名模式速查**：
+**回调处理模式速查**：
 
 | 模式 | 主动请求 | 回调处理 | 适用场景 |
 |------|---------|---------|---------|
@@ -141,22 +139,19 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 采信 `body.ParsedContent` 免验签需要**两个条件同时成立**，缺一个都退回自验签（fail closed）：
 
-| 条件 | 含义 | 为什么不能只看它 |
+| 判定依据 | 含义 | 代码强制不了的边界 |
 |---|---|---|
-| `signMode=gateway` | 部署事实：回调地址指向集成中心，函数没有公网回调入口 | 它是静态配置，任何人都能往函数端口发 `{"ParsedContent":{...}}`，证明不了来源 |
-| 平台注入 `notifyURLCallbackType=system` | 平台声明：本次回调由网关代验签解密 | 若函数自己开了公网入口（`sdk` 模式），残留的声明会让明文回调被无条件采信 |
+| 平台注入 `notifyURLCallbackType=system` | 这个实例的回调托管在集成中心，网关已代验签解密 | 它证明的是「实例配置」，不是「本次请求来源」：函数一旦开了公网入口，任何人都能 POST `{"ParsedContent":{...}}` |
 
 | 实际配置 | 回调行为 |
 |---|---|
-| `signMode=gateway` + `system`（集成中心创建即如此） | 采信 `ParsedContent` + 结构校验 + 时间戳窗口（若带） |
-| `gateway` + `ownservice` / 空 | 自验签 + 解密（含「只改了 notifyURL* 没清声明」的迁移残留场景） |
-| `sdk` + `system` | 仍自验签（函数有公网入口，声明不作数）；`validateConfig` 会提示这组矛盾 |
-| `sdk` + 空 | 自验签 + 解密 |
+| `notifyURLCallbackType=system`（集成中心创建即如此） | 采信 `ParsedContent` + 结构校验 + **必须带 `wechatpay-timestamp` 且不超过 5 分钟**；**函数不得开公网入口** |
+| `ownservice` / 空（未声明） | 自验签 + 解密（自建公网回调） |
 
-> 🚨 为什么不能只看 `signMode`：回调路由本身没有鉴权。只要请求体里有 `ParsedContent` 就跳过验签，等于开放了一个免签名的「支付成功」入口 —— 任何人都能发 `{"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}`。
+> 🚨 回调路由本身没有鉴权：`system` 时只要请求体里有 `ParsedContent` 就采信，等于开放了一个免签名的「支付成功」入口。所以 `system` 模式**必须不开公网入口**。
 >
-> 集成中心（官方推荐）部署时：平台会自动注入 `notifyURLCallbackType=system`，`signMode` 保持默认 `gateway`，**不要手工覆盖这两个值**；同时**不要为 `pay-common` 开 HTTP 访问服务**。
-> 自建公网回调（备选）时：保持不填或直接用 `signMode=sdk`，同时按微信要求配置平台证书 / 支付公钥。
+> 集成中心（官方推荐）部署时：平台会自动注入 `notifyURLCallbackType=system` 和三个回调地址，**不要手工覆盖**；同时**不要为 `pay-common` 开 HTTP 访问服务** —— 这条是部署约束，代码强制不了（函数无法自查是否开放了公网入口）。
+> 自建公网回调（备选）时：保持不填（= 未声明，走自验签），同时按微信要求配置 `token` / `msgSecret` / 平台证书或支付公钥。
 
 #### 金额校验（上线前必须实现）
 

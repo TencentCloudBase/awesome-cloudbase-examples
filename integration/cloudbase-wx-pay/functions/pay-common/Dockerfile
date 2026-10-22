@@ -16,7 +16,6 @@ ENV PORT=80
 # 正式环境请在云托管控制台 → 服务设置 → 环境变量中配置，不要把密钥写在 Dockerfile 里。
 # 本地开发请复制 .env.example 为 .env 并填入实际值。
 # 以下仅为占位声明，实际值通过运行时注入。
-ENV signMode=sdk
 ENV corsAllowOrigin=""
 ENV appId=""
 ENV merchantId=""

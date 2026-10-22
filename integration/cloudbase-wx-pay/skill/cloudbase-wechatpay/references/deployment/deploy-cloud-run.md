@@ -9,7 +9,7 @@
 - **生产环境**高并发服务
 - 已有 **Docker 化**项目
 - 需要**常驻容器**避免冷启动
-- 搭配 **SDK 模式**使用（完全自主控制）
+- 搭配 **自建回调模式**使用（完全自主控制）
 
 ---
 
@@ -119,13 +119,13 @@ curl -X POST \
 | **扩缩容** | 自动（按请求量） | 手动/自动（按配置规则） |
 | **计费** | 按 GB·ms（调用量×执行时间） | 按 CPU/内存×时长 |
 | **冷启动** | 有（1-3s） | 无（常驻容器） |
-| **适合 signMode** | Gateway（更省心） | **SDK（更灵活）** |
+| **适合 notifyURLCallbackType** | Gateway（更省心） | **SDK（更灵活）** |
 
 ---
 
-## SDK 模式的额外配置
+## 自建回调模式的额外配置
 
-云托管搭配 SDK 模式是最灵活的组合：
+云托管搭配 自建回调模式是最灵活的组合：
 
 ### 回调 URL 配置
 
@@ -144,7 +144,7 @@ transferNotifyUrl=https://<env-id>-<uin>.ap-shanghai.app.tcloudbase.com/wx-pay/t
 
 ### IP 白名单放行
 
-确保云托管的**安全组**放行了微信回调 IP 段（参见 [sign-mode.md](../template-onboarding/sign-mode.md) §IP 白名单）。
+确保云托管的**安全组**放行了微信回调 IP 段（参见 [callback-mode.md](../template-onboarding/callback-mode.md) §IP 白名单）。
 
 ---
 

@@ -44,9 +44,9 @@
 
 | 路由 | 方法 | 说明 |
 |------|------|------|
-| `/unifiedOrderTrigger` | POST | 支付回调通知（SDK 模式） |
-| `/refundTrigger` | POST | 退款回调通知（SDK 模式） |
-| `/transferTrigger` | POST | 转账回调通知（SDK 模式） |
+| `/unifiedOrderTrigger` | POST | 支付回调通知（自建回调模式） |
+| `/refundTrigger` | POST | 退款回调通知（自建回调模式） |
+| `/transferTrigger` | POST | 转账回调通知（自建回调模式） |
 
 ---
 
@@ -60,9 +60,9 @@
 | 4 | 必须在商户平台设置 APIv3 密钥 | 未设置 = 收不到任何回调通知 |
 | 5 | 回调处理必须在 5 秒内返回应答 | 超时触发重试（~15 次/最长 24h） |
 
-> **简单总结：SDK 模式 = 开 HTTP 访问服务 → 关掉回调路由身份认证 → 设 APIv3 密钥 → 回调 URL 写完整 → 5 秒内返回**
+> **简单总结：自建回调模式 = 开 HTTP 访问服务 → 关掉回调路由身份认证 → 设 APIv3 密钥 → 回调 URL 写完整 → 5 秒内返回**
 >
-> **对比 Gateway 模式**：回调地址由集成中心自动生成，直接复制填入即可，无特殊部署约束。
+> **对比 集成中心托管模式**：回调地址由集成中心自动生成，直接复制填入即可，无特殊部署约束。
 >
 > 详细操作步骤见 `references/template-onboarding/quick-start.md` Step 4.2-4.5
 

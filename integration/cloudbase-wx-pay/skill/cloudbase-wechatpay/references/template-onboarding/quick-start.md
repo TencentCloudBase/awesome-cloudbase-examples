@@ -105,13 +105,13 @@ npm install
 - **本地测试** → `export` 或启动脚本注入
 - **控制台部署** → 按此列表逐项填写
 
-**根据你的签名模式选择配置：**
+**根据你的回调处理模式选择配置：**
 
-### 方式 A：SDK 模式（自行验签解密）
+### 方式 A：自建回调模式（自行验签解密）
 
 适用于：HTTP 云函数 + HTTP 访问服务、云托管直连部署、自建服务器。
 
-> ⚠️ **SDK 模式的 3 条硬性约束**：
+> ⚠️ **自建回调模式的 3 条硬性约束**：
 >
 > | # | 约束 | 说明 |
 > |---|------|------|
@@ -119,10 +119,9 @@ npm install
 > | 2 | **HTTP 访问服务的回调路由不能开启身份认证** | 微信回调不带 Token，开了会被拦截 |
 > | 3 | **回调 URL 必须带完整路径** | 域名后带环境子路径，如 `/xxx-env/wx-pay/unifiedOrderTrigger` |
 >
-> **简单总结**：SDK 模式 = 开 HTTP 访问服务 → 关掉回调路由身份认证 → 回调 URL 写完整路径。
+> **简单总结**：自建回调模式 = 开 HTTP 访问服务 → 关掉回调路由身份认证 → 回调 URL 写完整路径。
 
 ```env
-signMode=sdk
 appId=你的AppID
 merchantId=你的商户号
 merchantSerialNumber=你的证书序列号
@@ -149,12 +148,12 @@ transferNotifyUrl=https://你的HTTP访问服务域名/你的路由Path/transfer
 corsAllowOrigin=https://your-frontend-domain.com
 ```
 
-### 方式 B：Gateway 模式（集成中心代签）
+### 方式 B：集成中心托管模式（集成中心代签）
 
 适用于：CloudBase 集成中心，回调经集成中心解密转发。
 
 ```env
-signMode=gateway
+notifyURLCallbackType=system（集成中心托管）
 # 平台自动注入：回调托管在网关时值为 system（采信 ParsedContent 明文的依据）
 notifyURLCallbackType=system
 appId=你的AppID
@@ -171,7 +170,7 @@ transferNotifyUrl=https://integration-xxx.tcloudbase.com/wechatpay/transfer
 corsAllowOrigin=https://your-frontend-domain.com
 ```
 
-> **关键区别**：凭证完全相同，只有回调 URL 不同。详见 [sign-mode.md](sign-mode.md)。
+> **关键区别**：凭证完全相同，只有回调 URL 不同。详见 [callback-mode.md](callback-mode.md)。
 
 ## Step 3：本地测试
 
@@ -338,15 +337,15 @@ fetch('https://{domain}/{path}/wxpay_order', {
 
 ## Step 4：部署
 
-### 4.0 理解 SDK 模式的双通道架构 ⭐
+### 4.0 理解 自建回调模式的双通道架构 ⭐
 
 > **这是最关键的概念，理解了就不会配错！**
 
-SDK 验签模式下，小程序 Demo 的请求走 **两个完全不同的通道**：
+自建回调（自验签）模式下，小程序 Demo 的请求走 **两个完全不同的通道**：
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      小程序 SDK 模式双通道架构                        │
+│                      小程序 自建回调模式双通道架构                        │
 │                                                                     │
 │  通道一：前端 → 后端（主动请求）                                        │
 │  ─────────────────────────────                                      │
@@ -400,7 +399,6 @@ SDK 验签模式下，小程序 Demo 的请求走 **两个完全不同的通道*
       "installDependency": true,
       "ignore": ["node_modules", ".git", ".env"],
       "envVariables": {
-        "signMode": "sdk",
         "appId": "YOUR_APP_ID",
         "merchantId": "YOUR_MERCHANT_ID",
         "merchantSerialNumber": "YOUR_MERCHANT_SERIAL_NUMBER",
@@ -431,7 +429,7 @@ SDK 验签模式下，小程序 Demo 的请求走 **两个完全不同的通道*
 | `timeout` | `30` | 超时时间（秒），回调处理建议设大些 |
 | **`envVariables`** ⭐ | 见上方 | **环境变量可在此声明，也可在控制台配置（见下方 Step 4.4）** |
 
-#### 方式 A：HTTP 云函数（推荐，SDK 模式必选此方式处理回调）
+#### 方式 A：HTTP 云函数（推荐，自建回调模式必选此方式处理回调）
 
 ```bash
 # 1. 登录 CloudBase
@@ -462,7 +460,7 @@ tcb cloudrun deploy pay-common --path .
 
 ### 4.2 开启 HTTP 访问服务并配置路由 ⭐⭐
 
-> **SDK 模式必须执行此步骤！没有 HTTP 访问服务，微信回调无法到达你的函数。**
+> **自建回调模式必须执行此步骤！没有 HTTP 访问服务，微信回调无法到达你的函数。**
 
 #### 方式 A：控制台操作（可视化）
 
@@ -521,7 +519,7 @@ tcb routes list -e your-env-id --filter "Path=/pay/wx-pay"
 
 ```env
 # ============================================================
-# 回调 URL 组装公式（SDK 模式）
+# 回调 URL 组装公式（自建回调模式）
 # ============================================================
 #
 # 完整格式：{HTTP访问服务域名} + {路由Path} + {API路径}
@@ -580,7 +578,7 @@ transferNotifyUrl=https://your-env-id-your-uin.ap-shanghai.app.tcloudbase.com/pa
 ```
 .env 文件格式（key=value）          控制台界面
 ─────────────────────────────────  ──────────────────────────────
-signMode=sdk                        变量名: signMode    值: sdk
+notifyURLCallbackType=system（平台注入，一般不用手填）  变量名: notifyURLCallbackType  值: system
 appId=wx1234567890                  变量名: appId       值: wx1234567890
 merchantId=YOUR_MERCHANT_ID               变量名: merchantId  值: YOUR_MERCHANT_ID
 privateKey=-----BEGIN...            变量名: privateKey  值: （粘贴完整 PEM 内容）
@@ -654,7 +652,7 @@ python3 scripts/check_deploy_config.py /path/to/pay-common
 微信支付会偶尔发送签名值含 WECHATPAY/SIGNTEST/ 前缀的探测请求。
 这是微信用来验证你的服务器是否能正确处理验签失败的请求。
 
-→ 收到此类请求时，pay-common SDK 验签失败后会自动返回错误响应码
+→ 收到此类请求时，pay-common 验签失败后会自动返回错误响应码
 → 这是正常行为，直接忽略即可，等待正常回调通知到来
 
 日志中可能出现类似记录：
@@ -920,4 +918,4 @@ class OrderService {
 
 ---
 
-*详细配置说明见 [env-config.md](env-config.md) | 签名模式详解见 [sign-mode.md](sign-mode.md)*
+*详细配置说明见 [env-config.md](env-config.md) | 回调处理模式详解见 [callback-mode.md](callback-mode.md)*

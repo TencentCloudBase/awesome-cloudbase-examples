@@ -2,7 +2,7 @@
 
 > 本文档是 [`../template-onboarding/quick-start.md`](../template-onboarding/quick-start.md) Step 4 的**详细补充**。
 >
-> **阅读顺序**：先走完 quick-start.md 的 Step 4.0~4.5（含 cloudbaserc.json 配置、HTTP 访问服务、环境变量同步），再回到本文查看 Gateway 模式特殊配置、进阶排查、脚本工具。
+> **阅读顺序**：先走完 quick-start.md 的 Step 4.0~4.5（含 cloudbaserc.json 配置、HTTP 访问服务、环境变量同步），再回到本文查看 集成中心托管模式特殊配置、进阶排查、脚本工具。
 
 ---
 
@@ -10,7 +10,7 @@
 
 - **首次接入**、快速原型验证
 - **低频调用**场景（按调用量计费，更经济）
-- SDK 模式（自行验签解密）或 Gateway 模式（集成中心代签）
+- 自建回调模式（自行验签解密）或 集成中心托管模式（集成中心代签）
 
 ---
 
@@ -92,9 +92,9 @@ curl -X POST https://your-http-domain/wx-pay/wxpay_order \
 
 ---
 
-## Gateway 模式特殊配置
+## 集成中心托管模式特殊配置
 
-若使用 Gateway 模式（`signMode=gateway`），还需要：
+若使用 集成中心托管模式（`notifyURLCallbackType=system`），还需要：
 
 ### 5.1 开通并配置集成中心
 
@@ -117,7 +117,7 @@ curl -X POST https://your-http-domain/wx-pay/wxpay_order \
 
 ### 5.3 回调路由鉴权豁免
 
-> **SDK 模式必须操作此步！** Gateway 模式下回调走集成中心，无需此步。
+> **自建回调模式必须操作此步！** 集成中心托管模式下回调走集成中心，无需此步。
 >
 > ⭐ **完整操作步骤见 `quick-start.md` Step 4.2**（控制台 + CLI 两种方式，含 `enableAuth: false` 配置）。
 >

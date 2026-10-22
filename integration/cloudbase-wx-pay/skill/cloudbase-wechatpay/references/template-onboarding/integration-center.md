@@ -22,7 +22,7 @@
 |------|:----------:|:-------------------:|
 | 凭证管理 | 控制台统一托管，环境变量自动注入 | 自行配置 `cloudbaserc.json` / 控制台环境变量 |
 | 回调域名 | 平台自动生成 HTTPS 域名 | 需自行开启 HTTP 访问服务 + 拼装 URL |
-| 回调验签 | 集成中心代验签 + 代解密（`signMode=gateway`） | 自行验签 + AES-GCM 解密（`signMode=sdk`） |
+| 回调验签 | 集成中心代验签 + 代解密（`notifyURLCallbackType=system`） | 自行验签 + AES-GCM 解密（未声明 `notifyURLCallbackType`（自建回调）） |
 | 部署方式 | 一键创建，自动部署 HTTP 云函数 | CLI 部署 / Docker 构建 |
 | 灵活度 | 配置修改需通过控制台表单 | 完全自主控制 |
 | 适合谁 | 新手 / 只做小程序支付 / 快速验证 | 需要多端支付 / 自定义部署 / 高级控制 |
@@ -92,7 +92,7 @@
 
 | 变量 | 是否必填 | 说明 |
 |------|---------|------|
-| `signMode` | 是 | 模式开关，集成中心默认为 **`gateway`** |
+| `notifyURLCallbackType` | 平台注入 | 集成中心创建实例时注入 **`system`**，不要手改 |
 | `appId` | 是 | 小程序 AppID |
 | `merchantId` | 是 | 商户号 |
 | `apiV3Key` | 是 | APIv3 密钥 |
@@ -106,14 +106,14 @@
 
 > 与手动部署的关键区别：
 > - **回调 URL 由平台自动生成**——格式为 `https://<集成标识>.integration-callback.tcloudbase.com/wechatpay/*`
-> - **signMode 固定为 `gateway`**——回调由集成中心代验签、代解密，业务代码直接读明文
+> - **notifyURLCallbackType 固定为 `system`**——回调由集成中心代验签、代解密，业务代码直接读明文
 > - **`cloudbaserc.json` 和 `Dockerfile` 不使用**——集成中心自动管理部署
 
 ---
 
-## 第四步 · signMode=gateway 的特殊行为
+## 第四步 · 回调托管（`notifyURLCallbackType=system`）的特殊行为
 
-集成中心模式下 `signMode` 注入为 `gateway`，这影响两个方面：
+集成中心模式下 `notifyURLCallbackType` 注入为 `system`，这影响两个方面：
 
 ### 主动请求（下单/退款/转账）
 
@@ -121,9 +121,9 @@
 
 ### 回调处理
 
-**与 SDK 模式不同**——`gateway` 模式下：
+**与 自建回调模式不同**——`gateway` 模式下：
 
-| 步骤 | SDK 模式（`signMode=sdk`） | Gateway 模式（`signMode=gateway`） |
+| 步骤 | 自建回调模式（未声明 `notifyURLCallbackType`（自建回调）） | 集成中心托管模式（`notifyURLCallbackType=system`） |
 |------|--------------------------|----------------------------------|
 | 接收回调 | 自己的 HTTP 访问服务域名 | 集成中心域名（`integration-callback.tcloudbase.com`） |
 | 验签 | 自己验签（`wechatpay-node-v3` SDK） | 集成中心代验签 ✅ |
@@ -172,7 +172,7 @@ pay-common/
 ├── routes/
 │   └── pay.js                    对外路由定义
 ├── services/
-│   ├── payService.js             统一入口，按 signMode 路由到策略
+│   ├── payService.js             统一入口，按 notifyURLCallbackType 路由到策略
 │   ├── orderService.js           回调处理（需对接业务系统）
 │   └── strategies/
 │       └── sdkStrategy.js        SDK 自签名策略（主动请求均走此策略）
@@ -232,4 +232,4 @@ PEM 私钥被 OpenSSL 拒绝解码。通常为集成中心表单中粘贴时缺�
 
 ---
 
-*手动部署方式见 [quick-start.md](quick-start.md) | 环境变量配置见 [env-config.md](env-config.md) | 签名模式见 [sign-mode.md](sign-mode.md)*
+*手动部署方式见 [quick-start.md](quick-start.md) | 环境变量配置见 [env-config.md](env-config.md) | 回调处理模式见 [callback-mode.md](callback-mode.md)*

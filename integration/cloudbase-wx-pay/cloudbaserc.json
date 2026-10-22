@@ -19,7 +19,6 @@
       "memorySize": 256,
       "installDependency": true,
       "envVariables": {
-        "signMode": "{{env.SIGN_MODE}}",
         "appId": "{{env.WX_APP_ID}}",
         "merchantId": "{{env.MCH_ID}}",
         "merchantSerialNumber": "{{env.MCH_SERIAL_NO}}",
