@@ -10,13 +10,14 @@ description: |
   "OfferID", "AppKey", "米大师", "Midas", "沙箱", "PAYMENT_ILLEGAL_IN_SANDBOX",
   "小程序消息推送", "EncodingAESKey".
   For 实物商品 微信支付 (wx.requestPayment / V3 接口), defer to cloudbase-wechatpay skill.
-  For 海外收款, defer to Stripe integration.
 ---
 
 # 小程序虚拟支付接入（xpay-common 模板）
 
-面向**虚拟商品**（道具直购、代币支付、会员订阅）的微信支付能力。核心价值是**解决 iOS 端支付合规**——
-底层把微信支付与 Apple IAP 打通，同一套 `wx.requestVirtualPayment` 在安卓与 iOS 都能拉起收银台。
+面向**虚拟商品**（道具直购、代币支付、会员订阅）的微信小程序虚拟支付能力（米大师 Midas）。
+封装 `paySig` / `signature` 双签名、下单、发货推送、查单、退款与 iOS 退款问询；客户端统一用
+`wx.requestVirtualPayment`。iOS 端能否拉起收银台由平台侧开通的「虚拟支付 iOS 能力」决定，
+服务端只处理签名与推送，不是本模板「打通 IAP」。
 
 ---
 
@@ -45,7 +46,6 @@ description: |
 | 技能 | 负责范围 |
 |------|---------|
 | `cloudbase-wechatpay` | 实物商品的普通微信支付（pay-common 模板） |
-| `miniprogram-virtualpay-person` | 微信官方虚拟支付接入指引（开通、道具管理、结算规则） |
 
 本 Skill **专注范围**：CloudBase 平台上用 `xpay-common` 模板的部署、配置、签名、回调、排障。
 
@@ -77,11 +77,13 @@ description: |
 
 ## 路由速查
 
-| 路由 | 鉴权 | 说明 |
+函数内路径；完整 URL = HTTP 访问服务地址（含路径前缀）+ `/xpay/xxx`。
+
+| 路由 | 身份来源 | 说明 |
 |---|---|---|
-| `POST /xpay/create_order` | 上游网关 | 返回 `payData`（signData / mode / paySig / signature） |
-| `POST /xpay/query_order` | 上游网关 | 查单，推送丢失时兜底补发货 |
-| `POST /xpay/callback` | 网关验签 | 所有 `xpay_*` 事件统一入口 |
+| `POST /xpay/create_order` | 平台注入 `x-wx-openid`；`code2Session` 换出的权威 openid 必须与之相同 | 返回 `payData`（signData / mode / paySig / signature） |
+| `POST /xpay/query_order` | 同上 + 订单归属校验（`XPAY_GUARD=on` 时查不到单即拒绝） | 查单，推送丢失时兜底补发货 |
+| `POST /xpay/callback` | `notifyUrlCallbackType=system` → 网关验签；`ownservice`/未声明 → 本函数自验签（fail closed，见 Gotcha 9） | 所有 `xpay_*` 事件统一入口 |
 
 ## 回调事件速查
 

@@ -41,7 +41,7 @@
 
 > `notifyUrlCallbackType=ownservice` 时不走网关：URL 由业务方自己填在【虚拟支付 → 基本配置 → 基础配置 → 发货推送配置】，验签与解密由业务函数完成（模板 `app.js` 已内置，配 `token` + `msgSecret` 即生效）。
 >
-> 与 Stripe 的 `signMode` 不同：这里的模式由平台字段声明 + 请求自带标记（`Encrypt` / `echostr`）双重判定，不需要业务侧再造一个开关。
+> 模式由平台字段声明 + 请求自带标记（`Encrypt` / `echostr`）双重判定，不需要业务侧再造一个开关。
 
 ## 验签口径（网关侧）
 

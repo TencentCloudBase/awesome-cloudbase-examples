@@ -2,11 +2,14 @@
 
 ## 云函数路由（对外）
 
-| 路由 | 鉴权 | 入参 | 返回 |
+下表是**函数内路径**。完整 URL = HTTP 访问服务地址（含路径前缀）+ `/xpay/xxx`；
+`wx.cloud.callHTTPFunction` 调用时只传函数名与参数，前缀由平台拼接。
+
+| 路由 | 身份来源 | 入参 | 返回 |
 |---|---|---|---|
-| `POST /xpay/create_order` | 上游网关 | `code`, `productId`, `goodsPrice`, `buyQuantity`, `mode`, `attach`, 可选 `outTradeNo` | `{ signData, mode, paySig, signature, outTradeNo, openid }` |
-| `POST /xpay/query_order` | 上游网关 | `code`, `outTradeNo` | 订单详情 |
-| `POST /xpay/callback` | 网关验签 | 推送明文 | `{ ErrCode, ErrMsg }` |
+| `POST /xpay/create_order` | 平台注入 `x-wx-openid`；`code2Session` 换出的权威 openid 必须与之相同 | `code`, `productId`, `goodsPrice`, `buyQuantity`, `mode`, `attach`, 可选 `outTradeNo` | `{ signData, mode, paySig, signature, outTradeNo, openid }` |
+| `POST /xpay/query_order` | 同上 + 订单归属校验（`XPAY_GUARD=on` 时查不到单即拒绝） | `code`, `outTradeNo` | 订单详情 |
+| `POST /xpay/callback` | `notifyUrlCallbackType=system` → 网关验签；`ownservice`/未声明 → 本函数自验签（fail closed） | 推送明文 | `{ ErrCode, ErrMsg }` |
 
 统一响应：`{ code, msg, data }`，`code=0` 为成功。
 
@@ -57,6 +60,10 @@ Event 以 xpay_ 开头            →  /callback
 ## 微信服务端接口（`/xpay/*`）
 
 通过 `XpayStrategy` 封装，业务侧不直接接触签名与密钥。
+
+> ⚠️ **与上面的云函数路由同名但不同层**：这里的 `query_order` 是发往微信
+> `api.weixin.qq.com` 的上游接口，由 `XpayStrategy` 调用；`/xpay/create_order` 才是本函数对外的路由。
+> 两者都写作 `/xpay/xxx`，排查日志时看清是入站还是出站。
 
 | 接口 | 方法 | 用途 |
 |---|---|---|

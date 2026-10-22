@@ -104,7 +104,7 @@
 
 ```bash
 cd integration/cloudbase-virtualpay/functions/xpay-common
-npm test          # 70 个单元测试（签名/官方基准向量/回调/XML/配置映射）
+npm test          # 单元测试（签名 / 官方基准向量 / 回调 / XML / 配置映射）
 
 # 部署前：占位符 ↔ .env 键名一致性（名字对不上会静默写成空值）
 bash ../../skill/cloudbase-xpay/scripts/check_env_keys.sh

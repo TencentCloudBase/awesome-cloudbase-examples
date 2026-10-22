@@ -32,7 +32,7 @@
 | 签名算法 | HMAC-SHA256（hex） |
 | 币种 | `CNY` |
 | 金额单位 | **分** |
-| `outTradeNo` 长度 | 8–32 位，不能 `_` 开头 |
+| `outTradeNo` 长度 | 8–32 位；模板校验字符集 `0-9A-Za-z_-|*@`。微信侧还要求**不以 `_` 开头**，模板未强制，生成单号时自行避免 |
 | `env`（固定常量，非环境变量） | `0`（现网，模板不支持切换） |
 | 回调重推次数 | 最多 **15** 次 |
 | iOS 退款问询时限 | **3 秒**（问 3 次） |
@@ -51,11 +51,15 @@
 
 # 应答格式
 
+只有两种形态，**跟随推送格式**（没有第三种兜底）：
+
 | 推送 | 应答 |
 |---|---|
 | JSON | `{"ErrCode":0,"ErrMsg":"success"}` |
 | XML | `<xml><ErrCode>0</ErrCode><ErrMsg><![CDATA[success]]></ErrMsg></xml>` |
-| 兜底 | 空串 或 `success` |
+
+判定顺序：`content-type` 含 xml/json → 照办；无该头 → 看请求体是否 `<xml` 开头；都没有 → 按 JSON。
+iOS 退款问询另需在应答里带 `IosRefundQueryResponse`（XML / JSON 两条通道语义一致）。
 
 # 命名风格
 

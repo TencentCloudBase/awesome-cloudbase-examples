@@ -88,8 +88,8 @@ signForClient(signData: string, sessionKey: string, mode?)   // ← 字符串
 signForServer(uri: string, postBody: string, sessionKey)     // ← 字符串
 ```
 
-> 对比 Stripe：Stripe 是**验签时**要用原始 body（不能被 parse 再 stringify）；
-> 虚拟支付是**签名时**要保证字符串不被改动。方向相反，但都栽在「序列化改变了字节」上。
+> 同源问题在别的支付网关上表现为「验签时要用原始 body（不能被 parse 再 stringify）」；
+> 虚拟支付方向相反，是**签名时**就要保证字符串不被改动。无论哪一头，栽的都是「序列化改变了字节」。
 
 ## sessionKey 从哪来
 

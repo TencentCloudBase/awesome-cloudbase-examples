@@ -1,4 +1,4 @@
-# 支付方案选型：虚拟支付 vs 普通微信支付 vs Stripe
+# 支付方案选型：虚拟支付 vs 普通微信支付
 
 ## 一句话判断
 
@@ -6,28 +6,27 @@
 |---|---|
 | 卖**实物商品** | 普通微信支付（`cloudbase-wechatpay`，`pay-common`） |
 | 卖**虚拟商品**（道具/代币/会员），且要上 iOS | **虚拟支付（本 Skill，`xpay-common`）** |
-| **海外收款** | Stripe 集成 |
 
 > 判断依据不是「金额大小」或「是否需要服务端」，而是**商品形态 + 终端**。虚拟商品在 iOS 上必须走 IAP，这是苹果政策硬要求。
 
 ---
 
-## 三方案对比矩阵
+## 两方案对比矩阵
 
-| 维度 | 普通微信支付 pay-common | **虚拟支付 xpay-common** | Stripe pay-stripe |
-|---|---|---|---|
-| 商品 | 实物 | **虚拟商品** | 实物 + 虚拟 |
-| 客户端 API | `wx.requestPayment` | **`wx.requestVirtualPayment`** | `stripe.redirectToCheckout` |
-| iOS 虚拟商品 | ❌ 不支持 | ✅ **支持（底层 Apple IAP）** | ✅ |
-| 服务端接口 | `/v3/pay/transactions/*` | **`/xpay/*`（米大师 Midas）** | `stripe.checkout.sessions.*` |
-| 下单动作 | 服务端调统一下单拿 `prepay_id` | **服务端只出签名，客户端自行下单** | 服务端创建 Session |
-| 回调通道 | 微信支付回调 + AES-GCM | **小程序消息推送** + AES-256-CBC | Stripe webhook（明文 + HMAC） |
-| 验签位置 | 双模（sdk / gateway） | **仅网关**（无 sdk 模式） | 双模（sdk / gateway） |
-| 凭证 | 商户号 5 项 + PEM 证书 | OfferID + AppKey + AppID/AppSecret | sk + whsec |
-| 幂等键 | `out_trade_no` | 平台单号 `wx_order_id`（缺失回退 `OutTradeNo`） | `event.id` |
-| 应答格式 | `{ code: 'SUCCESS' }` | **`{ ErrCode: 0, ErrMsg: 'success' }`** | 2xx |
-| 费率 | 约 0.6% | **安卓 1% / iOS 12%** | 2.9% + $0.30 |
-| 结算 | T+1 | **安卓 T+3 / iOS 约 45–60 天** | 按 Stripe 周期 |
+| 维度 | 普通微信支付 pay-common | **虚拟支付 xpay-common** |
+|---|---|---|
+| 商品 | 实物 | **虚拟商品** |
+| 客户端 API | `wx.requestPayment` | **`wx.requestVirtualPayment`** |
+| iOS 虚拟商品 | ❌ 不支持 | ✅ **支持（平台侧 Apple IAP 能力）** |
+| 服务端接口 | `/v3/pay/transactions/*` | **`/xpay/*`（米大师 Midas）** |
+| 下单动作 | 服务端调统一下单拿 `prepay_id` | **服务端只出签名，客户端自行下单** |
+| 回调通道 | 微信支付回调 + AES-GCM | **小程序消息推送** + AES-256-CBC |
+| 验签归属 | 平台字段 `notifyURLCallbackType` | 平台字段 `notifyUrlCallbackType` |
+| 凭证 | 商户号 5 项 + PEM 证书 | OfferID + AppKey + AppID/AppSecret |
+| 幂等键 | `out_trade_no` | 平台单号 `wx_order_id`（缺失回退 `OutTradeNo`） |
+| 应答格式 | `{ code: 'SUCCESS' }` | **`{ ErrCode: 0, ErrMsg: 'success' }`** |
+| 费率 | 约 0.6% | **安卓 1% / iOS 12%** |
+| 结算 | T+1 | **安卓 T+3 / iOS 约 45–60 天** |
 
 ---
 
@@ -40,7 +39,7 @@
 | `sdkStrategy.js`（wechatpay SDK + PEM + RSA 签名） | ❌ | 虚拟支付用 HMAC-SHA256 双签名，无证书体系 |
 | `_handleCallback` 的 AES-GCM 解密 | ❌ | 回调走消息推送，解密在网关完成 |
 | 凭证体系（商户号/证书序列号/APIv3 密钥） | ❌ | 换成 OfferID + AppKey |
-| `signMode` 双模 | ⚠️ 部分 | 虚拟支付**只有 gateway 模式**（通道是消息推送） |
+| 回调验签归属 | ✅ | 两边都由平台字段声明，**不提供业务侧开关**（虚拟支付走消息推送） |
 | Express 骨架 | ✅ | 直接复用（鉴权依赖上游网关，不再自带中间件） |
 | 云 API 适配层 | ✅ | 复用，事件前缀换成 `xpay_` |
 | Dockerfile / scf_bootstrap | ✅ | 复用 |

@@ -87,7 +87,7 @@
 > 猜成「网关代验签」的代价是任何人都能 POST 一段 JSON 伪造发货推送。
 > 要免验签必须在平台上明确声明 `notifyUrlCallbackType=system`。
 
-> 与 Stripe 的 `signMode` 的区别：Stripe 必须显式声明模式，因为网关代验签后的 body 与自验签后的明文字段无法区分；微信这边 `Encrypt` / `echostr` / `encrypt_type` 是请求自带标记，可自动判定。
+> 不另造开关的原因：网关代验签后的 body 与自验签后的明文字段无法区分，靠配置声明「模式」容易和实际形态漂移；而 `Encrypt` / `echostr` / `encrypt_type` 是请求自带标记，可自动判定真实形态。
 
 ### 4. 应答格式跟随请求
 

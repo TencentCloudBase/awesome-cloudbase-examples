@@ -34,7 +34,7 @@ MP 后台 → 虚拟支付 → 基本配置：
 ```bash
 cd integration/cloudbase-virtualpay/functions/xpay-common
 npm install
-npm test        # 109 个单元测试
+npm test        # 单元测试（签名基准向量 / 回调 / XML / 配置映射）
 ```
 
 > ⚠️ 部署实测注意（2026-10）：

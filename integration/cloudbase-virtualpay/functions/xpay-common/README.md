@@ -1,6 +1,8 @@
 # xpay-common
 
-小程序虚拟支付云函数模板。面向**虚拟商品**（道具直购、代币支付、会员订阅），解决 iOS 端支付合规——底层把微信支付与 Apple IAP 打通，同一套 `wx.requestVirtualPayment` 在两端都能拉起收银台。
+小程序虚拟支付云函数模板。面向**虚拟商品**（道具直购、代币支付、会员订阅），封装米大师（Midas）的服务端能力：`paySig` / `signature` 双签名、下单、发货推送、查单、退款；客户端统一用 `wx.requestVirtualPayment`。
+
+> iOS 端由平台侧的「虚拟支付 iOS 能力（IAP）」承载，**不是本模板打通**：模板只负责签名、发货推送与退款问询的服务端处理。开通条件见 [`examples/miniprogram/README.md`](../../examples/miniprogram/README.md)。
 
 ## 与「微信支付」模板（pay-common）的差异
 
@@ -279,7 +281,7 @@ cp .env.example .env
 # 部署前自检：占位符 ↔ .env 键名是否对得上（见下方说明）
 bash ../../skill/cloudbase-xpay/scripts/check_env_keys.sh
 
-npm test      # 109 个单元测试（含官方签名基准向量）
+npm test      # 单元测试（含官方签名基准向量）
 npm start     # 默认 3000 端口，自动加载 .env
 ```
 
