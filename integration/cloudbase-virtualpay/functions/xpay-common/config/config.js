@@ -85,7 +85,55 @@ const CANDIDATE_KEYS = [
     'notifyUrlCallbackType', 'notifyUrlResourceType', 'msgEncryptType',
     // 回调验签解密凭据
     'token', 'msgSecret', 'sandboxAppKey',
+    // 联调闸门（唯一一个；默认 on = 校验生效，见 guardOff）
+    'XPAY_GUARD', 'PAY_ALLOW_INSECURE_BOOT',
 ];
+
+/**
+ * 唯一的联调闸门：`XPAY_GUARD`（on / off）—— 与 wx-pay 的 `PAY_GUARD` 同一套心智
+ *
+ * 它回答一个问题：**订单归属 / 退款问询的校验是否生效**。
+ *
+ *   XPAY_GUARD=on  （默认，不设也是 on）→ 校验全部生效，生产态
+ *   XPAY_GUARD=off （仅联调）           → 「本地查不到订单」时放行，三条路径一致：
+ *      查单（checkOrderOwnership）        → 放行（否则内存 Map 冷启动后永远查不到）
+ *      iOS 退款问询（_decideIosRefund）   → result_code=0 放过
+ *
+ * 🚨 为什么只有「查不到订单」这一个口子：
+ *    示例用进程内 Map 存订单，冷启动 / 多实例下必然查不到。早期实现直接
+ *    `if (!order) return null`（放行），等于把「默认放开」写进代码：
+ *    任何人拿别人的 outTradeNo 就能查单（越权读），Apple 退款问询也会
+ *    建议通过已发货订单（资损）。现在默认拒绝，只留这一个显式开关兜住联调。
+ *
+ * 🚨 生产形态：落库并按 openid 维度查询后，正常情况下不会再走到「查不到」分支，
+ *    这个开关也就无需开启（保持 on 即可）。
+ *
+ * ⚠️ 每次调用都读 process.env（不在 require 时求值），便于测试与运行时调整。
+ * @returns {boolean} true = 处于联调模式（放行）
+ */
+function guardOff() {
+    return (process.env.XPAY_GUARD || '').trim().toLowerCase() === 'off';
+}
+
+/**
+ * 是否拒绝启动（纯函数，便于单测；app.js 用默认参数调用）
+ *
+ * 拒绝的唯一组合：**跑在云上 + XPAY_GUARD=off + 没显式许可**。
+ * 与 wx-pay 的判定规则完全一致：
+ *   - 本地 `npm run dev` 靠 off 跑通链路，不拦（不是云环境，零额外配置）
+ *   - 云上出现 off 通常意味着联调配置被当正式配置发布，日志横幅会被容器淹没，
+ *     启动失败才是运维一定会发现的信号
+ *   - 云上确需联调：额外设 PAY_ALLOW_INSECURE_BOOT=true（与 wx-pay 共用一个逃生舱名）
+ *
+ * @param {Object} [env=process.env] 环境变量
+ * @returns {boolean} true = 应拒绝启动
+ */
+function shouldRefuseBoot(env = process.env) {
+    const off = String(env.XPAY_GUARD || '').trim().toLowerCase() === 'off';
+    const inCloud = Boolean(env.SCF_RUNTIME || env.TENCENTCLOUD_RUNENV);
+    const explicitlyAllowed = String(env.PAY_ALLOW_INSECURE_BOOT || '').trim().toLowerCase() === 'true';
+    return off && inCloud && !explicitlyAllowed;
+}
 
 // 运行环境 / 开发工具自带的变量，与本业务无关，全量清单里跳过
 //
@@ -238,6 +286,25 @@ function validateConfig() {
 
     console.info(`[Config] 现网(env=0) | notifyFormat=${c.notifyFormat}`);
 
+    // XPAY_GUARD 拼错（非空且既不是 on 也不是 off）→ 静默落到安全侧，但必须让人看见
+    const guardRaw = (process.env.XPAY_GUARD || '').trim();
+    const guardValue = guardRaw.toLowerCase();
+    if (guardRaw && guardValue !== 'on' && guardValue !== 'off') {
+        errors.push(
+            `XPAY_GUARD 取值无法识别: "${guardRaw}"，已按 on（安全侧：校验全部生效）处理。`
+            + '联调请写 off，生产请写 on 或直接不设'
+        );
+    }
+
+    // 危险开关单独高亮：这是资金 / 越权敞口，不能和「配置缺失」混在一张告警清单里
+    if (guardOff()) {
+        console.error('🚨🚨🚨 不安全模式已生效（XPAY_GUARD=off）—— 仅允许用于本地 / 联调环境 🚨🚨🚨');
+        console.error('  查单：本地无订单记录 → 放行（无法证明归属）');
+        console.error('  iOS 退款问询：本地无订单记录 → result_code=0（放过退款）');
+        console.error('  上线前必须删掉 XPAY_GUARD=off（不设即 on），并改为按 openid 落库');
+        console.error('🚨🚨🚨 否则任何人都能查别人的单、让已发货订单被退款 🚨🚨🚨');
+    }
+
     if (errors.length > 0) {
         console.warn('⚠️ 配置校验警告（共 ' + errors.length + ' 项）:');
         errors.forEach((msg, idx) => console.warn(`  ${idx + 1}. ${msg}`));
@@ -252,6 +319,8 @@ module.exports = {
     getCallbackConfig,
     isProduction,
     validateConfig,
+    guardOff,
+    shouldRefuseBoot,
     readEnv,
     readEnvAny,
     envSummary,

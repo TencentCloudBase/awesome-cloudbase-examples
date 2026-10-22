@@ -361,7 +361,7 @@ test('投诉 / 风控事件不参与幂等去重（可多次记录）', async ()
     assert.strictEqual(second.duplicated, undefined);
 });
 
-test('⚠️ iOS 退款问询：必须返回 result_code 与 evidence', async () => {
+test('⛔ iOS 退款问询：本地查不到订单默认拦截（result_code=1）', async () => {
     const s = svc();
     const result = await s.handleCallback(
         makeEvent('xpay_subscribe_ios_refund_query_notify', 'IOS20261014001')
@@ -370,9 +370,23 @@ test('⚠️ iOS 退款问询：必须返回 result_code 与 evidence', async ()
     assert.ok(result.iosRefundQueryResponse, 'iOS 退款问询必须带 IosRefundQueryResponse');
 
     const resp = result.iosRefundQueryResponse;
-    assert.strictEqual(resp.result_code, 0, '未发货应放过（建议退款）');
+    // 云函数冷启动后 orders 必为空，按「未发货」放过 = 默认放过已发货订单
+    assert.strictEqual(resp.result_code, 1, '查不到记录必须拦截，不能默认放过');
     assert.ok(resp.result_info);
     assert.ok(resp.evidence, 'evidence 必填，用于退款审计');
+});
+
+test('XPAY_GUARD=off 时才放过无记录订单（仅联调，与查单同一个开关）', async () => {
+    process.env.XPAY_GUARD = 'off';
+    try {
+        const s = svc();
+        const result = await s.handleCallback(
+            makeEvent('xpay_subscribe_ios_refund_query_notify', 'IOS20261014003')
+        );
+        assert.strictEqual(result.iosRefundQueryResponse.result_code, 0);
+    } finally {
+        delete process.env.XPAY_GUARD;
+    }
 });
 
 test('iOS 退款问询：已发货订单应拦截（result_code=1）', async () => {
@@ -385,6 +399,26 @@ test('iOS 退款问询：已发货订单应拦截（result_code=1）', async () 
     );
 
     assert.strictEqual(result.iosRefundQueryResponse.result_code, 1);
+});
+
+test('⛔ iOS 退款问询：GOODS_MISSING（钱已收、货未发）必须拦截', async () => {
+    const s = svc();
+    // 发货事件缺 ProductId → 落 GOODS_MISSING（对账异常单）并显式抛错（让微信重推），
+    // 但钱已经收了：状态已写入，退款问询必须能读到
+    await assert.rejects(
+        () => s.handleCallback(makeEvent('xpay_goods_deliver_notify', 'IOS20261014009', {
+            GoodsInfo: { Quantity: 1 },
+        })),
+        /ProductId/
+    );
+
+    const result = await s.handleCallback(
+        makeEvent('xpay_subscribe_ios_refund_query_notify', 'IOS20261014009')
+    );
+
+    const resp = result.iosRefundQueryResponse;
+    assert.strictEqual(resp.result_code, 1, '钱已收、货未发不能建议退款（退款 + 未发货双重损失）');
+    assert.match(resp.evidence, /GOODS_MISSING/);
 });
 
 test('未订阅的事件被忽略', async () => {

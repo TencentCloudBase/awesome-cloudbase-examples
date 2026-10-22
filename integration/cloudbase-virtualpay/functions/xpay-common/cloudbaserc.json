@@ -29,7 +29,8 @@
         "token": "{{env.token}}",
         "msgSecret": "{{env.msgSecret}}",
         "notifyFormat": "{{env.notifyFormat}}",
-        "trustBearerIdentity": "{{env.trustBearerIdentity}}"
+        "trustBearerIdentity": "{{env.trustBearerIdentity}}",
+        "XPAY_GUARD": "on"
       }
     }
   ],
@@ -49,7 +50,8 @@
         "notifyUrlCallbackType": "{{env.notifyUrlCallbackType}}",
         "msgEncryptType": "{{env.msgEncryptType}}",
         "token": "{{env.token}}",
-        "msgSecret": "{{env.msgSecret}}"
+        "msgSecret": "{{env.msgSecret}}",
+        "XPAY_GUARD": "on"
       }
     }
   ]

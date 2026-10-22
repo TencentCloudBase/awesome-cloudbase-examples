@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const express = require('express');
 const logger = require('morgan');
-const { validateConfig, isProduction } = require('./config/config');
+const { validateConfig, isProduction, shouldRefuseBoot } = require('./config/config');
 
 const app = express();
 
@@ -10,8 +10,16 @@ const app = express();
 //    判定口径与 controller 共用 isProduction()，避免两处漂移。
 app.set('env', isProduction() ? 'production' : 'development');
 
-// 启动时校验配置（只告警不阻断）
+// 启动时校验配置（配置缺失只告警不阻断）
 validateConfig();
+
+// 🔒 唯一的阻断条件：云上 + XPAY_GUARD=off（带病上线的形态）。
+//    本地 `npm run dev` 不受影响（不是云环境，直接放行），联调零额外配置。
+if (shouldRefuseBoot()) {
+    console.error('[Startup] ⛔ 检测到「云上运行 + XPAY_GUARD=off」，已拒绝启动。');
+    console.error('[Startup] 本地联调请用 npm run dev；确需云上联调，请额外设置 PAY_ALLOW_INSECURE_BOOT=true');
+    process.exit(1);
+}
 
 // 不启用 CORS：调用方是小程序（wx.cloud.callHTTPFunction），不走浏览器同源策略。
 // 若确有 Web 端直接调用需求，请在上游网关配置跨域，而不是在函数里放开。

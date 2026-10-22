@@ -9,7 +9,7 @@
  *   C 端 signData 用驼峰：offerId / outTradeNo / goodsPrice
  *   服务端接口用下划线：offer_id / out_trade_no
  */
-const { xpayConfig, env } = require('../../config/config');
+const { xpayConfig, env, envSummary } = require('../../config/config');
 const { signForServer } = require('../signService');
 const { getAccessToken, httpsPostJson } = require('../../utils/wechatApi');
 
@@ -38,9 +38,10 @@ class XpayStrategy {
      * @param {string} uri - 接口路径，如 '/xpay/query_order'（签名基串里的 uri 不带 query）
      * @param {Object} bizParams - 业务参数（下划线风格）
      * @param {string} sessionKey
+     * @param {string} [appId] - 小程序 AppID，**必须与 code2Session 用的是同一个**
      * @returns {Promise<Object>}
      */
-    async call(uri, bizParams, sessionKey) {
+    async call(uri, bizParams, sessionKey, appId) {
         // 1. 请求体原样字符串：既是发出内容，也是签名基串，绝不重新序列化
         const postBody = JSON.stringify(bizParams);
 
@@ -48,7 +49,18 @@ class XpayStrategy {
         const { signature, paySig } = signForServer(uri, postBody, sessionKey);
 
         // 3. 换取 access_token（带缓存 + 并发去重）
-        const token = await getAccessToken(xpayConfig.appId, xpayConfig.appSecret);
+        //
+        // 🚨 appId 必须与下单/查单换 sessionKey 时一致：
+        //    下单链路优先用平台注入的请求头 x-wx-appid，支持「只靠请求头部署、不配 appId 环境变量」。
+        //    如果这里只读 xpayConfig.appId（环境变量），就会出现
+        //    「下单成功、查单 41002（appid 缺失/不匹配）」—— 错误信息完全不指向 appId。
+        const tokenAppId = appId || xpayConfig.appId;
+        if (!tokenAppId) {
+            throw new Error(
+                `缺少 appId：换 access_token 需要与 code2Session 相同的 AppID（当前环境变量: ${envSummary()}）`
+            );
+        }
+        const token = await getAccessToken(tokenAppId, xpayConfig.appSecret);
 
         // 4. 签名放 query —— 放 body 微信读不到
         const query = [
@@ -79,7 +91,7 @@ class XpayStrategy {
             openid: params.openid,
             env,
             order_id: params.outTradeNo,
-        }, sessionKey);
+        }, sessionKey, params.appId);
     }
 
     /**
@@ -95,7 +107,7 @@ class XpayStrategy {
             user_ip: params.userIp,
             offer_id: params.offerId || xpayConfig.offerId,
             env,
-        }, sessionKey);
+        }, sessionKey, params.appId);
     }
 
     /** 扣减代币（代币支付） */
@@ -106,7 +118,7 @@ class XpayStrategy {
             out_trade_no: params.outTradeNo,
             pay_coin: params.payCoin,
             env,
-        }, sessionKey);
+        }, sessionKey, params.appId);
     }
 
     /** 代币支付退款 */
@@ -116,7 +128,7 @@ class XpayStrategy {
             offer_id: params.offerId || xpayConfig.offerId,
             out_trade_no: params.outTradeNo,
             env,
-        }, sessionKey);
+        }, sessionKey, params.appId);
     }
 
     /**
@@ -130,7 +142,7 @@ class XpayStrategy {
             out_trade_no: params.outTradeNo,
             present_coin: params.presentCoin,
             env,
-        }, sessionKey);
+        }, sessionKey, params.appId);
     }
 
     /** 通知已发货完成（现金单） */
@@ -140,7 +152,7 @@ class XpayStrategy {
             offer_id: params.offerId || xpayConfig.offerId,
             out_trade_no: params.outTradeNo,
             env,
-        }, sessionKey);
+        }, sessionKey, params.appId);
     }
 
     /**
@@ -157,7 +169,7 @@ class XpayStrategy {
             out_refund_no: params.outRefundNo,
             refund_amount: params.refundAmount,
             env,
-        }, sessionKey);
+        }, sessionKey, params.appId);
     }
 
     /** 下载小程序账单 */
@@ -166,7 +178,7 @@ class XpayStrategy {
             date: params.date,
             offer_id: params.offerId || xpayConfig.offerId,
             env,
-        }, sessionKey);
+        }, sessionKey, params.appId);
     }
 }
 

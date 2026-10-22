@@ -120,3 +120,35 @@ test('⚠️ 环境变量清单：业务变量不能被当成系统变量过滤'
     assert.strictEqual(isSystemKey('TENCENTCLOUD_RUNENV'), true);
     assert.strictEqual(isSystemKey('USER_TOKEN'), false);
 });
+
+// ========== 联调闸门 XPAY_GUARD（与 wx-pay 的 PAY_GUARD 同一套心智）==========
+
+test('guardOff：只有显式 off 才是联调模式', () => {
+    const c = loadConfig({});
+    const cases = [['off', true], [' OFF ', true], ['on', false], ['true', false], ['', false]];
+    for (const [v, expected] of cases) {
+        process.env.XPAY_GUARD = v;
+        assert.strictEqual(c.guardOff(), expected, `XPAY_GUARD="${v}"`);
+    }
+    delete process.env.XPAY_GUARD;
+    assert.strictEqual(c.guardOff(), false, '漏配必须是 on（安全侧）');
+});
+
+test('shouldRefuseBoot：只有「云上 + off + 未许可」才拒绝启动', () => {
+    const { shouldRefuseBoot } = loadConfig({});
+    const CLOUD = { SCF_RUNTIME: 'Nodejs24.11' };
+
+    assert.strictEqual(shouldRefuseBoot({ XPAY_GUARD: 'off' }), false, '本地 off 必须放行（npm run dev）');
+    assert.strictEqual(shouldRefuseBoot({}), false);
+    assert.strictEqual(shouldRefuseBoot({ ...CLOUD, XPAY_GUARD: 'off' }), true, '云上 off 必须拒绝');
+    assert.strictEqual(
+        shouldRefuseBoot({ TENCENTCLOUD_RUNENV: 'cloudrun', XPAY_GUARD: 'off' }), true);
+    assert.strictEqual(shouldRefuseBoot({ ...CLOUD, XPAY_GUARD: 'on' }), false);
+    assert.strictEqual(shouldRefuseBoot({ ...CLOUD }), false);
+    assert.strictEqual(
+        shouldRefuseBoot({ ...CLOUD, XPAY_GUARD: 'off', PAY_ALLOW_INSECURE_BOOT: 'true' }), false,
+        '云上联调逃生舱');
+    assert.strictEqual(
+        shouldRefuseBoot({ ...CLOUD, XPAY_GUARD: ' OFF ', PAY_ALLOW_INSECURE_BOOT: ' TRUE ' }), false,
+        '大小写 / 空格不影响判定');
+});

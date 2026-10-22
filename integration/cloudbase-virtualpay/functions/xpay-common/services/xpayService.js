@@ -10,7 +10,12 @@
  *    虚拟支付是客户端 wx.requestVirtualPayment 自行完成下单与收银台拉起，
  *    服务端只负责出签名。
  */
-const { env, xpayConfig, envSummary } = require('../config/config');
+const {
+    env,
+    xpayConfig,
+    envSummary,
+    guardOff,
+} = require('../config/config');
 const {
     MODE,
     buildSignData,
@@ -34,11 +39,42 @@ const MAX_TRACKED_ORDERS = 5000;
 const ENTITLEMENT_GRANTED_STATES = new Set(['DELIVERED', 'COIN_PAID', 'REFUNDED']);
 
 /**
- * 「权益已发放」之外的异常状态：发不出货、等人工对账
+ * 「钱已收、货未发」的异常状态：发不出货，等人工对账
  *
- * 不在 ENTITLEMENT_GRANTED_STATES 里 —— iOS 退款问询遇到它应放过退款（权益没发出去）。
+ * 🚨 它不属于「未发放权益」—— 钱已经收了。所以：
+ *   - iOS 退款问询遇到它必须**拦截**（result_code=1），转人工确认，
+ *     否则用户既拿到 Apple 退款、又没收到商品，商户净损商品等值资金，
+ *     且这单作为对账证据也失去了意义。
+ *   - 不能被复用（见下面 NON_REUSABLE_ORDER_STATES）。
  */
 const GOODS_MISSING_STATE = 'GOODS_MISSING';
+
+/**
+ * 已产生资金 / 权益后果、**任何人都不能复用**的订单状态
+ *
+ * 复用这类 outTradeNo 会把记录整条重置成 PENDING：
+ *   - DELIVERED / COIN_PAID / REFUNDED → iOS 退款问询读到「未发放权益」→ 建议退款（资损）
+ *   - GOODS_MISSING → 抹掉「钱收了货没发」的对账证据
+ * 与 ENTITLEMENT_GRANTED_STATES 同源，新增终态时必须同步加进来。
+ */
+const NON_REUSABLE_ORDER_STATES = new Set([
+    ...ENTITLEMENT_GRANTED_STATES,
+    GOODS_MISSING_STATE,
+]);
+
+/**
+ * iOS 退款问询里应**拦截（不建议退款）**的状态
+ *
+ * = 已发放权益 ∪ 钱已收但货未发。
+ *
+ * 🚨 不能直接用 ENTITLEMENT_GRANTED_STATES 判：GOODS_MISSING 不在其中，
+ *    那样「钱收了、货没发」会被判成「未发货 → 建议退款」，形成双重损失
+ *    （既退款又没发货）。新增状态时必须同时考虑它属于哪一边。
+ */
+const REFUND_BLOCKING_STATES = new Set([
+    ...ENTITLEMENT_GRANTED_STATES,
+    GOODS_MISSING_STATE,
+]);
 
 /**
  * 缺少商品信息就**无法发货**的业务语义
@@ -99,14 +135,34 @@ const XPAY_EVENTS = {
 /**
  * 订单归属校验（纯函数，便于单测）
  *
+ * 判定顺序（每一步都是 fail closed）：
+ *   1. 本地无记录 → 默认拒绝（无法证明归属）；`XPAY_GUARD=off`（仅联调）时才放行
+ *   2. 请求侧无身份 → 交给上层判空
+ *   3. 记录存在但缺 openid → 拒绝（无法判断归属）
+ *   4. openid 不一致 → 拒绝
+ *
  * @param {Object|undefined} order 本地记录的订单（可能因冷启动/多实例而不存在）
  * @param {string} openid 本次请求的权威 openid（code2Session 结果，而非客户端头）
  * @returns {string|null} 错误信息；null 表示通过
  */
 function checkOrderOwnership(order, openid) {
-    // 查不到记录时不拦：示例用进程内 Map，冷启动后必然查不到，
-    // 拦下来会让正常的查单兜底全部失效（生产应按 openid 维度查库）
-    if (!order) return null;
+    // 🚨 查不到记录 = 无法证明「这单是你的」，默认**显式失败**（fail closed）。
+    //
+    //    早期实现是 `if (!order) return null`（放行），理由是本示例用进程内 Map、
+    //    冷启动后必然查不到。但那等于把「默认放开」写进代码：任何人拿别人的
+    //    outTradeNo 查单都能过，批量遍历还能探测订单是否存在与状态（越权读）。
+    //    生产应按 openid 维度落库；只有本地联调（内存 Map 冷启动）才用
+    //    XPAY_GUARD=off 显式放开（与 wx-pay 的 PAY_GUARD 同一套心智）。
+    if (!order) {
+        if (guardOff()) {
+            console.warn(
+                '[XpayService] ⚠️ XPAY_GUARD=off：本地无订单记录仍放行查单，'
+                + '仅限联调，生产必须落库并按 openid 查询'
+            );
+            return null;
+        }
+        return '订单不存在或本地无归属记录，无法校验归属（生产需按 openid 落库）';
+    }
     // 请求侧没身份交给上层判空，不在这里拦
     if (!openid) return null;
 
@@ -185,6 +241,23 @@ class XpayService {
         const err = validateOutTradeNo(tradeNo);
         if (err) throw new Error(err);
 
+        // ⚠️ 单号冲突分两级判定，不能只看 `orders.has(tradeNo)`：
+        //    「用户取消后重新下单复用同一个 outTradeNo」是幂等键设计（见下方注释）明确支持的
+        //    正常业务流，无条件拒绝会让这些单号永久无法重试。
+        //
+        //    第一级（此处，无需 openid）：已产生资金 / 权益后果的终态 → 一律拒绝。
+        //    _trackOrder 对已存在的 key 是「整条替换」，覆盖会抹掉已发货 / 已退款的记录。
+        //    生产环境应改由订单表 outTradeNo 唯一索引保证。
+        const existingOrder = this.orders.get(tradeNo);
+        if (existingOrder && NON_REUSABLE_ORDER_STATES.has(existingOrder.state)) {
+            const duplicate = new Error(
+                `outTradeNo 已存在，不能复用：${tradeNo}`
+                + `（当前状态 ${existingOrder.state}，已产生权益/资金结果；换新单号）`
+            );
+            duplicate.status = 409;
+            throw duplicate;
+        }
+
         // 2. 道具直购必须带 productId + goodsPrice，且金额/数量必须是合法正整数
         //    （goodsPrice: null 不能靠 === undefined 判空，null 会被下游静默跳过）
         const payMode = mode === 'coin' ? MODE.COIN : MODE.GOODS;
@@ -207,6 +280,30 @@ class XpayService {
             xpayConfig.appSecret,
             code
         );
+
+        // 第二级（拿到 code2Session 的权威 openid 后才能判归属）：
+        //   记录已存在时，只有「同一个用户 + 仍未支付」才允许复用（覆盖 PENDING）。
+        //   归属不同 → 拒绝：否则拿到别人的 outTradeNo 调一次下单就能把归属改成自己；
+        //   缺归属 → 拒绝：无法判断是否本人，按 fail closed 处理（与 checkOrderOwnership 同口径）。
+        if (existingOrder) {
+            if (!existingOrder.openid) {
+                const unowned = new Error(
+                    `outTradeNo 已存在但缺少归属信息，不能复用：${tradeNo}（换新单号）`
+                );
+                unowned.status = 409;
+                throw unowned;
+            }
+            if (existingOrder.openid !== openid) {
+                const notMine = new Error(
+                    `outTradeNo 已存在且属于其他用户，不能复用：${tradeNo}（换新单号）`
+                );
+                notMine.status = 409;
+                throw notMine;
+            }
+            // 同一用户 + 非终态（PENDING）：用户取消后重新下单，覆盖是预期行为
+            console.info('[XpayService] 复用本用户未支付单号，将覆盖原 PENDING 记录:',
+                tradeNo, '（原状态', existingOrder.state, '）');
+        }
 
         // 4. 构造 signData（原样字符串，后续签名与返回前端共用同一个）
         const signData = buildSignData({
@@ -294,8 +391,9 @@ class XpayService {
         //    缺了这一步，任何持有自己 code 的用户都能拿别人的 outTradeNo 去查单，
         //    批量遍历就能探测订单是否存在、状态是什么（越权读）。
         //
-        // ⚠️ 局限性：orders 是进程内 Map，冷启动/多实例下可能查不到记录（返回 null 即跳过）。
-        //    这里只是把「能查到的都拦住」，生产必须落库并按 openid 维度查询 —— 见 README。
+        // 🚨 查不到记录也是**拒绝**（fail closed）：orders 是进程内 Map，
+        //    冷启动/多实例下必然查不到，早期实现据此放行 = 默认放开越权读。
+        //    生产必须落库并按 openid 维度查询；仅联调可用 XPAY_GUARD=off。
         const ownershipError = checkOrderOwnership(this.orders.get(outTradeNo), authoritativeOpenid);
         if (ownershipError) {
             const err = new Error(ownershipError);
@@ -303,8 +401,10 @@ class XpayService {
             throw err;
         }
 
+        // appId 必须透传：换 access_token 要用与 code2Session 相同的小程序身份，
+        // 否则「只靠 x-wx-appid 请求头部署」时会出现下单成功、查单 41002
         return this.strategy.queryOrder(
-            { openid: authoritativeOpenid, outTradeNo },
+            { openid: authoritativeOpenid, outTradeNo, appId: resolvedAppId },
             sessionKey
         );
     }
@@ -526,10 +626,13 @@ class XpayService {
      * iOS 退款问询决策
      * Apple 会连续问询 3 次，每次须在 3 秒内应答；3 次都超时则结果标记为「不确定」
      *
-     * 🚨 默认策略是「未发货即放过」，且依赖内存中的订单状态：
-     *    云函数冷启动后 orders 为空 → 一律返回 0（放过），
-     *    对已发货订单存在**资损风险**。
-     *    生产环境必须改为查询持久化订单表，并按真实业务规则决策。
+     * 🚨 两种情况的默认值都必须是「拦截」：
+     *    1. 本地查不到订单 → 默认 result_code=1（拦截），
+     *       因为云函数冷启动后 orders 必为空，按「未发货」放过等于**默认放过已发货订单**；
+     *       仅 `XPAY_GUARD=off` 时才放过（示例/联调，与查单共用一个开关）。
+     *    2. 查得到订单 → 按「权益是否已发放」判定，已发放则拦截。
+     *
+     * 生产环境必须改为查询持久化订单表，并按真实业务规则决策。
      *
      * TODO(业务侧)：替换为持久化查询 + 真实风控规则
      * @param {string} outTradeNo
@@ -538,24 +641,46 @@ class XpayService {
      */
     async _decideIosRefund(outTradeNo, event) {
         const order = this.orders.get(outTradeNo);
-        // 默认策略：未发货则放过（建议退款），已发放权益则拦截
+
+        // 查不到记录：无法确认权益是否已发放 → 默认拦截，交人工确认
+        if (!order) {
+            const allowed = guardOff();
+            const unknownResultCode = allowed ? 0 : 1;
+            console.warn(
+                `[XpayService] iOS 退款问询：本地无订单记录（${outTradeNo}），`
+                + (allowed
+                    ? '⚠️ XPAY_GUARD=off → 放过退款（仅示例/联调）'
+                    : '默认拦截，待人工确认（生产应查持久化订单表）')
+            );
+            console.info('[XpayService] iOS 退款问询决策:', {
+                outTradeNo, resultCode: unknownResultCode, orderUnknown: true,
+            });
+            return {
+                result_code: unknownResultCode,
+                result_info: allowed
+                    ? '本地无订单记录，按联调开关放过'
+                    : '本地无订单记录，默认拦截待人工确认',
+                // evidence 必填：退款审计凭据
+                evidence: `订单 ${outTradeNo} 状态=UNKNOWN（无本地记录）`,
+            };
+        }
+
+        // 查得到记录：按「钱 / 权益是否已经动了」判定
         //
         // ⚠️ 不能只判 === 'DELIVERED'：代币充值成功写的是 COIN_PAID、
-        //    已退款写的是 REFUNDED，漏判会导致「代币已到账 + Apple 仍放行退款」的资损，
-        //    已退款订单还会被再次建议退款。这里按「权益是否已发放」列全状态。
-        const delivered = !!order && ENTITLEMENT_GRANTED_STATES.has(order.state);
-        const resultCode = delivered ? 1 : 0;
+        //    已退款写的是 REFUNDED，漏判会导致「代币已到账 + Apple 仍放行退款」的资损。
+        // ⚠️ 也不能只按 ENTITLEMENT_GRANTED_STATES 判：GOODS_MISSING 是「钱已收、货未发」，
+        //    判成「未发货 → 建议退款」就是退款 + 未发货的双重损失，必须一起拦截。
+        const blocked = REFUND_BLOCKING_STATES.has(order.state);
+        const resultCode = blocked ? 1 : 0;
 
-        if (!order) {
-            console.warn('[XpayService] iOS 退款问询：本地无订单记录，按「未发货」放过:', outTradeNo);
-        }
-        console.info('[XpayService] iOS 退款问询决策:', { outTradeNo, resultCode });
+        console.info('[XpayService] iOS 退款问询决策:', { outTradeNo, resultCode, state: order.state });
 
         return {
             result_code: resultCode,
-            result_info: delivered ? '已发货，拒绝退款' : '订单未发货，建议退款',
+            result_info: blocked ? '已收款（含待对账异常单），拒绝退款' : '订单未发货，建议退款',
             // evidence 必填：退款审计凭据
-            evidence: `订单 ${outTradeNo} 状态=${order ? order.state : 'UNKNOWN'}`,
+            evidence: `订单 ${outTradeNo} 状态=${order.state}`,
         };
     }
 

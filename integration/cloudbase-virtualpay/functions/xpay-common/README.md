@@ -200,7 +200,11 @@ wx.login({
 9. **命名风格两套**：C 端 signData 用驼峰（`offerId`），服务端接口用下划线（`order_id` / `offer_id`）。写错直接报参数错误。
 10. **iOS 走 Apple 支付，最低金额 1 元**（100 分）—— 低于 1 元的道具档位在 iPhone 上必然失败；开发者无法主动退款，只能应答 Apple 的退款问询（3 秒内 + `evidence` 必填）；结算周期 45–60 天，与安卓 T+3 完全不同。
 11. **`query_order` 只能查现金单**，查不了代币单（代币单靠 `query_user_balance` / 幂等重试兜底）。
-12. **`query_order` 必须校验订单归属**。`code2Session` 只证明「你是谁」，不证明「这单是你的」—— 少了归属校验，任何人拿自己的 `code` + 别人的 `outTradeNo` 就能越权查单，批量遍历还能探测订单是否存在。模板已加 `checkOrderOwnership`，但它读的是进程内 `orders` Map（冷启动/多实例查不到就跳过），**生产必须落库并按 `openid` 维度查询**。
+12. **`query_order` 必须校验订单归属**。`code2Session` 只证明「你是谁」，不证明「这单是你的」—— 少了归属校验，任何人拿自己的 `code` + 别人的 `outTradeNo` 就能越权查单，批量遍历还能探测订单是否存在。模板已加 `checkOrderOwnership`，且**查不到记录时默认拒绝**（fail closed）：它读的是进程内 `orders` Map，冷启动/多实例下必然查不到，早期实现据此放行等于默认放开越权读。仅本地联调可用 `XPAY_GUARD=off` 临时放过（与 wx-pay 的 `PAY_GUARD` 同一套心智，全模板只有这一个联调开关）；**生产必须落库并按 `openid` 维度查询**。
+
+13. **下单对已存在的 `outTradeNo` 分两级处理**。`_trackOrder` 对已存在的 key 是整条替换，所以：① 记录处于终态（`DELIVERED` / `COIN_PAID` / `REFUNDED` / `GOODS_MISSING`）或属于其他用户、或缺少归属信息 → **拒绝复用**（409），否则覆盖会抹掉「已发货」证据，iOS 退款问询读到「未发放权益」而放过退款；② 同一用户、仍为 `PENDING` 的未支付单 → **允许复用**（用户取消后重新下单是正常业务流，幂等键之所以用 `wx_order_id` 而非 `outTradeNo` 正是基于这个前提）。生产应由订单表 `outTradeNo` 唯一索引保证。
+
+14. **iOS 退款问询在本地查不到订单时默认拦截**（`result_code=1`）。云函数冷启动后订单 Map 必为空，早期实现按「未发货」放过，等于默认放过已发货订单。仅示例/联调可用 `XPAY_GUARD=off` 放过（同一个开关）；生产应查持久化订单表。云上 + `off` 会直接拒绝启动，确需云上联调还要额外设 `PAY_ALLOW_INSECURE_BOOT=true`。**判定不只看「权益是否发放」**：`GOODS_MISSING`（钱已收、货未发）也必须拦截，否则用户既拿到退款又没收到商品。
 
 ## 回调事件
 

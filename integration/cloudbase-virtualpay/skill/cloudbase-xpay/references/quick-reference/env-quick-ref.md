@@ -9,6 +9,7 @@
 | `notifyFormat` | 否 | `json` | `json` / `xml`，须与微信后台一致；平台不注入，只能由 `cloudbaserc.json` 提供 |
 | `notifyUrlCallbackType` | 否 | 空 | 未声明 = 自己验签；`system` = 网关代验签 |
 | `trustBearerIdentity` | 否 | 空 | 采信 Bearer JWT 身份，仅当函数只经云 API 网关暴露时开 |
+| `XPAY_GUARD` | 否 | 未设（= `on`） | **全模板唯一的联调开关**（与 wx-pay 的 `PAY_GUARD` 同一套心智）。`off` = 「本地查不到订单」时放行查单 + iOS 退款问询 `result_code=0`；`on` 或不设 = 全部拒绝/拦截。本地 `npm run dev` 已带 `off`；云上 + `off` 会拒绝启动，确需云上联调再加 `PAY_ALLOW_INSECURE_BOOT=true` |
 
 > 变量名以**集成中心注入为准**（`authTypeCode=wxvirtualpay` → `appId / secret / offerId / appKey`），本地 `.env` 与旧文档的 `prodAppKey` / `appSecret` 由 `readEnv()` 回退兼容。
 > 集成中心还注入 `token` / `msgSecret`（消息推送 Token 与 EncodingAESKey）。

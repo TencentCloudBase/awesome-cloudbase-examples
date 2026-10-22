@@ -56,3 +56,58 @@ test('post_body 被重新序列化（键顺序/空格变化）会导致签名失
     const { paySig } = signForServer(URI, reserialized, SESSION_KEY);
     assert.notStrictEqual(paySig, OFFICIAL_PAY_SIG, '重新序列化后签名必须变化');
 });
+
+// ============================================================
+//  C 端（wx.requestVirtualPayment）基准
+//
+//  B 端有官方脚本的 assert 值，C 端官方没有给现成向量，所以这里用
+//  「固定期望值 + 独立 crypto 重算」双重钉住：
+//    - 固定值：实现被改动时立刻红（包括 CLIENT_PAY_URI 被改）
+//    - 独立重算：期望值本身写错、或拼接符/uri 变了也会红
+//
+//  🚨 CLIENT_PAY_URI 写错的后果是**所有下单验签失败**，而错误信息只报
+//     「签名错误」，完全不指向这个常量 —— 所以它必须有独立断言。
+// ============================================================
+
+const crypto = require('crypto');
+const { signForClient, CLIENT_PAY_URI } = require('../services/signService');
+
+const CLIENT_SESSION_KEY = '9hAb/NEYUlkaMBEsmFgzig==';
+const CLIENT_SIGN_DATA = '{"offerId":"test_offer","buyQuantity":1,"env":0,"currencyType":"CNY",'
+    + '"productId":"prod_001","goodsPrice":100,"outTradeNo":"CLIENT20261022001",'
+    + '"attach":"CLIENT20261022001"}';
+
+const CLIENT_EXPECTED_PAY_SIG = '98ce07af6ad3964cb10f05fbb1807fec820036f58bcc5e5a155cd6f410da3386';
+const CLIENT_EXPECTED_SIGNATURE = '4637f79f2670477e59518681e8a9b3b3da50d6483d53b83e2f808179ab15d94e';
+
+test('C 端 paySig 的 uri 固定为 requestVirtualPayment（官方约定）', () => {
+    assert.strictEqual(CLIENT_PAY_URI, 'requestVirtualPayment');
+});
+
+test('C 端 paySig = HMAC-SHA256(appKey, "requestVirtualPayment&" + signData)', () => {
+    const { paySig } = signForClient(CLIENT_SIGN_DATA, CLIENT_SESSION_KEY);
+
+    assert.strictEqual(paySig, CLIENT_EXPECTED_PAY_SIG);
+
+    // 独立重算：不经过 signForClient，直接把官方公式写进用例
+    const independent = crypto.createHmac('sha256', '12345')
+        .update(`requestVirtualPayment&${CLIENT_SIGN_DATA}`, 'utf8')
+        .digest('hex');
+    assert.strictEqual(paySig, independent, 'uri 或拼接符被改动时签名会失配');
+});
+
+test('C 端 signature = HMAC-SHA256(sessionKey, signData)', () => {
+    const { signature } = signForClient(CLIENT_SIGN_DATA, CLIENT_SESSION_KEY);
+    assert.strictEqual(signature, CLIENT_EXPECTED_SIGNATURE);
+
+    const independent = crypto.createHmac('sha256', CLIENT_SESSION_KEY)
+        .update(CLIENT_SIGN_DATA, 'utf8')
+        .digest('hex');
+    assert.strictEqual(signature, independent);
+});
+
+test('C 端 signData 原样返回：不能被重新序列化（否则客户端签出的基串与签名不一致）', () => {
+    const { signData, mode } = signForClient(CLIENT_SIGN_DATA, CLIENT_SESSION_KEY);
+    assert.strictEqual(signData, CLIENT_SIGN_DATA);
+    assert.strictEqual(mode, 'short_series_goods');
+});

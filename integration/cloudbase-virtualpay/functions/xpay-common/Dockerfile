@@ -22,6 +22,13 @@ ENV appId=""
 ENV secret=""
 ENV notifyFormat="json"
 
+# 唯一的联调闸门（on / off）：
+#   on  → 订单归属 / iOS 退款问询按 fail closed 校验，生产态
+#   off → 「本地查不到订单」时放行查单、放过退款（仅本地联调）
+# 不设即 on。⚠️ 不要改成 off —— 镜像一旦这么部署，任何人都能查别人的单、
+# 已发货订单会被 Apple 建议退款。云上 + off 会直接拒绝启动（见 app.js）。
+ENV XPAY_GUARD=on
+
 COPY package*.json /app/
 
 RUN npm config set registry https://mirrors.cloud.tencent.com/npm/
