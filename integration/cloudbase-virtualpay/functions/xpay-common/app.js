@@ -184,10 +184,11 @@ app.get('*', (req, res, next) => {
 // 只验 msg_signature 是不够的 —— 不加密的推送没有 Encrypt，会直接越过验签，
 // 任何人都能 POST 一段 XML 伪造 xpay_goods_deliver_notify 触发发货。
 //
-// 「谁负责验签」优先看平台声明 notifyUrlCallbackType，读不到才退回 token 启发式：
-//   ownservice → 本函数验签：带签名必验，无签名的 XML 直接拒绝
+// 「谁负责验签」只看平台声明 notifyUrlCallbackType，**没有 token 启发式**：
+//   ownservice → 本函数验签：带签名必验，无签名的推送直接拒绝
 //   system     → 网关代验签：明文放行，仅做密文兜底解密
-//   未注入     → 看 token 是否配置（兼容老集成）
+//   未注入     → 按本函数验签（fail closed，见 isSelfVerify）
+//               漏配 token 是常见误操作，猜成「网关已代验签」= 任何人都能伪造发货
 app.use((req, res, next) => {
     if (req.method !== 'POST') return next();
 

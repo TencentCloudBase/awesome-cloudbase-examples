@@ -91,7 +91,7 @@ const CANDIDATE_KEYS = [
  * 它回答一个问题：**订单归属 / 退款问询的校验是否生效**。
  *
  *   XPAY_GUARD=on  （默认，不设也是 on）→ 校验全部生效，生产态
- *   XPAY_GUARD=off （仅联调）           → 「本地查不到订单」时放行，三条路径一致：
+ *   XPAY_GUARD=off （仅联调）           → 「本地查不到订单」时放行，两处判定一致：
  *      查单（checkOrderOwnership）        → 放行（否则内存 Map 冷启动后永远查不到）
  *      iOS 退款问询（_decideIosRefund）   → result_code=0 放过
  *
@@ -225,8 +225,9 @@ function logEnvInventory() {
  *                          aes       = 安全模式（Encrypt + msg_signature）
  *                          compatible= 兼容模式（明文与密文同时下发，解密失败可回退明文）
  *
- * 三个字段都可能读不到（老集成未注入），此时返回空串，由调用方退回
- * 「token 是否配置」的启发式判断。
+ * 三个字段都可能读不到（老集成未注入），此时返回空串。调用方据此按
+ * 「本函数验签」处理（fail closed，见 app.js 的 isSelfVerify）——
+ * **不存在「token 没配就说明网关已代验签」的推断**。
  *
  * ⚠️ 之所以是函数而不是常量：测试要能改 process.env 后立即生效。
  * @returns {{type: string, resource: string, encryptType: string, token: string, aesKey: string}}

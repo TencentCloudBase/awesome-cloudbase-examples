@@ -109,7 +109,7 @@ xpay-common/
 
 > ⚠️ **解密后必须按明文形态解析**：后台「数据格式」选 JSON 时，解密结果就是 **JSON 字符串**。如果一律用 XML 解析器，会得到空对象 → 取不到 `Event` → 推送打到根路径 `/` 时无路由可匹配 → **404**。日志现象是「密文已解密」紧接着 404，很有迷惑性。`utils/xml.js` 的 `parsePayload()` 负责按形态选择，解密日志会带上 `Event=` 便于确认。
 
-「谁负责验签」优先看**平台声明的三个字段**，读不到才退回 `token` 启发式：
+「谁负责验签」只看**平台声明的三个字段**，读不到时按本函数验签（fail closed）：
 
 | 变量 | 取值 | 含义 |
 |---|---|---|
@@ -120,7 +120,8 @@ xpay-common/
 | | `aes` | 安全模式：`Encrypt` + `msg_signature` |
 | | `compatible` | 兼容模式：**明文与密文同时下发**，解密失败可回退明文 |
 
-判定优先级：`ownservice` → 本函数验签；`system` → 网关代验签；都未注入 → 看 `token` 是否配置。
+判定优先级：`ownservice` → 本函数验签；`system` → 网关代验签；**都未注入 → 本函数验签（fail closed）**。
+不再看 `token` 是否配置来猜「可能有人代验签了」—— 漏配 `token` 是常见误操作，猜错的代价是任何人都能伪造发货。
 
 **关于 `notifyUrlResourceType` / `notifyUrlResourceName`**：这两个是平台系统字段，由 `tcb integration create` 依据 `demoCodeFunctionName` 自动写入集成 Ext（`resourceType='function'` + `resourceName=函数名`），`tcb config init` 生成模板时也会主动跳过它们。**不要写进 `cloudbaserc.json` 或 `.env`**——手填既多余，也可能与云端校验冲突。读不到时本函数按空串处理，不影响功能。
 

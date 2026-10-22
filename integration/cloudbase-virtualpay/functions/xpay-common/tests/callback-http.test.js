@@ -316,7 +316,7 @@ test('声明 system：即使误配了 token，也不拦网关转发的无签名�
 
     try {
         const r = await postPlain(deliverXml('SYSTEM20261019001'));
-        assert.strictEqual(r.status, 200, 'system 声明应优先于 token 启发式');
+        assert.strictEqual(r.status, 200, 'system 声明优先于「token 是否配置」的判断');
     } finally {
         if (saved === undefined) delete process.env.notifyUrlCallbackType;
         else process.env.notifyUrlCallbackType = saved;
