@@ -14,7 +14,6 @@
       "dir": "./",
       "envVariables": {
         "signMode": "{{env.SIGN_MODE}}",
-        "TRUST_GATEWAY_CALLBACK": "{{env.TRUST_GATEWAY_CALLBACK}}",
         "appId": "{{env.WX_APP_ID}}",
         "service_app_id": "{{env.SERVICE_APP_ID}}",
         "merchantId": "{{env.MCH_ID}}",

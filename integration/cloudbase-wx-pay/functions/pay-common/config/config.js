@@ -11,20 +11,22 @@ const config = {
     signMode: process.env.signMode || 'gateway',
 
     /**
-     * 是否信任「集成中心网关已验签并解密」的回调明文（body.ParsedContent）
+     * 平台声明的回调类型（**由集成中心创建实例时自动注入，不要手工填**）
      *
-     * 🚨 默认 false。曾经的漏洞：只要请求体里有 ParsedContent 就直接采信明文，
-     *    连 verifySign 里的 5 分钟时间戳检查都一起跳过 —— 任何能访问函数端口的人
-     *    发 {"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}
-     *    就是一笔「支付成功」。
+     *   system      → 回调地址托管在集成中心，网关代验签 + 代解密，转发 body.ParsedContent
+     *   ownservice  → 回调指向本函数，验签解密由本函数完成
+     *   空          → 未声明，按「自己验签」处理（fail closed）
      *
-     * 开启前提（两个都要满足）：
-     *   1. 回调只经集成中心网关转发，**函数没有公网入口**（不要为它开 HTTP 访问服务）
-     *   2. 确认集成中心确实代验签（signMode=gateway 的场景）
-     *
-     * 不开启时：gateway 模式退化为「自验签 → 解密」，明文只作为忽略日志输出。
+     * 🚨 为什么要看这个变量而不是只看 signMode：
+     *    signMode 是「部署意图」，任何人都能往函数端口发
+     *    {"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}，
+     *    光凭 signMode=gateway 无法证明请求真来自网关。
+     *    notifyUrlCallbackType 是平台在实例创建时注入的声明，只有真走集成中心
+     *    托管回调才等于 system —— 这才是「明文可以免验签」的依据。
      */
-    trustGatewayCallback: process.env.TRUST_GATEWAY_CALLBACK === 'true',
+    notifyUrlCallbackType: (process.env.notifyUrlCallbackType || process.env.notifyURLCallbackType || '')
+        .trim()
+        .toLowerCase(),
 
     // 验签方式：根据是否配置 wxPayPublicKey 自动推断（无需手动设置）
     // 有公钥 → publickey（公钥验签，兼容旧配置）
@@ -106,12 +108,18 @@ function validateConfig() {
         errors.push(`signMode 值无效: "${signMode}"，仅支持 "sdk" 或 "gateway"`);
     }
 
-    // gateway 模式但未显式信任网关明文：回调会走自验签，属于安全默认，但要提示
-    // （集成中心只传明文、不带签名头时，回调会 400 —— 让配置者立刻看见原因）
-    if (signMode === 'gateway' && !config.trustGatewayCallback) {
+    // 回调由谁验签，以平台注入的 notifyUrlCallbackType 为准（signMode 只是部署意图）
+    if (signMode === 'gateway' && config.notifyUrlCallbackType !== 'system') {
         errors.push(
-            'signMode=gateway 但未开启 TRUST_GATEWAY_CALLBACK：回调将走自验签（安全默认）。'
-            + '若回调只经集成中心转发且函数无公网入口，请设 TRUST_GATEWAY_CALLBACK=true'
+            `signMode=gateway 但平台未声明 notifyUrlCallbackType=system（当前: "${config.notifyUrlCallbackType || '空'}"）：`
+            + '回调将走自验签（安全默认）。集成中心创建实例会自动注入该变量；'
+            + '自建公网回调请保持不填，或改用 signMode=sdk'
+        );
+    }
+    if (signMode === 'sdk' && config.notifyUrlCallbackType === 'system') {
+        errors.push(
+            'notifyUrlCallbackType=system（网关代验签）但 signMode=sdk：'
+            + '回调仍会按网关明文处理，请确认这是预期配置'
         );
     }
 

@@ -167,32 +167,45 @@ describe('validateConfig', () => {
         assert.ok(errors.some(e => e.includes('signMode') && e.includes('无效')));
     });
 
-    // ========== 网关回调信任开关 ==========
+    // ========== 回调类型声明（notifyUrlCallbackType）==========
 
-    it('signMode=gateway 但未开 TRUST_GATEWAY_CALLBACK → 提示将走自验签', () => {
+    it('signMode=gateway 但未声明 notifyUrlCallbackType=system → 提示将走自验签', () => {
         process.env.appId = 'wx_test';
         process.env.merchantId = '1234567890';
         process.env.apiV3Key = 'test_key_32_bytes_long!!';
         process.env.merchantSerialNumber = 'ABC123';
         process.env.privateKey = 'test_key';
         process.env.signMode = 'gateway';
-        delete process.env.TRUST_GATEWAY_CALLBACK;
+        delete process.env.notifyUrlCallbackType;
 
         const errors = loadConfig().validateConfig();
-        assert.ok(errors.some(e => e.includes('TRUST_GATEWAY_CALLBACK')));
+        assert.ok(errors.some(e => e.includes('notifyUrlCallbackType')));
     });
 
-    it('signMode=gateway + TRUST_GATEWAY_CALLBACK=true → 无此提示', () => {
+    it('signMode=gateway + notifyUrlCallbackType=system → 无此提示', () => {
         process.env.appId = 'wx_test';
         process.env.merchantId = '1234567890';
         process.env.apiV3Key = 'test_key_32_bytes_long!!';
         process.env.merchantSerialNumber = 'ABC123';
         process.env.privateKey = 'test_key';
         process.env.signMode = 'gateway';
-        process.env.TRUST_GATEWAY_CALLBACK = 'true';
+        process.env.notifyUrlCallbackType = 'system';
 
         const errors = loadConfig().validateConfig();
-        assert.ok(!errors.some(e => e.includes('TRUST_GATEWAY_CALLBACK')));
+        assert.ok(!errors.some(e => e.includes('notifyUrlCallbackType')));
+    });
+
+    it('signMode=sdk + notifyUrlCallbackType=system → 提示配置矛盾', () => {
+        process.env.appId = 'wx_test';
+        process.env.merchantId = '1234567890';
+        process.env.apiV3Key = 'test_key_32_bytes_long!!';
+        process.env.merchantSerialNumber = 'ABC123';
+        process.env.privateKey = 'test_key';
+        process.env.signMode = 'sdk';
+        process.env.notifyUrlCallbackType = 'system';
+
+        const errors = loadConfig().validateConfig();
+        assert.ok(errors.some(e => e.includes('notifyUrlCallbackType') && e.includes('signMode=sdk')));
     });
 
     // ========== 公钥模式关联校验 ==========

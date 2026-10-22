@@ -453,10 +453,10 @@ describe('Controller - refund & queryRefund', () => {
 
 describe('Controller - _handleCallback', () => {
 
-    it('网关模式 + 显式 TRUST_GATEWAY_CALLBACK=true 有 ParsedContent → SUCCESS', async () => {
+    it('平台声明 notifyUrlCallbackType=system + ParsedContent → SUCCESS', async () => {
         // 集成中心系统内置回调：解密结果在 body.ParsedContent。
-        // 采信明文必须显式声明「函数无公网入口、回调只经集成中心转发」。
-        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', TRUST_GATEWAY_CALLBACK: 'true' });
+        // 采信明文以平台注入的 notifyUrlCallbackType=system 为准（证明回调托管在网关）。
+        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', notifyUrlCallbackType: 'system' });
         const { req, res } = mockReqRes(
             {
                 event_type: 'TRANSACTION.SUCCESS',
@@ -470,20 +470,24 @@ describe('Controller - _handleCallback', () => {
         assert.strictEqual(res._getBody().code, 'SUCCESS');
     });
 
-    it('⚠️ 网关模式未开 TRUST_GATEWAY_CALLBACK：伪造 ParsedContent 一律拒绝', async () => {
+    it('⚠️ 平台未声明 system（ownservice / 空）：伪造 ParsedContent 一律拒绝', async () => {
         // 回归「请求体带 ParsedContent 就跳过验签」的旁路
-        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway' });
-        const { req, res } = mockReqRes(
-            { ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' } },
-            {},
-        );
-        await ctrl.unifiedOrderTrigger(req, res);
-        assert.notStrictEqual(res._getStatusCode(), 200, '未声明信任上游时不能采信明文');
-        assert.strictEqual(res._getBody().code, 'FAIL');
+        for (const type of [undefined, 'ownservice']) {
+            const env = { signMode: 'gateway' };
+            if (type !== undefined) env.notifyUrlCallbackType = type;
+            const ctrl = loadControllerWithMockSdk({}, env);
+            const { req, res } = mockReqRes(
+                { ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' } },
+                {},
+            );
+            await ctrl.unifiedOrderTrigger(req, res);
+            assert.notStrictEqual(res._getStatusCode(), 200, `type=${type} 时不能采信明文`);
+            assert.strictEqual(res._getBody().code, 'FAIL');
+        }
     });
 
-    it('⚠️ 开了 TRUST 但明文缺必需字段：仍然拒绝', async () => {
-        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', TRUST_GATEWAY_CALLBACK: 'true' });
+    it('⚠️ 声明了 system 但明文缺必需字段：仍然拒绝', async () => {
+        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', notifyUrlCallbackType: 'system' });
         const { req, res } = mockReqRes({ ParsedContent: { foo: 'bar' } }, {});
         await ctrl.unifiedOrderTrigger(req, res);
         assert.strictEqual(res._getStatusCode(), 400);

@@ -57,7 +57,7 @@
 
 - [ ] `.env` 所有必填变量已填入生产值
 - [ ] `signMode` 与部署方式匹配（云函数+集成中心=gateway；云托管=sdk）
-- [ ] gateway 模式已设 `TRUST_GATEWAY_CALLBACK=true`，且**函数无公网入口**（回调只经集成中心转发）；不设则回调走自验签、会因缺签名头 400
+- [ ] 集成中心部署时平台已注入 `notifyUrlCallbackType=system`（采信网关明文的唯一依据），且**函数无公网入口**；自建公网回调保持不填或设 `ownservice`
 - [ ] 回调 URL 正确（SDK→自己的域名，Gateway→集成中心域名）
 - [ ] `privateKey` 格式验证通过（运行 `check_pem_format.py`）
 - [ ] `wxPayPublicKey` 是**微信支付公钥**（不是商户 API 公钥）
@@ -78,7 +78,7 @@
 ### 5.3 部署验证 ☑️
 
 - [ ] 部署命令执行成功（`tcb fn deploy` / `tcb cloudrun deploy`）
-- [ ] 云函数已开启 **HTTP 访问服务**（⚠️ 仅 `signMode=sdk` 自建公网回调需要；`gateway` + `TRUST_GATEWAY_CALLBACK=true` 时**不要**开放公网入口，否则等于暴露一个免签名的「支付成功」接口）
+- [ ] 云函数已开启 **HTTP 访问服务**（⚠️ 仅 `signMode=sdk` 自建公网回调需要；`notifyUrlCallbackType=system`（回调托管在网关）时**不要**开放公网入口，否则等于暴露一个免签名的「支付成功」接口）
 - [ ] 环境变量生效（可通过健康接口或日志确认）
 - [ ] `validate_env.sh` 脚本全部 PASS
 - [ ] 测试下单接口返回 `code: 0`

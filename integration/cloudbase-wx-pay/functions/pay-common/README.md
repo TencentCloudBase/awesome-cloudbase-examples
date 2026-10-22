@@ -56,7 +56,7 @@ npm install
 | 变量名 | 必填 | 示例值 | 说明 |
 |--------|:----:|--------|------|
 | `signMode` | 是 | `sdk` / `gateway` | 签名模式。`sdk`=自己验签；`gateway`=集成中心代验签（**默认值**） |
-| `TRUST_GATEWAY_CALLBACK` | gateway 模式必填 | `true` | 是否采信 `body.ParsedContent` 明文（**默认关闭**）。开启前提：函数无公网入口、回调只经集成中心转发 |
+| `notifyUrlCallbackType` | 集成中心自动注入 | `system` | 平台声明回调由谁验签。`system`=网关代验签，采信 `body.ParsedContent`；`ownservice`/空=本函数自己验签。**不要手工覆盖** |
 | `appId` | 是 | `wx1234567890abcdef` | 小程序 / 公众号 AppID，需已在商户平台绑定 |
 | `merchantId` | 是 | `1900009191` | 微信支付商户号（10 位数字） |
 | `merchantSerialNumber` | 是 | `40位十六进制` | API 证书序列号 |
@@ -139,18 +139,18 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 #### 回调安全（必读）
 
-`signMode=gateway` **不等于**无条件采信请求体里的 `body.ParsedContent`。采信网关明文还要求 `TRUST_GATEWAY_CALLBACK=true`，否则回调会退回「自验签 → 解密」，验不过就 400：
+「回调由谁验签」看**平台注入的** `notifyUrlCallbackType`，不是看 `signMode`：`signMode` 只是部署意图，任何人都能往函数端口发 `{"ParsedContent":{...}}`，它证明不了请求来自网关；`notifyUrlCallbackType` 是集成中心创建实例时注入的声明，为 `system` 才意味着回调地址托管在网关、由它验签解密。
 
-| `signMode` | `TRUST_GATEWAY_CALLBACK` | 回调行为 |
-|---|---|---|
-| `gateway` | `true` | 采信 `ParsedContent` 明文 + 结构校验（**函数必须无公网入口**） |
-| `gateway` | 空（默认） | 忽略明文，走自验签；无签名头 → 拒绝 |
-| `sdk` | 任意 | 一律自验签 + 解密 |
+| `notifyUrlCallbackType` | 回调行为 |
+|---|---|
+| `system`（集成中心自动注入） | 采信 `ParsedContent` 明文 + 结构校验 + 时间戳窗口（若带） |
+| `ownservice` | 自验签 + 解密 |
+| 空（默认，自建部署） | 同上，按「自己验签」处理（fail closed） |
 
-> 🚨 为什么默认关闭：普通回调路由是没有鉴权的。只要请求体里有 `ParsedContent` 就跳过验签，等于开放了一个免签名的「支付成功」入口 —— 任何人都能发 `{"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}`。
+> 🚨 为什么不能只看 `signMode`：回调路由本身没有鉴权。只要请求体里有 `ParsedContent` 就跳过验签，等于开放了一个免签名的「支付成功」入口 —— 任何人都能发 `{"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}`。
 >
-> 集成中心（官方推荐）部署时：**不要为 `pay-common` 开 HTTP 访问服务**，并在控制台设 `TRUST_GATEWAY_CALLBACK=true`。
-> 自建公网回调（备选）时：保持关闭或直接用 `signMode=sdk`，同时按微信要求配置平台证书 / 支付公钥。
+> 集成中心（官方推荐）部署时：平台会自动注入 `notifyUrlCallbackType=system`，**不要手工覆盖**；同时**不要为 `pay-common` 开 HTTP 访问服务**。
+> 自建公网回调（备选）时：保持不填或直接用 `signMode=sdk`，同时按微信要求配置平台证书 / 支付公钥。
 
 #### 金额校验（上线前必须实现）
 

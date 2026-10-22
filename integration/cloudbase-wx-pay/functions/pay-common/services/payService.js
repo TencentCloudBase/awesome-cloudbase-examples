@@ -3,7 +3,7 @@
  * 主动请求（下单/退款/转账）永远走 SDK 自签名直连微信
  * 回调处理根据 signMode 决定：自己验签解密 或 读取集成中心已解密的明文
  */
-const { signMode, verifyMode, payConfig, trustGatewayCallback } = require('../config/config');
+const { signMode, verifyMode, payConfig, notifyUrlCallbackType } = require('../config/config');
 const SdkStrategy = require('./strategies/sdkStrategy');
 const OrderService = require('./orderService');
 
@@ -194,10 +194,13 @@ class PayService {
      *    就是一笔「支付成功」。
      *
      * 现在的判定：
-     *   1. 信任网关明文 = `signMode === 'gateway'` **且** `TRUST_GATEWAY_CALLBACK=true`
-     *      （前提：函数无公网入口，回调只经集成中心转发）
-     *   2. 其余情况一律自验签 + 解密，验不过就拒绝
+     *   1. 采信网关明文 = 平台声明 `notifyUrlCallbackType=system`
+     *      （集成中心创建实例时自动注入，意味着回调地址托管在网关、由它验签解密）
+     *   2. 其余情况（未声明 / ownservice）一律自验签 + 解密，验不过就拒绝
      *   3. 无论哪条路径，明文都要过结构校验
+     *
+     * ⚠️ 为什么不再用 signMode 判定：signMode 只是部署意图，
+     *    任何人都能往函数端口发 {"ParsedContent":{...}}，它证明不了来源。
      *
      * @param {Object} callbackParams - 回调参数
      * @param {string} label - 日志标识
@@ -205,7 +208,7 @@ class PayService {
      * @returns {Promise<Object|null>} 明文；不可信或结构不合法返回 null
      */
     async _resolveCallbackPayload(callbackParams, label, requiredFields) {
-        const trustsGateway = signMode === 'gateway' && trustGatewayCallback === true;
+        const trustsGateway = notifyUrlCallbackType === 'system';
 
         if (trustsGateway && callbackParams.decryptedData) {
             // 网关转发的请求若带时间戳头，仍然做重放窗口校验（带不了就无从判断，只能靠网络隔离）
@@ -221,9 +224,10 @@ class PayService {
         }
 
         if (callbackParams.decryptedData && !trustsGateway) {
-            console.warn(`[PayService] ${label}收到网关明文（ParsedContent），但未开启 TRUST_GATEWAY_CALLBACK，`
-                + '已忽略明文并走自验签。若回调只经集成中心转发且函数无公网入口，'
-                + '可设 TRUST_GATEWAY_CALLBACK=true（见 README「回调安全」）');
+            console.warn(`[PayService] ${label}收到网关明文（ParsedContent），但平台未声明 `
+                + `notifyUrlCallbackType=system（当前: "${notifyUrlCallbackType || '空'}"），`
+                + '已忽略明文并走自验签。集成中心创建实例会自动注入该声明；'
+                + '自建公网回调请保持不填（见 README「回调安全」）');
         }
 
         const verified = await this.strategy.verifySign(callbackParams);
