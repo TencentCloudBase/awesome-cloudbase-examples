@@ -114,6 +114,8 @@ corsAllowOrigin=https://your-frontend-domain.com
 
 ```env
 signMode=gateway
+# ⚠️ 采信集成中心明文必须显式开启（默认关闭）；前提是函数无公网入口
+TRUST_GATEWAY_CALLBACK=true
 appId=你的AppID
 merchantId=你的商户号
 merchantSerialNumber=你的证书序列号
@@ -538,6 +540,7 @@ appId=wx1234567890                  变量名: appId       值: wx1234567890
 merchantId=YOUR_MERCHANT_ID               变量名: merchantId  值: YOUR_MERCHANT_ID
 privateKey=-----BEGIN...            变量名: privateKey  值: （粘贴完整 PEM 内容）
 notifyURLPayURL=https://xxx         变量名: notifyURLPayURL  值: https://...
+TRUST_GATEWAY_CALLBACK=true         变量名: TRUST_GATEWAY_CALLBACK  值: true（仅 gateway 模式且函数无公网入口时）
 ...                                 ...
 ```
 
