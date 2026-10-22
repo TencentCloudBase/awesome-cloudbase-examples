@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const express = require('express');
 const logger = require('morgan');
-const { validateConfig, isProduction, shouldRefuseBoot } = require('./config/config');
+const { validateConfig, isProduction, shouldRefuseBoot, resolveNotifySource } = require('./config/config');
 
 const app = express();
 
@@ -101,14 +101,14 @@ function hasPlainEvent(body) {
 /**
  * 本函数是否负责验签
  *
- * 平台声明优先（notifyUrlCallbackType）：
+ * 平台声明优先（notifyURLCallbackType）：
  *   ownservice → 用户自定义回调地址，必须自己验签
  *   system     → 系统内置回调地址，网关已代验签
  *   未注入     → **fail closed，按「自己验签」处理**
  *
  * 🚨 未声明时绝不能用「token 没配 = 网关代验签」去猜：
  *    漏配 token 是常见误操作，猜错的代价是任何人都能 POST 一段 JSON 伪造发货。
- *    要免验签必须在平台上明确声明 notifyUrlCallbackType=system。
+ *    要免验签必须在平台上明确声明 notifyURLCallbackType=system。
  * @param {ReturnType<typeof getCallbackConfig>} cb
  * @returns {boolean}
  */
@@ -125,11 +125,20 @@ function isSelfVerify(cb) {
     const keyLen = cb.aesKey.length;
     const na = '(未注入)';
 
-    // 打印**原始变量名 + 值**：不同集成注入的名字不同（虚拟支付是驼峰 notifyUrlCallbackType），
+    // 打印**原始变量名 + 值**：平台口径是大写 URL，历史集成可能注入小写，
     // 只打 type= 值的话，排查时分不清是「平台没注入」还是「读错了变量名」
-    const rawType = process.env.notifyUrlCallbackType;
-    console.info('[Callback] 声明来源: notifyUrlCallbackType='
-        + (rawType === undefined ? na : `"${rawType}"`));
+    //    判定口径与 config.readNotifyEnv 完全一致（trim 后非空才算生效）：
+    //    只看 undefined 会让「大写注入空串 + 小写有值」打出与生效值相反的结论
+    const source = resolveNotifySource(
+        process.env.notifyURLCallbackType,
+        process.env.notifyUrlCallbackType
+    );
+    console.info('[Callback] 声明来源: ' + source.name
+        + (source.value === undefined ? '' : `="${source.value}"`));
+    if (source.fellBackFromEmptyUpper) {
+        console.warn('[Callback] ⚠️ notifyURLCallbackType 已注入但为空，'
+            + `实际生效的是 notifyUrlCallbackType="${source.value}"，建议统一改成大写 URL 写法`);
+    }
     console.info('[Callback] 声明: '
         + `type=${cb.type || na} resource=${cb.resource || na} encrypt=${cb.encryptType || na}`
         + ` | token=${tokenLen ? '已配' : '未配'} msgSecret=${keyLen ? keyLen + ' 位' : '未配'}`);
@@ -141,15 +150,11 @@ function isSelfVerify(cb) {
         warnings.push(`msgEncryptType=${cb.encryptType} 需要 msgSecret（43 位），`
             + `当前 ${keyLen ? keyLen + ' 位' : '未配置'} → 安全模式解密必失败`);
     }
-    if (cb.type === 'system' && tokenLen) {
-        warnings.push('notifyUrlCallbackType=system（网关代验签）却配置了 token，'
-            + '可能重复验签；网关若改写了 signature，本函数会误判 401，建议删除 token');
-    }
     if (cb.type === 'ownservice' && !tokenLen) {
-        warnings.push('notifyUrlCallbackType=ownservice（自建回调）却未配置 token，推送无法验签');
+        warnings.push('notifyURLCallbackType=ownservice（自建回调）却未配置 token，推送无法验签');
     }
     if (cb.resource === 'cloudrun') {
-        warnings.push('notifyUrlResourceType=cloudrun：回调打到云托管，这个云函数收不到推送');
+        warnings.push('notifyURLResourceType=cloudrun：回调打到云托管，这个云函数收不到推送');
     }
     warnings.forEach((w) => console.warn('⚠️ [Callback]', w));
 })();
@@ -184,7 +189,7 @@ app.get('*', (req, res, next) => {
 // 只验 msg_signature 是不够的 —— 不加密的推送没有 Encrypt，会直接越过验签，
 // 任何人都能 POST 一段 XML 伪造 xpay_goods_deliver_notify 触发发货。
 //
-// 「谁负责验签」只看平台声明 notifyUrlCallbackType，**没有 token 启发式**：
+// 「谁负责验签」只看平台声明 notifyURLCallbackType，**没有 token 启发式**：
 //   ownservice → 本函数验签：带签名必验，无签名的推送直接拒绝
 //   system     → 网关代验签：明文放行，仅做密文兜底解密
 //   未注入     → 按本函数验签（fail closed，见 isSelfVerify）
@@ -203,7 +208,7 @@ app.use((req, res, next) => {
     // 若仍强制本地验签必然失败，与下面 pushVerified 的判定口径自相矛盾
     if (selfVerify && signature && !verifySignature({ token: cb.token, timestamp, nonce, signature })) {
         console.error('[Callback] signature 校验失败：Token 与微信后台是否一致？'
-            + '（若回调已由集成中心网关代验签，请删环境变量 token 并声明 notifyUrlCallbackType=system）');
+            + '（若回调已由集成中心网关代验签，请删环境变量 token 并声明 notifyURLCallbackType=system）');
         return res.status(401).json({ code: -1, msg: 'invalid signature' });
     }
 
@@ -217,7 +222,7 @@ app.use((req, res, next) => {
     if (selfVerify && !signature && (eventType || encrypt)) {
         console.error('[Callback] 收到无 signature 的推送，已拒绝'
             + '（msg_signature 只能用于密文；若回调已由集成中心网关代验签，'
-            + '请声明 notifyUrlCallbackType=system）');
+            + '请声明 notifyURLCallbackType=system）');
         return res.status(401).json({ code: -1, msg: 'missing signature' });
     }
 

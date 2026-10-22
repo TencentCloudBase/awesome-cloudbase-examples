@@ -21,7 +21,7 @@
 | 服务端接口 | `/v3/pay/transactions/*` | **`/xpay/*`（米大师 Midas）** |
 | 下单动作 | 服务端调统一下单拿 `prepay_id` | **服务端只出签名，客户端自行下单** |
 | 回调通道 | 微信支付回调 + AES-GCM | **小程序消息推送** + AES-256-CBC |
-| 验签归属 | 平台字段 `notifyURLCallbackType` | 平台字段 `notifyUrlCallbackType` |
+| 验签归属 | 平台字段 `notifyURLCallbackType` | 平台字段 `notifyURLCallbackType` |
 | 凭证 | 商户号 5 项 + PEM 证书 | OfferID + AppKey + AppID/AppSecret |
 | 幂等键 | `out_trade_no` | 平台单号 `wx_order_id`（缺失回退 `OutTradeNo`） |
 | 应答格式 | `{ code: 'SUCCESS' }` | **`{ ErrCode: 0, ErrMsg: 'success' }`** |

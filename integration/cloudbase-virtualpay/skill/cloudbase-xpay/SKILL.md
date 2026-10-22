@@ -83,7 +83,7 @@ description: |
 |---|---|---|
 | `POST /xpay/create_order` | 平台注入 `x-wx-openid`；`code2Session` 换出的权威 openid 必须与之相同 | 返回 `payData`（signData / mode / paySig / signature） |
 | `POST /xpay/query_order` | 同上 + 订单归属校验（`XPAY_GUARD=on` 时查不到单即拒绝） | 查单，推送丢失时兜底补发货 |
-| `POST /xpay/callback` | `notifyUrlCallbackType=system` → 网关验签；`ownservice`/未声明 → 本函数自验签（fail closed，见 Gotcha 9） | 所有 `xpay_*` 事件统一入口 |
+| `POST /xpay/callback` | `notifyURLCallbackType=system` → 网关验签；`ownservice`/未声明 → 本函数自验签（fail closed，见 Gotcha 9） | 所有 `xpay_*` 事件统一入口 |
 
 ## 回调事件速查
 

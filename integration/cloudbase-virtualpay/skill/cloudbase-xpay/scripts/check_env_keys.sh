@@ -78,7 +78,7 @@ done <<< "$KEYS"
 # 它们写进 cloudbaserc.json 的占位符是允许的（与平台注入的是同一份信息，
 # 部署时由 .env 提供值，创建/更新集成时再被平台覆盖回来）；
 # 没写进占位符时出现在 .env 中同样正常，不应报「名字写错」。
-PLATFORM_INJECTED="appId appid secret appSecret offerId appKey prodAppKey sandboxAppKey token msgSecret notifyUrlCallbackType msgEncryptType notifyUrlResourceType notifyUrlResourceName"
+PLATFORM_INJECTED="appId appid secret appSecret offerId appKey prodAppKey token msgSecret notifyURLCallbackType msgEncryptType notifyURLResourceType notifyURLResourceName"
 
 ENV_KEYS=$(grep -oE '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*=' "$ENV_FILE" \
     | sed -E 's/^[[:space:]]*//; s/=$//' \

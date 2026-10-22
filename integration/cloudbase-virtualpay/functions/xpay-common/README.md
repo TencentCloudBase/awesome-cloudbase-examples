@@ -58,9 +58,8 @@ xpay-common/
 | `token` | 平台注入 | 自建回调必填 | 消息推送 Token，验签用；托管回调由网关使用 | — |
 | `msgSecret` | 平台注入 | 自建回调必填 | EncodingAESKey（43 位），安全模式解密用 | — |
 | `msgEncryptType` | 平台注入 | 否 | `plaintext` / `aes` / `compatible`，**须与后台「消息推送 → 加密方式」一致** | — |
-| `notifyUrlCallbackType` | 平台注入 | 否 | `system` = 网关代验签解密；未声明 / `ownservice` = 本函数自验签（fail closed） | — |
-| `notifyUrlResourceType` | 平台系统字段 | 否 | `function` / `cloudrun`，由 `tcb integration create` 写进集成 Ext，**不进函数环境变量**；代码按空串兜底（真被注入且为 `cloudrun` 时启动告警） | — |
-| `sandboxAppKey` | 平台注入 | 否 | 沙箱密钥。本模板只走现网（`env` 固定 0），**代码不读**，留空即可 | — |
+| `notifyURLCallbackType` | 平台注入 | 否 | `system` = 网关代验签解密；未声明 / `ownservice` = 本函数自验签（fail closed） | — |
+| `notifyURLResourceType` | 平台系统字段 | 否 | `function` / `cloudrun`，由 `tcb integration create` 写进集成 Ext，**不进函数环境变量**；代码按空串兜底（真被注入且为 `cloudrun` 时启动告警） | — |
 | `XPAY_GUARD` | 模板自有 | 否 | 联调开关：`on`（默认，校验全生效）/ `off`（查不到订单时放行查单、放过退款）。云上带 `off` 拒绝启动 | — |
 | `TCB_ENV_ID` | 部署侧 | 是（部署用） | `cloudbaserc.json` 的 `envId`，为空会导致部署失败；**不进函数环境变量** | — |
 | `PORT` | 仅本地 | 否 | 本地开发端口（云函数固定 9000、云托管 80） | — |
@@ -115,9 +114,9 @@ xpay-common/
 
 | 变量 | 取值 | 含义 |
 |---|---|---|
-| `notifyUrlCallbackType` | `system` | 系统内置回调地址，网关代验签/代解密 |
+| `notifyURLCallbackType` | `system` | 系统内置回调地址，网关代验签/代解密 |
 | | `ownservice` | 用户自定义回调地址，本函数自己验签解密 |
-| `notifyUrlResourceType` | `function` / `cloudrun` | 回调打到云函数 / 云托管（**系统字段**，见下方说明） |
+| `notifyURLResourceType` | `function` / `cloudrun` | 回调打到云函数 / 云托管（**系统字段**，见下方说明） |
 | `msgEncryptType` | `plaintext` | 明文：只有 `signature`，无 `Encrypt` |
 | | `aes` | 安全模式：`Encrypt` + `msg_signature` |
 | | `compatible` | 兼容模式：**明文与密文同时下发**，解密失败可回退明文 |
@@ -125,7 +124,7 @@ xpay-common/
 判定优先级：`ownservice` → 本函数验签；`system` → 网关代验签；**都未注入 → 本函数验签（fail closed）**。
 不再看 `token` 是否配置来猜「可能有人代验签了」—— 漏配 `token` 是常见误操作，猜错的代价是任何人都能伪造发货。
 
-**关于 `notifyUrlResourceType` / `notifyUrlResourceName`**：这两个是平台系统字段，由 `tcb integration create` 依据 `demoCodeFunctionName` 自动写入集成 Ext（`resourceType='function'` + `resourceName=函数名`），`tcb config init` 生成模板时也会主动跳过它们。**不要写进 `cloudbaserc.json` 或 `.env`**——手填既多余，也可能与云端校验冲突。读不到时本函数按空串处理，不影响功能。
+**关于 `notifyURLResourceType` / `notifyURLResourceName`**：这两个是平台系统字段，由 `tcb integration create` 依据 `demoCodeFunctionName` 自动写入集成 Ext（`resourceType='function'` + `resourceName=函数名`），`tcb config init` 生成模板时也会主动跳过它们。**不要写进 `cloudbaserc.json` 或 `.env`**——手填既多余，也可能与云端校验冲突。读不到时本函数按空串处理，不影响功能。
 
 启动日志会打两行，直接看结论：
 
@@ -141,16 +140,16 @@ xpay-common/
 | `msgEncryptType=aes/compatible` 但 `msgSecret` 非 43 位 | 解密必失败 | 补 `msgSecret` |
 | `type=system` 却配了 `token` | 网关若改写 `signature` → 误判 401 | 删 `token` |
 | `type=ownservice` 却没配 `token` | 推送无法验签 | 补 `token` |
-| `notifyUrlResourceType=cloudrun` | 回调打到云托管，此函数收不到推送 | 检查部署形态 |
+| `notifyURLResourceType=cloudrun` | 回调打到云托管，此函数收不到推送 | 检查部署形态 |
 
 `compatible` 的额外行为：解密失败但 body 里有明文 `Event` 时，**回退用明文字段继续处理**而不是返回 400——兼容模式本来就把明文和密文一起发了，没必要让微信白重推 15 次。
 
 `appId` 用于解密后校验明文尾部的 AppID，不一致会抛错。
 
-切到集成中心托管后，`notifyUrlCallbackType` 会变成 `system`，无需改代码。
+切到集成中心托管后，`notifyURLCallbackType` 会变成 `system`，无需改代码。
 
 ⚠️ 老集成若读不到这三个字段，模板按「自己验签」处理（fail closed），删掉 `token` **不会**变成免验签 ——
-要免验签必须显式声明 `notifyUrlCallbackType=system`。
+要免验签必须显式声明 `notifyURLCallbackType=system`。
 
 > 微信推送的 `Content-Type` 不固定（`text/xml` / `application/xml`，偶发不带），`app.js` 用 `express.text({ type: (req) => !req.is('application/json') })` 兜住，保证密文以字符串进入解密中间件；`application/json` 的密文由 `extractEncrypt` 直接从对象里取。
 
@@ -306,7 +305,7 @@ npm start     # 默认 3000 端口，自动加载 .env
 >
 > 实测踩过：`.env` 里叫 `appId`，占位符写的是 `{{env.APP_ID}}` → 全部解析为空。
 >
-> **`cloudbaserc.json` 当前引用了全部键**：平台注入的 `appId` / `secret` / `offerId` / `appKey` / `token` / `msgSecret` / `notifyUrlCallbackType` / `msgEncryptType` / `sandboxAppKey`，加上模板自己的 `XPAY_GUARD`。
+> **`cloudbaserc.json` 当前引用了全部键**：平台注入的 `appId` / `secret` / `offerId` / `appKey` / `token` / `msgSecret` / `notifyURLCallbackType` / `msgEncryptType`，加上模板自己的 `XPAY_GUARD`。
 > 所以 `.env` 里每个键都要有、名字逐字一致（本地自测场景）。
 > 只走集成中心时，可以只在 `.env` 填 `TCB_ENV_ID` 后创建集成，其余由平台覆盖 —— 但别在凭证为空的状态下单独 `tcb fn deploy`。
 >

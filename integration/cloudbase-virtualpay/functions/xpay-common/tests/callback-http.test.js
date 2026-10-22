@@ -261,34 +261,34 @@ test('安全模式：密文被篡改时解密失败返回 400', async () => {
 //    漏配 token 是常见误操作，猜错的代价是任何人都能伪造发货推送。
 test('未声明类型且未配 token：无签名推送按「需验签」拒绝', async () => {
     const savedToken = process.env.token;
-    const savedType = process.env.notifyUrlCallbackType;
+    const savedType = process.env.notifyURLCallbackType;
     delete process.env.token;
-    delete process.env.notifyUrlCallbackType;
+    delete process.env.notifyURLCallbackType;
 
     try {
         const r = await postPlain(deliverXml('GATEWAY20261019001'));
         assert.strictEqual(r.status, 401, '未声明就按自己验签处理，缺签名必须拒绝');
     } finally {
         process.env.token = savedToken;
-        if (savedType === undefined) delete process.env.notifyUrlCallbackType;
-        else process.env.notifyUrlCallbackType = savedType;
+        if (savedType === undefined) delete process.env.notifyURLCallbackType;
+        else process.env.notifyURLCallbackType = savedType;
     }
 });
 
 // 同一份报文，只要在平台上声明 system，就应当放行（网关已代验签）
 test('声明 system 且未配 token：无签名推送放行', async () => {
     const savedToken = process.env.token;
-    const savedType = process.env.notifyUrlCallbackType;
+    const savedType = process.env.notifyURLCallbackType;
     delete process.env.token;
-    process.env.notifyUrlCallbackType = 'system';
+    process.env.notifyURLCallbackType = 'system';
 
     try {
         const r = await postPlain(deliverXml('GATEWAY20261019002'));
         assert.strictEqual(r.status, 200, 'system = 网关代验签，不应误拦');
     } finally {
         process.env.token = savedToken;
-        if (savedType === undefined) delete process.env.notifyUrlCallbackType;
-        else process.env.notifyUrlCallbackType = savedType;
+        if (savedType === undefined) delete process.env.notifyURLCallbackType;
+        else process.env.notifyURLCallbackType = savedType;
     }
 });
 
@@ -308,25 +308,25 @@ test('无签名 + JSON body：伪造发货事件必须 401', async () => {
     assert.strictEqual(r.status, 401, 'JSON 形态不能绕过验签');
 });
 
-// ---------- 平台声明字段（notifyUrlCallbackType / msgEncryptType） ----------
+// ---------- 平台声明字段（notifyURLCallbackType / msgEncryptType） ----------
 
 test('声明 system：即使误配了 token，也不拦网关转发的无签名明文', async () => {
-    const saved = process.env.notifyUrlCallbackType;
-    process.env.notifyUrlCallbackType = 'system';
+    const saved = process.env.notifyURLCallbackType;
+    process.env.notifyURLCallbackType = 'system';
 
     try {
         const r = await postPlain(deliverXml('SYSTEM20261019001'));
         assert.strictEqual(r.status, 200, 'system 声明优先于「token 是否配置」的判断');
     } finally {
-        if (saved === undefined) delete process.env.notifyUrlCallbackType;
-        else process.env.notifyUrlCallbackType = saved;
+        if (saved === undefined) delete process.env.notifyURLCallbackType;
+        else process.env.notifyURLCallbackType = saved;
     }
 });
 
 test('声明 ownservice 但未配 token：带签名的推送必须拒绝', async () => {
-    const savedType = process.env.notifyUrlCallbackType;
+    const savedType = process.env.notifyURLCallbackType;
     const savedToken = process.env.token;
-    process.env.notifyUrlCallbackType = 'ownservice';
+    process.env.notifyURLCallbackType = 'ownservice';
     delete process.env.token;
 
     try {
@@ -337,8 +337,8 @@ test('声明 ownservice 但未配 token：带签名的推送必须拒绝', async
         assert.strictEqual(r.status, 401, '声明优先：ownservice 不会因缺 token 就放弃验签');
     } finally {
         process.env.token = savedToken;
-        if (savedType === undefined) delete process.env.notifyUrlCallbackType;
-        else process.env.notifyUrlCallbackType = savedType;
+        if (savedType === undefined) delete process.env.notifyURLCallbackType;
+        else process.env.notifyURLCallbackType = savedType;
     }
 });
 
@@ -400,8 +400,8 @@ test('兼容模式：没有明文字段时，解密失败仍返回 400', async (
 // → 微信不再重推 → 静默丢单，所以必须端到端覆盖。
 
 test('网关转发 /wechat/notify + ParsedNotify 包装：正常发货，不 404 不丢单', async () => {
-    const saved = process.env.notifyUrlCallbackType;
-    process.env.notifyUrlCallbackType = 'system';
+    const saved = process.env.notifyURLCallbackType;
+    process.env.notifyURLCallbackType = 'system';
 
     try {
         const r = await fetch(`${base}/wechat/notify`, {
@@ -420,8 +420,8 @@ test('网关转发 /wechat/notify + ParsedNotify 包装：正常发货，不 404
         const payload = await r.json();
         assert.strictEqual(payload.ErrCode, 0, '必须回成功，否则微信会重推 15 次');
     } finally {
-        if (saved === undefined) delete process.env.notifyUrlCallbackType;
-        else process.env.notifyUrlCallbackType = saved;
+        if (saved === undefined) delete process.env.notifyURLCallbackType;
+        else process.env.notifyURLCallbackType = saved;
     }
 });
 

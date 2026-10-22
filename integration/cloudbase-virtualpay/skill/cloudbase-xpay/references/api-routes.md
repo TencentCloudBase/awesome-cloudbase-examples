@@ -9,7 +9,7 @@
 |---|---|---|---|
 | `POST /xpay/create_order` | 平台注入 `x-wx-openid`；`code2Session` 换出的权威 openid 必须与之相同 | `code`, `productId`, `goodsPrice`, `buyQuantity`, `mode`, `attach`, 可选 `outTradeNo` | `{ signData, mode, paySig, signature, outTradeNo, openid }` |
 | `POST /xpay/query_order` | 同上 + 订单归属校验（`XPAY_GUARD=on` 时查不到单即拒绝） | `code`, `outTradeNo` | 订单详情 |
-| `POST /xpay/callback` | `notifyUrlCallbackType=system` → 网关验签；`ownservice`/未声明 → 本函数自验签（fail closed） | 推送明文 | `{ ErrCode, ErrMsg }` |
+| `POST /xpay/callback` | `notifyURLCallbackType=system` → 网关验签；`ownservice`/未声明 → 本函数自验签（fail closed） | 推送明文 | `{ ErrCode, ErrMsg }` |
 
 统一响应：`{ code, msg, data }`，`code=0` 为成功。
 
@@ -28,7 +28,7 @@
 |---|---|
 | 转发路径 | 虚拟支付固定 `/wechat/notify`（`CALLBACK_URL_MAP.notifyUrl`）；微信支付是 `/wechatpay/order` |
 | body 包装 | `ParsedContent`（微信支付风格）或 `ParsedNotify`（消息推送风格）—— **两种都必须认** |
-| 免验签开关 | 只有 `notifyUrlCallbackType=system`。未注入时 fail-closed 按「自己验签」处理 → 网关明文没有 `signature` → 401 |
+| 免验签开关 | 只有 `notifyURLCallbackType=system`。未注入时 fail-closed 按「自己验签」处理 → 网关明文没有 `signature` → 401 |
 | 路径没注册路由 | 云 API 适配层兜底：识别出 `xpay_*` 事件后改写投递到 `/callback`，但仍强制 `req.pushVerified` |
 
 > ⚠️ **最隐蔽的失败**：`pickEvent` 认得 `ParsedNotify`（所以适配层会把请求投递到 callback），

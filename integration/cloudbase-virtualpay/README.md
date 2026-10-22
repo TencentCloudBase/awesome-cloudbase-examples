@@ -46,11 +46,10 @@ cloudbase-virtualpay/
 | `appId` | 同上 | 换 sessionKey / access_token；**只走小程序调用时可不配**（平台注入的请求头 `x-wx-appid` 优先） |
 | `token` / `msgSecret` | MP 后台 → 开发管理 → 消息推送 | 自建回调必填：验签 Token + EncodingAESKey（43 位）；集成中心托管时由网关使用 |
 
-> `notifyUrlCallbackType` / `msgEncryptType` 由平台注入；本地自测需手填，且 `msgEncryptType`
+> `notifyURLCallbackType` / `msgEncryptType` 由平台注入；本地自测需手填，且 `msgEncryptType`
 > 必须与后台「消息推送 → 加密方式」一致，否则实际收到的形态与声明不符（表现为验签失败 / 解密失败）。
-> `sandboxAppKey` 本模板不读（`env` 固定 0 现网），留空即可。
 
-**完整环境变量表**见 [`functions/xpay-common/README.md#环境变量`](functions/xpay-common/README.md#环境变量)：共 13 项 —— 平台注入 9 个、平台系统字段 1 个（`notifyUrlResourceType`，不进函数环境变量）、模板自有 1 个（`XPAY_GUARD`）、部署侧 `TCB_ENV_ID`、本地 `PORT`，含必填性与本地/旧名对照（`prodAppKey` / `appSecret`）。
+**完整环境变量表**见 [`functions/xpay-common/README.md#环境变量`](functions/xpay-common/README.md#环境变量)：共 12 项 —— 平台注入 8 个、平台系统字段 1 个（`notifyURLResourceType`，不进函数环境变量）、模板自有 1 个（`XPAY_GUARD`）、部署侧 `TCB_ENV_ID`、本地 `PORT`，含必填性与本地/旧名对照（`prodAppKey` / `appSecret`）。
 
 两条要点：
 
@@ -124,7 +123,7 @@ tcb fn log xpay-common -e <环境ID>
 |---|---|---|
 | `POST /xpay/create_order` | 平台注入 `x-wx-openid` + `code2Session` 换出的权威 openid 必须一致 | 出 `signData` + 双签名，**不下单** |
 | `POST /xpay/query_order` | 同上 + 订单归属校验（`XPAY_GUARD=on` 时查不到单即拒绝） | 查单兜底（前端 success 回调不可靠） |
-| `POST /xpay/callback` | `notifyUrlCallbackType=system` → 网关验签；`ownservice`/未声明 → 本函数自验签（fail closed） | 消息推送落点，按 `Event` 分发 |
+| `POST /xpay/callback` | `notifyURLCallbackType=system` → 网关验签；`ownservice`/未声明 → 本函数自验签（fail closed） | 消息推送落点，按 `Event` 分发 |
 
 完整清单见 [`references/api-routes.md`](skill/cloudbase-xpay/references/api-routes.md)。
 

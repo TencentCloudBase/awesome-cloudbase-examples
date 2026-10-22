@@ -11,9 +11,8 @@
 | `token` | 自建回调必填 | 空 | 消息推送 Token，验签用 |
 | `msgSecret` | 自建回调必填 | 空 | EncodingAESKey（43 位），安全模式解密 |
 | `msgEncryptType` | 否 | 空 | `plaintext` / `aes` / `compatible`，须与后台一致 |
-| `notifyUrlCallbackType` | 否 | 空（未声明 = 自己验签） | `system` = 网关代验签；`ownservice` = 本函数验签 |
-| `notifyUrlResourceType` | 否 | 空 | 平台系统字段，写进集成 Ext、**不进函数环境变量**；`cloudrun` = 回调打云托管、本函数收不到 |
-| `sandboxAppKey` | 否 | 空 | 沙箱密钥；本模板只走现网，代码不读 |
+| `notifyURLCallbackType` | 否 | 空（未声明 = 自己验签） | `system` = 网关代验签；`ownservice` = 本函数验签 |
+| `notifyURLResourceType` | 否 | 空 | 平台系统字段，写进集成 Ext、**不进函数环境变量**；`cloudrun` = 回调打云托管、本函数收不到 |
 | `XPAY_GUARD` | 否 | 未设（= `on`） | 联调开关；`off` = 查不到订单时放行查单 / 放过退款，云上带 `off` 拒绝启动 |
 
 **变量名以集成中心注入为准**：`authTypeCode=wxvirtualpay` 注入的是 `appId / secret / offerId / appKey`。本地 `.env` 与旧版文档用的 `prodAppKey` / `appSecret`，由 `config/config.js` 的 `readEnv()` 回退兼容 —— 优先平台名，两套都能跑。
@@ -27,7 +26,7 @@
 | 事项 | 默认口径 |
 |---|---|
 | **入站身份**（`x-wx-openid`） | 信任上游网关注入 —— 认为 HTTP 云函数平台网关 / 集成中心网关已完成鉴权 |
-| **回调验签** | **默认本函数自己验**（fail closed）；只有平台声明 `notifyUrlCallbackType=system` 才采信网关明文 |
+| **回调验签** | **默认本函数自己验**（fail closed）；只有平台声明 `notifyURLCallbackType=system` 才采信网关明文 |
 
 下面说的是第一件事（身份）：
 
@@ -57,7 +56,7 @@
 |---|---|---|
 | 虚拟支付侧 | OfferID、AppKey | 登记到集成，由平台注入云函数环境变量 |
 | 小程序侧 | AppID、AppSecret | 由业务方提供，同样注入环境变量（业务代码不接触明文） |
-| 消息推送 | Token、EncodingAESKey（注入名 `token` / `msgSecret`） | `notifyUrlCallbackType=system` → 网关用，业务不读；`ownservice` → **业务函数自己验签解密，必填** |
+| 消息推送 | Token、EncodingAESKey（注入名 `token` / `msgSecret`） | `notifyURLCallbackType=system` → 网关用，业务不读；`ownservice` → **业务函数自己验签解密，必填** |
 
 **AppSecret 为什么必须在服务端**：`signature` 是用户态签名，密钥是 `sessionKey`，而 `sessionKey` 只能用 AppSecret 通过 `auth.code2Session` 换取。云函数的 `getWXContext()` 只给 `OPENID / APPID / UNIONID / ENV`，**不提供 sessionKey**。
 
@@ -112,7 +111,7 @@ git check-ignore -v functions/xpay-common/.env
 `config/config.js` 的 `validateConfig()` 会在服务启动时校验，**只告警不阻断**：
 
 ```
-[Config] 环境变量(名=长度): offerId=10 appKey=32 prodAppKey=- appId=18 appid=- APP_ID=- secret=32 appSecret=- token=4 msgSecret=43 sandboxAppKey=32
+[Config] 环境变量(名=长度): offerId=10 appKey=32 prodAppKey=- appId=18 appid=- APP_ID=- secret=32 appSecret=- token=4 msgSecret=43
 [Config] 现网(env=0) | 应答格式跟随请求 content-type（默认 JSON）
 ⚠️ 配置校验警告（共 4 项）:
   1. offerId 未配置（虚拟支付 → 基本配置）

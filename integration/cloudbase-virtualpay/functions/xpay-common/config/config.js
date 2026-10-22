@@ -78,9 +78,12 @@ const CANDIDATE_KEYS = [
     'offerId', 'appKey', 'prodAppKey', 'appId', 'appid', 'APP_ID', 'wxAppId',
     'secret', 'appSecret',
     // 回调形态声明：决定「谁负责验签解密」
-    'notifyUrlCallbackType', 'notifyUrlResourceType', 'msgEncryptType',
+    // ⚠️ 平台口径是 URL 全大写；小写 URL 是历史变体，读的时候兼容回退，写文档只用大写
+    'notifyURLCallbackType', 'notifyURLResourceType', 'notifyURLResourceName',
+    'notifyUrlCallbackType', 'notifyUrlResourceType', 'notifyUrlResourceName',
+    'msgEncryptType',
     // 回调验签解密凭据
-    'token', 'msgSecret', 'sandboxAppKey',
+    'token', 'msgSecret',
     // 联调闸门（唯一一个；默认 on = 校验生效，见 guardOff）
     'XPAY_GUARD', 'PAY_ALLOW_INSECURE_BOOT',
 ];
@@ -217,9 +220,9 @@ function logEnvInventory() {
  * 回调形态配置（**每次调用都读**，不在 require 时求值）
  *
  * 平台注入的三个声明字段，用来判断「谁负责验签解密」：
- *   notifyUrlCallbackType: system    = 系统内置回调地址（平台托管，网关代验签/代解密）
+ *   notifyURLCallbackType: system    = 系统内置回调地址（平台托管，网关代验签/代解密）
  *                          ownservice= 用户自定义回调地址（自建，函数自己验签解密）
- *   notifyUrlResourceType: function  = 回调打到云函数
+ *   notifyURLResourceType: function  = 回调打到云函数
  *                          cloudrun  = 回调打到云托管
  *   msgEncryptType:        plaintext = 明文（只有 signature，无 Encrypt）
  *                          aes       = 安全模式（Encrypt + msg_signature）
@@ -232,11 +235,50 @@ function logEnvInventory() {
  * ⚠️ 之所以是函数而不是常量：测试要能改 process.env 后立即生效。
  * @returns {{type: string, resource: string, encryptType: string, token: string, aesKey: string}}
  */
+/**
+ * 解析「回调声明实际来自哪个变量」
+ *
+ * 判定口径必须与 readNotifyEnv 完全一致：**trim 后非空才算生效**。
+ * 只看 `!== undefined` 会把「大写注入空串 + 小写有值」判成「大写生效且为空」，
+ * 打印出与真实生效值相反的日志 —— 而验签是否关闭直接关系资金安全，误诊代价高。
+ *
+ * @param {string|undefined} rawUpper notifyURLCallbackType 原始值
+ * @param {string|undefined} rawLower notifyUrlCallbackType 原始值（历史写法）
+ * @returns {{name: string, value: (string|undefined), fellBackFromEmptyUpper: boolean}}
+ */
+function resolveNotifySource(rawUpper, rawLower) {
+    const upper = String(rawUpper || '').trim();
+    const lower = String(rawLower || '').trim();
+    if (upper) {
+        return { name: 'notifyURLCallbackType', value: upper, fellBackFromEmptyUpper: false };
+    }
+    if (lower) {
+        return {
+            name: 'notifyUrlCallbackType（历史小写，建议迁到大写）',
+            value: lower,
+            // 大写被注入但为空 → 静默回落是隐患，调用方应显式告警
+            fellBackFromEmptyUpper: rawUpper !== undefined,
+        };
+    }
+    return { name: '(未注入)', value: undefined, fellBackFromEmptyUpper: false };
+}
+
+function readNotifyEnv(upperName) {
+    // 平台口径为 URL 全大写；小写变体（notifyUrlXxx）只作兼容回退。
+    // 大写的值非空时以大写为准，避免两个都配了却按旧值生效。
+    const upper = String(process.env[upperName] || '').trim();
+    if (upper) return upper;
+
+    const legacyName = upperName.replace('URL', 'Url');
+    if (legacyName === upperName) return '';
+    return String(process.env[legacyName] || '').trim();
+}
+
 function getCallbackConfig() {
     return {
-        type: (process.env.notifyUrlCallbackType || '').trim().toLowerCase(),
-        resource: (process.env.notifyUrlResourceType || '').trim().toLowerCase(),
-        encryptType: (process.env.msgEncryptType || '').trim().toLowerCase(),
+        type: readNotifyEnv('notifyURLCallbackType').toLowerCase(),
+        resource: readNotifyEnv('notifyURLResourceType').toLowerCase(),
+        encryptType: String(process.env.msgEncryptType || '').trim().toLowerCase(),
         token: process.env.token || '',
         aesKey: process.env.msgSecret || '',
     };
@@ -310,6 +352,7 @@ module.exports = {
     ...config,
     getAppKey,
     getCallbackConfig,
+    resolveNotifySource,
     isProduction,
     validateConfig,
     guardOff,

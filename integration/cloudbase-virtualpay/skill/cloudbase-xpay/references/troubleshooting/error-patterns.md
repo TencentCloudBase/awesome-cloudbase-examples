@@ -45,7 +45,7 @@
 | 订单 env 校验失败 | `signData.env` / B 端 `env` 被改成非 0 | 模板固定现网，必须传 `0` |
 | 接口无需身份即可调用 | 误把可伪造的 header / 未验签 JWT 当鉴权凭据，或云函数被公网直连 | 模板只认平台注入的 `x-wx-openid`；公网暴露时在上游网关做身份校验 |
 | 集成中心上线后回调「没反应」，日志只有一条 error | 网关 `POST /wechat/notify` 的明文包在 `ParsedNotify` 里，业务只认 `ParsedContent` → 判「缺 Event」→ 回 `ErrCode=0` → 不重推 | 取 `Event` 时两种包装都认（`ParsedContent \|\| ParsedNotify \|\| body`）；排查看 `has_parsed_notify` |
-| 网关明文回调被 401 拒绝 | 未声明 `notifyUrlCallbackType=system`，fail-closed 走本函数验签，而网关转发不带 `signature` | 集成配置声明 `system`；确认启动日志 `[Callback] 判定: 网关代验签` |
+| 网关明文回调被 401 拒绝 | 未声明 `notifyURLCallbackType=system`，fail-closed 走本函数验签，而网关转发不带 `signature` | 集成配置声明 `system`；确认启动日志 `[Callback] 判定: 网关代验签` |
 | 任意用户能查他人订单 | `query_order` 只校验了身份（code2Session），没校验订单归属 | 归属校验放在 code2Session 之后，用**权威 sessionOpenid** 比对（不是请求头）；生产按 `openid` 维度查库 |
 | 服务端带 Bearer access_token 调用，取不到 openid | 模板**不采信**未验签的 JWT（payload 可 base64 伪造），只认平台注入的 `x-wx-openid` | 服务端调用改为在函数内验证 JWT 签名（拉 CloudBase Auth 公钥），或由调用方以服务端身份直接传业务参数 |
 

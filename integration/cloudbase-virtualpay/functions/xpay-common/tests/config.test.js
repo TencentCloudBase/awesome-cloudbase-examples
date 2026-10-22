@@ -152,3 +152,124 @@ test('shouldRefuseBoot：只有「云上 + off + 未许可」才拒绝启动', (
         shouldRefuseBoot({ ...CLOUD, XPAY_GUARD: ' OFF ', PAY_ALLOW_INSECURE_BOOT: ' TRUE ' }), false,
         '大小写 / 空格不影响判定');
 });
+
+// ========== 回调声明字段：URL 全大写口径（兼容历史小写）==========
+
+const NOTIFY_KEYS = [
+    'notifyURLCallbackType', 'notifyUrlCallbackType',
+    'notifyURLResourceType', 'notifyUrlResourceType',
+    'notifyURLResourceName', 'notifyUrlResourceName',
+    'msgEncryptType',
+];
+
+/** 隔离 notify* 环境变量，用例结束后恢复（避免与其它用例互相污染） */
+function withNotifyEnv(env, fn) {
+    const saved = {};
+    NOTIFY_KEYS.forEach((k) => { saved[k] = process.env[k]; delete process.env[k]; });
+    Object.assign(process.env, env);
+    try {
+        return fn();
+    } finally {
+        NOTIFY_KEYS.forEach((k) => {
+            if (saved[k] === undefined) delete process.env[k];
+            else process.env[k] = saved[k];
+        });
+    }
+}
+
+test('notifyURLCallbackType（URL 全大写）能被读取，取值大小写归一', () => {
+    const { getCallbackConfig } = loadConfig({});
+    const cb = withNotifyEnv({ notifyURLCallbackType: 'SYSTEM' }, () => getCallbackConfig());
+    assert.strictEqual(cb.type, 'system');
+});
+
+test('notifyURLResourceType（URL 全大写）能被读取', () => {
+    const { getCallbackConfig } = loadConfig({});
+    const cb = withNotifyEnv({ notifyURLResourceType: 'cloudrun' }, () => getCallbackConfig());
+    assert.strictEqual(cb.resource, 'cloudrun');
+});
+
+test('历史小写写法仍兼容（平台若注入旧名，回调不能全挂）', () => {
+    const { getCallbackConfig } = loadConfig({});
+    const cb = withNotifyEnv({ notifyUrlCallbackType: 'ownservice' }, () => getCallbackConfig());
+    assert.strictEqual(cb.type, 'ownservice');
+});
+
+test('大小写同时存在且冲突时，大写为准', () => {
+    const { getCallbackConfig } = loadConfig({});
+    const cb = withNotifyEnv(
+        { notifyURLCallbackType: 'system', notifyUrlCallbackType: 'ownservice' },
+        () => getCallbackConfig()
+    );
+    assert.strictEqual(cb.type, 'system', '不能被旧名反向覆盖');
+});
+
+test('大写是空串/空白时回退小写（空值不遮蔽有效值）', () => {
+    const { getCallbackConfig } = loadConfig({});
+    const cb = withNotifyEnv(
+        { notifyURLCallbackType: '   ', notifyUrlCallbackType: 'system' },
+        () => getCallbackConfig()
+    );
+    assert.strictEqual(cb.type, 'system');
+});
+
+test('两个都不配 → 空串（= 自己验签，fail closed）', () => {
+    const { getCallbackConfig } = loadConfig({});
+    const cb = withNotifyEnv({}, () => getCallbackConfig());
+    assert.strictEqual(cb.type, '');
+    assert.strictEqual(cb.resource, '');
+});
+
+// ========== 声明来源诊断：必须与 readNotifyEnv 同口径（trim 后非空）==========
+
+test('resolver：大写有值 → 判定为大写', () => {
+    const { resolveNotifySource } = loadConfig({});
+    const s = resolveNotifySource('system', 'ownservice');
+    assert.strictEqual(s.name, 'notifyURLCallbackType');
+    assert.strictEqual(s.value, 'system');
+    assert.strictEqual(s.fellBackFromEmptyUpper, false);
+});
+
+test('resolver：大写注入空串 → 回落小写并标记（不能谎报大写生效）', () => {
+    const { resolveNotifySource } = loadConfig({});
+    const s = resolveNotifySource('', 'system');
+    assert.match(s.name, /notifyUrlCallbackType/);
+    assert.strictEqual(s.value, 'system');
+    assert.strictEqual(s.fellBackFromEmptyUpper, true);
+});
+
+test('resolver：大写注入纯空格 → 同样回落并标记', () => {
+    const { resolveNotifySource } = loadConfig({});
+    const s = resolveNotifySource('   ', 'system');
+    assert.strictEqual(s.value, 'system');
+    assert.strictEqual(s.fellBackFromEmptyUpper, true);
+});
+
+test('resolver：大写未注入（undefined）→ 回落小写但不标记 fallback', () => {
+    const { resolveNotifySource } = loadConfig({});
+    const s = resolveNotifySource(undefined, 'system');
+    assert.strictEqual(s.value, 'system');
+    assert.strictEqual(s.fellBackFromEmptyUpper, false);
+});
+
+test('resolver：都未配置 → (未注入)', () => {
+    const { resolveNotifySource } = loadConfig({});
+    assert.strictEqual(resolveNotifySource(undefined, '').name, '(未注入)');
+});
+
+test('🚨 诊断口径 == 生效口径：大写空串 + 小写 system 时，日志指向小写，行为也是 system', () => {
+    const { resolveNotifySource, getCallbackConfig } = loadConfig({});
+    const r = withNotifyEnv(
+        { notifyURLCallbackType: '', notifyUrlCallbackType: 'system' },
+        () => ({
+            src: resolveNotifySource(
+                process.env.notifyURLCallbackType,
+                process.env.notifyUrlCallbackType
+            ),
+            cb: getCallbackConfig(),
+        })
+    );
+    assert.strictEqual(r.cb.type, 'system', '实际生效值');
+    assert.match(r.src.name, /notifyUrlCallbackType/, '日志必须指向真正生效的变量');
+    assert.strictEqual(r.src.value, 'system');
+});

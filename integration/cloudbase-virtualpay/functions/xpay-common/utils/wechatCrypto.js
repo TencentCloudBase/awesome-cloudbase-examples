@@ -73,7 +73,8 @@ function verifySignature({ token, timestamp, nonce, encrypt, signature }) {
     //    空串会让签名串退化，算出来的常量对谁都成立
     if (!token) {
         console.error('[Crypto] 未配置 token，拒绝验签'
-            + '（若回调已由集成中心网关代验签，请声明 notifyUrlCallbackType=system 并删掉 token）');
+            + '（若回调已由集成中心网关代验签，请声明 notifyURLCallbackType=system；'
+            + '此时 token 由平台注入也不会被本函数使用）');
         return false;
     }
     if (!signature) return false;
