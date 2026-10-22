@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:24-alpine
 
 # 容器默认时区为UTC，如需使用上海时间请启用以下时区设置命令
 RUN apk add --no-cache tzdata ca-certificates \

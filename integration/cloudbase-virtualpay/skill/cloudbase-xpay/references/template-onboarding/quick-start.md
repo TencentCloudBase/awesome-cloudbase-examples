@@ -38,8 +38,10 @@ npm test        # 109 个单元测试
 ```
 
 > ⚠️ 部署实测注意（2026-10）：
-> 1. `npm test` 必须是 glob 写法（`node --test tests/*.test.js`）；目录参数形式
->    `node --test tests/` 在 Node 22+ 会把目录当模块路径，直接 `MODULE_NOT_FOUND`。
+> 1. `npm test` 统一用**无参数**的 `node --test`（脚本里已是这个写法）：
+>    目录参数（`tests/` 或 `tests`）在 Node 22+ 会把目录当模块路径直接 `MODULE_NOT_FOUND`；
+>    而 glob（`tests/*.test.js`）在 Node 18/20 不被展开、在 Windows cmd 下也不展开。
+>    无参数形式在 18 / 20 / 22 / 24 上实测均可（自带 `node_modules` 排除）。
 > 2. HTTP 云函数 runtime 用 `Nodejs24.11`；`Nodejs18.15` 已被创建链路拒绝
 >    （SCF 报 `Unsupported runtime`）。
 > 3. 扩展连库等场景新增自定义环境变量时：`TCB_*` 前缀与 `NODE_ENV` 是**平台保留变量**，

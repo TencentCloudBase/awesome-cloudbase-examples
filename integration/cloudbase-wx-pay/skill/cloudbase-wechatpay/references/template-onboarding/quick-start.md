@@ -392,7 +392,7 @@ fetch('https://{domain}/{path}/wxpay_order', {
     {
       "name": "pay-common",
       "type": "HTTP",
-      "runtime": "Nodejs18.15",
+      "runtime": "Nodejs24.11",
       "handler": "index.main",
       "timeout": 30,
       "memorySize": 256,
@@ -424,7 +424,7 @@ fetch('https://{domain}/{path}/wxpay_order', {
 |------|:---:|------|
 | `envId` | 你的环境 ID | CloudBase 环境唯一标识 |
 | **`"type": "HTTP"`** ⭐ | `"HTTP"` | **声明为 HTTP 云函数！没有此字段或值为其他则无法通过 HTTP 访问服务访问** |
-| `runtime` | `"Nodejs18.15"` | Node.js 运行时版本（建议 18+） |
+| `runtime` | `"Nodejs24.11"` | Node.js 运行时版本（建议 18+） |
 | `handler` | `"index.main"` | 入口函数，对应 `index.js` 的 `exports.main` |
 | `timeout` | `30` | 超时时间（秒），回调处理建议设大些 |
 | **`envVariables`** ⭐ | 见上方 | **环境变量可在此声明，也可在控制台配置（见下方 Step 4.4）** |

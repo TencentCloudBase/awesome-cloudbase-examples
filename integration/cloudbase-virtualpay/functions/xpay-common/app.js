@@ -125,6 +125,11 @@ function isSelfVerify(cb) {
     const keyLen = cb.aesKey.length;
     const na = '(未注入)';
 
+    // 打印**原始变量名 + 值**：不同集成注入的名字不同（虚拟支付是驼峰 notifyUrlCallbackType），
+    // 只打 type= 值的话，排查时分不清是「平台没注入」还是「读错了变量名」
+    const rawType = process.env.notifyUrlCallbackType;
+    console.info('[Callback] 声明来源: notifyUrlCallbackType='
+        + (rawType === undefined ? na : `"${rawType}"`));
     console.info('[Callback] 声明: '
         + `type=${cb.type || na} resource=${cb.resource || na} encrypt=${cb.encryptType || na}`
         + ` | token=${tokenLen ? '已配' : '未配'} msgSecret=${keyLen ? keyLen + ' 位' : '未配'}`);

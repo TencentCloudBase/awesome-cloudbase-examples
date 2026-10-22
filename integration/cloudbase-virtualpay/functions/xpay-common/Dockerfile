@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:24-alpine
 
 RUN apk add --no-cache tzdata ca-certificates \
  && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
