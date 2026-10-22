@@ -32,45 +32,23 @@ cloudbase-virtualpay/
 
 ### 1. 拿齐凭证
 
-**自己提供（4 个，缺一不可）**：
+**凭证（集成中心会自动注入；本地自测自己填）**：
 
 | 凭证 | 出处 | 用途 |
 |---|---|---|
 | `offerId` | MP 后台 → 虚拟支付 → 基本配置 | 虚拟支付商户号（米大师应用 ID） |
 | `appKey` | 同上 | 支付签名密钥，算 `paySig`，只放服务端 |
-| `appId` | MP 后台 → 设置 → 基本设置 | 换 sessionKey / access_token |
-| `secret` | 同上 | AppSecret，换 sessionKey 必需，只放服务端 |
+| `secret` | MP 后台 → 设置 → 基本设置 | AppSecret，换 sessionKey 必需，只放服务端 |
+| `appId` | 同上 | 换 sessionKey / access_token；**只走小程序调用时可不配**（平台注入的请求头 `x-wx-appid` 优先） |
 
-**模板侧（只能自己配）**：
+**完整环境变量表**见 [`functions/xpay-common/README.md#环境变量`](functions/xpay-common/README.md#环境变量)：平台注入 9 个、模板自有 2 个（`XPAY_GUARD` / `trustBearerIdentity`）、部署侧 `TCB_ENV_ID`、本地 `PORT`，含必填性与本地/旧名对照（`prodAppKey` / `appSecret`）。
 
-| 变量 | 必填 | 说明 |
-|---|---|---|
-| `TCB_ENV_ID` | 是 | 云开发环境 ID，`cloudbaserc.json` 的 `envId`，为空会导致部署失败 |
-| `XPAY_GUARD` | 否 | 联调开关，不设即 `on`（校验全部生效）。`off` = 查不到订单时放行查单 / 放过退款，云上带 `off` 会拒绝启动 |
-| `trustBearerIdentity` | 否 | 是否采信 `Authorization: Bearer` 的 JWT 身份；仅当函数只经云 API 网关暴露时开 |
+三条要点：
 
-> 应答格式不需要配置：跟随请求 `content-type`（XML 回 XML，其余回 JSON），无该头时看请求体是否 `<xml` 开头。
+- **应答格式不需要配置**：跟随请求 `content-type`（XML 回 XML，其余回 JSON），无该头时看请求体是否 `<xml` 开头
+- **联调只看一个变量**：`XPAY_GUARD`，不设即 `on`；本地 `npm run dev` 自动设 `off`，云上带 `off` 会**拒绝启动**
+- **`token` / `msgSecret` 只在「自建回调」时需要**；集成中心托管时由网关代验签解密
 
-**回调验签 / 解密（只有自建回调才需要）**：
-
-| 变量 | 何时必填 | 说明 |
-|---|---|---|
-| `notifyUrlCallbackType` | 本地自测 | `system` = 网关代验签解密（集成中心托管）/ `ownservice` = 本函数自己验签；不填按「自己验签」处理 |
-| `msgEncryptType` | 本地自测 | `plaintext` / `aes` / `compatible`，**须与 MP 后台加密方式一致** |
-| `token` | `ownservice` 或直连 HTTP 自测 | 消息推送 Token，验签用 |
-| `msgSecret` | 同上 | EncodingAESKey（43 位），安全模式解密用 |
-
-**其余可选**：
-
-| 变量 | 说明 |
-|---|---|
-| `trustBearerIdentity` | 是否采信 `Authorization: Bearer` 的 JWT 身份，默认关闭；仅当函数只经云 API 网关暴露时才开 |
-| `sandboxAppKey` | 沙箱密钥。本模板只走现网（`env` 固定 0），代码不读，留空即可 |
-| `PORT` | 仅本地开发用（云函数固定 9000 / 云托管 80） |
-
-> 走**集成中心**创建实例时，4 个凭证 + `notifyUrlCallbackType` / `msgEncryptType` / `token` / `msgSecret` 由平台注入，
-> 并**覆盖**云函数上的同名变量 —— `.env` 与 `cloudbaserc.json` 里的这些键是同一份信息，本地自测填全即可，不会和平台打架。
->
 > 道具需先创建并**发布**，同步要几分钟到半小时，期间下单报
 > `COIN_OR_PRODUCT_ID_CREATED_IN_RECENTLY`。
 
@@ -81,7 +59,7 @@ cd functions/xpay-common
 npm install
 npm test                          # 单元测试
 
-cp .env.example .env              # 按上表填写；自测要填全，只走集成中心可只填 TCB_ENV_ID
+cp .env.example .env              # 按 xpay-common/README.md#环境变量 填写；只走集成中心可只填 TCB_ENV_ID
 bash ../../skill/cloudbase-xpay/scripts/check_env_keys.sh
 ```
 

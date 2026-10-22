@@ -4,9 +4,13 @@
 |---|---|---|---|
 | `offerId` | ✅ | — | 虚拟支付商户号 |
 | `appKey` | ✅ | — | 支付签名密钥（旧名 `prodAppKey`） |
-| `appId` | ✅ | — | 小程序 AppID |
+| `appId` | 否 | — | 小程序 AppID；下单链路优先用请求头 `x-wx-appid`，只走小程序调用可不配 |
 | `secret` | ✅ | — | 换取 sessionKey 必需（旧名 `appSecret`） |
+| `token` | 自建回调必填 | 空 | 消息推送 Token，验签用（托管回调由网关使用） |
+| `msgSecret` | 自建回调必填 | 空 | EncodingAESKey（43 位），安全模式解密 |
+| `msgEncryptType` | 否 | 空 | `plaintext` / `aes` / `compatible`，须与后台加密方式一致 |
 | `notifyUrlCallbackType` | 否 | 空 | 未声明 = 自己验签；`system` = 网关代验签 |
+| `notifyUrlResourceType` | 否 | 空 | 平台系统字段，写进集成 Ext、**不进函数环境变量**；`cloudrun` 表示回调打到云托管、本函数收不到 |
 | `trustBearerIdentity` | 否 | 空 | 采信 Bearer JWT 身份，仅当函数只经云 API 网关暴露时开 |
 | `XPAY_GUARD` | 否 | 未设（= `on`） | **全模板唯一的联调开关**（与 wx-pay 的 `PAY_GUARD` 同一套心智）。`off` = 「本地查不到订单」时放行查单 + iOS 退款问询 `result_code=0`；`on` 或不设 = 全部拒绝/拦截。本地 `npm run dev` 已带 `off`；云上 + `off` 会拒绝启动，确需云上联调再加 `PAY_ALLOW_INSECURE_BOOT=true` |
 

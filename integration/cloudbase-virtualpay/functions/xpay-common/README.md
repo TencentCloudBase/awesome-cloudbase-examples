@@ -39,27 +39,36 @@ xpay-common/
 
 ## 环境变量
 
-变量分两类，两类都出现在 `cloudbaserc.json` 的 `functions[].envVariables` 里（值为 `{{env.X}}` 占位符）：
+**这张表是唯一的变量清单**（`integration/cloudbase-virtualpay/README.md` 只做摘要 + 链接，不重复维护）。
 
-| 类别 | 变量 | 谁提供 |
-|---|---|---|
-| **平台注入** | `appId` `secret` `offerId` `appKey` `token` `msgSecret` `notifyUrlCallbackType` `msgEncryptType` `sandboxAppKey` | 集成中心创建实例时注入，并**覆盖**云函数上的同名变量 |
-| **本模板自己的** | `XPAY_GUARD` `trustBearerIdentity` | 平台不注入，只能由 `cloudbaserc.json` / 控制台提供 |
+三类来源：
 
-> ✅ 平台注入的变量写进 `cloudbaserc.json` 是**允许的**：它和平台注入的是**同一份信息**。
-> `tcb fn deploy` 先按 `.env` 把占位符解析成值写进函数，创建/更新集成时平台再按集成配置覆盖回正确值，两边不会打架。
+- **平台注入** —— 集成中心创建实例时注入，并**覆盖**云函数上的同名变量；写进 `cloudbaserc.json` 是允许的（同一份信息）
+- **模板自有** —— 平台不注入，只能由 `cloudbaserc.json` / 控制台提供
+- **部署侧 / 本地** —— 不进函数运行时环境变量，或只在本地开发用
+
+| 变量 | 来源 | 必填 | 说明 | 本地 / 旧名 |
+|---|---|---|---|---|
+| `offerId` | 平台注入 | 是 | 虚拟支付商户号（虚拟支付 → 基本配置） | — |
+| `appKey` | 平台注入 | 是 | 支付签名密钥，计算 `paySig` | `prodAppKey` |
+| `appId` | 平台注入 | 否 | 小程序 AppID，换 sessionKey / access_token；下单链路优先用请求头 `x-wx-appid`，只走小程序调用时可不配 | `appid` / `APP_ID` / `wxAppId` / `WX_APP_ID` |
+| `secret` | 平台注入 | 是 | AppSecret，换 sessionKey 必需，**只放服务端** | `appSecret` |
+| `token` | 平台注入 | 自建回调必填 | 消息推送 Token，验签用；托管回调由网关使用 | — |
+| `msgSecret` | 平台注入 | 自建回调必填 | EncodingAESKey（43 位），安全模式解密用 | — |
+| `msgEncryptType` | 平台注入 | 否 | `plaintext` / `aes` / `compatible`，**须与后台「消息推送 → 加密方式」一致** | — |
+| `notifyUrlCallbackType` | 平台注入 | 否 | `system` = 网关代验签解密；未声明 / `ownservice` = 本函数自验签（fail closed） | — |
+| `notifyUrlResourceType` | 平台系统字段 | 否 | `function` / `cloudrun`，由 `tcb integration create` 写进集成 Ext，**不进函数环境变量**；代码按空串兜底（真被注入且为 `cloudrun` 时启动告警） | — |
+| `sandboxAppKey` | 平台注入 | 否 | 沙箱密钥。本模板只走现网（`env` 固定 0），**代码不读**，留空即可 | — |
+| `XPAY_GUARD` | 模板自有 | 否 | 联调开关：`on`（默认，校验全生效）/ `off`（查不到订单时放行查单、放过退款）。云上带 `off` 拒绝启动 | — |
+| `trustBearerIdentity` | 模板自有 | 否 | 是否采信 `Authorization: Bearer` 的 JWT 身份，默认关闭；仅当函数只经云 API 网关暴露时开 | — |
+| `TCB_ENV_ID` | 部署侧 | 是（部署用） | `cloudbaserc.json` 的 `envId`，为空会导致部署失败；**不进函数环境变量** | — |
+| `PORT` | 仅本地 | 否 | 本地开发端口（云函数固定 9000、云托管 80） | — |
+
+> ✅ `tcb fn deploy` 先按 `.env` 把 `{{env.X}}` 占位符解析成值写进函数，创建/更新集成时平台再按集成配置覆盖回正确值，两边不打架。
 >
-> 🚨 唯一要注意的是**空值 + 单独部署**：`functions[].envVariables` 是**整体覆盖**（不是合并），
+> 🚨 要注意的是**空值 + 单独部署**：`functions[].envVariables` 是**整体覆盖**（不是合并），
 > 写了什么，函数上就只有什么。若 `.env` 里 `appId=` / `secret=` 留空就只跑 `tcb fn deploy`，
 > 函数上的值会被写成空串（现象：`41004 appsecret missing`）—— 再跑一次集成创建/更新即可灌回平台值。
-
-| 变量（集成中心注入名） | 必填 | 说明 | 本地/旧名 |
-|---|---|---|---|
-| `offerId` | 是 | 虚拟支付商户号（虚拟支付 → 基本配置） | — |
-| `appKey` | 是 | 支付签名密钥，计算 `paySig` | `prodAppKey` |
-| `appId` | 是 | 小程序 AppID | — |
-| `secret` | 是 | 换取 sessionKey 必需，**只放服务端** | `appSecret` |
-| `notifyUrlCallbackType` | 否 | 未声明 = 本函数自己验签（fail closed）；`system` = 网关代验签 | — |
 
 **命名对齐**：集成中心（`authTypeCode=wxvirtualpay`）注入的是 `appKey` / `secret`，而本地 `.env` 与旧版文档写的是 `prodAppKey` / `appSecret`。`config/config.js` 的 `readEnv()` 优先读平台名、回退旧名，两套都能跑。
 
@@ -80,9 +89,7 @@ xpay-common/
 
 > 🚨 **所有候选变量全为空**（`offerId=- appId=- secret=- appKey=- token=- ...`）时，基本不是变量名问题，而是**你调用的函数不是集成中心托管的那一个**。集成中心托管的 HTTP 云函数名为 `<集成名>-<随机串>`，小程序 `app.js` 的 `functionName` 必须填这个名字，不能填裸的 `xpay-common`。
 
-集成中心还会注入 `token` / `msgSecret`（消息推送 Token 与 EncodingAESKey）。
-
-**这两种变量怎么用，取决于回调走哪条路：**
+`token` / `msgSecret` 怎么用，取决于回调走哪条路：
 
 | 部署方式 | Token / EncodingAESKey 谁用 | 业务代码 |
 |---|---|---|

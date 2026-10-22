@@ -6,9 +6,15 @@
 |---|---|---|---|
 | `offerId` | ✅ | 虚拟支付 → 基本配置 | 虚拟支付商户号（米大师应用 ID） |
 | `appKey` | ✅ | 虚拟支付 → 基本配置 | 签名密钥，计算 `paySig`（旧名 `prodAppKey`） |
-| `appId` | ✅ | MP 后台 → 设置 | 换取 sessionKey / access_token |
+| `appId` | 否 | MP 后台 → 设置 | 换取 sessionKey / access_token；下单链路优先用请求头 `x-wx-appid`，只走小程序调用可不配 |
 | `secret` | ✅ | MP 后台 → 设置 | **换取 sessionKey 必需**（旧名 `appSecret`） |
+| `token` | 自建回调必填 | 空 | 消息推送 Token，验签用 |
+| `msgSecret` | 自建回调必填 | 空 | EncodingAESKey（43 位），安全模式解密 |
+| `msgEncryptType` | 否 | 空 | `plaintext` / `aes` / `compatible`，须与后台一致 |
 | `notifyUrlCallbackType` | 否 | 空（未声明 = 自己验签） | `system` = 网关代验签；`ownservice` = 本函数验签 |
+| `notifyUrlResourceType` | 否 | 空 | 平台系统字段，写进集成 Ext、**不进函数环境变量**；`cloudrun` = 回调打云托管、本函数收不到 |
+| `sandboxAppKey` | 否 | 空 | 沙箱密钥；本模板只走现网，代码不读 |
+| `XPAY_GUARD` | 否 | 未设（= `on`） | 联调开关；`off` = 查不到订单时放行查单 / 放过退款，云上带 `off` 拒绝启动 |
 | `trustBearerIdentity` | 否 | 空（关闭） | 是否采信 `Authorization: Bearer` 的 JWT 身份；仅当函数只经云 API 网关暴露时开 |
 
 **变量名以集成中心注入为准**：`authTypeCode=wxvirtualpay` 注入的是 `appId / secret / offerId / appKey`。本地 `.env` 与旧版文档用的 `prodAppKey` / `appSecret`，由 `config/config.js` 的 `readEnv()` 回退兼容 —— 优先平台名，两套都能跑。
