@@ -340,3 +340,47 @@ describe('validateConfig', () => {
         assert.ok(!errors.some(e => e.includes('https://') || e.includes('localhost') || e.includes('?')));
     });
 });
+
+describe('shouldRefuseBoot（云上 + PAY_GUARD=off 才拒绝启动）', () => {
+
+    const { shouldRefuseBoot } = require('../config/config');
+    const CLOUD = { SCF_RUNTIME: 'Nodejs18.15' };
+
+    it('本地 + PAY_GUARD=off → 放行（npm run dev 不需要任何额外变量）', () => {
+        assert.strictEqual(shouldRefuseBoot({ PAY_GUARD: 'off' }), false);
+    });
+
+    it('本地 + 不设 PAY_GUARD → 放行（生产态，钩子全部生效）', () => {
+        assert.strictEqual(shouldRefuseBoot({}), false);
+    });
+
+    it('⛔ 云上 + PAY_GUARD=off → 拒绝启动', () => {
+        assert.strictEqual(shouldRefuseBoot({ ...CLOUD, PAY_GUARD: 'off' }), true);
+    });
+
+    it('⛔ 云托管（TENCENTCLOUD_RUNENV）+ PAY_GUARD=off → 拒绝启动', () => {
+        assert.strictEqual(
+            shouldRefuseBoot({ TENCENTCLOUD_RUNENV: 'cloudrun', PAY_GUARD: 'off' }), true);
+    });
+
+    it('云上 + PAY_GUARD=on / 不设 → 放行（正常生产形态）', () => {
+        assert.strictEqual(shouldRefuseBoot({ ...CLOUD, PAY_GUARD: 'on' }), false);
+        assert.strictEqual(shouldRefuseBoot({ ...CLOUD }), false);
+    });
+
+    it('云上 + off + 显式 PAY_ALLOW_INSECURE_BOOT=true → 放行（云上联调）', () => {
+        assert.strictEqual(
+            shouldRefuseBoot({ ...CLOUD, PAY_GUARD: 'off', PAY_ALLOW_INSECURE_BOOT: 'true' }), false);
+    });
+
+    it('大小写 / 空格不改变判定', () => {
+        assert.strictEqual(shouldRefuseBoot({ ...CLOUD, PAY_GUARD: ' OFF ' }), true);
+        assert.strictEqual(
+            shouldRefuseBoot({ ...CLOUD, PAY_GUARD: 'off', PAY_ALLOW_INSECURE_BOOT: ' TRUE ' }), false);
+    });
+
+    it('PAY_ALLOW_INSECURE_BOOT 只对「云上 + off」生效，不会把 on 变成放行 off', () => {
+        assert.strictEqual(
+            shouldRefuseBoot({ PAY_GUARD: 'on', PAY_ALLOW_INSECURE_BOOT: 'true' }), false);
+    });
+});

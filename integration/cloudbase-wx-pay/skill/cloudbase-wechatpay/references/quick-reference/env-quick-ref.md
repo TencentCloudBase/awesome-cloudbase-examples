@@ -43,7 +43,7 @@
 
 | 使用方式 | 加在哪 | 生效时机 |
 |---|---|---|
-| 集成中心创建云函数 → 下载 example 联调 | 控制台 → 函数管理 → `pay-common` → 函数配置 → 环境变量 | 保存即生效，不用重新部署 |
+| 集成中心创建云函数 → 下载 example 联调 | 控制台 → 函数管理 → `pay-common` → 函数配置 → 环境变量（云上还要加 `PAY_ALLOW_INSECURE_BOOT=true`，否则拒绝启动） | 保存即生效，不用重新部署 |
 | example 代码 → CLI 部署 → 绑定后联调 | `cloudbaserc.json` → `functions[0].envVariables` | 部署时写入，改完要重新 `tcb fn deploy` |
 | 云托管 | 控制台 → 服务配置 → 环境变量 | 保存后重启实例 |
 | 本地 `npm start` | `export PAY_GUARD=off`（无 dotenv，`.env` 不自动加载） | 启动即生效 |

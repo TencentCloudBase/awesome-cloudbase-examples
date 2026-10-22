@@ -107,10 +107,15 @@ class OrderService {
 
 | 使用方式 | 加在哪 | 生效时机 |
 |---|---|---|
-| 集成中心创建云函数 → 下载 example 联调 | 控制台 → 函数管理 → `pay-common` → 函数配置 → 环境变量 | 保存即生效，无需重新部署 |
-| example 代码 → CLI 部署 → 绑定后联调 | `cloudbaserc.json` → `functions[0].envVariables` | 部署时写入，改完需重新 deploy |
-| 云托管 | 控制台 → 服务配置 → 环境变量 | 保存后重启实例 |
-| 本地联调 | `npm run dev`（脚本已带 `PAY_GUARD=off`） | 启动即生效 |
+| 集成中心创建云函数 → 下载 example 联调 | 控制台 → 函数管理 → `pay-common` → 函数配置 → 环境变量（**云上还要加 `PAY_ALLOW_INSECURE_BOOT=true`**） | 保存即生效，无需重新部署 |
+| example 代码 → CLI 部署 → 绑定后联调 | `cloudbaserc.json` → `functions[0].envVariables`（同上） | 部署时写入，改完需重新 deploy |
+| 云托管 | 控制台 → 服务配置 → 环境变量（同上） | 保存后重启实例 |
+| 本地联调 | `npm run dev`（脚本已带 `PAY_GUARD=off`，**无需**别的变量） | 启动即生效 |
+
+> 🚨 `PAY_GUARD=off` 是**危险开关**：启动时打 `console.error` 横幅；
+> 若同时**跑在云上**（云函数 / 云托管），`app.js` 默认 `process.exit(1)` **拒绝启动** ——
+> 云上出现 `off` 往往意味着联调配置被当正式配置发布了，横幅在容器日志里极易被淹没。
+> 这种组合确需联调时，额外设 `PAY_ALLOW_INSECURE_BOOT=true` 显式放行。
 
 > 🔒 **只有 `PAY_GUARD=off` 才放行**，其它任何值（含 `on`、不设、拼错）都按生产处理。
 > `cloudbaserc.json` / `Dockerfile` 已预置 `PAY_GUARD=on`，部署后即使忘了改也保持拒绝。

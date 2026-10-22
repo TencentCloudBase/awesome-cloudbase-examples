@@ -79,6 +79,25 @@ const config = {
     /** 防护闸门是否处于开启（生产）状态（与 insecureDemo 同源，不会出现两份口径） */
     guardEnabled: !PAY_GUARD_OFF,
 
+    /**
+     * 当前进程是否跑在云上（云函数 SCF / 云托管容器）
+     *
+     * ⚠️ 用途仅限「判断运行位置」，**不能**用来证明「本次请求经过平台网关」——
+     *    这两个变量在云函数内恒存在，客户端伪造不了也控制不了，但同样证不了请求来源。
+     *    两者语义不同，别混用（鉴权侧的口径见 utils/cloudbaseAuth.js）。
+     */
+    runningInCloud: Boolean(process.env.SCF_RUNTIME || process.env.TENCENTCLOUD_RUNENV),
+
+    /**
+     * 云上**联调**时的逃生舱：PAY_GUARD=off + 云上运行 默认拒绝启动，
+     * 显式设 `PAY_ALLOW_INSECURE_BOOT=true` 才放行。
+     *
+     * 🚨 本地开发**不需要**这个变量：`npm run dev` 只设 PAY_GUARD=off，
+     *    因为本地不是云环境，直接放行（0 额外配置）。
+     *    需要二次确认的只有「云上 + 危险开关」这一种组合 —— 那正是带病上线的形态。
+     */
+    allowInsecureBoot: (process.env.PAY_ALLOW_INSECURE_BOOT || '').trim().toLowerCase() === 'true',
+
     payConfig: {
         // AppID（JSAPI/H5→公众号, 小程序→小程序）
         // 小程序场景使用此 appId
@@ -236,7 +255,38 @@ function validateConfig() {
         errors.forEach((msg, idx) => console.warn(`  ${idx + 1}. ${msg}`));
     }
 
+    // 返回值仍是 errors 数组（历史调用方按 errors.length / deepStrictEqual(errors, []) 断言），
+    // risky 与 unsafe 以**不可枚举**属性挂上去：app.js 能据此决定是否退出，
+    // 又不会破坏「返回错误数组」这一既有契约
+    Object.defineProperties(errors, {
+        risky: { value: risky, enumerable: false },
+        unsafe: { value: risky.length > 0, enumerable: false },
+    });
+
     return errors;
 }
 
-module.exports = { ...config, validateConfig };
+/**
+ * 是否拒绝启动（纯函数，便于单测；app.js 用默认参数调用）
+ *
+ * 拒绝的唯一组合：**跑在云上 + PAY_GUARD=off + 没显式许可**。
+ *
+ * 🚨 为什么只拦「云上」：
+ *   - 本地 `npm run dev` 就是靠 PAY_GUARD=off 跑通链路的，拦它等于拦掉官方联调流程，
+ *     还得再教读者多配一个变量（模板的第一原则是「拉下来就能跑」）。
+ *   - 云上出现 off 只有两种来路：忘了删，或者把联调配置当正式配置发布了。
+ *     这两种都是「带病上线」，日志横幅在容器里极易被淹没，启动失败才是运维一定会发现的信号。
+ *   - 云上确实要联调（少见）时留了逃生舱：额外设 PAY_ALLOW_INSECURE_BOOT=true，
+ *     把「我知道这是不安全模式」变成一次显式动作。
+ *
+ * @param {Object} [env=process.env] 环境变量
+ * @returns {boolean} true = 应拒绝启动
+ */
+function shouldRefuseBoot(env = process.env) {
+    const guardOff = String(env.PAY_GUARD || '').trim().toLowerCase() === 'off';
+    const inCloud = Boolean(env.SCF_RUNTIME || env.TENCENTCLOUD_RUNENV);
+    const explicitlyAllowed = String(env.PAY_ALLOW_INSECURE_BOOT || '').trim().toLowerCase() === 'true';
+    return guardOff && inCloud && !explicitlyAllowed;
+}
+
+module.exports = { ...config, validateConfig, shouldRefuseBoot };

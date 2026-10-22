@@ -69,7 +69,7 @@ npm install
 
 | `PAY_GUARD` | 4 个钩子 | 谁在用 |
 |---|---|---|
-| `off` | 全部跳过 | 本地 `npm run dev`；云上联调在控制台加 |
+| `off` | 全部跳过 | 本地 `npm run dev`；云上联调在控制台加，并**同时加 `PAY_ALLOW_INSECURE_BOOT=true`**（云上 + `off` 默认拒绝启动） |
 | `on` | 全部拒绝 | `cloudbaserc.json` / `Dockerfile` 已预置 |
 | 不设 / 其他值 | 全部拒绝 | 安全默认（拼错也不会放开） |
 

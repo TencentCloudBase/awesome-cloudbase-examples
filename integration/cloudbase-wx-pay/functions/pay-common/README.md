@@ -192,8 +192,8 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 | 场景 | 怎么跑 | `PAY_GUARD` | 钩子 |
 |---|---|---|---|
-| 本地联调 | `npm run dev`（脚本已带 `PAY_GUARD=off`） | `off` | 跳过 |
-| 云上联调 | 控制台环境变量加 `PAY_GUARD=off` | `off` | 跳过 |
+| 本地联调 | `npm run dev`（脚本已带 `PAY_GUARD=off`，**不需要**别的变量） | `off` | 跳过 |
+| 云上联调 | 控制台环境变量加 `PAY_GUARD=off` **和** `PAY_ALLOW_INSECURE_BOOT=true` | `off` | 跳过 |
 | 正式部署（CLI） | `cloudbaserc.json` 已预置 `"PAY_GUARD": "on"` | `on` | 全部拒绝 |
 | 正式部署（云托管） | `Dockerfile` 已预置 `ENV PAY_GUARD=on` | `on` | 全部拒绝 |
 | 漏配 | 什么都不设 | 未设（= `on`） | 全部拒绝（安全默认） |
@@ -202,6 +202,12 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 > 一律按开启处理，会继续 400 / 403。
 >
 > ⚠️ 代码只读 `process.env`，**没有 dotenv**，`.env` 文件不会自动加载；本地用 `npm run dev` 即可。
+>
+> 🚨 `PAY_GUARD=off` 属于**危险开关**：启动时会用 `console.error` 打横幅；
+> 若同时**跑在云上**（云函数 / 云托管），默认 `process.exit(1)` **拒绝启动** ——
+> 云上出现 `off` 通常意味着「联调配置被当成正式配置发布了」，而容器日志里的横幅极易被淹没。
+> 这种组合确需联调时，额外设 `PAY_ALLOW_INSECURE_BOOT=true` 显式放行。
+> 本地开发不在此列：`npm run dev` 直接可跑，不用配第二个变量。
 
 **上线前必须做的两件事：**
 
@@ -645,6 +651,7 @@ H5 拿不到平台注入的 `x-wx-openid`，只靠 Origin 白名单是不够的�
 | `corsAllowOrigin` | 空 | H5 来源白名单，逗号分隔；为空则 H5 路由直接 403 |
 | `ALLOW_ANONYMOUS_H5` | 关 | `true` 时允许未登录调用 H5 下单（仅本地联调） |
 | `PAY_GUARD` | 未设（= `on`） | **全模板唯一的联调开关**。`off` = 跳过金额核定 + 订单归属 / 转账权限校验（4 个钩子）；其余任何值（含不设）= 全部生效拒绝。`cloudbaserc.json` / `Dockerfile` 已预置 `on` |
+| `PAY_ALLOW_INSECURE_BOOT` | 关 | 仅用于「云上 + `PAY_GUARD=off`」的组合：默认 `process.exit(1)` 拒绝启动，设 `true` 才放行。本地 `npm run dev` 不需要 |
 | `AUTH_EXPECTED_ISSUER` | 空 | 配了就强校验 JWT 的 `iss` |
 
 > 🚨 曾经还有 `ALLOW_BODY_OPENID`（开启后可从 `body.payer.openid` 取身份），**已整层删除**。
