@@ -256,6 +256,32 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 > 完整可运行示例：[`examples/miniprogram/`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram/)（云函数版）、[`examples/miniprogram-cloudrun/`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/examples/miniprogram-cloudrun/)（云托管版）
 
+#### 公众号网页（微信内 H5）：配合 `wechat-official` 示例
+
+微信内网页做 JSAPI 支付要拿 openid，但**本模板不重复实现公众号侧能力**（网页授权、全局 access_token、JS-SDK 签名）。
+直接用 [`integration/wechat-official`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/wechat-official) 的 `offiaccount-common`：
+
+| 需求 | 它的路由 |
+|---|---|
+| 取公众号 AppID（拼授权链接） | `POST /oauth/config` |
+| **code → openid** | `POST /oauth/token` |
+| 拉用户信息（`snsapi_userinfo`） | `POST /oauth/userinfo` |
+| `wx.config` 签名包 | `POST /jssdk/config` |
+
+分工（`offiaccount-common` 不签发 CloudBase 登录态）：
+
+```
+offiaccount-common  →  code 换 openid
+CloudBase 自定义登录  →  openid 换 ticket（服务端 auth().createTicket）
+pay-common          →  校验身份 → 下单
+```
+
+- **微信内 JSAPI**：有了 openid 就能直接调 `/wxpay_order`，前提是请求经平台网关（`x-wx-openid`）或 Bearer 凭证带 `provider_sub`。
+- **微信外 H5**：调 `/wxpay_order_h5`，鉴权只需 CloudBase Bearer token（UID 即可），不需要 openid。
+- 部署 `offiaccount-common` 时**必须开「固定出口 IP」并加进公众号 IP 白名单**，否则报 `40164`。
+
+> 📖 前端完整流程：[web-h5.md](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/cloudbase-wx-pay/skill/cloudbase-wechatpay/references/frontend-integration/web-h5.md)
+
 #### 小程序 `callHTTPFunction` 下单支付流程
 
 > 推荐方式：通过 `wx.cloud.callHTTPFunction` 调用 HTTP 云函数，**平台自动注入 openid，无需登录流程**。

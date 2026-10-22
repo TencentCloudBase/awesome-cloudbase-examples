@@ -30,6 +30,40 @@
 | 微信外浏览器 | `auth.customAuthProvider().signIn(ticket)` | 自家后端用 CloudBase 服务端 SDK 签发 ticket，绑定用户 uid |
 | 快速验证（**不可上线**） | `auth.anonymousAuthProvider().signIn()` | 无（清 cookie 就换 uid，订单归属形同虚设） |
 
+### 微信侧能力：直接用 `wechat-official` 示例
+
+**不要在本示例里重写「code → openid」「access_token」「wx.config 签名」**：
+[`integration/wechat-official`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/wechat-official)
+的 `offiaccount-common` 云函数已经封装好公众号全套接口，与 `pay-common` 组合即可。
+
+| 需求 | 用它的路由 |
+|---|---|
+| 取公众号 AppID（拼授权链接用） | `POST /oauth/config` |
+| **code → openid** | `POST /oauth/token` |
+| 拉用户昵称头像（`snsapi_userinfo`） | `POST /oauth/userinfo` |
+| `wx.config` 签名包 | `POST /jssdk/config` |
+
+```javascript
+// ① 取 appId → ② 跳授权 → ③ 回跳带 code → ④ 换 openid
+const { data: { appId } } = await post(`${OFFIACCOUNT_URL}/oauth/config`);
+const { data: { openid } } = await post(`${OFFIACCOUNT_URL}/oauth/token`, { code });
+
+// ⑤ 把 openid 交给自家服务端换 CloudBase 自定义登录 ticket
+//    app.auth().createTicket(openid, { refresh: 3600 * 1000 })
+// ⑥ auth.customAuthProvider().signIn(ticket) → 带 Bearer 调 /wxpay_order_h5
+```
+
+**两段链路的分工**（`offiaccount-common` 只解决微信身份，不签发 CloudBase 登录态）：
+
+```
+offiaccount-common  →  code 换 openid（公众号侧，AppSecret 在它自己的环境变量里）
+自定义登录 ticket    →  openid 换 ticket（CloudBase 侧，auth().createTicket）
+pay-common          →  校验 Bearer → 下单
+```
+
+> ⚠️ 前端**只传 code，不传 openid**：openid 必须由服务端换取，否则任何人都能自报身份。
+> `offiaccount-common` 部署时记得开「固定出口 IP」并加进公众号 IP 白名单，否则报 `40164`。
+
 ### `getCloudBaseAccessToken()` 的实现
 
 ```javascript
