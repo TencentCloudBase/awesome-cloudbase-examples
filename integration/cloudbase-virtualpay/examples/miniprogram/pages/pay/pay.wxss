@@ -1,0 +1,13 @@
+radio-group {
+  display: flex;
+  align-items: center;
+}
+
+radio {
+  transform: scale(0.8);
+}
+
+picker {
+  flex: 1;
+  text-align: right;
+}

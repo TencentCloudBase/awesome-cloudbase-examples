@@ -1,0 +1,320 @@
+# H5 页面支付接入
+
+> 基于 `pay-common/README.md` Step 5 H5 章节 + `examples/react/` 整理。
+
+---
+
+## 适用场景
+
+- 手机浏览器内的 H5 页面（非微信内置浏览器）
+- 公众号网页（JSAPI 模式）
+- 需要 **H5 支付授权目录**配置
+
+> **注意**：微信内 H5 页面应使用 **JSAPI 支付**（走 `/wxpay_order`），不是 H5 支付。
+
+---
+
+## 登录：H5 必须先拿 access_token
+
+小程序不需要登录（平台注入 `x-wx-openid`），H5 没有这条路：浏览器里没有平台头，
+而 `/wxpay_order_h5` 要求 `Authorization: Bearer <CloudBase Auth access_token>`。
+
+函数侧只解 JWT payload 取 `sub`（CloudBase UID）作为订单归属，**不验签** ——
+验签是前置网关的职责，所以 H5 必须经网关访问，不要公网直连函数端口。
+
+### 拿到 token 的三条路
+
+| 场景 | 前端 | 后端 |
+|---|---|---|
+| 微信内浏览器（公众号网页） | `auth.weixinAuthProvider({ appid, scope: 'snsapi_base' }).signInWithRedirect()` | 无 |
+| 微信外浏览器 | `auth.customAuthProvider().signIn(ticket)` | 自家后端用 CloudBase 服务端 SDK 签发 ticket，绑定用户 uid |
+| 快速验证（**不可上线**） | `auth.anonymousAuthProvider().signIn()` | 无（清 cookie 就换 uid，订单归属形同虚设） |
+
+### 微信侧能力：直接用 `wechat-official` 示例
+
+**不要在本示例里重写「code → openid」「access_token」「wx.config 签名」**：
+[`integration/wechat-official`](https://github.com/TencentCloudBase/awesome-cloudbase-examples/tree/master/integration/wechat-official)
+的 `offiaccount-common` 云函数已经封装好公众号全套接口，与 `pay-common` 组合即可。
+
+| 需求 | 用它的路由 |
+|---|---|
+| 取公众号 AppID（拼授权链接用） | `POST /oauth/config` |
+| **code → openid** | `POST /oauth/token` |
+| 拉用户昵称头像（`snsapi_userinfo`） | `POST /oauth/userinfo` |
+| `wx.config` 签名包 | `POST /jssdk/config` |
+
+```javascript
+// ① 取 appId → ② 跳授权 → ③ 回跳带 code → ④ 换 openid
+const { data: { appId } } = await post(`${OFFIACCOUNT_URL}/oauth/config`);
+const { data: { openid } } = await post(`${OFFIACCOUNT_URL}/oauth/token`, { code });
+
+// ⑤ 把 openid 交给自家服务端换 CloudBase 自定义登录 ticket
+//    app.auth().createTicket(openid, { refresh: 3600 * 1000 })
+// ⑥ auth.customAuthProvider().signIn(ticket) → 带 Bearer 调 /wxpay_order_h5
+```
+
+**两段链路的分工**（`offiaccount-common` 只解决微信身份，不签发 CloudBase 登录态）：
+
+```
+offiaccount-common  →  code 换 openid（公众号侧，AppSecret 在它自己的环境变量里）
+自定义登录 ticket    →  openid 换 ticket（CloudBase 侧，auth().createTicket）
+pay-common          →  校验 Bearer → 下单
+```
+
+> ⚠️ 前端**只传 code，不传 openid**：openid 必须由服务端换取，否则任何人都能自报身份。
+> `offiaccount-common` 部署时记得开「固定出口 IP」并加进公众号 IP 白名单，否则报 `40164`。
+
+### `getCloudBaseAccessToken()` 的实现
+
+```javascript
+import cloudbase from '@cloudbase/js-sdk';
+
+const app = cloudbase.init({ env: 'your-env-id' });   // 换成你的云开发环境 ID
+const auth = app.auth({ persistence: 'local' });
+
+export async function getCloudBaseAccessToken() {
+  const loginState = await auth.getLoginState();
+  if (!loginState) throw new Error('H5 未登录：先走登录流程再下单');
+
+  // ⚠️ 取值路径随 SDK 大版本变化，二选一（装哪个版本用哪个，跑通后固定下来）：
+  //    @cloudbase/js-sdk v1 → loginState.credential.accessToken
+  //    @cloudbase/js-sdk v2 → loginState.accessToken
+  const token = loginState.accessToken || loginState.credential?.accessToken;
+  if (!token) throw new Error('登录态存在但取不到 access_token，检查 SDK 版本的取值路径');
+
+  return token;
+}
+```
+
+### 失败对照
+
+| 现象 | 原因 |
+|---|---|
+| 401 `未授权访问` | 没带 Bearer / token 已过期 / `getCloudBaseAccessToken()` 返回空 |
+| 403 CORS / Origin 不允许 | 环境变量 `corsAllowOrigin` 没加当前页面域名 |
+| 403 `凭证缺 provider_sub` | 走错路由了：H5 用 `/wxpay_order_h5`（不需要 openid），`/wxpay_order` 才是 JSAPI |
+
+---
+
+## 架构流程
+
+```
+手机浏览器 H5 页面
+  │
+  ├─ 1. 用户选择商品 → 进入结算页
+  │
+  ├─ 2. 前端 POST /wxpay_order_h5（带 Authorization: Bearer）
+  │   - 必传 scene_info（IP + h5_type）
+  │   - 无需 openid
+  │
+  ├─ 3. 后端返回 h5_url（微信中间页 URL）
+  │
+  ├─ 4. 前端 window.location.href = h_url
+  │     → 跳转到微信支付的中间页面
+  │
+  ├─ 5. 用户在微信中完成支付
+  │     → 自动跳转回 redirect_url
+  │
+  └─ 6. 前端轮询查单确认结果
+```
+
+---
+
+## 前提条件
+
+| 条件 | 说明 |
+|------|------|
+| pay-common 已部署 | 云函数或云托管均可 |
+| H5 支付授权目录 | 商户平台→产品中心→开发配置→支付授权目录 |
+| 合法域名配置 | pay-common 的域名需要在商户平台备案 |
+| HTTPS | H5 支付要求全链路 HTTPS |
+
+---
+
+## 核心代码示例
+
+### 1. H5 下单请求
+
+```javascript
+async function h5Pay(description, amountFen) {
+  // 获取用户真实 IP（关键风控字段！）
+  const clientIp = await fetchClientIp()  // 需要一个后端接口返回客户端 IP
+
+  const res = await fetch(`${BACKEND_URL}/wx-pay/wxpay_order_h5`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // ⚠️ 必填：H5 路由要求登录态（跨站请求拿不到 token，即 CSRF 防护）
+      // 实现在上面「登录：H5 必须先拿 access_token」小节
+      // 服务端还要配环境变量 corsAllowOrigin 白名单，否则 403
+      Authorization: `Bearer ${await getCloudBaseAccessToken()}`,
+    },
+    body: JSON.stringify({
+      description: description,
+      out_trade_no: 'H5' + Date.now(),
+      amount: { total: amountFen, currency: 'CNY' },
+      scene_info: {
+        payer_client_ip: clientIp,        // ⚠️ 必填！用户真实 IP
+        h5_info: {
+          type: 'Wap',                     // ⚠️ 必填！Wap=iOS/Android
+          app_name: '商城',
+          app_url: 'https://your-shop.com',
+        },
+      },
+    }),
+  }).then(r => r.json())
+
+  if (res.code !== 0) throw new Error(res.msg)
+
+  // 返回 h5_url，用于跳转
+  return res.data?.h5_url
+}
+
+// 获取客户端 IP 的辅助接口
+async function fetchClientIp() {
+  const res = await fetch(`${BACKEND_URL}/wx-pay/client_ip`, {
+    method: 'GET',
+  }).then(r => r.json())
+  return res.ip
+}
+```
+
+### 2. 跳转微信中间页
+
+```javascript
+async function handleH5Pay() {
+  try {
+    const h5Url = await h5Pay('商品名称', 100)
+
+    // 跳转到微信支付中间页
+    // 用户将在微信中完成支付，然后跳转回 redirect_url
+    window.location.href = h5Url
+  } catch (e) {
+    alert('下单失败: ' + e.message)
+  }
+}
+```
+
+### 3. 支付结果确认
+
+> H5 支付没有前端回调（不像小程序的 `requestPayment`）。需要**轮询查单**或**设置回调跳转**来确认结果。
+
+**方式 A：轮询查单**
+
+```javascript
+async function pollOrderStatus(outTradeNo, maxAttempts = 20) {
+  for (let i = 0; i < maxAttempts; i++) {
+    const res = await fetch(`${BACKEND_URL}/wx-pay/wxpay_query_order_by_out_trade_no`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ out_trade_no: outTradeNo }),
+    }).then(r => r.json())
+
+    if (res.code === 0 && res.data?.trade_state === 'SUCCESS') {
+      return 'PAID'
+    }
+
+    await new Promise(r => setTimeout(r, 2000))  // 每 2 秒查一次
+  }
+  return 'TIMEOUT'
+}
+```
+
+**方式 B：回调 redirect_url**
+
+在下单时指定 `redirect_url`：
+
+```javascript
+body: JSON.stringify({
+  // ... 其他字段
+  scene_info: {
+    // ... 其他字段
+    redirect_url: encodeURI('https://your-shop.com/pay/result?no=H5xxxx'),
+  },
+})
+```
+
+> 注意：`redirect_url` 需要在商户平台配置的授权目录下。
+
+---
+
+## H5 支付必填字段详解
+
+### scene_info 结构
+
+```json
+{
+  "scene_info": {
+    "payer_client_ip": "1.2.3.4",       // ⚠️ 必填，用户真实 IP
+    "h5_info": {
+      "type": "Wap",                      // ⚠️ 必填
+      "app_name": "商城",                 // 选填，APP 名称
+      "app_url": "https://shop.com",      // 选填，APP URL
+      "device_id": "unique-device-id"     // 选填，设备标识
+    }
+  }
+}
+```
+
+### h5_info.type 可选值
+
+| type值 | 含义 |
+|--------|------|
+| `Wap` | 手机浏览器（最常用） |
+| `IOS` | iOS 平板或手机 App 内 WebView |
+| `Android` | Android 平板或手机 App 内 WebView |
+| `PC` | PC Web（极少使用） |
+
+---
+
+## H5 支付授权目录配置
+
+> **这是最常见的 H5 支付报错原因之一！**
+
+### 配置路径
+
+[商户平台](https://pay.weixin.qq.com/) → 产品中心 → 开发配置 → **支付授权目录**
+
+### 规则
+
+| 规则 | 说明 |
+|------|------|
+| 格式 | `https://domain.com/path/`（注意末尾斜杠！）|
+| 数量 | 最多 5 个目录 |
+| 匹配方式 | 前缀匹配，发起支付的页面 URL 必须在某个目录下 |
+| 生效时间 | 修改后约 **10 分钟**生效 |
+
+### 常见错误
+
+| 错误信息 | 原因 | 解决方案 |
+|---------|------|---------|
+| 「当前页面无法发起支付」 | 授权目录未配置或 URL 不匹配 | 添加当前域名到授权目录 |
+| 「缺少 scene_info 参数\" | 未传 payer_client_ip 或 h5_info.type | 补充必填字段 |
+| 「网络环境未能通过安全验证\" | 风控拦截，IP 异常 | 确保 payer_client_ip 是真实 IP |
+
+---
+
+## 与 JSAPI 支付的区别
+
+| 维度 | JSAPI（微信内） | H5（外部浏览器） |
+|------|:--------------:|:---------------:|
+| **触发环境** | 微信内置浏览器 | 任意手机浏览器 |
+| **必传 openid** | 是 | 否 |
+| **必传 scene_info** | 否 | **是（IP + h5_type）** |
+| **授权目录** | 不需要 | **必须配置** |
+| **支付流程** | `requestPayment` 弹窗 | 跳转微信中间页 |
+| **结果确认** | `requestPayment` 回调 | **轮询查单** 或 redirect |
+| **路由** | `/wxpay_order` | `/wxpay_order_h5` |
+
+---
+
+## 安全注意事项
+
+1. **金额必须来自后端**：前端不可传金额，应由服务端根据商品 ID 查库确定
+2. **防止重复支付**：提交订单前先检查是否已有未完成的订单
+3. **h5_url 有效期 5 分钟**：过期需重新下单
+4. **redirect_url 必须白名单**：防止开放重定向漏洞
+
+---
+
+*PC 扫码支付见 [web-native.md](web-native.md) | 小程序见 [miniprogram-cloud-api.md](miniprogram-cloud-api.md)*

@@ -5,7 +5,7 @@
 const PayService = require('../services/payService');
 const config = require('../config/config');
 const { validateOrderParams, validateRefundParams, validateTransferParams } = require('../utils/validator');
-const { getOpenId } = require('../utils/cloudbaseAuth');
+const { getOpenId, getUid } = require('../utils/cloudbaseAuth');
 const payService = new PayService();
 
 // ========== 统一响应格式 ==========
@@ -18,6 +18,18 @@ function fail(res, msg, statusCode = 400) {
     res.status(statusCode).json({ code: -1, msg, data: null });
 }
 
+/**
+ * 当前登录身份（中间件已解析并挂到 req.user，缺失时兜底再解析一次）
+ *
+ * 查单 / 关单 / 退款 / 转账的归属校验都靠它，身份为空时钩子会直接拒绝。
+ * @param {Object} req
+ * @returns {{openid: ?string, uid: ?string}}
+ */
+function currentIdentity(req) {
+    if (req.user) return req.user;
+    return { openid: getOpenId(req), uid: getUid(req) };
+}
+
 // ========== 下单 ==========
 
 /**
@@ -25,19 +37,26 @@ function fail(res, msg, statusCode = 400) {
  */
 exports.unifiedOrder = async (req, res) => {
     try {
-        // 自动注入 payer.openid（如果前端没传，从 JWT / x-wx-openid header 中解析）
-        if (!req.body.payer?.openid) {
-            const openid = getOpenId(req);
-            if (openid) {
-                req.body.payer = { ...req.body.payer, openid };
-                console.info('[Controller] 自动注入 payer.openid:', openid);
+        // 自动注入 payer.openid
+        //
+        // ⚠️ 客户端传的 payer.openid 不可信：鉴权通过后以服务端身份为准覆盖，
+        //    否则攻击者拿自己的 token 就能以他人 openid 下单 / 查单。
+        const openid = getOpenId(req);
+        if (openid) {
+            if (req.body.payer?.openid && req.body.payer.openid !== openid) {
+                console.warn('[Controller] 客户端传入的 payer.openid 与登录身份不一致，已用登录身份覆盖');
             }
+            req.body.payer = { ...req.body.payer, openid };
+            console.info('[Controller] 注入 payer.openid:', openid);
         }
 
         const errors = validateOrderParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.unifiedOrder(req.body, 'jsapi');
+        // 身份单独传给订单服务落库：不能塞进 req.body（body 会原样发给微信支付 API）
+        // JSAPI 路由受 payMiddleware 保护，openid 一定有值；uid 一并返回，
+        // 保证三个下单入口的归属口径完全一致（此前只有 H5 传，JSAPI/Native 归属丢失）。
+        const result = await payService.unifiedOrder(req.body, 'jsapi', { openid, uid: getUid(req) });
         success(res, result);
     } catch (err) {
         console.error('[Controller] unifiedOrder error:', err);
@@ -50,10 +69,33 @@ exports.unifiedOrder = async (req, res) => {
  */
 exports.unifiedOrderH5 = async (req, res) => {
     try {
+        // H5 支付本身不需要 openid，但**不能采信客户端传的 payer.openid**：
+        // 有 openid 就用登录身份，没有就删掉该字段，避免以他人身份下单
+        const openid = getOpenId(req);
+
+        // ⚠️ H5 常在微信外浏览器发起，CloudBase Auth 凭证可能只有 UID、没有 openid
+        //    （JWT 无 provider_sub）。h5SecurityMiddleware 允许这类身份放行，
+        //    所以这里必须取 UID 作为订单归属，否则就是「放行但身份取不到」。
+        const uid = getUid(req);
+        if (!openid && !uid) {
+            // 匿名放行只在 ALLOW_ANONYMOUS_H5=true 时发生（本地联调）。
+            // 归属为空会被 orderService 视为「无主订单」直接拒绝下单，不再静默落库。
+            console.warn('[Controller] H5 下单既无 openid 也无 UID（匿名/本地联调），订单将被归属校验拒绝');
+        }
+
+        if (openid) {
+            req.body.payer = { ...req.body.payer, openid };
+        } else if (req.body.payer?.openid) {
+            console.warn('[Controller] H5 下单无登录身份，移除客户端传入的 payer.openid');
+            const { openid: _clientOpenid, ...restPayer } = req.body.payer;
+            req.body.payer = restPayer;
+        }
+
         const errors = validateOrderParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.unifiedOrder(req.body, 'h5');
+        // 身份单独传给订单服务落库：不能塞进 req.body（body 会原样发给微信支付 API）
+        const result = await payService.unifiedOrder(req.body, 'h5', { openid, uid });
         success(res, result);
     } catch (err) {
         console.error('[Controller] unifiedOrderH5 error:', err);
@@ -69,7 +111,12 @@ exports.unifiedOrderNative = async (req, res) => {
         const errors = validateOrderParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.unifiedOrder(req.body, 'native');
+        // Native 路由同样受 payMiddleware 保护，openid 一定有值（扫码场景下
+        // 下单人是已登录用户，不是匿名终端）。身份只用于订单归属落库，不进 req.body。
+        const result = await payService.unifiedOrder(req.body, 'native', {
+            openid: getOpenId(req),
+            uid: getUid(req),
+        });
         success(res, result);
     } catch (err) {
         console.error('[Controller] unifiedOrderNative error:', err);
@@ -85,11 +132,11 @@ exports.unifiedOrderNative = async (req, res) => {
 exports.queryOrderByOutTradeNo = async (req, res) => {
     try {
         if (!req.body.out_trade_no) return fail(res, 'out_trade_no 必填');
-        const result = await payService.queryOrderByOutTradeNo(req.body);
+        const result = await payService.queryOrderByOutTradeNo(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryOrderByOutTradeNo error:', err);
-        fail(res, err.message || '查单失败');
+        fail(res, err.message || '查单失败', err.status || 400);
     }
 };
 
@@ -99,11 +146,11 @@ exports.queryOrderByOutTradeNo = async (req, res) => {
 exports.queryOrderByTransactionId = async (req, res) => {
     try {
         if (!req.body.transaction_id) return fail(res, 'transaction_id 必填');
-        const result = await payService.queryOrderByTransactionId(req.body);
+        const result = await payService.queryOrderByTransactionId(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryOrderByTransactionId error:', err);
-        fail(res, err.message || '查单失败');
+        fail(res, err.message || '查单失败', err.status || 400);
     }
 };
 
@@ -115,11 +162,11 @@ exports.queryOrderByTransactionId = async (req, res) => {
 exports.closeOrder = async (req, res) => {
     try {
         if (!req.body.out_trade_no) return fail(res, 'out_trade_no 必填');
-        const result = await payService.closeOrder(req.body);
+        const result = await payService.closeOrder(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] closeOrder error:', err);
-        fail(res, err.message || '关闭订单失败');
+        fail(res, err.message || '关闭订单失败', err.status || 400);
     }
 };
 
@@ -133,11 +180,11 @@ exports.refund = async (req, res) => {
         const errors = validateRefundParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.refund(req.body);
+        const result = await payService.refund(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] refund error:', err);
-        fail(res, err.message || '退款失败');
+        fail(res, err.message || '退款失败', err.status || 400);
     }
 };
 
@@ -147,11 +194,11 @@ exports.refund = async (req, res) => {
 exports.queryRefund = async (req, res) => {
     try {
         if (!req.body.out_refund_no) return fail(res, 'out_refund_no 必填');
-        const result = await payService.queryRefund(req.body);
+        const result = await payService.queryRefund(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryRefund error:', err);
-        fail(res, err.message || '退款查询失败');
+        fail(res, err.message || '退款查询失败', err.status || 400);
     }
 };
 
@@ -234,19 +281,22 @@ exports.refundTrigger = (req, res) => _handleCallback(req, res, payService.handl
  */
 exports.transfer = async (req, res) => {
     try {
-        // 自动注入 openid（如果前端没传，从 JWT / x-wx-openid header 中解析）
+        // ⚠️ 收款人 openid 与 transfer_amount 都来自请求体：
+        //    - openid 只在前端没传时才用当前登录身份兜底（「给自己提现」的场景）
+        //    - 传了别人的 openid 也不会被改写，所以**权限判断必须靠
+        //      orderService.verifyTransferAllowed 钩子**，不能只看「已登录」
         if (!req.body.openid) {
             const openid = getOpenId(req);
             if (openid) {
                 req.body.openid = openid;
-                console.info('[Controller] 转账自动注入 openid:', openid);
+                console.info('[Controller] 转账未传 openid，使用当前登录身份:', openid);
             }
         }
 
         const errors = validateTransferParams(req.body);
         if (errors.length > 0) return fail(res, errors.join('; '));
 
-        const result = await payService.transfer(req.body);
+        const result = await payService.transfer(req.body, currentIdentity(req));
         // 把 mchId 注入 result.data 中透传给前端（wx.requestMerchantTransfer 需要）
         if (result && result.data) {
             result.data.mchId = config.payConfig.mchId;
@@ -254,7 +304,7 @@ exports.transfer = async (req, res) => {
         success(res, result);
     } catch (err) {
         console.error('[Controller] transfer error:', err);
-        fail(res, err.message || '商家转账失败');
+        fail(res, err.message || '商家转账失败', err.status || 400);
     }
 };
 
@@ -264,11 +314,11 @@ exports.transfer = async (req, res) => {
 exports.queryTransferBill = async (req, res) => {
     try {
         if (!req.body.out_bill_no) return fail(res, 'out_bill_no（商户单号）必填');
-        const result = await payService.queryTransferBill(req.body);
+        const result = await payService.queryTransferBill(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryTransferBill error:', err);
-        fail(res, err.message || '查询转账单失败');
+        fail(res, err.message || '查询转账单失败', err.status || 400);
     }
 };
 
@@ -278,11 +328,11 @@ exports.queryTransferBill = async (req, res) => {
 exports.queryTransferBillByNo = async (req, res) => {
     try {
         if (!req.body.transfer_bill_no) return fail(res, 'transfer_bill_no（微信转账单号）必填');
-        const result = await payService.queryTransferBillByNo(req.body);
+        const result = await payService.queryTransferBillByNo(req.body, currentIdentity(req));
         success(res, result);
     } catch (err) {
         console.error('[Controller] queryTransferBillByNo error:', err);
-        fail(res, err.message || '查询转账单失败');
+        fail(res, err.message || '查询转账单失败', err.status || 400);
     }
 };
 
@@ -292,80 +342,14 @@ exports.queryTransferBillByNo = async (req, res) => {
 exports.transferTrigger = (req, res) => _handleCallback(req, res, payService.handleTransferCallback, 'transferTrigger');
 
 // ========== 鉴权中间件 ==========
+//
+// 实现在 middleware/auth.js：独立文件，不依赖 service → wechatpay-node-v3，
+// 便于单独跑鉴权回归测试。
 
-const { parseCloudBaseAuth } = require('../utils/cloudbaseAuth');
+const { payMiddleware, h5SecurityMiddleware, requireWechatOpenId } = require('../middleware/auth');
 
-/**
- * 鉴权中间件
- * 兼容多种部署方式：云 API 网关、集成中心网关、HTTP 云函数、云托管、本地开发
- */
-exports.payMiddleware = (req, res, next) => {
-    // ⚠️ 开发环境提示（不跳过鉴权，仅打印日志辅助排查）
-    if (process.env.NODE_ENV === 'development') {
-        console.warn('[鉴权] 开发环境 — 鉴权仍然生效，如需测试请携带有效 header（Bearer token / X-WX-SOURCE 等）');
-    }
-
-    // 云 API 网关模式：请求带有 Bearer token（CloudBase Auth accessToken）
-    // 网关已验证 token 有效性，这里解析 JWT 获取用户信息
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-        const authInfo = parseCloudBaseAuth(req);
-        if (authInfo) {
-            req.cloudbaseAuth = authInfo;
-            return next();
-        }
-    }
-
-    // 集成中心网关模式
-    // 安全前提：集成中心网关会剥离客户端传入的 x-tcb-integration-id，仅网关自身注入
-    if (req.headers['x-tcb-integration-id']) {
-        return next();
-    }
-
-    // 云托管模式（callContainer）
-    // 安全前提：云托管入口会剥离客户端传入的 X-WX-SOURCE / X-Authmethod
-    const authMethod = req.headers['x-authmethod'] || req.headers['X-Authmethod'];
-    const wxSource = req.headers['x-wx-source'];
-    if (wxSource === 'wx_devtools' || wxSource === 'wx_client' || authMethod === 'WX_SERVER_AUTH') {
-        return next();
-    }
-
-    // HTTP 云函数模式
-    // 安全前提：这些环境变量仅存在于 SCF 运行时，外部无法伪造
-    if (process.env.TENCENTCLOUD_RUNENV || process.env.SCF_RUNTIME) {
-        return next();
-    }
-
-    res.status(401).json({ code: -1, msg: '未授权访问' });
-};
-
-/**
- * H5 安全中间件
- * 先走 payMiddleware 鉴权，再做 H5 特有的安全校验（Origin 白名单等）
- */
-exports.h5SecurityMiddleware = (req, res, next) => {
-    // 先经过通用鉴权
-    exports.payMiddleware(req, res, (err) => {
-        if (err) return next(err);
-
-        // H5 Origin 白名单校验（微信支付安全规范要求）
-        // 从环境变量 corsAllowOrigin 读取（与 app.js CORS 中间件共用同一配置）
-        const allowedOrigins = process.env.corsAllowOrigin
-            ? process.env.corsAllowOrigin.split(',').map(s => s.trim())
-            : [];
-        const origin = req.headers.origin;
-
-        if (origin && allowedOrigins.length > 0 && !allowedOrigins.includes(origin)) {
-            console.warn('[H5Security] Origin 被拒绝:', origin, '白名单:', allowedOrigins);
-            return res.status(403).json({ code: -1, msg: 'Origin 不在白名单内' });
-        }
-
-        // 如果未配置白名单（allowedOrigins 为空），放行并打印警告
-        if (allowedOrigins.length === 0 && origin) {
-            console.warn('[H5Security] ⚠️ 未配置 Origin 白名单，所有来源均放行。建议设置环境变量 corsAllowOrigin');
-        }
-
-        next();
-    });
-};
+exports.payMiddleware = payMiddleware;
+exports.h5SecurityMiddleware = h5SecurityMiddleware;
+exports.requireWechatOpenId = requireWechatOpenId;
 
 

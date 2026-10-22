@@ -1,11 +1,63 @@
 /**
  * 支付服务（策略入口）
  * 主动请求（下单/退款/转账）永远走 SDK 自签名直连微信
- * 回调处理根据 signMode 决定：自己验签解密 或 读取集成中心已解密的明文
+ * 回调处理根据平台声明 notifyURLCallbackType 决定：
+ *   system → 回调托管在集成中心，网关已验签解密，读 body.ParsedContent 明文
+ *   其它    → 回调直达本函数，自己验签 + 解密（fail closed）
  */
-const { signMode, verifyMode, payConfig } = require('../config/config');
+const { verifyMode, payConfig, notifyUrlCallbackType } = require('../config/config');
 const SdkStrategy = require('./strategies/sdkStrategy');
 const OrderService = require('./orderService');
+
+/**
+ * 用服务端配置覆盖客户端可传的关键字段
+ *
+ * appid / mchid / notify_url 决定「钱进谁的商户」和「结果回调到哪」，
+ * 绝不能由请求体决定：`params.appid = params.appid || payConfig.appId`
+ * 这种写法等于允许客户端换掉 AppID 或把回调地址指到自己的服务器。
+ *
+ * @param {Object} params - 请求参数（会被就地修改）
+ * @param {string} key - 字段名
+ * @param {string} serverValue - 服务端配置值
+ */
+function forceServerValue(params, key, serverValue) {
+    if (params[key] !== undefined && params[key] !== serverValue) {
+        console.warn(`[PayService] 忽略客户端传入的 ${key}，改用服务端配置`);
+    }
+    if (serverValue) {
+        params[key] = serverValue;
+    } else {
+        delete params[key];
+    }
+}
+
+/**
+ * 校验回调明文结构：必须是对象且含业务必需字段
+ *
+ * 只认结构、不认来源 —— 来源可信度由 _resolveCallbackPayload 决定。
+ * 没有这一步，空对象 / 字符串明文也能一路走到业务处理。
+ *
+ * @param {*} payload - 回调明文
+ * @param {string[]} requiredFields - 必需字段
+ * @param {string} label - 日志标识
+ * @returns {boolean}
+ */
+function isPayloadValid(payload, requiredFields, label) {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+        console.error(`[PayService] ${label}回调明文不是对象，拒绝`);
+        return false;
+    }
+
+    const missing = requiredFields.filter(
+        field => payload[field] === undefined || payload[field] === null || payload[field] === ''
+    );
+    if (missing.length > 0) {
+        console.error(`[PayService] ${label}回调明文缺少必需字段，拒绝:`, missing.join(', '));
+        return false;
+    }
+
+    return true;
+}
 
 class PayService {
 
@@ -14,35 +66,49 @@ class PayService {
 
         // 永远使用 SDK 策略（自己签名直连微信）
         this.strategy = new SdkStrategy(payConfig);
-        console.log(`[PayService] 签名模式: SDK | 回调处理: ${signMode} | 验签方式: ${verifyMode}`);
+        console.log(`[PayService] 回调处理: ${notifyUrlCallbackType === 'system' ? '网关代验签' : '本函数自验签'}`
+            + ` | 验签方式: ${verifyMode}`);
     }
 
     // ========== 统一下单（支持多平台）==========
 
     /**
      * 统一下单
-     * @param {Object} params - 下单参数
+     * @param {Object} params - 下单参数（会原样发给微信支付 API，不要塞业务字段）
      * @param {string} payType - 支付类型: jsapi | h5 | native
+     * @param {Object|null} [identity] - 登录身份 { openid, uid }，仅用于订单落库归属
      * @returns {Object} 微信支付返回结果
      */
-    async unifiedOrder(params, payType = 'jsapi') {
+    async unifiedOrder(params, payType = 'jsapi', identity = null) {
         try {
-            // 注入通用参数
+            // 注入通用参数 —— 全部由服务端赋值，客户端传的一律忽略
             // 根据 useServiceAccount 参数选择 appId（支持服务号/小程序双账号）
             if (params.useServiceAccount) {
                 if (!payConfig.serviceAppId) {
                     throw new Error('useServiceAccount=true 但未配置 service_app_id 环境变量，请在 CloudBase 控制台为 pay-common 云函数添加该环境变量');
                 }
-                params.appid = payConfig.serviceAppId;
+                forceServerValue(params, 'appid', payConfig.serviceAppId);
             } else {
-                params.appid = params.appid || payConfig.appId;
+                forceServerValue(params, 'appid', payConfig.appId);
             }
             // 用完删除，不传给微信支付 API
             delete params.useServiceAccount;
-            params.mchid = params.mchid || payConfig.mchId;
+            forceServerValue(params, 'mchid', payConfig.mchId);
 
-            // 根据支付类型设置回调 URL
-            params.notify_url = params.notify_url || payConfig.jsapiNotifyUrl;
+            // 根据支付类型设置回调 URL（客户端不可指定，否则能把支付结果导流到别处）
+            forceServerValue(params, 'notify_url', payConfig.jsapiNotifyUrl);
+
+            // 归属预检：必须在调微信下单【之前】失败。
+            // 放到下单后再判会出现「微信侧订单已创建、本地因无归属落库失败」的不一致状态，
+            // 且无主订单会让后续查单 / 退款的归属校验失效。
+            if (!this.orderService.resolveOwner(params, identity)) {
+                throw new Error('订单缺少归属身份：identity.openid / identity.uid 均为空，已拒绝下单');
+            }
+
+            // 金额校验钩子：同样必须在调微信下单【之前】失败。
+            // 普通微信支付按请求金额收款，平台不核对商品值多少钱 ——
+            // 请求体写 amount.total=1 就是一笔 1 分钱订单，回调照样 SUCCESS。
+            await this._verifyAmountBeforeOrder(params);
 
             // 根据支付类型调不同接口
             let result;
@@ -60,7 +126,7 @@ class PayService {
             }
 
             if (result.status === 200 && result.data) {
-                await this.orderService.handlerUnified(params);
+                await this.orderService.handlerUnified(params, identity);
                 return result;
             } else {
                 console.error(`[PayService] ${payType} 下单失败: status=${result?.status}, code=${result?.data?.code}, message=${result?.data?.message}`);
@@ -72,7 +138,122 @@ class PayService {
         }
     }
 
+    // ========== 金额校验钩子 ==========
+
+    /**
+     * 下单前的金额校验（调用业务钩子 orderService.verifyAmount）
+     *
+     * 🚨 只认 `{ ok: true }`，其余一律拒绝（fail closed）。
+     *    早期实现只判断 `check.ok === false`，钩子返回 null 会被当成「不校验」放行 ——
+     *    而 amount.total 完全来自客户端，写 1 就是 1 分钱订单。
+     *
+     *    接入数据库后必须在 `orderService.verifyAmount` 里按 product_id 查真实价格，
+     *    与 `params.amount.total` 比对，一致时返回 `{ ok: true }`。
+     *    校验不通过时本方法抛错，下单在**调用微信之前**失败，
+     *    不会留下「微信侧已下单、本地金额错」的不一致状态。
+     *
+     * @param {Object} params - 下单参数
+     * @throws {Error} 钩子未放行（返回 null / { ok: false }）时
+     */
+    async _verifyAmountBeforeOrder(params) {
+        const check = await this.orderService.verifyAmount(params);
+
+        if (!check || check.ok !== true) {
+            throw new Error(`订单金额校验失败：${check?.reason || 'amount.total 与商品价格不一致'}`);
+        }
+    }
+
+    /**
+     * 退款前的金额校验（调用业务钩子 orderService.verifyRefundAmount）
+     *
+     * 退款金额同样由客户端决定，`validateRefundParams` 只检查
+     * `refund <= total`（两个数都来自请求体），无法防「多退」。
+     * 业务侧应按落库订单金额做上限校验。
+     *
+     * 🚨 与下单侧同样只认 `{ ok: true }`：钩子返回 null 时不能当成「不校验」放行，
+     *    否则等于允许按客户端指定的任意金额多退。
+     *
+     * @param {Object} params - 退款参数
+     * @throws {Error} 钩子未放行（返回 null / { ok: false }）时
+     */
+    async _verifyRefundAmountBeforeRefund(params) {
+        const check = await this.orderService.verifyRefundAmount(params);
+
+        if (!check || check.ok !== true) {
+            throw new Error(`退款金额校验失败：${check?.reason || '退款金额超过订单可退金额'}`);
+        }
+    }
+
     // ========== 回调处理 ==========
+
+    /**
+     * 解析回调明文（唯一入口：三个回调共用同一套「信任上游 / 自验签」判定）
+     *
+     * 🚨 曾经的口子：只要 `body.ParsedContent` 存在就直接采信明文，
+     *    连 verifySign 里的 5 分钟时间戳检查都一起跳过 —— 任何能访问函数端口的人
+     *    发 `{"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}`
+     *    就是一笔「支付成功」。
+     *
+     * 现在的判定（唯一依据是平台声明，没有第二个开关）：
+     *   1. 采信网关明文 = 平台声明 `notifyURLCallbackType=system`
+     *      （集成中心创建实例时自动注入；此时回调地址在网关，函数不该有公网回调入口）
+     *   2. 其余情况（未声明 / ownservice）一律自验签 + 解密，验不过就拒绝
+     *   3. 无论哪条路径，明文都要过结构校验
+     *
+     * ⚠️ 为什么不能靠「配置」判定：任何人都能往函数端口发 {"ParsedContent":{...}}，
+     *    声明只能证明「这个实例的回调托管在网关」，证明不了「本次请求来自网关」。
+     *    所以 system 模式下**不要给函数开公网入口** —— 这是部署约束，代码强制不了。
+     *
+     * @param {Object} callbackParams - 回调参数
+     * @param {string} label - 日志标识
+     * @param {string[]} requiredFields - 明文必需字段
+     * @returns {Promise<Object|null>} 明文；不可信或结构不合法返回 null
+     */
+    async _resolveCallbackPayload(callbackParams, label, requiredFields) {
+        const trustsGateway = notifyUrlCallbackType === 'system';
+
+        if (trustsGateway && callbackParams.decryptedData) {
+            // 🔒 重放窗口校验必须 fail closed：网关会转发原始的 wechatpay-timestamp，
+            //    缺头 / 非数字（被篡改）都不能当成「无从判断所以放过」——
+            //    那不叫没信息，那叫请求形态不对。过期同理。
+            const rawTs = callbackParams.timestamp;
+            const headerTs = parseInt(rawTs, 10);
+            if (!Number.isFinite(headerTs)) {
+                console.warn(`[PayService] ${label}回调缺少/非法 wechatpay-timestamp（当前: ${rawTs ?? '无'}），`
+                    + '无法排除重放，拒绝处理（见 README「回调安全」）');
+                return null;
+            }
+            if (Math.abs(Math.floor(Date.now() / 1000) - headerTs) > 300) {
+                console.warn(`[PayService] ${label}回调时间戳过期，拒绝处理。callback_ts:`, headerTs);
+                return null;
+            }
+
+            const payload = callbackParams.decryptedData;
+            return isPayloadValid(payload, requiredFields, label) ? payload : null;
+        }
+
+        if (callbackParams.decryptedData && !trustsGateway) {
+            console.warn(`[PayService] ${label}收到网关明文（ParsedContent），但平台未声明 `
+                + `notifyURLCallbackType=system（当前: "${notifyUrlCallbackType || '空'}"），`
+                + '已忽略明文并走自验签（见 README「回调安全」）');
+        }
+
+        const verified = await this.strategy.verifySign(callbackParams);
+        if (!verified) {
+            console.error(`[PayService] ${label}验签失败`);
+            return null;
+        }
+
+        const resource = callbackParams.body?.resource;
+        if (!resource || typeof resource !== 'object') {
+            console.error(`[PayService] ${label}缺少 resource 密文，拒绝解密`);
+            return null;
+        }
+
+        const { ciphertext, associated_data, nonce } = resource;
+        const payload = await this.strategy.decryptResource(ciphertext, associated_data, nonce);
+        return isPayloadValid(payload, requiredFields, label) ? payload : null;
+    }
 
     /**
      * 支付回调处理
@@ -82,22 +263,10 @@ class PayService {
      * @returns {Object} 解密后的支付结果
      */
     async handlePayCallback(callbackParams) {
-        let payResult;
-
-        if (signMode === 'gateway' && callbackParams.decryptedData) {
-            // 网关模式：集成中心已解密，直接使用明文
-            payResult = callbackParams.decryptedData;
-        } else {
-            // SDK 模式（或网关模式但无解密数据时回退）：自己验签 + 解密
-            const verified = await this.strategy.verifySign(callbackParams);
-            if (!verified) {
-                console.error('[PayService] 支付回调验签失败');
-                return null;
-            }
-
-            const { ciphertext, associated_data, nonce } = callbackParams.body.resource;
-            payResult = await this.strategy.decryptResource(ciphertext, associated_data, nonce);
-        }
+        const payResult = await this._resolveCallbackPayload(
+            callbackParams, '支付', ['out_trade_no', 'trade_state']
+        );
+        if (!payResult) return null;
 
         console.info('[PayService] 支付回调结果: out_trade_no=%s, trade_state=%s', payResult?.out_trade_no, payResult?.trade_state);
 
@@ -113,22 +282,10 @@ class PayService {
      * 退款回调处理
      */
     async handleRefundCallback(callbackParams) {
-        let refundResult;
-
-        if (signMode === 'gateway' && callbackParams.decryptedData) {
-            // 网关模式：集成中心已解密，直接使用明文
-            refundResult = callbackParams.decryptedData;
-        } else {
-            // SDK 模式（或网关模式但无解密数据时回退）：自己验签 + 解密
-            const verified = await this.strategy.verifySign(callbackParams);
-            if (!verified) {
-                console.error('[PayService] 退款回调验签失败');
-                return null;
-            }
-
-            const { ciphertext, associated_data, nonce } = callbackParams.body.resource;
-            refundResult = await this.strategy.decryptResource(ciphertext, associated_data, nonce);
-        }
+        const refundResult = await this._resolveCallbackPayload(
+            callbackParams, '退款', ['out_refund_no', 'refund_status']
+        );
+        if (!refundResult) return null;
 
         console.info('[PayService] 退款回调结果: out_refund_no=%s, refund_status=%s', refundResult?.out_refund_no, refundResult?.refund_status);
 
@@ -139,27 +296,97 @@ class PayService {
         return refundResult;
     }
 
+    // ========== 归属校验（查单 / 关单 / 退款 / 转账）==========
+
+    /**
+     * 订单归属校验（调用业务钩子 orderService.verifyOrderOwner）
+     *
+     * 🚨 鉴权中间件只回答「你是谁」，这里才回答「这单是不是你的」。
+     *    只认 `{ ok: true }`，其余一律抛 403 —— 包括钩子返回 null（= 未实现），
+     *    否则任何登录用户拿别人的 out_trade_no 就能查单 / 关单 / 退款。
+     *
+     * @param {Object} params - 请求参数（out_trade_no / transaction_id / out_refund_no）
+     * @param {Object|null} identity - 登录身份 { openid, uid }
+     * @param {string} action - 动作名，用于错误信息
+     * @throws {Error} status=403 的错误
+     */
+    async _verifyOrderOwnerBefore(params, identity, action) {
+        const check = await this.orderService.verifyOrderOwner(params, identity);
+
+        if (!check || check.ok !== true) {
+            const err = new Error(`${action}被拒绝：${check?.reason || '订单不属于当前用户'}`);
+            err.status = 403;
+            throw err;
+        }
+    }
+
+    /**
+     * 转账权限校验（调用业务钩子 orderService.verifyTransferAllowed）
+     *
+     * 收款人 openid 与金额都来自请求体，必须由业务侧判断调用者是否有权发起转账。
+     *
+     * @param {Object} params - 转账参数
+     * @param {Object|null} identity - 登录身份
+     * @throws {Error} status=403 的错误
+     */
+    async _verifyTransferAllowedBefore(params, identity) {
+        const check = await this.orderService.verifyTransferAllowed(params, identity);
+
+        if (!check || check.ok !== true) {
+            const err = new Error(`转账被拒绝：${check?.reason || '无转账权限'}`);
+            err.status = 403;
+            throw err;
+        }
+    }
+
+    /**
+     * 转账单查询的权限校验（同一套转账权限钩子，避免「能发起不能查 / 能查别人」）
+     * @param {Object} params - 转账单查询参数
+     * @param {Object|null} identity - 登录身份
+     * @throws {Error} status=403 的错误
+     */
+    async _verifyTransferQueryBefore(params, identity) {
+        const check = await this.orderService.verifyTransferAllowed(params, identity);
+
+        if (!check || check.ok !== true) {
+            const err = new Error(`查询转账单被拒绝：${check?.reason || '无查询权限'}`);
+            err.status = 403;
+            throw err;
+        }
+    }
+
     // ========== 查询 ==========
 
-    async queryOrderByOutTradeNo(params) {
+    async queryOrderByOutTradeNo(params, identity = null) {
+        await this._verifyOrderOwnerBefore(params, identity, '查单');
         return this.strategy.query(params);
     }
 
-    async queryOrderByTransactionId(params) {
+    async queryOrderByTransactionId(params, identity = null) {
+        await this._verifyOrderOwnerBefore(params, identity, '查单');
         return this.strategy.query(params);
     }
 
     // ========== 关闭订单 ==========
 
-    async closeOrder(params) {
+    async closeOrder(params, identity = null) {
+        await this._verifyOrderOwnerBefore(params, identity, '关闭订单');
         return this.strategy.close(params);
     }
 
     // ========== 退款 ==========
 
-    async refund(params) {
+    async refund(params, identity = null) {
         try {
-            params.notify_url = params.notify_url || payConfig.refundNotifyUrl;
+            // 归属校验：先确认这单是当前用户的，再谈金额
+            await this._verifyOrderOwnerBefore(params, identity, '退款');
+
+            // 回调地址由服务端赋值，客户端不可指定
+            forceServerValue(params, 'notify_url', payConfig.refundNotifyUrl);
+
+            // 退款金额上限校验钩子：必须在调微信之前
+            await this._verifyRefundAmountBeforeRefund(params);
+
             const result = await this.strategy.refund(params);
 
             if (result.status === 200 && result.data) {
@@ -175,7 +402,8 @@ class PayService {
         }
     }
 
-    async queryRefund(params) {
+    async queryRefund(params, identity = null) {
+        await this._verifyOrderOwnerBefore(params, identity, '查询退款');
         return this.strategy.queryRefund(params);
     }
 
@@ -190,22 +418,25 @@ class PayService {
      * 2. 系统错误/资金不足/频率超限时，必须用相同参数重试，勿更换单号
      * 3. user_name 字段规则：< 0.3元不填，≥ 2000元必填
      */
-    async transfer(params) {
+    async transfer(params, identity = null) {
         try {
-            // 注入通用参数
+            // 转账权限校验：收款 openid 与金额都来自请求体，不能只看「已登录」
+            await this._verifyTransferAllowedBefore(params, identity);
+
+            // 注入通用参数（appid / 回调地址由服务端赋值，客户端不可指定）
             // 根据 useServiceAccount 参数选择 appId（支持服务号/小程序双账号）
             if (params.useServiceAccount) {
                 if (!payConfig.serviceAppId) {
                     throw new Error('useServiceAccount=true 但未配置 service_app_id 环境变量，请在 CloudBase 控制台为 pay-common 云函数添加该环境变量');
                 }
-                params.appid = payConfig.serviceAppId;
+                forceServerValue(params, 'appid', payConfig.serviceAppId);
             } else {
-                params.appid = params.appid || payConfig.appId;
+                forceServerValue(params, 'appid', payConfig.appId);
             }
             // 用完删除，不传给微信支付 API
             delete params.useServiceAccount;
             // 转账回调 URL
-            params.notify_url = params.notify_url || payConfig.transferNotifyUrl || '';
+            forceServerValue(params, 'notify_url', payConfig.transferNotifyUrl);
 
             const result = await this.strategy.transfer(params);
 
@@ -227,14 +458,16 @@ class PayService {
     /**
      * 商户单号查询转账单（升级版）
      */
-    async queryTransferBill(params) {
+    async queryTransferBill(params, identity = null) {
+        await this._verifyTransferQueryBefore(params, identity);
         return this.strategy.queryTransferBill(params);
     }
 
     /**
      * 微信单号查询转账单（升级版）
      */
-    async queryTransferBillByNo(params) {
+    async queryTransferBillByNo(params, identity = null) {
+        await this._verifyTransferQueryBefore(params, identity);
         return this.strategy.queryTransferBillByNo(params);
     }
 
@@ -242,22 +475,10 @@ class PayService {
      * 商家转账回调处理
      */
     async handleTransferCallback(callbackParams) {
-        let transferResult;
-
-        if (signMode === 'gateway' && callbackParams.decryptedData) {
-            // 网关模式：集成中心已解密，直接使用明文
-            transferResult = callbackParams.decryptedData;
-        } else {
-            // SDK 模式（或网关模式但无解密数据时回退）：自己验签 + 解密
-            const verified = await this.strategy.verifySign(callbackParams);
-            if (!verified) {
-                console.error('[PayService] 转账回调验签失败');
-                return null;
-            }
-
-            const { ciphertext, associated_data, nonce } = callbackParams.body.resource;
-            transferResult = await this.strategy.decryptResource(ciphertext, associated_data, nonce);
-        }
+        const transferResult = await this._resolveCallbackPayload(
+            callbackParams, '转账', ['out_bill_no', 'state']
+        );
+        if (!transferResult) return null;
 
         console.info('[PayService] 转账回调结果: out_bill_no=%s, state=%s', transferResult?.out_bill_no, transferResult?.state);
 

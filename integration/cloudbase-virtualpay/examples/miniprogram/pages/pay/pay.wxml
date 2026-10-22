@@ -1,0 +1,72 @@
+<view class="container">
+
+  <!-- 环境信息 -->
+  <view class="card">
+    <view class="card-title">运行环境</view>
+    <view class="tip">{{envTip}}</view>
+  </view>
+
+  <!-- 商品选择 -->
+  <view class="card">
+    <view class="card-title">购买商品</view>
+
+    <view class="row">
+      <text class="label">支付模式</text>
+      <radio-group bindchange="onModeChange" class="value">
+        <radio value="goods" checked="true" />道具直购
+        <radio value="coin" style="margin-left:20rpx;" />代币充值
+      </radio-group>
+    </view>
+
+    <view class="row" wx:if="{{mode === 'short_series_goods'}}">
+      <text class="label">道具</text>
+      <picker mode="selector" range="{{products}}" range-key="name" value="{{productIndex}}" bindchange="onProductChange">
+        <view class="picker">
+          {{products[productIndex].name}}（¥{{products[productIndex].price / 100}}）
+        </view>
+      </picker>
+    </view>
+
+    <view class="row">
+      <text class="label">数量</text>
+      <input class="value" type="number" value="{{buyQuantity}}" bindinput="onQuantityInput" style="text-align:right;width:200rpx;" />
+    </view>
+
+    <view class="row">
+      <text class="label">合计</text>
+      <text class="value highlight">¥{{products[productIndex].price * buyQuantity / 100}}</text>
+    </view>
+  </view>
+
+  <!-- 操作 -->
+  <view class="card">
+    <view class="card-title">操作</view>
+    <view class="btn" bindtap="handlePay" wx:if="{{!loading}}">立即购买</view>
+    <view class="btn" disabled wx:else>处理中...</view>
+
+    <view class="tip">
+      调用方式：wx.cloud.callHTTPFunction，平台自动注入 x-wx-openid，无需额外鉴权配置。
+    </view>
+
+    <view class="btn-group" style="margin-top:20rpx;">
+      <view class="btn secondary" bindtap="handleQuery">查询订单</view>
+      <view class="btn secondary" wx:if="{{isIOS}}" bindtap="handleRefundGuide">iOS 退款说明</view>
+    </view>
+
+    <view class="tip">
+      业务单号：{{outTradeNo || '（未下单）'}}
+      <text wx:if="{{outTradeNo}}" bindtap="onCopyTradeNo" style="color:#07c160;margin-left:12rpx;">复制</text>
+    </view>
+
+    <view class="warn">
+      ⚠️ 虚拟支付必须真机测试（模拟器不支持），并确保道具已在 MP 后台发布超过半小时。
+    </view>
+  </view>
+
+  <!-- 结果 -->
+  <view class="card" wx:if="{{result}}">
+    <view class="card-title">结果</view>
+    <view class="result">{{result}}</view>
+  </view>
+
+</view>

@@ -2,13 +2,18 @@
 
 > 基于 `pay-common/README.md` §路由表。下单/查询/退款/转账路由前缀为 `/wxpay_*`，回调路由为 `/*Trigger`。
 
+> ⚠️ **查询 / 关单 / 退款 / 查退款 / 转账 / 转账单查询** 在鉴权之后还要过归属钩子
+> （`verifyOrderOwner` / `verifyTransferAllowed`），模板默认 `{ ok: false }` → **403**。
+> 联调设 `PAY_GUARD=off`；上线前实现钩子并返回 `{ ok: true }`。
+> 只有下单路由不受影响。
+
 ---
 
 ## 下单路由
 
 | 路由 | 方法 | 说明 | 必传字段 |
 |------|------|------|---------|
-| `/wxpay_order` | POST | JSAPI/小程序下单 | description, out_trade_no, amount.total(CNY分), payer.openid |
+| `/wxpay_order` | POST | JSAPI/小程序下单 | description, out_trade_no, amount.total(CNY分)；`payer.openid` **不需要传**，由平台注入的 `x-wx-openid` 覆盖 |
 | `/wxpay_order_h5` | POST | H5 下单 | 同上 + scene_info(payer_client_ip, h5_info) |
 | `/wxpay_order_native` | POST | Native 扫码下单 | 同上 + scene_info(payer_client_ip)，无需 openid |
 
@@ -39,9 +44,9 @@
 
 | 路由 | 方法 | 说明 |
 |------|------|------|
-| `/unifiedOrderTrigger` | POST | 支付回调通知（SDK 模式） |
-| `/refundTrigger` | POST | 退款回调通知（SDK 模式） |
-| `/transferTrigger` | POST | 转账回调通知（SDK 模式） |
+| `/unifiedOrderTrigger` | POST | 支付回调通知（自建回调模式） |
+| `/refundTrigger` | POST | 退款回调通知（自建回调模式） |
+| `/transferTrigger` | POST | 转账回调通知（自建回调模式） |
 
 ---
 
@@ -55,11 +60,11 @@
 | 4 | 必须在商户平台设置 APIv3 密钥 | 未设置 = 收不到任何回调通知 |
 | 5 | 回调处理必须在 5 秒内返回应答 | 超时触发重试（~15 次/最长 24h） |
 
-> **简单总结：SDK 模式 = 开 HTTP 访问服务 → 关掉回调路由身份认证 → 设 APIv3 密钥 → 回调 URL 写完整 → 5 秒内返回**
+> **简单总结：自建回调模式 = 开 HTTP 访问服务 → 关掉回调路由身份认证 → 设 APIv3 密钥 → 回调 URL 写完整 → 5 秒内返回**
 >
-> **对比 Gateway 模式**：回调地址由集成中心自动生成，直接复制填入即可，无特殊部署约束。
+> **对比 集成中心托管模式**：回调地址由集成中心自动生成，直接复制填入即可，无特殊部署约束。
 >
-> 详细操作步骤见 `references/模板接入/quick-start.md` Step 4.2-4.5
+> 详细操作步骤见 `references/template-onboarding/quick-start.md` Step 4.2-4.5
 
 ---
 

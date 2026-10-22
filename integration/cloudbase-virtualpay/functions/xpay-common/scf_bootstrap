@@ -1,0 +1,4 @@
+#!/bin/bash
+# SCF 云函数环境：平台固定使用 9000 端口，不可更改
+export PORT=9000
+node ./bin/www

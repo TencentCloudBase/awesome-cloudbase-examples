@@ -76,14 +76,13 @@ has_var() {
 
 # --- 检查项 ---
 
-# 1. signMode 必填且合法
-if has_var "signMode"; then
-    SM=$(load_env_var "signMode")
-    if [[ "$SM" != "sdk" && "$SM" != "gateway" ]]; then
-        ERRORS+=("signMode='$SM' is invalid: must be 'sdk' or 'gateway'")
+# 1. notifyURLCallbackType（平台注入的回调声明）可选，填了就必须合法
+#    不填 = 自建公网回调，按自验签处理（fail closed），这是合法的本地/自建形态
+if has_var "notifyURLCallbackType"; then
+    SM=$(load_env_var "notifyURLCallbackType")
+    if [[ "$SM" != "system" && "$SM" != "ownservice" && -n "$SM" ]]; then
+        ERRORS+=("notifyURLCallbackType='$SM' is invalid: must be 'system', 'ownservice' or empty")
     fi
-else
-    ERRORS+=("signMode is REQUIRED but missing")
 fi
 
 # 2. 基础信息必填
@@ -173,14 +172,14 @@ if has_var "merchantSerialNumber"; then
     fi
 fi
 
-# 10. signMode 与回调 URL 一致性检查
-if has_var "signMode" && has_var "notifyURLPayURL"; then
-    SM=$(load_env_var "signMode")
+# 10. notifyURLCallbackType 与回调 URL 一致性检查
+if has_var "notifyURLCallbackType" && has_var "notifyURLPayURL"; then
+    SM=$(load_env_var "notifyURLCallbackType")
     URL=$(load_env_var "notifyURLPayURL")
     if [[ "$SM" == "sdk" && "$URL" == *integration-* ]]; then
-        ERRORS+=("signMode=sdk but notifyURLPayURL points to integration center ($URL) — mismatch!")
+        ERRORS+=("notifyURLCallbackType 未声明（自建回调） but notifyURLPayURL points to integration center ($URL) — mismatch!")
     elif [[ "$SM" == "gateway" && "$URL" != *integration-* && "$URL" != *tcloudbase.com*wechatpay* ]]; then
-        WARNINGS+=("signMode=gateway but notifyURLPayURL does not look like an integration center URL ($URL) — verify it's correct")
+        WARNINGS+=("notifyURLCallbackType=system（集成中心托管） but notifyURLPayURL does not look like an integration center URL ($URL) — verify it's correct")
     fi
 fi
 

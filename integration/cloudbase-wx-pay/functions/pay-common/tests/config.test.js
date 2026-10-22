@@ -42,7 +42,6 @@ describe('validateConfig', () => {
         process.env.apiV3Key = 'abcdefghijklmnopqrstuvwxyz123456';
         process.env.merchantSerialNumber = 'ABC123DEF456';
         process.env.privateKey = '-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----';
-        process.env.signMode = 'sdk';
         process.env.notifyURLPayURL = 'https://example.com/pay/callback';
 
         const config = loadConfig();
@@ -152,19 +151,46 @@ describe('validateConfig', () => {
         assert.ok(errors.some(e => e.includes('?')));
     });
 
-    // ========== signMode 校验 ==========
+    // ========== 回调类型声明（notifyURLCallbackType，免验签的唯一依据）==========
 
-    it('signMode 无效值 → 报错', () => {
+    it('声明 system + 回调地址已配 → 无提示', () => {
         process.env.appId = 'wx_test';
         process.env.merchantId = '1234567890';
         process.env.apiV3Key = 'test_key_32_bytes_long!!';
         process.env.merchantSerialNumber = 'ABC123';
         process.env.privateKey = 'test_key';
-        process.env.signMode = 'invalid_mode'; // 非法值
+        process.env.notifyURLCallbackType = 'system';
+        process.env.notifyURLPayURL = 'https://integration-xxx.tcloudbase.com/wechatpay/order';
 
-        const config = loadConfig();
-        const errors = config.validateConfig();
-        assert.ok(errors.some(e => e.includes('signMode') && e.includes('无效')));
+        const errors = loadConfig().validateConfig();
+        assert.ok(!errors.some(e => e.includes('notifyURLCallbackType')));
+    });
+
+    it('声明 system 但三个回调地址全空 → 报错（声明与配置不一致）', () => {
+        process.env.appId = 'wx_test';
+        process.env.merchantId = '1234567890';
+        process.env.apiV3Key = 'test_key_32_bytes_long!!';
+        process.env.merchantSerialNumber = 'ABC123';
+        process.env.privateKey = 'test_key';
+        process.env.notifyURLCallbackType = 'system';
+        delete process.env.notifyURLPayURL;
+        delete process.env.notifyURLRefundsURL;
+        delete process.env.transferNotifyUrl;
+
+        const errors = loadConfig().validateConfig();
+        assert.ok(errors.some(e => e.includes('notifyURLCallbackType=system 声明回调由网关托管')));
+    });
+
+    it('未声明（自建公网回调）→ 不报错，按自验签处理', () => {
+        process.env.appId = 'wx_test';
+        process.env.merchantId = '1234567890';
+        process.env.apiV3Key = 'test_key_32_bytes_long!!';
+        process.env.merchantSerialNumber = 'ABC123';
+        process.env.privateKey = 'test_key';
+        delete process.env.notifyURLCallbackType;
+
+        const errors = loadConfig().validateConfig();
+        assert.ok(!errors.some(e => e.includes('notifyURLCallbackType')));
     });
 
     // ========== 公钥模式关联校验 ==========
@@ -200,8 +226,9 @@ describe('validateConfig', () => {
 
     // ========== 默认值回退 ==========
 
-    it('不设 signMode → 默认为 gateway', () => {
-        delete process.env.signMode;
+    it('不设 notifyURLCallbackType → 空（= 自验签，fail closed）', () => {
+        delete process.env.notifyURLCallbackType;
+        delete process.env.notifyUrlCallbackType;
         process.env.appId = 'wx_test';
         process.env.merchantId = '1234567890';
         process.env.apiV3Key = 'test_key_32_bytes_long!!';
@@ -209,7 +236,7 @@ describe('validateConfig', () => {
         process.env.privateKey = 'test_key';
 
         const config = loadConfig();
-        assert.strictEqual(config.signMode, 'gateway');
+        assert.strictEqual(config.notifyUrlCallbackType, '');
     });
 
     it('不设 wxPayPublicKey → verifyMode 为 certificate', () => {
@@ -280,5 +307,49 @@ describe('validateConfig', () => {
         const errors = config.validateConfig();
         // 不应有 URL 格式相关的错误
         assert.ok(!errors.some(e => e.includes('https://') || e.includes('localhost') || e.includes('?')));
+    });
+});
+
+describe('shouldRefuseBoot（云上 + PAY_GUARD=off 才拒绝启动）', () => {
+
+    const { shouldRefuseBoot } = require('../config/config');
+    const CLOUD = { SCF_RUNTIME: 'Nodejs18.15' };
+
+    it('本地 + PAY_GUARD=off → 放行（npm run dev 不需要任何额外变量）', () => {
+        assert.strictEqual(shouldRefuseBoot({ PAY_GUARD: 'off' }), false);
+    });
+
+    it('本地 + 不设 PAY_GUARD → 放行（生产态，钩子全部生效）', () => {
+        assert.strictEqual(shouldRefuseBoot({}), false);
+    });
+
+    it('⛔ 云上 + PAY_GUARD=off → 拒绝启动', () => {
+        assert.strictEqual(shouldRefuseBoot({ ...CLOUD, PAY_GUARD: 'off' }), true);
+    });
+
+    it('⛔ 云托管（TENCENTCLOUD_RUNENV）+ PAY_GUARD=off → 拒绝启动', () => {
+        assert.strictEqual(
+            shouldRefuseBoot({ TENCENTCLOUD_RUNENV: 'cloudrun', PAY_GUARD: 'off' }), true);
+    });
+
+    it('云上 + PAY_GUARD=on / 不设 → 放行（正常生产形态）', () => {
+        assert.strictEqual(shouldRefuseBoot({ ...CLOUD, PAY_GUARD: 'on' }), false);
+        assert.strictEqual(shouldRefuseBoot({ ...CLOUD }), false);
+    });
+
+    it('云上 + off + 显式 PAY_ALLOW_INSECURE_BOOT=true → 放行（云上联调）', () => {
+        assert.strictEqual(
+            shouldRefuseBoot({ ...CLOUD, PAY_GUARD: 'off', PAY_ALLOW_INSECURE_BOOT: 'true' }), false);
+    });
+
+    it('大小写 / 空格不改变判定', () => {
+        assert.strictEqual(shouldRefuseBoot({ ...CLOUD, PAY_GUARD: ' OFF ' }), true);
+        assert.strictEqual(
+            shouldRefuseBoot({ ...CLOUD, PAY_GUARD: 'off', PAY_ALLOW_INSECURE_BOOT: ' TRUE ' }), false);
+    });
+
+    it('PAY_ALLOW_INSECURE_BOOT 只对「云上 + off」生效，不会把 on 变成放行 off', () => {
+        assert.strictEqual(
+            shouldRefuseBoot({ PAY_GUARD: 'on', PAY_ALLOW_INSECURE_BOOT: 'true' }), false);
     });
 });

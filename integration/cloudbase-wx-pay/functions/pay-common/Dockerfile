@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:24-alpine
 
 # 容器默认时区为UTC，如需使用上海时间请启用以下时区设置命令
 RUN apk add --no-cache tzdata ca-certificates \
@@ -16,7 +16,6 @@ ENV PORT=80
 # 正式环境请在云托管控制台 → 服务设置 → 环境变量中配置，不要把密钥写在 Dockerfile 里。
 # 本地开发请复制 .env.example 为 .env 并填入实际值。
 # 以下仅为占位声明，实际值通过运行时注入。
-ENV signMode=sdk
 ENV corsAllowOrigin=""
 ENV appId=""
 ENV merchantId=""
@@ -28,6 +27,12 @@ ENV wxPayPublicKeyId=""
 ENV notifyURLPayURL=""
 ENV notifyURLRefundsURL=""
 ENV transferNotifyUrl=""
+
+# 唯一的防护闸门（on / off）：
+#   on  → orderService 的 4 个钩子全部生效（下单退款 400、查单退款转账 403），生产态
+#   off → 跳过 4 个钩子，金额与订单归属全由客户端决定（仅本地联调）
+# 不设即 on。⚠️ 不要改成 off —— 镜像一旦这么部署，任何人都能改金额、操作别人的订单。
+ENV PAY_GUARD=on
 
 # 拷贝包管理文件
 COPY package*.json /app/

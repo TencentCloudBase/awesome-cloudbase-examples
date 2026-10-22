@@ -1,6 +1,5 @@
 {
   "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
-  "version": "2.0",
   "envId": "{{env.TCB_ENV_ID}}",
 
   "_comment": "此文件仅作为项目元数据索引，实际部署请进入各子目录使用独立的 cloudbaserc.json",
@@ -15,12 +14,11 @@
       "name": "pay-common",
       "type": "HTTP",
       "timeout": 30,
-      "runtime": "Nodejs18.15",
+      "runtime": "Nodejs24.11",
       "handler": "index.main",
       "memorySize": 256,
       "installDependency": true,
       "envVariables": {
-        "signMode": "{{env.SIGN_MODE}}",
         "appId": "{{env.WX_APP_ID}}",
         "merchantId": "{{env.MCH_ID}}",
         "merchantSerialNumber": "{{env.MCH_SERIAL_NO}}",

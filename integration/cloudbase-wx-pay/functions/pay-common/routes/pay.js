@@ -4,8 +4,8 @@ const payController = require('../controllers/payController');
 
 // ========== 下单（鉴权保护）==========
 
-// JSAPI / 小程序下单
-router.post('/wxpay_order', payController.payMiddleware, payController.unifiedOrder);
+// JSAPI / 小程序下单：必须有微信 openid（纯 UID 身份回 403，与匿名 401 区分）
+router.post('/wxpay_order', payController.payMiddleware, payController.requireWechatOpenId, payController.unifiedOrder);
 // H5 下单（额外安全中间件：Origin 白名单 + 登录态）
 router.post('/wxpay_order_h5', payController.h5SecurityMiddleware, payController.unifiedOrderH5);
 // Native 扫码下单

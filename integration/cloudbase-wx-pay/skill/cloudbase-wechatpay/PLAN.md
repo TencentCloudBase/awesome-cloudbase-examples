@@ -41,7 +41,7 @@
 | 用户类型 | 典型 prompt | 需要什么 |
 |---------|------------|---------|
 | **外部客户-入门** | "我要在小程序里加支付功能" | 手把手引导，Quick Start |
-| **外部客户-进阶** | "怎么配 Gateway 签名模式" | 详细配置文档 |
+| **外部客户-进阶** | "怎么配 Gateway 回调处理模式" | 详细配置文档 |
 | **内部支撑** | "客户说签名失败，帮我看看" | 诊断脚本 + 排障速查 |
 | **AI Agent** | 自动调用 skill 帮用户接入 | 结构化决策树 + Demo 索引 |
 
@@ -66,29 +66,36 @@
 
 ```
 cloudbase-wechatpay/
-├── SKILL.md                              # 路由表 + 决策树 + 全局规范（≤400行）
-├── references/                           # 按场景分层的详细文档
-│   ├── 方案选型/
+├── SKILL.md                                  # 路由表 + 决策树 + 全局规范（≤400行）
+├── references/                               # 按场景分层的详细文档
+│   ├── api-routes.md                         # HTTP API 路由与鉴权速查
+│   ├── solution-selection/
 │   │   └── cloudbase-pay-overview.md         # CloudBase 支付方案全景 + 选型决策树
-│   ├── 模板接入/
+│   ├── template-onboarding/
 │   │   ├── quick-start.md                    # 5 分钟快速开始（从 0 到下单成功）
 │   │   ├── env-config.md                     # 环境变量完整配置指南
-│   │   └── sign-mode.md                      # SDK 模式 vs Gateway 模式详解
-│   ├── 部署/
+│   │   ├── merchant-credentials.md           # 商户号/证书/密钥准备与校验
+│   │   ├── integration-center.md             # 集成中心开通与配置
+│   │   ├── callback-mode.md                      # 自建回调模式 vs 集成中心托管模式详解
+│   │   └── verify-mode.md                    # 公钥验签 vs 证书验签
+│   ├── deployment/
 │   │   ├── deploy-cloud-function.md          # 部署为 HTTP 云函数
 │   │   ├── deploy-cloud-run.md               # 部署为云托管（Docker）
 │   │   └── deploy-local.md                   # 本地开发调试
-│   ├── 前端集成/
+│   ├── frontend-integration/
 │   │   ├── miniprogram-cloud-api.md          # 小程序 - 云API调用（推荐）
 │   │   ├── miniprogram-cloud-run.md          # 小程序 - 云托管直连
 │   │   ├── web-h5.md                         # H5 页面（手机浏览器）
 │   │   ├── web-native.md                     # PC 扫码支付
-│   │   └── app.md                            # APP 端
-│   ├── 业务开发/
+│   │   └── weda-miniprogram.md               # 微搭小程序集成
+│   ├── quick-reference/
+│   │   ├── concepts.md                       # 核心概念与术语速查
+│   │   └── env-quick-ref.md                  # 环境变量速查表
+│   ├── business-logic/
 │   │   ├── order-service.md                  # orderService 数据库集成
 │   │   ├── transfer.md                       # 商家转账注意事项
 │   │   └── security-checklist.md             # 安全红线 + 上线清单
-│   └── 问题排查/
+│   └── troubleshooting/
 │       ├── troubleshooting.md                # 常见问题速查表（20+ 条目）
 │       └── error-patterns.md                 # 签名/回调/部署 错误模式详解
 ├── scripts/
@@ -123,7 +130,7 @@ L3: scripts/ 脚本执行                      ← 排障时按需调用
 | 维度 | 内容 |
 |------|------|
 | **触发 prompt** | "我要在小程序里加支付" / "pay-common 和云调用区别" / "支付方案怎么选" |
-| **加载文档** | `references/方案选型/cloudbase-pay-overview.md` |
+| **加载文档** | `references/solution-selection/cloudbase-pay-overview.md` |
 | **内容来源** | `pay-common-方案对比分析.md` + `微信支付三种方式对比报告.md` |
 | **引用关系** | 支付方式选型（JSAPI/H5/Native/APP）→ 引用 `wechatpay-basic-payment` 能力1 |
 
@@ -147,8 +154,8 @@ L3: scripts/ 脚本执行                      ← 排障时按需调用
 | 维度 | 内容 |
 |------|------|
 | **触发 prompt** | "怎么用 pay-common" / "环境变量怎么配" / "SDK 和 Gateway 什么区别" |
-| **加载文档** | `quick-start.md` / `env-config.md` / `sign-mode.md`（按需） |
-| **内容来源** | `pay-common/README.md`（§前提条件、§铁律、§Step 1‑3、§签名模式详解） + `开发注意事项与模板使用指南.md` + `pay-common-best-practices.md` |
+| **加载文档** | `quick-start.md` / `env-config.md` / `callback-mode.md`（按需） |
+| **内容来源** | `pay-common/README.md`（§前提条件、§铁律、§Step 1‑3、§回调处理模式详解） + `开发注意事项与模板使用指南.md` + `pay-common-best-practices.md` |
 
 **子能力拆分**：
 
@@ -156,13 +163,13 @@ L3: scripts/ 脚本执行                      ← 排障时按需调用
 |--------|------|---------|
 | 快速开始 | `quick-start.md` | 5 步走：获取凭证 → 配环境变量 → 部署 → 配回调 → 前端接入 |
 | 环境变量 | `env-config.md` | 完整配置项清单 + 必填/选填标注 + 配置示例（SDK/Gateway 双模式） |
-| 签名模式 | `sign-mode.md` | SDK 直签 vs Gateway 代签，各自适用场景 + 切换方式 + 回调地址差异 |
+| 回调处理模式 | `callback-mode.md` | SDK 直签 vs Gateway 代签，各自适用场景 + 切换方式 + 回调地址差异 |
 
 **关键要点（来自 README）**：
 - **铁律**：金额单位（分）、订单号全局唯一、下单与调起使用同一私钥
 - **前提条件**：商户号、API 证书序列号、私钥文件、微信支付公钥、APIv3 密钥、AppID
-- **配置示例**：SDK 模式与 Gateway 模式的 `.env` 示例
-- **签名模式详解**：`signMode=sdk`（自行验签解密） vs `signMode=gateway`（集成中心解密转发）
+- **配置示例**：自建回调模式与 集成中心托管模式的 `.env` 示例
+- **回调处理模式详解**：未声明 `notifyURLCallbackType`（自建回调）（自行验签解密） vs `notifyURLCallbackType=system`（集成中心解密转发）
 
 ### 能力 3：部署
 
@@ -220,7 +227,7 @@ L3: scripts/ 脚本执行                      ← 排障时按需调用
 | 签名失败 | PEM 换行符问题（`\\n` vs 真换行） | `scripts/check_pem_format.py` | env-config.md |
 | 签名失败 | 公钥搞混（用了 API 证书公钥而非微信支付公钥） | 检查 WECHATPAY_PUBLIC_KEY 来源 | env-config.md |
 | 回调收不到 | URL 不通 / 未开 HTTP 访问服务 | `scripts/test_callback_url.sh` | deploy-*.md |
-| 回调收不到 | signMode 与回调地址不匹配 | 检查 signMode + notifyURL | sign-mode.md |
+| 回调收不到 | notifyURLCallbackType 与回调地址不匹配 | 检查 notifyURLCallbackType + notifyURL | callback-mode.md |
 | 商户号错误 | mchId 未从后端返回 | 检查转账流程 mchId 透传 | transfer.md |
 | 登录失败 | ENV_ID 未替换或身份源未开启 | 检查前端 app.js 配置；确认控制台已开启小程序身份源 | miniprogram-*.md |
 | openid 缺失 | JWT 中未包含 openid | 确认使用 signInWithOpenId | miniprogram-*.md |
@@ -349,7 +356,7 @@ description: >
 | `cloudbase-pay-overview.md` | 方案对比分析 + 上下文分享 | 三种方式对比 |
 | `quick-start.md` | README Step 1-3 + 最佳实践路径 | 开发注意事项 §4.1 |
 | `env-config.md` | README 环境变量 + 开发注意事项 §2.1-2.3 | 架构设计笔记 |
-| `sign-mode.md` | README 签名模式详解 + 开发注意事项 §2.3 | 架构设计笔记 |
+| `callback-mode.md` | README 回调处理模式详解 + 开发注意事项 §2.3 | 架构设计笔记 |
 | `deploy-cloud-function.md` | README Step 4 方式一 | cloudbaserc.json |
 | `deploy-cloud-run.md` | README Step 4 方式二 + cloudrun Demo README | Dockerfile |
 | `deploy-local.md` | README 本地开发 | - |
@@ -357,7 +364,7 @@ description: >
 | `miniprogram-cloud-run.md` | cloudrun Demo README + `examples/miniprogram-cloudrun/` | - |
 | `web-h5.md` | README + `examples/react/` | 三种方式对比 |
 | `web-native.md` | README + `examples/react/` | 三种方式对比 |
-| `app.md` | README APP 支付章节 | wechatpay-basic-payment 引用 |
+
 | `order-service.md` | README Step 6 + 方案对比分析（数据库设计） | - |
 | `transfer.md` | README 商家转账 + 商家转账分析 + 开发注意事项 §2.5 | - |
 | `security-checklist.md` | 开发注意事项 §6 安全红线 | - |
@@ -378,7 +385,7 @@ description: >
 | **Step 6** | 接入业务逻辑（orderService） | `order-service.md` |
 | **路由表** | 下单、查询、退款、转账、回调等全部路由 | SKILL.md API 路由速查表 |
 | **⚠️ 注意事项** | AppID 类型对应、有效期、APP 签名格式差异、查单兜底、回调处理要求、回调 IP 白名单 | `troubleshooting.md`、`error-patterns.md`、`security-checklist.md` |
-| **签名模式详解** | `signMode=sdk` vs `gateway`，主动请求与回调处理差异 | `sign-mode.md` |
+| **回调处理模式详解** | 未声明（自建回调，自验签） vs `system`（集成中心托管），主动请求与回调处理的差异 | `callback-mode.md` |
 | **目录结构** | 项目文件组织 | `assets/architecture.md` |
 
 ---
@@ -430,10 +437,10 @@ description: >
 | # | 任务 | 产出 | 依赖 |
 |---|------|------|------|
 | 1 | 编写 SKILL.md 主文件 | `SKILL.md` (~400行) | 无 |
-| 2 | 编写快速开始文档 | `references/模板接入/quick-start.md` | README + best-practices |
-| 3 | 编写环境变量配置文档 | `references/模板接入/env-config.md` | README + 开发注意事项 |
-| 4 | 编写签名模式文档 | `references/模板接入/sign-mode.md` | README + architecture |
-| 5 | 编写问题排查速查表 | `references/问题排查/troubleshooting.md` | 开发注意事项 §5 |
+| 2 | 编写快速开始文档 | `references/template-onboarding/quick-start.md` | README + best-practices |
+| 3 | 编写环境变量配置文档 | `references/template-onboarding/env-config.md` | README + 开发注意事项 |
+| 4 | 编写回调处理模式文档 | `references/template-onboarding/callback-mode.md` | README + architecture |
+| 5 | 编写问题排查速查表 | `references/troubleshooting/troubleshooting.md` | 开发注意事项 §5 |
 | 6 | 开发 .env 校验脚本 | `scripts/validate_env.sh` | env-config.md |
 | 7 | 开发 PEM 格式检查脚本 | `scripts/check_pem_format.py` | 无 |
 | 8 | 冒烟测试（加载 + 路由验证） | 测试通过 | 1-7 全部完成 |
@@ -442,11 +449,11 @@ description: >
 
 | # | 任务 | 产出 |
 |---|------|------|
-| 9 | 编写方案选型文档 | `references/方案选型/cloudbase-pay-overview.md` |
-| 10 | 编写三种部署方式文档（×3） | `references/部署/deploy-*.md` |
-| 11 | 编写前端集成文档（×5） | `references/前端集成/*.md` |
-| 12 | 编写业务开发文档（×3） | `references/业务开发/*.md` |
-| 13 | 编写错误模式详解 | `references/问题排查/error-patterns.md` |
+| 9 | 编写方案选型文档 | `references/solution-selection/cloudbase-pay-overview.md` |
+| 10 | 编写三种部署方式文档（×3） | `references/deployment/deploy-*.md` |
+| 11 | 编写前端集成文档（×5） | `references/frontend-integration/*.md` |
+| 12 | 编写业务开发文档（×3） | `references/business-logic/*.md` |
+| 13 | 编写错误模式详解 | `references/troubleshooting/error-patterns.md` |
 | 14 | 开发部署配置检查脚本 | `scripts/check_deploy_config.py` |
 | 15 | 开发回调 URL 测试脚本 | `scripts/test_callback_url.sh` |
 | 16 | 编写架构图 | `assets/architecture.md` |
@@ -490,11 +497,11 @@ description: >
 
 | 扩展方向 | 预留入口 | 时机 |
 |---------|---------|------|
-| CLI 集成中心创建 | `references/部署/cli-integration.md` | CLI 集成中心上线后 |
+| CLI 集成中心创建 | `references/deployment/cli-integration.md` | CLI 集成中心上线后 |
 | Git 模板仓库上架 | `quick-start.md` 中预留"从模板仓库创建"章节 | 模板上架后 |
-| 小程序云调用方案 | `references/方案选型/` 预留 `cloud-call.md` | 功能开发后 |
+| 小程序云调用方案 | `references/solution-selection/` 预留 `cloud-call.md` | 功能开发后 |
 | 数据库集成示例 | `order-service.md` 预留 CloudBase 数据库 SDK 示例 | 有需求时 |
-| 更多前端框架 | `references/前端集成/` 可扩展 Vue/React 示例 | 有 Demo 后 |
+| 更多前端框架 | `references/frontend-integration/` 可扩展 Vue/React 示例 | 有 Demo 后 |
 
 ---
 
@@ -505,7 +512,7 @@ description: >
 | 术语 | 说明 |
 |------|------|
 | `pay-common` | CloudBase 微信支付通用模板（Node.js + Express） |
-| `signMode` | 签名模式，`sdk`=SDK直签，`gateway`=网关代签 |
+| `notifyURLCallbackType` | 平台注入的回调声明：`system`=网关代验签，空/`ownservice`=本函数自验签 |
 | `signInWithOpenId` | CloudBase 客户端 SDK 静默登录方法 |
 | `accessToken` | CloudBase 认证令牌，用于调用云API |
 | `HTTP 云函数` | CloudBase 支持 HTTP 触发的 Serverless 函数 |
