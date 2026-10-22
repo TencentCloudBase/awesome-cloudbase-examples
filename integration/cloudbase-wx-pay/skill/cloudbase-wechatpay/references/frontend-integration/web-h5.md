@@ -14,6 +14,54 @@
 
 ---
 
+## 登录：H5 必须先拿 access_token
+
+小程序不需要登录（平台注入 `x-wx-openid`），H5 没有这条路：浏览器里没有平台头，
+而 `/wxpay_order_h5` 要求 `Authorization: Bearer <CloudBase Auth access_token>`。
+
+函数侧只解 JWT payload 取 `sub`（CloudBase UID）作为订单归属，**不验签** ——
+验签是前置网关的职责，所以 H5 必须经网关访问，不要公网直连函数端口。
+
+### 拿到 token 的三条路
+
+| 场景 | 前端 | 后端 |
+|---|---|---|
+| 微信内浏览器（公众号网页） | `auth.weixinAuthProvider({ appid, scope: 'snsapi_base' }).signInWithRedirect()` | 无 |
+| 微信外浏览器 | `auth.customAuthProvider().signIn(ticket)` | 自家后端用 CloudBase 服务端 SDK 签发 ticket，绑定用户 uid |
+| 快速验证（**不可上线**） | `auth.anonymousAuthProvider().signIn()` | 无（清 cookie 就换 uid，订单归属形同虚设） |
+
+### `getCloudBaseAccessToken()` 的实现
+
+```javascript
+import cloudbase from '@cloudbase/js-sdk';
+
+const app = cloudbase.init({ env: 'your-env-id' });   // 换成你的云开发环境 ID
+const auth = app.auth({ persistence: 'local' });
+
+export async function getCloudBaseAccessToken() {
+  const loginState = await auth.getLoginState();
+  if (!loginState) throw new Error('H5 未登录：先走登录流程再下单');
+
+  // ⚠️ 取值路径随 SDK 大版本变化，二选一（装哪个版本用哪个，跑通后固定下来）：
+  //    @cloudbase/js-sdk v1 → loginState.credential.accessToken
+  //    @cloudbase/js-sdk v2 → loginState.accessToken
+  const token = loginState.accessToken || loginState.credential?.accessToken;
+  if (!token) throw new Error('登录态存在但取不到 access_token，检查 SDK 版本的取值路径');
+
+  return token;
+}
+```
+
+### 失败对照
+
+| 现象 | 原因 |
+|---|---|
+| 401 `未授权访问` | 没带 Bearer / token 已过期 / `getCloudBaseAccessToken()` 返回空 |
+| 403 CORS / Origin 不允许 | 环境变量 `corsAllowOrigin` 没加当前页面域名 |
+| 403 `凭证缺 provider_sub` | 走错路由了：H5 用 `/wxpay_order_h5`（不需要 openid），`/wxpay_order` 才是 JSAPI |
+
+---
+
 ## 架构流程
 
 ```
@@ -21,7 +69,7 @@
   │
   ├─ 1. 用户选择商品 → 进入结算页
   │
-  ├─ 2. 前端 POST /wxpay_order_h5
+  ├─ 2. 前端 POST /wxpay_order_h5（带 Authorization: Bearer）
   │   - 必传 scene_info（IP + h5_type）
   │   - 无需 openid
   │
@@ -63,6 +111,7 @@ async function h5Pay(description, amountFen) {
     headers: {
       'Content-Type': 'application/json',
       // ⚠️ 必填：H5 路由要求登录态（跨站请求拿不到 token，即 CSRF 防护）
+      // 实现在上面「登录：H5 必须先拿 access_token」小节
       // 服务端还要配环境变量 corsAllowOrigin 白名单，否则 403
       Authorization: `Bearer ${await getCloudBaseAccessToken()}`,
     },
