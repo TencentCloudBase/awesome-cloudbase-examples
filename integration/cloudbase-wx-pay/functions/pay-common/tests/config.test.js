@@ -167,45 +167,62 @@ describe('validateConfig', () => {
         assert.ok(errors.some(e => e.includes('signMode') && e.includes('无效')));
     });
 
-    // ========== 回调类型声明（notifyUrlCallbackType）==========
+    // ========== 回调类型声明（notifyURLCallbackType）==========
 
-    it('signMode=gateway 但未声明 notifyUrlCallbackType=system → 提示将走自验签', () => {
+    it('signMode=gateway 但未声明 notifyURLCallbackType=system → 提示将走自验签', () => {
         process.env.appId = 'wx_test';
         process.env.merchantId = '1234567890';
         process.env.apiV3Key = 'test_key_32_bytes_long!!';
         process.env.merchantSerialNumber = 'ABC123';
         process.env.privateKey = 'test_key';
         process.env.signMode = 'gateway';
-        delete process.env.notifyUrlCallbackType;
+        delete process.env.notifyURLCallbackType;
 
         const errors = loadConfig().validateConfig();
-        assert.ok(errors.some(e => e.includes('notifyUrlCallbackType')));
+        assert.ok(errors.some(e => e.includes('notifyURLCallbackType')));
     });
 
-    it('signMode=gateway + notifyUrlCallbackType=system → 无此提示', () => {
+    it('signMode=gateway + notifyURLCallbackType=system + 回调地址已配 → 无此提示', () => {
         process.env.appId = 'wx_test';
         process.env.merchantId = '1234567890';
         process.env.apiV3Key = 'test_key_32_bytes_long!!';
         process.env.merchantSerialNumber = 'ABC123';
         process.env.privateKey = 'test_key';
         process.env.signMode = 'gateway';
-        process.env.notifyUrlCallbackType = 'system';
+        process.env.notifyURLCallbackType = 'system';
+        process.env.notifyURLPayURL = 'https://integration-xxx.tcloudbase.com/wechatpay/order';
 
         const errors = loadConfig().validateConfig();
-        assert.ok(!errors.some(e => e.includes('notifyUrlCallbackType')));
+        assert.ok(!errors.some(e => e.includes('notifyURLCallbackType')));
     });
 
-    it('signMode=sdk + notifyUrlCallbackType=system → 提示配置矛盾', () => {
+    it('声明 system 但三个回调地址全空 → 报错（声明与配置不一致）', () => {
+        process.env.appId = 'wx_test';
+        process.env.merchantId = '1234567890';
+        process.env.apiV3Key = 'test_key_32_bytes_long!!';
+        process.env.merchantSerialNumber = 'ABC123';
+        process.env.privateKey = 'test_key';
+        process.env.signMode = 'gateway';
+        process.env.notifyURLCallbackType = 'system';
+        delete process.env.notifyURLPayURL;
+        delete process.env.notifyURLRefundsURL;
+        delete process.env.transferNotifyUrl;
+
+        const errors = loadConfig().validateConfig();
+        assert.ok(errors.some(e => e.includes('notifyURLCallbackType=system 声明回调由网关托管')));
+    });
+
+    it('signMode=sdk + notifyURLCallbackType=system → 提示配置矛盾', () => {
         process.env.appId = 'wx_test';
         process.env.merchantId = '1234567890';
         process.env.apiV3Key = 'test_key_32_bytes_long!!';
         process.env.merchantSerialNumber = 'ABC123';
         process.env.privateKey = 'test_key';
         process.env.signMode = 'sdk';
-        process.env.notifyUrlCallbackType = 'system';
+        process.env.notifyURLCallbackType = 'system';
 
         const errors = loadConfig().validateConfig();
-        assert.ok(errors.some(e => e.includes('notifyUrlCallbackType') && e.includes('signMode=sdk')));
+        assert.ok(errors.some(e => e.includes('notifyURLCallbackType') && e.includes('signMode=sdk')));
     });
 
     // ========== 公钥模式关联校验 ==========

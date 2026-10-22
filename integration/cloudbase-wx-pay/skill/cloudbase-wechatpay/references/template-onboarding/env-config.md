@@ -50,7 +50,7 @@ signMode=sdk appId=YOUR_APP_ID merchantId=YOUR_MERCHANT_ID npm start
 | 变量名 | 必填 | 示例值 | 说明 |
 |--------|:----:|--------|------|
 | `signMode` | 是 | `sdk` \| `gateway` | 签名模式。`sdk`=SDK 自验签（自己部署时用）；`gateway`=集成中心代签（控制台创建时用，**也是代码级默认值**）。详见 [sign-mode.md](sign-mode.md) |
-| `notifyUrlCallbackType` | 集成中心自动注入 | `system` | 平台声明回调由谁验签。`system`=网关代验签，采信 `body.ParsedContent` 明文；`ownservice`/空=本函数自己验签（fail closed）。**不要手工覆盖** |
+| `notifyURLCallbackType` | 集成中心自动注入 | `system` | 平台声明回调由谁验签。`system`=网关代验签，采信 `body.ParsedContent` 明文；`ownservice`/空=本函数自己验签（fail closed）。**不要手工覆盖** |
 | **`verifyMode`** | **否**（自动推断） | **`publickey`** \| **`certificate`** | **验签方式。配了 `wxPayPublicKey` → 公钥验签；未配 → 证书自动下载验签。详见 [verify-mode.md](verify-mode.md)** |
 | `appId` | 是 | `YOUR_APP_ID` | 小程序/公众号 AppID，需已在商户平台绑定 |
 | `merchantId` | 是 | `YOUR_MERCHANT_ID` | 微信支付商户号（10 位数字） |

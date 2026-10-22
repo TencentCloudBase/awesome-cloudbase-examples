@@ -13,6 +13,9 @@ const config = {
     /**
      * 平台声明的回调类型（**由集成中心创建实例时自动注入，不要手工填**）
      *
+     * 变量名以平台真实注入的 `notifyURLCallbackType` 为准（URL 全大写）；
+     * 小写写法 `notifyUrlCallbackType` 仅作兼容兜底，不要写进文档。
+     *
      *   system      → 回调地址托管在集成中心，网关代验签 + 代解密，转发 body.ParsedContent
      *   ownservice  → 回调指向本函数，验签解密由本函数完成
      *   空          → 未声明，按「自己验签」处理（fail closed）
@@ -21,10 +24,10 @@ const config = {
      *    signMode 是「部署意图」，任何人都能往函数端口发
      *    {"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}，
      *    光凭 signMode=gateway 无法证明请求真来自网关。
-     *    notifyUrlCallbackType 是平台在实例创建时注入的声明，只有真走集成中心
+     *    notifyURLCallbackType 是平台在实例创建时注入的声明，只有真走集成中心
      *    托管回调才等于 system —— 这才是「明文可以免验签」的依据。
      */
-    notifyUrlCallbackType: (process.env.notifyUrlCallbackType || process.env.notifyURLCallbackType || '')
+    notifyUrlCallbackType: (process.env.notifyURLCallbackType || process.env.notifyUrlCallbackType || '')
         .trim()
         .toLowerCase(),
 
@@ -108,19 +111,44 @@ function validateConfig() {
         errors.push(`signMode 值无效: "${signMode}"，仅支持 "sdk" 或 "gateway"`);
     }
 
-    // 回调由谁验签，以平台注入的 notifyUrlCallbackType 为准（signMode 只是部署意图）
-    if (signMode === 'gateway' && config.notifyUrlCallbackType !== 'system') {
+    // 免验签的两个条件必须同时成立：signMode=gateway（回调指向网关） + 平台声明 system
+    // 只满足其一都会被认定为「声明与实际配置不一致」，此时代码按自验签处理（fail closed）
+    const declaredGateway = config.notifyUrlCallbackType === 'system';
+
+    if (signMode === 'gateway' && !declaredGateway) {
         errors.push(
-            `signMode=gateway 但平台未声明 notifyUrlCallbackType=system（当前: "${config.notifyUrlCallbackType || '空'}"）：`
+            `signMode=gateway 但平台未声明 notifyURLCallbackType=system（当前: "${config.notifyUrlCallbackType || '空'}"）：`
             + '回调将走自验签（安全默认）。集成中心创建实例会自动注入该变量；'
             + '自建公网回调请保持不填，或改用 signMode=sdk'
         );
     }
-    if (signMode === 'sdk' && config.notifyUrlCallbackType === 'system') {
+
+    if (declaredGateway && signMode !== 'gateway') {
         errors.push(
-            'notifyUrlCallbackType=system（网关代验签）但 signMode=sdk：'
-            + '回调仍会按网关明文处理，请确认这是预期配置'
+            `notifyURLCallbackType=system（网关代验签）但 signMode=${signMode}：`
+            + '回调地址指向本函数、函数必须开公网入口，因此网关明文不会被采信（按自验签处理）。'
+            + '请把 signMode 改为 gateway，或清掉残留的 system 声明'
         );
+    }
+
+    // 声明「回调托管在网关」时，回调地址必须真的配好并指向网关分配的那个地址。
+    // 三个地址全空 = 声明与配置自相矛盾（多半是切部署方式时只改了一半）。
+    if (declaredGateway) {
+        const notifyUrls = [
+            { key: 'notifyURLPayURL', val: payConfig.jsapiNotifyUrl },
+            { key: 'notifyURLRefundsURL', val: payConfig.refundNotifyUrl },
+            { key: 'transferNotifyUrl', val: payConfig.transferNotifyUrl },
+        ];
+        const configured = notifyUrls.filter(item => item.val);
+        if (configured.length === 0) {
+            errors.push(
+                'notifyURLCallbackType=system 声明回调由网关托管，但 notifyURLPayURL / notifyURLRefundsURL / '
+                + 'transferNotifyUrl 全为空：请填入集成中心分配的回调地址'
+            );
+        } else {
+            // 打出来供核对：切部署方式后若这里仍是旧的自建域名，说明声明与实际不符
+            console.info('[config] 网关托管回调地址:', configured.map(i => `${i.key}=${i.val}`).join(', '));
+        }
     }
 
     // 公钥模式：配置了公钥则公钥 ID 也必填

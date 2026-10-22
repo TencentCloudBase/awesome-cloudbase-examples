@@ -453,10 +453,10 @@ describe('Controller - refund & queryRefund', () => {
 
 describe('Controller - _handleCallback', () => {
 
-    it('平台声明 notifyUrlCallbackType=system + ParsedContent → SUCCESS', async () => {
+    it('平台声明 notifyURLCallbackType=system + ParsedContent → SUCCESS', async () => {
         // 集成中心系统内置回调：解密结果在 body.ParsedContent。
-        // 采信明文以平台注入的 notifyUrlCallbackType=system 为准（证明回调托管在网关）。
-        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', notifyUrlCallbackType: 'system' });
+        // 采信明文以平台注入的 notifyURLCallbackType=system 为准（证明回调托管在网关）。
+        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', notifyURLCallbackType: 'system' });
         const { req, res } = mockReqRes(
             {
                 event_type: 'TRANSACTION.SUCCESS',
@@ -474,7 +474,7 @@ describe('Controller - _handleCallback', () => {
         // 回归「请求体带 ParsedContent 就跳过验签」的旁路
         for (const type of [undefined, 'ownservice']) {
             const env = { signMode: 'gateway' };
-            if (type !== undefined) env.notifyUrlCallbackType = type;
+            if (type !== undefined) env.notifyURLCallbackType = type;
             const ctrl = loadControllerWithMockSdk({}, env);
             const { req, res } = mockReqRes(
                 { ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' } },
@@ -486,8 +486,23 @@ describe('Controller - _handleCallback', () => {
         }
     });
 
+    it('⚠️ signMode=sdk 且残留 system 声明：仍按自验签，伪造明文被拒', async () => {
+        // sdk 模式下函数必须开公网入口，此时绝不能因为残留声明跳过验签
+        const ctrl = loadControllerWithMockSdk(
+            {},
+            { signMode: 'sdk', notifyURLCallbackType: 'system' },
+        );
+        const { req, res } = mockReqRes(
+            { ParsedContent: { out_trade_no: 'ORD002', trade_state: 'SUCCESS' } },
+            {},
+        );
+        await ctrl.unifiedOrderTrigger(req, res);
+        assert.notStrictEqual(res._getStatusCode(), 200, 'sdk 模式有公网入口，不能采信明文');
+        assert.strictEqual(res._getBody().code, 'FAIL');
+    });
+
     it('⚠️ 声明了 system 但明文缺必需字段：仍然拒绝', async () => {
-        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', notifyUrlCallbackType: 'system' });
+        const ctrl = loadControllerWithMockSdk({}, { signMode: 'gateway', notifyURLCallbackType: 'system' });
         const { req, res } = mockReqRes({ ParsedContent: { foo: 'bar' } }, {});
         await ctrl.unifiedOrderTrigger(req, res);
         assert.strictEqual(res._getStatusCode(), 400);

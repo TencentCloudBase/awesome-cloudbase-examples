@@ -115,7 +115,7 @@ corsAllowOrigin=https://your-frontend-domain.com
 ```env
 signMode=gateway
 # 平台自动注入：回调托管在网关时值为 system（采信 ParsedContent 明文的依据）
-notifyUrlCallbackType=system
+notifyURLCallbackType=system
 appId=你的AppID
 merchantId=你的商户号
 merchantSerialNumber=你的证书序列号
@@ -540,7 +540,7 @@ appId=wx1234567890                  变量名: appId       值: wx1234567890
 merchantId=YOUR_MERCHANT_ID               变量名: merchantId  值: YOUR_MERCHANT_ID
 privateKey=-----BEGIN...            变量名: privateKey  值: （粘贴完整 PEM 内容）
 notifyURLPayURL=https://xxx         变量名: notifyURLPayURL  值: https://...
-notifyUrlCallbackType=system        变量名: notifyUrlCallbackType  值: system（集成中心自动注入，一般不用手填）
+notifyURLCallbackType=system        变量名: notifyURLCallbackType  值: system（集成中心自动注入，一般不用手填）
 ...                                 ...
 ```
 

@@ -194,9 +194,9 @@ class PayService {
      *    就是一笔「支付成功」。
      *
      * 现在的判定：
-     *   1. 采信网关明文 = 平台声明 `notifyUrlCallbackType=system`
-     *      （集成中心创建实例时自动注入，意味着回调地址托管在网关、由它验签解密）
-     *   2. 其余情况（未声明 / ownservice）一律自验签 + 解密，验不过就拒绝
+     *   1. 采信网关明文 = `signMode=gateway` **且** 平台声明
+     *      `notifyURLCallbackType=system`（集成中心创建实例时自动注入）
+     *   2. 其余情况（sdk / 未声明 / ownservice）一律自验签 + 解密，验不过就拒绝
      *   3. 无论哪条路径，明文都要过结构校验
      *
      * ⚠️ 为什么不再用 signMode 判定：signMode 只是部署意图，
@@ -208,7 +208,13 @@ class PayService {
      * @returns {Promise<Object|null>} 明文；不可信或结构不合法返回 null
      */
     async _resolveCallbackPayload(callbackParams, label, requiredFields) {
-        const trustsGateway = notifyUrlCallbackType === 'system';
+        // 两个条件必须同时成立才免验签：
+        //   signMode=gateway    → 部署事实：回调地址指向集成中心，函数没有公网回调入口
+        //   system 声明         → 平台声明：这次回调由网关代验签解密
+        // 只认其中一个都会漏：sdk 模式下函数必须开公网入口（任何人都能 POST），
+        // 此时即便残留 system 声明也不能跳过验签；反之只有 gateway 却无 system
+        // 声明时，请求体里自己塞的 ParsedContent 同样不可信。
+        const trustsGateway = signMode === 'gateway' && notifyUrlCallbackType === 'system';
 
         if (trustsGateway && callbackParams.decryptedData) {
             // 网关转发的请求若带时间戳头，仍然做重放窗口校验（带不了就无从判断，只能靠网络隔离）
@@ -224,10 +230,10 @@ class PayService {
         }
 
         if (callbackParams.decryptedData && !trustsGateway) {
-            console.warn(`[PayService] ${label}收到网关明文（ParsedContent），但平台未声明 `
-                + `notifyUrlCallbackType=system（当前: "${notifyUrlCallbackType || '空'}"），`
-                + '已忽略明文并走自验签。集成中心创建实例会自动注入该声明；'
-                + '自建公网回调请保持不填（见 README「回调安全」）');
+            console.warn(`[PayService] ${label}收到网关明文（ParsedContent），但未同时满足 `
+                + `signMode=gateway 与 notifyURLCallbackType=system`
+                + `（当前: signMode=${signMode}, notifyURLCallbackType="${notifyUrlCallbackType || '空'}"），`
+                + '已忽略明文并走自验签（见 README「回调安全」）');
         }
 
         const verified = await this.strategy.verifySign(callbackParams);

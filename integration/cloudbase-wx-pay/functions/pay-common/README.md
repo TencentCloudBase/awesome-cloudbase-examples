@@ -56,7 +56,7 @@ npm install
 | 变量名 | 必填 | 示例值 | 说明 |
 |--------|:----:|--------|------|
 | `signMode` | 是 | `sdk` / `gateway` | 签名模式。`sdk`=自己验签；`gateway`=集成中心代验签（**默认值**） |
-| `notifyUrlCallbackType` | 集成中心自动注入 | `system` | 平台声明回调由谁验签。`system`=网关代验签，采信 `body.ParsedContent`；`ownservice`/空=本函数自己验签。**不要手工覆盖** |
+| `notifyURLCallbackType` | 集成中心自动注入 | `system` | 平台声明回调由谁验签。`system`=网关代验签，采信 `body.ParsedContent`；`ownservice`/空=本函数自己验签。**不要手工覆盖** |
 | `appId` | 是 | `wx1234567890abcdef` | 小程序 / 公众号 AppID，需已在商户平台绑定 |
 | `merchantId` | 是 | `1900009191` | 微信支付商户号（10 位数字） |
 | `merchantSerialNumber` | 是 | `40位十六进制` | API 证书序列号 |
@@ -139,17 +139,23 @@ CLI 部署时将这些值填入 `cloudbaserc.json` → `envVariables`；云托�
 
 #### 回调安全（必读）
 
-「回调由谁验签」看**平台注入的** `notifyUrlCallbackType`，不是看 `signMode`：`signMode` 只是部署意图，任何人都能往函数端口发 `{"ParsedContent":{...}}`，它证明不了请求来自网关；`notifyUrlCallbackType` 是集成中心创建实例时注入的声明，为 `system` 才意味着回调地址托管在网关、由它验签解密。
+采信 `body.ParsedContent` 免验签需要**两个条件同时成立**，缺一个都退回自验签（fail closed）：
 
-| `notifyUrlCallbackType` | 回调行为 |
+| 条件 | 含义 | 为什么不能只看它 |
+|---|---|---|
+| `signMode=gateway` | 部署事实：回调地址指向集成中心，函数没有公网回调入口 | 它是静态配置，任何人都能往函数端口发 `{"ParsedContent":{...}}`，证明不了来源 |
+| 平台注入 `notifyURLCallbackType=system` | 平台声明：本次回调由网关代验签解密 | 若函数自己开了公网入口（`sdk` 模式），残留的声明会让明文回调被无条件采信 |
+
+| 实际配置 | 回调行为 |
 |---|---|
-| `system`（集成中心自动注入） | 采信 `ParsedContent` 明文 + 结构校验 + 时间戳窗口（若带） |
-| `ownservice` | 自验签 + 解密 |
-| 空（默认，自建部署） | 同上，按「自己验签」处理（fail closed） |
+| `signMode=gateway` + `system`（集成中心创建即如此） | 采信 `ParsedContent` + 结构校验 + 时间戳窗口（若带） |
+| `gateway` + `ownservice` / 空 | 自验签 + 解密（含「只改了 notifyURL* 没清声明」的迁移残留场景） |
+| `sdk` + `system` | 仍自验签（函数有公网入口，声明不作数）；`validateConfig` 会提示这组矛盾 |
+| `sdk` + 空 | 自验签 + 解密 |
 
 > 🚨 为什么不能只看 `signMode`：回调路由本身没有鉴权。只要请求体里有 `ParsedContent` 就跳过验签，等于开放了一个免签名的「支付成功」入口 —— 任何人都能发 `{"ParsedContent":{"out_trade_no":"X","trade_state":"SUCCESS"}}`。
 >
-> 集成中心（官方推荐）部署时：平台会自动注入 `notifyUrlCallbackType=system`，**不要手工覆盖**；同时**不要为 `pay-common` 开 HTTP 访问服务**。
+> 集成中心（官方推荐）部署时：平台会自动注入 `notifyURLCallbackType=system`，`signMode` 保持默认 `gateway`，**不要手工覆盖这两个值**；同时**不要为 `pay-common` 开 HTTP 访问服务**。
 > 自建公网回调（备选）时：保持不填或直接用 `signMode=sdk`，同时按微信要求配置平台证书 / 支付公钥。
 
 #### 金额校验（上线前必须实现）
