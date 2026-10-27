@@ -1,6 +1,6 @@
 # xpay-common
 
-小程序虚拟支付云函数模板。面向**虚拟商品**（道具直购、代币支付、会员订阅），封装米大师（Midas）的服务端能力：`paySig` / `signature` 双签名、下单、发货推送、查单、退款；客户端统一用 `wx.requestVirtualPayment`。
+小程序虚拟支付云函数模板。面向**虚拟商品**（道具直购、代币支付、会员订阅），封装米大师（Midas）的服务端能力：`paySig` / `signature` 双签名、出支付参数（**不代下单**）、发货推送、查单、退款事件处理；客户端统一用 `wx.requestVirtualPayment`。
 
 > iOS 端由平台侧的「虚拟支付 iOS 能力（IAP）」承载，**不是本模板打通**：模板只负责签名、发货推送与退款问询的服务端处理。开通条件见 [`examples/miniprogram/README.md`](../../examples/miniprogram/README.md)。
 
@@ -27,9 +27,9 @@ xpay-common/
 ├── index.js                 云函数入口
 ├── config/config.js         凭证 + 现网常量（env=0）
 ├── routes/xpay.js           路由表
-├── controllers/xpayController.js   下单/查单 + 回调应答
+├── controllers/xpayController.js   出支付参数/查单 + 回调应答
 ├── services/
-│   ├── xpayService.js       下单 + 6 类事件分发 + 幂等
+│   ├── xpayService.js       构造 signData + 6 类事件分发 + 幂等
 │   ├── signService.js       ★ 双签名（paySig + signature）
 │   └── strategies/xpayStrategy.js  /xpay/* B 端接口
 ├── utils/

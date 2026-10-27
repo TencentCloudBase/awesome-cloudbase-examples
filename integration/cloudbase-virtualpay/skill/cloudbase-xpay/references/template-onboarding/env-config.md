@@ -56,7 +56,7 @@
 |---|---|---|
 | 虚拟支付侧 | OfferID、AppKey | 登记到集成，由平台注入云函数环境变量 |
 | 小程序侧 | AppID、AppSecret | 由业务方提供，同样注入环境变量（业务代码不接触明文） |
-| 消息推送 | Token、EncodingAESKey（注入名 `token` / `msgSecret`） | `notifyURLCallbackType=system` → 网关用，业务不读；`ownservice` → **业务函数自己验签解密，必填** |
+| 「开发管理 → 消息推送」取值 + 「虚拟支付 → 发货推送配置」填 URL | Token、EncodingAESKey（注入名 `token` / `msgSecret`） | `notifyURLCallbackType=system` → 网关用，业务不读；`ownservice` → **业务函数自己验签解密，必填** |
 
 **AppSecret 为什么必须在服务端**：`signature` 是用户态签名，密钥是 `sessionKey`，而 `sessionKey` 只能用 AppSecret 通过 `auth.code2Session` 换取。云函数的 `getWXContext()` 只给 `OPENID / APPID / UNIONID / ENV`，**不提供 sessionKey**。
 
