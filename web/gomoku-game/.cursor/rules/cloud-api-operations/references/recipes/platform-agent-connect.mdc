@@ -70,6 +70,8 @@ tcb login --cloudbase-api-key <API Key> -e <envId>
 2. 打开云开发授权页（`/login?cliAuth=1`，带上 `_redirect_uri` 与 `authCallbackUrl`）
 3. 用户完成一次网页授权，回调带回 `authSource=api_key`、`envId`、`apiKey`
 4. 本地进程用 `@cloudbase/toolbox` 的 `loginByApiKey()` 换临时密钥，写进本机凭证文件
+
+> 交付给用户 / AI 的始终是 `envId + API Key` 这对根凭证；换出来的临时密钥（STS）只是本机产物，会过期，过期后凭 Key 自动重换。不要把临时密钥单独当交付物。
 5. 关掉本地服务，提示用户在客户端里启用连接器并**新开一个会话**
 
 换证地址可用环境变量 `CLOUDBASE_API_ENDPOINT` 覆盖 —— 客户要求走自己内网网关时用它。

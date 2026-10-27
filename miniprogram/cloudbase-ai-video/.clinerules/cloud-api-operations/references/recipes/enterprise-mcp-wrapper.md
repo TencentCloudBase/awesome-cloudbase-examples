@@ -6,9 +6,11 @@
 
 - 员工装一个包就拿到「裁剪过的工具面 + 默认拦截 + 审计」，不用每份配置重复写开关
 - 危险动作要在**协议层**拦（提示词约束拦不住误删与越权，见 Recipe 9 §C 的软硬之分）
-- 要预研远端形态：wrapper 部署为企业服务端点，员工零安装
+- 要把封装升级为远端形态：wrapper 部署为企业服务端点，员工零安装（见 §5）
 
 不管什么：环境/凭证还没发 → [Recipe 7](./platform-onboarding.md)；只是给单份配置做限制、不打算维护一个包 → Recipe 9 的配置开关就够，不用写代码。
+
+本篇就是被 `cloud-api-operations` skill 路由到的实操文档：当用户请求包含「企业接入 / 封装 MCP / 企业专属 MCP」时，SKILL.md 的 description 会命中并加载本 skill——提示词里直接点名 skill 名，是最精准的激活方式。
 
 ## 前置权限
 
@@ -101,6 +103,8 @@ if (scope && scope !== 'single_env') {
 
 `single_env` 且来源为 env 才放行；看到 `account` 说明回落到了全局登录态，直接拒绝服务。三个变量（envId、Key）由平台按人下发到员工配置的 `env` 块，员工不编辑。
 
+**交付给 AI 的凭证形态只有一种：环境 ID + API Key。** API Key 是长期根凭证，MCP 内部用它换 30 分钟有效的 STS 临时凭证出网，过期自动重换。STS 三件套（`TmpSecretId` / `TmpSecretKey` / `Token`）是换证**产物**，不是交付物——只把 STS 交给 AI 或写进配置，过期后整条链路挂掉且无法自愈；拿到 Key + envId 就永远能重新换证。
+
 ### 3. 发布与员工配置
 
 配上 `package.json`（`name` 写企业包名）后 `npm publish`；不发公共源就发企业内部源（员工 `.npmrc` 指过去）或直接从内部 git 安装。员工侧配置只剩：
@@ -171,7 +175,7 @@ await queryApps({ action: 'getBuildLog',  serviceName, buildId });
 
 `deployType: 'custom'` 的完整形态（git 源、`Routes`、`WorkingDir`）见云 API `CreateCloudApp` 文档；`secretRefs` 等敏感项建议由平台预配置。
 
-### 5. 远端形态（预研）
+### 5. 远端形态
 
 传输换成 `StreamableHTTPServerTransport`（短连接、无状态模式），每请求新建一对传输与实例——SDK 硬约束是「一个实例同时只能绑一个 transport」，短连接下每请求新建天然满足，无需会话管理。工具面开 `cloudMode: true` 让官方自动收窄依赖本地文件的工具。鉴权两条通道：员工 → wrapper 走企业 SSO / OAuth 网关；wrapper → CloudBase 走 OAuth 2.1 或静态凭证 header（`X-TencentCloud-SecretId` / `X-TencentCloud-SecretKey`）。行为对照物是官方托管端点 `tcb-api.cloud.tencent.com/mcp/v1`。
 
@@ -183,6 +187,8 @@ await queryApps({ action: 'getBuildLog',  serviceName, buildId });
 - **enum 剪空要下架整个工具**：留下一个「没有任何合法参数」的工具，模型会反复空参重试
 - **两个环境变量必须同时给**：只给 Key 不给 `CLOUDBASE_ENV_ID`，Key 根本不参与解析，静默回落全局登录态
 - **错误返回带原因**：拦截时写明「平台策略禁止，重试无效」，不带说明的报错会诱使模型换个姿势再试
+- **只交 STS 不交 API Key**：临时凭证 30 分钟过期，过期后没有根凭证可重换，整条链路瘫痪——交付物永远是 `envId + API Key` 对
+- **接口名与参数凭记忆猜**：Action 名、参数结构、默认值一律以文档索引（api-reference）与官方文档为准；记忆推断的内容必须标注并先验证再用
 
 ## 验证步骤
 
