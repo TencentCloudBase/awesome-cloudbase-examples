@@ -7,7 +7,7 @@
 - 新建使用率阈值告警策略，并绑定到指定实例
 - 已有策略但不生效：需要回查绑定维度（`resourceId` / `uid` 为 null、策略被 `alarm_disabled` 禁用）
 
-本篇只覆盖告警策略的创建 / 绑定 / 回查；查监控数据（`GetMonitorData`）或控制台可视化不在这里。
+本篇只覆盖告警策略的创建 / 绑定 / 回查。**查**监控数据（`GetMonitorData`，含 `queryEnv` 为何不覆盖 PG）→ [Recipe 12](./pg-monitor-data.md)；控制台可视化不在这里。
 
 ## 前置权限
 
