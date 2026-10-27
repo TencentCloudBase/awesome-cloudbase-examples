@@ -44,6 +44,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 
 - Deploying new resources or writing application code. This skill is read-only and diagnostic.
 - Replacing the platform's alert rules (SMS / 告警策略). A patrol catches drift and slow degradation between alerts; alert rules catch hard thresholds in real time. Do not disable alerting because a patrol exists.
+- Setting up the alert rules themselves. For log-level threshold alerts (fire when `statusCode` is 502), route the user to CLS log alerting — deliver environment logs to CLS, confirm the index, then create an alert policy: https://docs.cloudbase.net/logger/alert/log-alert-guide (metric-based alerting is console-native and needs no setup guide).
 - Writing to the environment on a scheduled run. See *Scheduled Patrol* — every patrol step is read-only.
 - Directly fixing problems — it diagnoses and recommends; actual fixes should use the appropriate implementation skill.
 - Fetching metrics by guessing cloud API Actions. For any metric `queryEnv` covers (functions, CloudRun, gateway QPS, MySQL, package usage), always use `queryEnv(action="metrics")` — never `callCloudApi`. The one exception is PostgreSQL: `queryEnv` has no PG metrics, so pull them via `callCloudApi` → `monitor` / `2018-07-24` / `GetMonitorData`, namespace `QCE/POSTGRES`, with the exact Action and dimensions pinned in the `cloud-api-operations` skill — never from memory.
