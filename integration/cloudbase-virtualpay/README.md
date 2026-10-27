@@ -152,7 +152,7 @@ tcb logs search -e <环境ID> -q 'request_id:"<RequestId>"'
 
 ## 交付边界
 
-这是**模板**，不是可直接上线的成品。以下四处需要按业务实现（代码内已标 `TODO(业务侧)`）：
+这是**模板**，不是可直接上线的成品。以下五处需要按业务实现（代码内已标 `TODO(业务侧)`）：
 
 | 位置 | 现状 | 生产必须替换 |
 |---|---|---|
@@ -160,6 +160,7 @@ tcb logs search -e <环境ID> -q 'request_id:"<RequestId>"'
 | `services/xpayService.js` 发货 | 只更新内存订单状态 | 对接自己的订单表与道具 / 代币余额 |
 | `services/xpayService.js` iOS 退款问询 | 查不到单 → 拦截（`result_code=1`）；查得到 → 按 `REFUND_BLOCKING_STATES`（含 `GOODS_MISSING`）判定 | 内存 Map 冷启动即空 = 等价「永不放行」，生产必须查持久化订单表 + 真实风控规则 |
 | `routes/xpay.js` **主动退款** | **未提供**（对外只有 3 条路由；`refundOrder` 仅封装在 `XpayStrategy`） | 需要商户主动退款时自行加路由，并做额度与风控校验 |
+| `services/xpayService.js` **投诉 / 风控事件** | 只记日志，不改订单状态（`switch` 落到 `default: break`） | 需要时对接自己的工单系统与风控处置流程（拦截、申诉、权益回收） |
 
 另外：模板**只走现网**（`env` 固定 0），不提供沙箱切换。
 
