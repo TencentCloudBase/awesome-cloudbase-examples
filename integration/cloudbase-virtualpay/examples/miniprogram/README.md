@@ -20,8 +20,7 @@
 4. **修改本示例配置**：
    - `pages/pay/pay.js` → `PRODUCTS` 的 `id` / `price` 换成**你自己后台**的 `productId` 与价格（单位：分）。仓库里写的是作者联调用的 `goods_001~003`，不换会报 `PRODUCT_ID_NOT_PUBLISH`
    - `app.js` → `globalData.envId`（云开发环境 ID）
-   - `app.js` → `globalData.functionName`（集成生成的函数名）
-   - `pages/pay/pay.js` → `PRODUCTS`（换成你后台真实创建的道具）
+   - `app.js` → `globalData.functionName`（云函数名：自建部署默认 `xpay-common`；走集成中心时填集成生成的函数名）
 
 ## 链路说明
 

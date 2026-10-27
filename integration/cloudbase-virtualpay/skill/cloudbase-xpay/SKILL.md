@@ -15,7 +15,7 @@ description: |
 # 小程序虚拟支付接入（xpay-common 模板）
 
 面向**虚拟商品**（道具直购、代币支付、会员订阅）的微信小程序虚拟支付能力（米大师 Midas）。
-封装 `paySig` / `signature` 双签名、下单、发货推送、查单、退款与 iOS 退款问询；客户端统一用
+封装 `paySig` / `signature` 双签名、出支付参数（不代下单）、发货推送、查单、退款事件处理与 iOS 退款问询；客户端统一用
 `wx.requestVirtualPayment`。iOS 端能否拉起收银台由平台侧开通的「虚拟支付 iOS 能力」决定，
 服务端只处理签名与推送，不是本模板「打通 IAP」。
 
