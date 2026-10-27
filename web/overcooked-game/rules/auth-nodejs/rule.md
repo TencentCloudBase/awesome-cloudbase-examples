@@ -1,9 +1,18 @@
 ---
 name: auth-nodejs-cloudbase
 description: CloudBase Node SDK auth guide for server-side identity, user lookup, and custom login tickets. This skill should be used when Node.js code must read caller identity, inspect end users, or bridge an existing user system into CloudBase; not when configuring providers or building client login UI.
-version: 2.15.4
+version: 2.24.1
 alwaysApply: false
 ---
+
+## Standalone Install Note
+
+If this environment only installed the current skill, start from the CloudBase main entry and use the published `cloudbase/references/...` paths for sibling skills.
+
+- CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
+- Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-nodejs/SKILL.md`
+
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
 
 ## Activation Contract
 
@@ -19,9 +28,9 @@ alwaysApply: false
 
 ### Then also read
 
-- Provider setup / publishable key -> `../auth-tool/SKILL.md`
-- Web login UI that consumes custom tickets -> `../auth-web/SKILL.md`
-- Raw HTTP auth client -> `../http-api/SKILL.md`
+- Provider setup / publishable key -> `../auth-tool/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-tool/SKILL.md`)
+- Web login UI that consumes custom tickets -> `../auth-web/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-web/SKILL.md`)
+- Raw HTTP auth client -> `../http-api/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/http-api/SKILL.md`)
 
 ### Do NOT use for
 
@@ -112,9 +121,9 @@ When you load this skill to work on a task:
 
 ## Node auth architecture – how Node fits into CloudBase Auth
 
-CloudBase Auth v2 separates **where users log in** from **where backend code runs**:
+CloudBase Auth separates **where users log in** from **where backend code runs**:
 
-- Users log in through the supported auth methods (anonymous, username/password, SMS, email, WeChat, custom login, etc.) using client SDKs or HTTP interfaces, as described in the official CloudBase Auth overview documentation.
+- Users log in through the supported auth methods (username/password, SMS, email, WeChat, custom login, anonymous — disabled by default, etc.) using client SDKs or HTTP interfaces, as described in the official CloudBase Auth overview documentation.
 - Once logged in, CloudBase attaches the user identity and tokens to the environment.
 - Node code then **reads** that identity using the Node SDK, or **bridges** external identities into CloudBase using custom login.
 

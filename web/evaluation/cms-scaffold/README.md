@@ -1,10 +1,10 @@
-# CMS Scaffold - CloudBase Evaluation Template
+# CMS Scaffold - Neutral Evaluation Template
 
 > ⚠️ 这是一个**评测用模板项目**，不是完整的应用。
 
 ## 用途
 
-作为 [CloudBase AI Coding Evaluation Set](https://github.com/TencentCloudBase/CloudBase-AI-Coding-Evaluation-Set) 的前端壳子模板，用于评测 AI agent 接入 CloudBase JS SDK 的能力。
+作为评测系统使用的前端壳子模板，用于评测 AI agent 将固定页面接入任意后端能力的实现质量。
 
 ## 项目现状
 
@@ -15,18 +15,18 @@
 
 ## 需要 Agent 完成的工作
 
-1. 安装并初始化 `@cloudbase/js-sdk`（在 `src/lib/cloudbase.ts`）
-2. 实现用户名密码登录（在 `src/lib/auth.ts`）
+1. 安装并初始化你选择的后端客户端（在 `src/lib/backend.ts`）
+2. 实现用户名 + 密码登录（在 `src/lib/auth.ts`）
 3. 实现文章 CRUD（在 `src/lib/cms-service.ts`）
 4. 实现封面图上传（在 `src/lib/storage-service.ts`）
-5. 确保所有功能都能真实读写 CloudBase 后端
+5. 确保所有功能都能真实读写到后端，不使用 mock 或静态假数据
 
 ## 文件结构
 
 ```
 src/
   lib/
-    cloudbase.ts        # TODO: CloudBase SDK 初始化
+    backend.ts          # TODO: 后端客户端初始化
     auth.ts             # TODO: 登录/登出/状态检查
     cms-service.ts      # TODO: 文章 CRUD
     storage-service.ts  # TODO: 封面图上传
@@ -53,11 +53,11 @@ src/
 
 ## 重要约束
 
-- **必须**使用 `npm install @cloudbase/js-sdk` 安装 SDK，不能使用 CDN
+- **必须**使用 npm 安装依赖，不能使用 CDN
 - **不要**修改页面结构和 `data-testid`
 - **不要**修改 `index.css` 样式文件
 - **不要**修改路由配置
-- 所有数据必须真实读写到 CloudBase 后端
+- 所有数据必须真实读写到后端
 
 ## 本地开发
 

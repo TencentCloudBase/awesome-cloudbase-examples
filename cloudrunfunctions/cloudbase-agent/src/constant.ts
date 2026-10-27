@@ -34,3 +34,41 @@ export const MSG_TYPE_TEXT = 'text'
 
 // 微信回调语音消息类型
 export const MSG_TYPE_VOICE = 'voice'
+
+// ==================== LLM 错误码 ====================
+
+/**
+ * 触发 HUNYUAN rateLimit
+ */
+export const HUNYUAN_RATE_LIMT_FAILED_CODE = 'HUNYUAN_RATE_LIMIT_FAILED'
+
+export const HUNYUAN_GENERATE_FAILED = 'HUNYUAN_GENERATE_FAILED'
+
+export const LLM_CONTENT_FILER = 'LLM_CONTENT_FILER'
+
+/**
+ * 请求聊天大模型失败
+ */
+export const REQUEST_LLM_ERROR_CODE = 'REQUEST_LLM_ERROR'
+
+export const REQUEST_LLM_ERROR_MESSAGE = '调用大模型失败，请稍后重试'
+
+/**
+ * LLM TOKEN 超限
+ */
+export const REQUEST_LLM_TOKEN_COUNT_EXCEED = 'REQUEST_LLM_TOKEN_COUNT_EXCEED'
+
+/**
+ * 大模型请求超限
+ */
+export const EXCEED_CONCURRENT_REQUEST_LIMIT = 'EXCEED_CONCURRENT_REQUEST_LIMIT'
+
+export const EXCEED_CONCURRENT_REQUEST_LIMIT_MESSAGE = '请求大模型并发超限，请稍后重试'
+
+/**
+ * 大模型 token 额度超限
+ */
+export const EXCEED_TOKEN_QUOTA_LIMIT = 'EXCEED_TOKEN_QUOTA_LIMIT'
+
+export const EXCEED_TOKEN_QUOTA_LIMIT_MESSAGE =
+  '大模型 Token 已耗尽，请通知开发者前往云开发平台进行处理。https://tcb.cloud.tencent.com/dev#/ai'

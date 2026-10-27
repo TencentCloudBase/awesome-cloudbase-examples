@@ -14,8 +14,13 @@ import {
   BOT_ROLE_ASSISTANT,
   BOT_ROLE_USER,
   BOT_TYPE_TEXT,
+  EXCEED_CONCURRENT_REQUEST_LIMIT,
+  EXCEED_CONCURRENT_REQUEST_LIMIT_MESSAGE,
+  EXCEED_TOKEN_QUOTA_LIMIT,
+  EXCEED_TOKEN_QUOTA_LIMIT_MESSAGE,
   MSG_TYPE_TEXT,
   MSG_TYPE_VOICE,
+  REQUEST_LLM_ERROR_MESSAGE,
   TRIGGER_SRC_WX_CUSTOM_SERVICE,
   TRIGGER_SRC_WX_MINI_APP,
   TRIGGER_SRC_WX_SERVICE,
@@ -23,6 +28,7 @@ import {
 } from './constant'
 import { LLMCommunicator } from './llm'
 import { WxApiService } from './wx_api.service'
+import { botConfig } from './bot_config'
 
 export interface WxChatOptions {
   botId: string;
@@ -87,6 +93,13 @@ export class WxChatService {
 
       // 获取文本内容
       const content = await this.getWxChatContent(options)
+
+      // 处理人工回复
+      if (botConfig?.manualKeyWord && content === botConfig.manualKeyWord) {
+        replyMsgData.content = botConfig?.manualReply || '未配备客服联系方式';
+        skipAI = true;
+      }
+
       // 处理未认证订阅号/服务号同步响应的情况
       if (
         [TRIGGER_SRC_WX_SUBSCRIPTION, TRIGGER_SRC_WX_SERVICE].includes(
@@ -463,7 +476,18 @@ export class WxChatService {
         }
       })
 
-      replyMsgData.content = result.content
+      if (result.error) {
+        // LLM 调用失败，映射错误码到用户友好消息
+        let errMsg = REQUEST_LLM_ERROR_MESSAGE
+        if (result.error.code === EXCEED_CONCURRENT_REQUEST_LIMIT) {
+          errMsg = EXCEED_CONCURRENT_REQUEST_LIMIT_MESSAGE
+        } else if (result.error.code === EXCEED_TOKEN_QUOTA_LIMIT) {
+          errMsg = EXCEED_TOKEN_QUOTA_LIMIT_MESSAGE
+        }
+        replyMsgData.content = errMsg
+      } else {
+        replyMsgData.content = result.content
+      }
     }
 
     console.log('replyMsgData:', replyMsgData)

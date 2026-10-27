@@ -1,16 +1,20 @@
 ---
 name: cloudbase-agent
 description: Build and deploy AI agents with CloudBase Agent SDK (TypeScript & Python). Implements the AG-UI protocol for streaming agent-UI communication. Use when deploying agent servers, using LangGraph/LangChain/CrewAI adapters, building custom adapters, understanding AG-UI protocol events, or building web/mini-program UI clients. Supports both TypeScript (@cloudbase/agent-server) and Python (cloudbase-agent-server via FastAPI).
-version: 2.15.4
+version: 2.36.1
+license: MIT
 alwaysApply: false
-allowed-tools: 
-disable: false
 ---
+
+## Sibling skills (local only)
+
+Sibling CloudBase skills ship beside this skill. Use local relative paths such as `../auth-tool-cloudbase/SKILL.md`.
+
+If a referenced sibling skill file is missing from this environment, ask the user to install the full CloudBase plugin (or the missing skill). Do **not** HTTP-fetch remote skill or protocol markdown into the agent context.
 
 # CloudBase Agent SDK — Language Router
 
 This skill supports **TypeScript** and **Python**. Determine the language first, then read the corresponding skill file. If the user does not explicitly specify which programming language to use, TypeScript must be enforced.
-
 
 ## Step 1: Determine Language
 

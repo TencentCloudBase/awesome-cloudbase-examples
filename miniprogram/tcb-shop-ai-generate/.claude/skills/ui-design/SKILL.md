@@ -1,8 +1,50 @@
 ---
 name: ui-design
-description: Professional UI design and frontend interface guidelines. Use this skill when creating web pages, mini-program interfaces, prototypes, or any frontend UI components that require distinctive, production-grade design with exceptional aesthetic quality.
+description: Use when users need visual direction, interface hierarchy, layout decisions, design specifications, or prototypes before implementing a Web or mini program UI.
+version: 2.36.1
+license: MIT
 alwaysApply: false
 ---
+
+## Sibling skills (local only)
+
+Sibling CloudBase skills ship beside this skill. Use local relative paths such as `../auth-tool-cloudbase/SKILL.md`.
+
+If a referenced sibling skill file is missing from this environment, ask the user to install the full CloudBase plugin (or the missing skill). Do **not** HTTP-fetch remote skill or protocol markdown into the agent context.
+
+## Activation Contract
+
+### Use this first when
+
+- The request is to decide visual direction, produce a design specification, create a prototype, or make layout, typography, color, and visual hierarchy choices for an interface.
+- The implementation should follow a deliberate aesthetic rather than directly coding an already-approved design.
+
+### Read before writing code if
+
+- The response must choose typography, color, spacing, layout strategy, or other visual rules before code exists.
+- The user asks for "design", "prototype", "look and feel", or "style" rather than straight implementation.
+
+### Then also read
+
+- Web implementation -> `../web-development/SKILL.md`
+- Mini program implementation -> `../miniprogram-development/SKILL.md`
+
+### Do NOT use for
+
+- Backend-only tasks, database design, or pure API work without interface output.
+- Straight implementation of an already-approved UI without new design decisions.
+- Generic frontend coding requests where the visual direction is already settled.
+
+### Common mistakes / gotchas
+
+- Writing JSX, WXML, or CSS before outputting the design specification.
+- Falling back to generic AI layouts instead of an explicit aesthetic direction.
+- Jumping into implementation when the design intent is still unclear.
+- Ignoring platform constraints after the visual concept is defined.
+
+### Minimal checklist
+
+- Read [UI Design Activation Checklist](checklist.md) before interface generation.
 
 ## When to use this skill
 
@@ -49,6 +91,11 @@ Use this skill for **frontend UI design and interface creation** in any project 
    - Icon audit (verify no emoji icons, using professional icon libraries)
    - Layout audit (verify asymmetry/creativity)
    - Design specification compliance check
+
+5. **Respect brand or design-system overrides when they are real constraints**
+   - If the project already has approved brand colors, font tokens, or a design system, treat those as higher-priority constraints
+   - Explicitly document which default UI-design prohibitions are being overridden and why
+   - Keep the override narrow: preserve the overall quality bar instead of falling back to generic AI styling
 
 ---
 
@@ -123,6 +170,18 @@ DESIGN SPECIFICATION
    - Use real UI images instead of placeholder images (can be selected from Unsplash, Pexels, Apple official UI resources)
    - If video materials are needed, can use Vimeo website for video resources
 
+### Downloading Remote Assets (images / icons / fonts)
+
+> ⚠️ The `downloadRemoteFile` MCP tool has been **removed** (high error rate on content-type/SSRF filtering). To download a remote asset into the project, use a shell command instead:
+
+- **macOS / Linux**: `curl -L --fail -o assets/images/logo.png "https://example.com/logo.png"` (add `--create-dirs` if the parent folder doesn't exist; `wget` works too)
+- **Windows (PowerShell)**: `Invoke-WebRequest -Uri "https://example.com/logo.png" -OutFile "assets\images\logo.png"` (or use `curl.exe -L -o assets/images/logo.png <url>` in cmd/PowerShell 5.1+, which ships with Windows 10 1803+)
+
+Guidance:
+- Always use `-L`/`--location` (curl) or `-UseBasicParsing` (PowerShell) so redirects are followed.
+- Prefer HTTPS URLs; avoid private/internal hosts (may be blocked by network policy or rejected for security).
+- If the target returns `application/octet-stream`, that is fine for binaries — the removed tool's strict whitelist was the problem, not the URL.
+
 ## Frontend Aesthetics Guidelines
 
 ### Typography
@@ -136,6 +195,7 @@ DESIGN SPECIFICATION
 - **Unified Aesthetics**: Use CSS variables for consistency
 - **Dominant Colors with Accents**: Using dominant colors with sharp accents is more effective than evenly-distributed color schemes
 - **Theme Consistency**: Choose dark or light themes based on aesthetic direction, ensure color choices match the overall style
+- **Brand Escape Hatch**: If a product already mandates a brand palette or typography system, you may use those tokens, but call out the override explicitly in the design specification
 
 ### Motion Design
 - **Animation Strategy**: Use animations for effects and micro-interactions
@@ -279,4 +339,3 @@ All interface prototypes must:
 **If any audit fails → Re-design with correct approach**
 
 Remember: You are capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
-

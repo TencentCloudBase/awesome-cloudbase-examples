@@ -1,9 +1,19 @@
 ---
 name: data-model-creation
-description: Optional advanced tool for complex data modeling. For simple table creation, use relational-database-tool directly with SQL statements.
-version: 2.15.4
+description: "[Deprecated] Optional advanced tool for complex data modeling. For simple MySQL table creation, use relational-database-tool directly; for PostgreSQL / CloudBase PG schema work, use postgresql-development. New environments should use PostgreSQL DDL via queryPgDatabase/managePgDatabase — see postgresql-development skill instead."
+version: 2.36.1
+license: MIT
 alwaysApply: false
+metadata:
+  priority: "5"
+  deprecated: "true"
 ---
+
+## Sibling skills (local only)
+
+Sibling CloudBase skills ship beside this skill. Use local relative paths such as `../auth-tool-cloudbase/SKILL.md`.
+
+If a referenced sibling skill file is missing from this environment, ask the user to install the full CloudBase plugin (or the missing skill). Do **not** HTTP-fetch remote skill or protocol markdown into the agent context.
 
 # Data Model Creation
 
@@ -13,7 +23,7 @@ alwaysApply: false
 
 - The user explicitly wants Mermaid `classDiagram` modeling.
 - The task needs complex multi-entity relational design, visual ER-style output, or generated data-model structure rather than direct SQL.
-- You need to create or update CloudBase data models through the dedicated modeling tools.
+- You need to create CloudBase data models through the dedicated modeling tools, or you need to inspect an existing model before planning follow-up changes.
 
 ### Read before writing code if
 
@@ -22,7 +32,8 @@ alwaysApply: false
 
 ### Then also read
 
-- Direct SQL creation or schema change -> `../relational-database-tool/SKILL.md`
+- Direct MySQL SQL creation or schema change -> `../relational-database-mcp-cloudbase/SKILL.md`
+- PostgreSQL / CloudBase PG schema work -> `../postgresql-development-cloudbase/SKILL.md`
 - Broader feature planning before schema work -> `../spec-workflow/SKILL.md`
 
 ### Do NOT use for
@@ -49,16 +60,17 @@ alwaysApply: false
 
 This skill is an **advanced modeling path**, not the default path for database work.
 
-- For most database tasks, use `relational-database-tool` and write SQL directly.
+- For most MySQL database tasks, use `relational-database-mcp-cloudbase` and write SQL directly. If the task says PostgreSQL, CloudBase PG, PG mode, `app.rdb()`, `queryPgDatabase`, `managePgDatabase`, or RLS, use `postgresql-development-cloudbase` instead.
 - Use this skill only when diagram-driven modeling adds value.
 
 ## Quick routing
 
-### Use `relational-database-tool` instead when
+### Use `relational-database-mcp-cloudbase` instead when
 
-- You need `CREATE TABLE`, `ALTER TABLE`, `INSERT`, `UPDATE`, `DELETE`, or `SELECT`
+- You need MySQL `CREATE TABLE`, `ALTER TABLE`, `INSERT`, `UPDATE`, `DELETE`, or `SELECT`
 - The schema is small and already clear
 - The user never asked for a visual model
+- The task does **not** mention PostgreSQL / CloudBase PG / PG mode / `app.rdb()` / `queryPgDatabase` / `managePgDatabase` / RLS
 
 ### Use this skill when
 
@@ -79,7 +91,7 @@ This skill is an **advanced modeling path**, not the default path for database w
 
 3. **Use the right tools**
    - Read/list existing models -> `manageDataModel(action="list"|"get"|"docs")`
-   - Create or update a model -> `modifyDataModel`
+   - Create a new model -> `modifyDataModel` (compatibility name; create-only)
 
 4. **Publish carefully**
    - Prefer creating with unpublished or draft-like intent first.
@@ -153,19 +165,20 @@ classDiagram
 
 ### Read existing models
 
-Use this before updating an existing model or when you need naming consistency:
+Use this before creating related models, checking naming consistency, or assessing how an existing model is defined:
 
 - `manageDataModel(action="list")`
 - `manageDataModel(action="get", name="ModelName")`
 - `manageDataModel(action="docs", name="ModelName")`
 
-### Create or update model
+### Create model
 
 Use `modifyDataModel` with:
 
-- complete `mermaidDiagram`
-- the correct update mode for create vs update
+- a complete `mermaidDiagram`
+- `action="create"` when you want to create new models
 - a deliberate publish decision
+- clear awareness that updating existing model structures is not currently supported by this tool
 
 ## Best practices
 
@@ -173,4 +186,4 @@ Use `modifyDataModel` with:
 2. Keep the first model iteration small and reviewable.
 3. Separate business entities from implementation-only helper fields.
 4. Validate relationship direction and ownership before publishing.
-5. After modeling, hand off actual SQL/table work to `relational-database-tool` when needed.
+5. After modeling, hand off actual MySQL SQL/table work to `relational-database-mcp-cloudbase` when needed. For PostgreSQL / CloudBase PG tables, hand off to `postgresql-development-cloudbase` instead.

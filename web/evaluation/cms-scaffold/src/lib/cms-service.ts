@@ -1,7 +1,7 @@
 /**
  * CMS 数据服务
  *
- * TODO: 使用后端 SDK 实现以下所有函数。
+ * TODO: 使用后端客户端实现以下所有函数。
  * 所有函数签名和返回值类型已固定，请勿修改。
  */
 
@@ -51,7 +51,7 @@ export async function getArticle(
  *
  * TODO: 向数据库插入一条新的文章记录
  * - 自动关联当前登录用户的 UID 到 authorId 字段
- * - 自动关联当前登录用户的邮箱/显示名到 authorName 字段
+ * - 自动关联当前登录用户的用户名/显示名到 authorName 字段
  * - 自动生成 createdAt 和 updatedAt 时间戳
  * - 返回新创建文章的 ID
  */

@@ -1,9 +1,18 @@
 ---
 name: relational-database-web-cloudbase
 description: Use when building frontend Web apps that talk to CloudBase Relational Database via @cloudbase/js-sdk – provides the canonical init pattern so you can then use Supabase-style queries from the browser.
-version: 2.15.4
+version: 2.20.1
 alwaysApply: false
 ---
+
+## Standalone Install Note
+
+If this environment only installed the current skill, start from the CloudBase main entry and use the published `cloudbase/references/...` paths for sibling skills.
+
+- CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
+- Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/relational-database-web/SKILL.md`
+
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
 
 # CloudBase Relational Database Web SDK
 
@@ -21,13 +30,13 @@ alwaysApply: false
 
 ### Then also read
 
-- SQL management and MCP operations -> `../relational-database-tool/SKILL.md`
-- Web auth/login -> `../auth-web/SKILL.md`
-- General Web app setup -> `../web-development/SKILL.md`
+- SQL management and MCP operations -> `../relational-database-tool/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/relational-database-tool/SKILL.md`)
+- Web auth/login -> `../auth-web/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-web/SKILL.md`)
+- General Web app setup -> `../web-development/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/web-development/SKILL.md`)
 
 ### Do NOT use for
 
-- MCP-based SQL provisioning, schema changes, or security-rule management.
+- MCP-based SQL provisioning, schema changes, or permissions management.
 - Backend/Node service access.
 - Document database operations.
 

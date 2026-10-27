@@ -1,9 +1,16 @@
 ---
 name: ui-design
-description: UI design specification and visual direction guide. This skill should be used when users need aesthetic direction, layout decisions, prototypes, or interface design specs before implementation across web or mini program surfaces.
-version: 2.15.4
+description: Use when users need visual direction, interface hierarchy, layout decisions, design specifications, or prototypes before implementing a Web or mini program UI.
+version: 2.36.1
+license: MIT
 alwaysApply: false
 ---
+
+## Sibling skills (local only)
+
+Sibling CloudBase skills ship beside this skill. Use local relative paths such as `../auth-tool-cloudbase/SKILL.md`.
+
+If a referenced sibling skill file is missing from this environment, ask the user to install the full CloudBase plugin (or the missing skill). Do **not** HTTP-fetch remote skill or protocol markdown into the agent context.
 
 ## Activation Contract
 
@@ -26,6 +33,7 @@ alwaysApply: false
 
 - Backend-only tasks, database design, or pure API work without interface output.
 - Straight implementation of an already-approved UI without new design decisions.
+- Generic frontend coding requests where the visual direction is already settled.
 
 ### Common mistakes / gotchas
 
@@ -161,6 +169,18 @@ DESIGN SPECIFICATION
 6. **Realism Enhancement**:
    - Use real UI images instead of placeholder images (can be selected from Unsplash, Pexels, Apple official UI resources)
    - If video materials are needed, can use Vimeo website for video resources
+
+### Downloading Remote Assets (images / icons / fonts)
+
+> ⚠️ The `downloadRemoteFile` MCP tool has been **removed** (high error rate on content-type/SSRF filtering). To download a remote asset into the project, use a shell command instead:
+
+- **macOS / Linux**: `curl -L --fail -o assets/images/logo.png "https://example.com/logo.png"` (add `--create-dirs` if the parent folder doesn't exist; `wget` works too)
+- **Windows (PowerShell)**: `Invoke-WebRequest -Uri "https://example.com/logo.png" -OutFile "assets\images\logo.png"` (or use `curl.exe -L -o assets/images/logo.png <url>` in cmd/PowerShell 5.1+, which ships with Windows 10 1803+)
+
+Guidance:
+- Always use `-L`/`--location` (curl) or `-UseBasicParsing` (PowerShell) so redirects are followed.
+- Prefer HTTPS URLs; avoid private/internal hosts (may be blocked by network policy or rejected for security).
+- If the target returns `application/octet-stream`, that is fine for binaries — the removed tool's strict whitelist was the problem, not the URL.
 
 ## Frontend Aesthetics Guidelines
 

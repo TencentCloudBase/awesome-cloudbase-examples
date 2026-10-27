@@ -10,7 +10,7 @@
 ## 项目特点
 
 - 🚀 基于 Vite 构建，提供极速的开发体验
-- ⚛️ 使用 React 18 和 React Router 6 构建现代化 UI
+- ⚛️ 使用 React 19 和 React Router 6 构建现代化 UI
 - 🎨 集成 Tailwind CSS 和 DaisyUI 组件库，快速构建漂亮的界面
 - 🔄 使用 Framer Motion 实现流畅的动画效果
 - 🎁 深度集成腾讯云开发 CloudBase，提供一站式后端云服务
@@ -19,7 +19,7 @@
 
 ### 前端架构
 
-- **框架**：React 18
+- **框架**：React 19
 - **构建工具**：Vite
 - **路由**：React Router 6（使用 HashRouter）
 - **样式**：Tailwind CSS + DaisyUI

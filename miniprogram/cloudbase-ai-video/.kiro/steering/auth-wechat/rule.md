@@ -1,9 +1,18 @@
 ---
 name: auth-wechat-miniprogram
 description: CloudBase WeChat Mini Program native authentication guide. This skill should be used when users need mini program identity handling, OPENID/UNIONID access, or `wx.cloud` auth behavior in projects where login is native and automatic.
-version: 2.15.4
+version: 2.24.1
 alwaysApply: false
 ---
+
+## Standalone Install Note
+
+If this environment only installed the current skill, start from the CloudBase main entry and use the published `cloudbase/references/...` paths for sibling skills.
+
+- CloudBase main entry: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/SKILL.md`
+- Current skill raw source: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/auth-wechat/SKILL.md`
+
+Keep local `references/...` paths for files that ship with the current skill directory. When this file points to a sibling skill such as `auth-tool` or `web-development`, use the standalone fallback URL shown next to that reference.
 
 ## Activation Contract
 
@@ -19,8 +28,8 @@ alwaysApply: false
 
 ### Then also read
 
-- Mini program project implementation -> `../miniprogram-development/SKILL.md`
-- Cloud function implementation -> `../cloud-functions/SKILL.md`
+- Mini program project implementation -> `../miniprogram-development/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/miniprogram-development/SKILL.md`)
+- Cloud function implementation -> `../cloud-functions/SKILL.md` (standalone fallback: `https://cnb.cool/tencent/cloud/cloudbase/cloudbase-skills/-/git/raw/main/skills/cloudbase/references/cloud-functions/SKILL.md`)
 
 ### Do NOT use for
 
@@ -447,6 +456,62 @@ exports.main = async (event, context) => {
   return { openid: OPENID, hasUnionId: !!UNIONID }
 }
 ```
+
+---
+
+## v3 Web SDK Mini Program methods
+
+If the Mini Program uses `@cloudbase/js-sdk` (Web SDK v3) instead of `wx-server-sdk`, the following auth methods are available:
+
+### signInWithOpenId
+
+WeChat OpenID silent login — automatically uses the current WeChat login state:
+
+```js
+import cloudbase from "@cloudbase/js-sdk"
+
+const app = cloudbase.init({
+  env: "your-env-id",
+  region: "ap-shanghai",
+})
+const auth = app.auth
+
+// OpenID silent login (default: use wx.cloud mode)
+const { data, error } = await auth.signInWithOpenId()
+if (error) {
+  console.error('OpenID login failed:', error.message)
+} else {
+  console.log('Logged in with OpenID:', data.user?.id)
+}
+
+// For non-wx.cloud mode, pass useWxCloud: false
+// const { data, error } = await auth.signInWithOpenId({ useWxCloud: false })
+```
+
+### signInWithPhoneAuth
+
+WeChat phone number authorization login — requires the user to authorize phone number via the Mini Program button:
+
+```js
+// Step 1: In Mini Program page, use <button open-type="getPhoneNumber">
+// to get the encrypted phone code
+
+// Step 2: Pass the phoneCode to signInWithPhoneAuth
+const { data, error } = await auth.signInWithPhoneAuth({
+  phoneCode: '<encrypted-phone-code-from-wechat>',
+})
+if (error) {
+  console.error('Phone auth failed:', error.message)
+} else {
+  console.log('Logged in with phone:', data.user)
+}
+```
+
+**Important:**
+- These methods are from `@cloudbase/js-sdk`, **not** `wx-server-sdk` or `wx.cloud`
+- They provide an alternative auth path for Mini Programs using the v3 Web SDK
+- For the standard `wx.cloud` + cloud function path, use the scenarios above instead
+- `signInWithPhoneAuth` requires the user to tap a `<button open-type="getPhoneNumber">` in the Mini Program
 
 ---
 

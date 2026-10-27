@@ -1,11 +1,11 @@
 <template>
-  <div class="flex min-h-screen flex-col bg-base-200 text-base-content">
+  <div class="flex min-h-screen flex-col bg-gray-50 text-gray-900">
     <div
       v-if="isLoading"
       class="flex grow flex-col items-center justify-center px-4"
     >
-      <span class="loading loading-spinner loading-lg text-primary"></span>
-      <p class="mt-4 text-sm opacity-70">加载中...</p>
+      <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+      <p class="mt-4 text-sm text-gray-500">加载中...</p>
     </div>
     <template v-else>
       <AppNavbar />
@@ -22,15 +22,14 @@ import { onMounted, ref } from "vue";
 import { RouterView } from "vue-router";
 import AppNavbar from "./components/AppNavbar.vue";
 import AppFooter from "./components/HomeFooter.vue";
-import { checkLogin } from "./utils/cloudbase.js";
+import { checkLogin } from "./utils/cloudbase";
 
 const isLoading = ref(true);
 
 onMounted(async () => {
   try {
-    console.log("开始检查登录态...");
-    await checkLogin();
-    console.log("检查登录态成功");
+    const result = await checkLogin();
+    console.log("登录态检查完成:", result.isLoggedIn ? "已登录" : "未登录");
   } catch (error) {
     console.error("检查登录态失败", error);
   } finally {
