@@ -30,6 +30,7 @@
 | 10 | 平台版用量、账期与环境回收 | [platform-usage-and-recycle.md](./platform-usage-and-recycle.md) | 🟡 文档核对，未实跑 |
 | 11 | 计费口径自查：为什么这笔费用会出现 | [billing-charges-explained.md](./billing-charges-explained.md) | 🟡 文档核对，未实跑（2026-10-15）：三套计费体系的口径（云托管免费额度为 3 个月总量、实例数不为 0 即计费、次日扣费；云开发资源点抵扣顺序；成长计划 Token 的来源限制）逐条取自官方文档；**未对真实账单逐项复算**，先按「验证步骤」只读自检再用 |
 | 12 | 拉取 PostgreSQL 监控数据 | [pg-monitor-data.md](./pg-monitor-data.md) | 🟡 文档核对，未实跑（2026-10-27）：`GetMonitorData` 的调用形状（命名空间 `QCE/POSTGRES`、独享/共享两套维度与指标清单、Period 支持列表、ISO8601 带时区时间）取自官方指标文档与控制台前端实现；**未在 `callCloudApi` 上实跑**，先按「验证步骤」只读自检再用 |
+| 13 | 封装企业专属 MCP | [enterprise-mcp-wrapper.md](./enterprise-mcp-wrapper.md) | 🟡 部分实证（2026-10-27）：协议层五断言（握手 / 裁剪 6→2 / enum 剪除 / 越权拒绝 / 合法转发）已用本地 probe 跑通；**未跑**——真凭证换证链路（`credential_scope=single_env` 全序列）、三例真实部署与域名访问 |
 
 ## 没有独立 recipe 的场景
 
