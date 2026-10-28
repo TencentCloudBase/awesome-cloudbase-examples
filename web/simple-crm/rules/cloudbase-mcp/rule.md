@@ -31,6 +31,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 - The user or the agent calls CloudBase tools from the shell with mcporter, or needs a tool schema before calling.
 - The user needs the site, region, cloud-mode, or plugin switches that already exist.
 - A bug is in this repo's MCP server, skills, or CLI, and the fix should be a pull request.
+- A CloudBase tool failed and the user needs to report it, but cannot share the whole session. Read `references/issue-report.md` first and build the report before answering anything else.
 
 ## Do not use this for
 
@@ -144,3 +145,4 @@ Read `CONTRIBUTING.md` at the repo root. Fork, use a feature branch, and follow 
 - A bug in MCP, a skill, or the CLI: open a pull request.
 - The cloud platform, a permission, or the account: open an issue. Do not put an environment ID or a secret in the text.
 - `prepareFeedback` only returns the new-issue page for the current site. Write the text in the chat. The user logs in and submits it.
+- The user cannot or will not share the conversation: build the report first, following `references/issue-report.md`. It has two parts — the call chain (tools, arguments, error wording) and the intent review (plan vs actual, which source pulled you off, the first step that went wrong). Replace the customer's business values — table names, entities, data rows — and mark every field you could not observe as `unknown`.

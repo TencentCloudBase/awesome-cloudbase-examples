@@ -59,7 +59,7 @@ Use this skill for **frontend UI design and interface creation** in any project 
 
 **Do NOT use for:**
 - Backend logic or API design
-- Database schema design (use data-model-creation skill)
+- Database schema design (use postgresql-development-cloudbase skill)
 - Pure business logic without UI components
 
 ---

@@ -24,7 +24,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 
 **Route, do not improvise** — when a task belongs to another skill, hand over instead of guessing flags here:
 - PostgreSQL schema / RLS / `pgstore` → `../postgresql-development-cloudbase/SKILL.md`
-- Data-model design (ER / Mermaid) → `../data-model-creation/SKILL.md`
+- Data-model design (ER / Mermaid) → `../postgresql-development-cloudbase/SKILL.md`
 - In-app SDK code (web / miniprogram / node) → the matching SDK skill
 
 ## Core Principles

@@ -30,7 +30,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 ### Then also read
 
 - Frontend page or visual design work -> `../ui-design/SKILL.md`
-- Advanced data-model work -> `../data-model-creation/SKILL.md`
+- Advanced data-model work -> `../postgresql-development-cloudbase/SKILL.md`
 
 ### Do NOT use for
 
