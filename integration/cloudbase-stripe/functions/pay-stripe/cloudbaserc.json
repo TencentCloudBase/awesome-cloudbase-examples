@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "version": "2.1",
+  "envId": "{{env.TCB_ENV_ID}}",
+
+  "functionRoot": "./",
+  "functions": [
+    {
+      "name": "pay-stripe",
+      "type": "HTTP",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "memorySize": 256,
+      "installDependency": true,
+      "envVariables": {
+        "signMode": "{{env.SIGN_MODE}}",
+        "corsAllowOrigin": "{{env.CORS_ALLOW_ORIGIN}}",
+        "stripeSecretKey": "{{env.STRIPE_SECRET_KEY}}",
+        "stripeWebhookSecret": "{{env.STRIPE_WEBHOOK_SECRET}}",
+        "stripeApiVersion": "{{env.STRIPE_API_VERSION}}",
+        "stripeSuccessUrl": "{{env.STRIPE_SUCCESS_URL}}",
+        "stripeCancelUrl": "{{env.STRIPE_CANCEL_URL}}"
+      },
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".env",
+        "tests",
+        "*.pem"
+      ]
+    }
+  ]
+}
