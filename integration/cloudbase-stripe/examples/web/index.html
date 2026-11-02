@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>pay-stripe 示例 — Checkout 下单</title>
+<style>
+  body { font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1f2328; }
+  h1 { font-size: 20px; }
+  fieldset { border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  legend { padding: 0 6px; color: #57606a; }
+  label { display: block; margin: 10px 0 4px; font-weight: 600; }
+  input { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #d0d7de; border-radius: 6px; font: inherit; }
+  button { margin-top: 16px; padding: 10px 18px; border: 0; border-radius: 6px; background: #1f883d; color: #fff; font: inherit; cursor: pointer; }
+  button:disabled { background: #94d3a2; cursor: not-allowed; }
+  pre { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 12px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+  .hint { color: #57606a; font-size: 12px; }
+  .err { color: #cf222e; }
+</style>
+</head>
+<body>
+<h1>pay-stripe 示例 — Checkout 下单</h1>
+<p class="hint">流程：create_session 拿到 url → 跳转 Stripe 托管收银台 → 支付完成回跳到本页并带 session_id → 自动查状态。</p>
+
+<fieldset>
+  <legend>云函数地址与登录态</legend>
+  <label>API Base（云函数访问地址，不带结尾斜杠）</label>
+  <input id="base" placeholder="https://<envId>.service.tcloudbase.com/pay-stripe" />
+  <label>Authorization Bearer Token（CloudBase Auth accessToken）</label>
+  <input id="token" placeholder="eyJhbGciOi..." />
+  <p class="hint">函数侧 payMiddleware 只认 Bearer JWT 或平台注入头，浏览器里只能走 Bearer；未登录会返回 401。</p>
+</fieldset>
+
+<fieldset>
+  <legend>订单参数</legend>
+  <label>金额（主单位，如 9.9）</label>
+  <input id="amount" type="number" step="0.01" min="0.5" value="9.9" />
+  <label>币种（ISO 4217，小写）</label>
+  <input id="currency" value="usd" />
+  <label>商品名</label>
+  <input id="product" value="示例商品" />
+  <label>业务订单号 client_reference_id（回调对账用）</label>
+  <input id="ref" placeholder="order_20261102_001" />
+  <button id="pay">创建 Session 并跳转支付</button>
+</fieldset>
+
+<fieldset>
+  <legend>结果</legend>
+  <pre id="out">（尚无请求）</pre>
+</fieldset>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const out = (v) => { $('out').textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2); };
+
+function headers() {
+  const h = { 'content-type': 'application/json' };
+  const t = $('token').value.trim();
+  if (t) h.authorization = t.startsWith('Bearer ') ? t : 'Bearer ' + t;
+  return h;
+}
+
+async function call(path, body) {
+  const base = $('base').value.trim().replace(/\/$/, '');
+  if (!base) throw new Error('请先填 API Base');
+  const res = await fetch(base + path, { method: 'POST', headers: headers(), body: JSON.stringify(body) });
+  const data = await res.json().catch(() => ({ code: -1, msg: 'HTTP ' + res.status }));
+  if (!res.ok || data.code !== 0) throw new Error((data.msg || '请求失败') + '（HTTP ' + res.status + '）');
+  return data.data;
+}
+
+$('pay').addEventListener('click', async () => {
+  const btn = $('pay');
+  btn.disabled = true;
+  try {
+    const payload = {
+      amount: Number($('amount').value),
+      currency: $('currency').value.trim().toLowerCase(),
+      productName: $('product').value.trim() || '示例商品',
+      // 回跳后本页仍在同一路径，带上 session_id 供下面的自动查询使用
+      success_url: location.origin + location.pathname,
+      cancel_url: location.origin + location.pathname,
+    };
+    const ref = $('ref').value.trim();
+    if (ref) payload.client_reference_id = ref;
+
+    out('正在创建 Session...');
+    const data = await call('/stripe/create_session', payload);
+    out(data);
+    if (data.url) location.href = data.url;
+  } catch (err) {
+    out({ error: err.message });
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// 从 Stripe 回跳：拿到 session_id 就查一次真实状态（前端 success 回调不可全信，服务端以 webhook 为准）
+(async () => {
+  const sid = new URLSearchParams(location.search).get('session_id');
+  if (!sid) return;
+  try {
+    out('回跳检测到 session_id，正在查询状态...');
+    out(await call('/stripe/retrieve_session', { session_id: sid }));
+  } catch (err) {
+    out({ error: err.message });
+  }
+})();
+</script>
+</body>
+</html>

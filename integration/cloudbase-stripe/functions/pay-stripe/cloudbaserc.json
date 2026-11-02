@@ -2,11 +2,10 @@
   "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
   "version": "2.1",
   "envId": "{{env.TCB_ENV_ID}}",
-
-  "functionRoot": "./",
   "functions": [
     {
       "name": "pay-stripe",
+      "dir": "./",
       "type": "HTTP",
       "timeout": 30,
       "runtime": "Nodejs18.15",
