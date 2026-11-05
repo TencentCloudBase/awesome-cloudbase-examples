@@ -18,7 +18,8 @@
         "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
         "stripeApiVersion": "{{env.stripeApiVersion}}",
         "stripeSuccessUrl": "{{env.stripeSuccessUrl}}",
-        "stripeCancelUrl": "{{env.stripeCancelUrl}}"      
+        "stripeCancelUrl": "{{env.stripeCancelUrl}}",
+        "stripeAllowedReturnDomains": "{{env.stripeAllowedReturnDomains}}"
       },
       "ignore": [
         "node_modules",

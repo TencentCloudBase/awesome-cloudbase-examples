@@ -43,13 +43,12 @@
       "keyId": "stripe-test",
       "name": "stripe-test",
       "authTypeCode": "stripe-pay",
-      "description": "请填写集成描述",
+      "description": "Stripe支付",
       "demoCodeFunctionName": "pay-stripe",
       "envVariables": {
         "stripeSecretKey": "{{env.stripeSecretKey}}",
         "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
-        "stripeApiVersion": "{{env.stripeApiVersion}}",
-        "notifyUrl": "https://stripe-test.integration-callback.tcloudbase.com/stripe/webhook"
+        "stripeApiVersion": "{{env.stripeApiVersion}}"
       }
     }
   ]
