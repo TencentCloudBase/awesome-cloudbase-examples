@@ -1,7 +1,7 @@
 ---
 name: spec-workflow
 description: Use when medium-to-large changes need explicit requirements, technical design, and task planning before implementation, especially for multi-module work, unclear acceptance criteria, or architecture-heavy requests.
-version: 2.36.1
+version: 2.37.4
 license: MIT
 alwaysApply: false
 ---
@@ -30,7 +30,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 ### Then also read
 
 - Frontend page or visual design work -> `../ui-design/SKILL.md`
-- Advanced data-model work -> `../data-model-creation/SKILL.md`
+- Advanced data-model work -> `../postgresql-development-cloudbase/SKILL.md`
 
 ### Do NOT use for
 

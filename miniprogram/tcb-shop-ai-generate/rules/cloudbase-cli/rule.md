@@ -1,7 +1,7 @@
 ---
 name: cloudbase-cli
 description: CloudBase CLI (tcb, 云开发CLI, Tencent CloudBase命令行) resource management skill. Use when deploying cloud functions, CloudRun, storage, NoSQL/MySQL, static hosting, permissions, CORS/domains via tcb; for CI/CD and batch ops; when the user prefers CLI; or as the first-session fallback when CloudBase MCP tools are not loaded yet (after install/config, before IDE restart). Also covers tcb login and site switching (国内站/国际站 via --intl or config isIntl), environment lifecycle (env create/modify/renew/delete/apikey/login/domain), tcb config and cloudbaserc.json sync, log search (logs search, CLS), metric monitoring (monitor), data model and PostgreSQL migrations (db model, db pg migration), sandbox/agent/integration management — do not default to tcb deploy.
-version: 2.36.1
+version: 2.37.4
 license: MIT
 alwaysApply: false
 ---
@@ -24,7 +24,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 
 **Route, do not improvise** — when a task belongs to another skill, hand over instead of guessing flags here:
 - PostgreSQL schema / RLS / `pgstore` → `../postgresql-development-cloudbase/SKILL.md`
-- Data-model design (ER / Mermaid) → `../data-model-creation/SKILL.md`
+- Data-model design (ER / Mermaid) → `../postgresql-development-cloudbase/SKILL.md`
 - In-app SDK code (web / miniprogram / node) → the matching SDK skill
 
 ## Core Principles

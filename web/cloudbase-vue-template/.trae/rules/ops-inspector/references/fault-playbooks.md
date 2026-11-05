@@ -55,7 +55,7 @@ Shared prerequisites for every playbook:
 1. `queryFunctions(action="listFunctions")` — does the name exist in **this** env?
 2. `queryFunctions(action="getFunctionDetail", functionName="...")` — status, HTTP access, triggers
 3. If HTTP: confirm path / domain / gateway with `queryGateway` / hosting docs as available; mismatch often looks like 404
-4. `queryLogs(action="searchLogs", queryString="404 OR FUNCTION_NOT_FOUND OR functionName:<name>", ...)`
+4. `queryLogs(action="searchLogs", queryString="404 OR FUNCTION_NOT_FOUND OR function_name:\"<name>\"", ...)`
 5. `queryEnv(action="metrics", metricName="FunctionInvocation", resourceID="<functionName>")` — if `allZero`, traffic never reached the function (client/env/path issue more likely than runtime crash)
 
 ### Decision tree

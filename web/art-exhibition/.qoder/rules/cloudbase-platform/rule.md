@@ -1,7 +1,7 @@
 ---
 name: cloudbase-platform
 description: CloudBase platform overview and routing guide. This skill should be used when users need high-level capability selection, platform concepts, console navigation, realtime (broadcast / presence / live database changes), or cross-platform best practices before choosing a more specific implementation skill.
-version: 2.36.1
+version: 2.37.4
 license: MIT
 alwaysApply: false
 ---
@@ -46,7 +46,7 @@ If a referenced sibling skill file is missing from this environment, ask the use
 - Realtime / live push / channels / live table change subscriptions / multiplayer sync -> `../postgresql-development-cloudbase/references/realtime.md`
   - **PG mode only.** Run its Step 0 environment probe before writing any realtime code; if the environment has no `realtime` schema, stop and report rather than working around it.
   - `app.realtime()` (Broadcast / Presence / Postgres CDC) is **not** document-database `collection.watch()`. Do not answer a realtime request with `watch()` code, or the reverse.
-- MySQL relational database / data modeling -> `../relational-database-mcp-cloudbase/SKILL.md` or `../data-model-creation/SKILL.md`
+- PostgreSQL schema and data modeling -> `../postgresql-development-cloudbase/SKILL.md`; existing MySQL only -> `../relational-database-mcp-cloudbase/SKILL.md`
 - Cloud storage -> `../cloud-storage-web/SKILL.md`
 
 ### Do NOT use for
