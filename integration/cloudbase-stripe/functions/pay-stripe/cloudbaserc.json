@@ -18,8 +18,7 @@
         "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
         "stripeApiVersion": "{{env.stripeApiVersion}}",
         "stripeSuccessUrl": "{{env.stripeSuccessUrl}}",
-        "stripeCancelUrl": "{{env.stripeCancelUrl}}",
-        "stripeAllowedReturnDomains": "{{env.stripeAllowedReturnDomains}}"
+        "stripeCancelUrl": "{{env.stripeCancelUrl}}"      
       },
       "ignore": [
         "node_modules",
@@ -35,13 +34,12 @@
       "keyId": "stripe-test",
       "name": "stripe-test",
       "authTypeCode": "stripe-pay",
-      "description": "请填写集成描述",
+      "description": "Stripe支付",
       "demoCodeFunctionName": "pay-stripe",
       "envVariables": {
         "stripeSecretKey": "{{env.stripeSecretKey}}",
         "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
-        "stripeApiVersion": "{{env.stripeApiVersion}}",
-        "notifyURLCallbackType": "system"
+        "stripeApiVersion": "{{env.stripeApiVersion}}"
       }
     }
   ]
