@@ -2,7 +2,7 @@
   "name": "pay-stripe",
   "version": "1.0.0",
   "private": true,
-  "description": "Stripe 支付云函数/云托管模板，Checkout Session 收款 + Webhook 回调，SDK/网关双验签模式",
+  "description": "Stripe 支付云函数/云托管模板，Checkout Session 收款 + Webhook 回调（签名验签）",
   "engines": {
     "node": ">=16.0.0 <23.0.0"
   },
