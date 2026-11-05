@@ -73,8 +73,7 @@ const EVENT_SEMANTICS = {
 const CHECKOUT_PAID_PAYMENT_STATUS = 'paid';
 const STATE_PENDING_PAYMENT = 'PENDING';
 
-/** 明文通道（未验签）允许的 Checkout Session payment_status 取值 */
-const CHECKOUT_PAYMENT_STATUS_WHITELIST = ['paid', 'unpaid', 'no_payment_required', 'processing'];
+
 
 /**
  * payment_intent.payment_failed 允许的 PaymentIntent 状态
@@ -295,48 +294,40 @@ class StripeService {
     }
 
     /**
-     * 业务字段校验：按订阅语义要求 data.object 的最小业务主键（fail closed）
+     * 业务字段校验：按事件类型要求 data.object 的最小业务主键（fail closed）
      *
      * 只校验容器类型时，`data: { object: {} }` 会被当作结构完整的事件一路走到
      * 「打标 PAID」，但业务侧拿不到 client_reference_id，既无法反查订单，
      * 也无法区分「结构合法但业务字段缺失」与正常事件。
      *
-     * ⚠️ 验签通道不枚举 status / payment_status 的取值：Stripe 状态值随 API 版本
-     *    演进，写死白名单会把合法的新状态误判成伪造事件，导致真实事件被丢弃。
-     *    是否映射 PAID 由 handleWebhook 单独按 payment_status === 'paid' 判定；
-     *    明文通道（未验签）额外要求 payment_status 落在已知白名单，避免一次
-     *    无副作用的低价值报文提前占住 event.id。
+     * ⚠️ 刻意不枚举 status / payment_status 的取值：Stripe 状态值随 API 版本演进，
+     *    写死白名单会把合法的新状态误判成伪造事件。这里只要求「字段存在且非空」，
+     *    是否映射 PAID 由 handleWebhook 单独按 payment_status === 'paid' 判定。
      *
      * @param {Object} event - 已通过 _isValidEvent 的事件
-     * @param {{biz: string, state: string}} semantic - EVENT_SEMANTICS 中的语义
-     * @param {boolean} verified - 是否经过本函数侧密码学验签
      * @returns {boolean}
      */
-        _isValidBizObject(event, semantic, verified) {
-            const obj = event.data.object;
-            const eventType = event.type;
+    _isValidBizObject(event) {
+        const obj = event.data.object;
+        const eventType = event.type;
 
-            // 所有 Stripe 资源对象都带 id：空对象 {} 到这里必须被挡住
-            if (!isNonEmptyString(obj.id)) return false;
+        // 所有 Stripe 资源对象都带 id：空对象 {} 到这里必须被挡住
+        if (!isNonEmptyString(obj.id)) return false;
 
-            if (eventType.startsWith('checkout.session.')) {
-                // 业务侧用 client_reference_id 反查本地订单（见落库 TODO），缺失即无法落库
-                if (!isNonEmptyString(obj.client_reference_id)) return false;
+        if (eventType.startsWith('checkout.session.')) {
+            // 业务侧用 client_reference_id 反查本地订单（见落库 TODO），缺失即无法落库
+            if (!isNonEmptyString(obj.client_reference_id)) return false;
 
-                // 🚨 status 只做结构性非空校验：它是「会话级」状态（complete / expired），
-                //    绝不能拿它当「资金到账」依据。异步支付方式下 status=complete 与
-                //    payment_status=unpaid 会同时出现，曾用 `payment_status ?? status`
-                //    合并取值把 unpaid 当成有效状态放行，最终把未收款事件打标 PAID。
-                if (obj.status !== undefined && !isNonEmptyString(obj.status)) return false;
+            // 🚨 status 只做结构性非空校验：它是「会话级」状态（complete / expired），
+            //    绝不能拿它当「资金到账」依据。异步支付方式下 status=complete 与
+            //    payment_status=unpaid 会同时出现，曾用 `payment_status ?? status`
+            //    合并取值把 unpaid 当成有效状态放行，最终把未收款事件打标 PAID。
+            if (obj.status !== undefined && !isNonEmptyString(obj.status)) return false;
 
-                // payment_status 必须存在且非空：资金是否到账由它决定。
-                // 明文通道再要求取值落在已知白名单（否则低价值报文会提前占住 event.id，
-                // 把后续同 id 的真实事件判成重复投递）；验签通道不枚举，兼容 Stripe 新状态。
-                const paymentStatus = obj.payment_status;
-                if (!isNonEmptyString(paymentStatus)) return false;
-                if (!verified && !CHECKOUT_PAYMENT_STATUS_WHITELIST.includes(paymentStatus)) return false;
-                return true;
-            }
+            // payment_status 必须存在且非空：资金是否到账由它决定
+            if (!isNonEmptyString(obj.payment_status)) return false;
+            return true;
+        }
 
         if (eventType.startsWith('payment_intent.')) {
             // PaymentIntent 对象没有 client_reference_id，靠自身 id 关联订单
@@ -456,7 +447,7 @@ class StripeService {
         // 业务字段校验（fail closed）：缺业务主键的报文既不能被打标 PAID，
         // 也不能占用去重键，否则「校验通过却没有可用业务主键」的状态会一路
         // 透传到业务落库环节。
-        if (!this._isValidBizObject(event, verified)) {
+        if (!this._isValidBizObject(event)) {
             console.error(
                 '[StripeService] 回调事件缺少必要业务字段（data.object.id / 反查主键 / 状态），拒绝（fail closed）'
             );

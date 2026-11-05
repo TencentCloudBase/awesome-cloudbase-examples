@@ -4,7 +4,7 @@
   "envId": "{{env.TCB_ENV_ID}}",
   "functionRoot": "./functions",
   "app": {
-    "serviceName": "pay-stripe-demo-01",
+    "serviceName": "pay-stripe-demo",
     "root": "./examples/web",
     "framework": "static",
     "installCommand": "",

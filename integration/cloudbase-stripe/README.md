@@ -88,7 +88,7 @@ tcb routes list -e <envId>   # 「身份认证」这一列必须是「开启」
 
 ```json
 "app": {
-  "serviceName": "pay-stripe-demo-01",
+  "serviceName": "pay-stripe-demo",
   "root": "./examples/web",
   "framework": "static",
   "installCommand": "",
@@ -99,7 +99,7 @@ tcb routes list -e <envId>   # 「身份认证」这一列必须是「开启」
 
 ```bash
 # 云端构建并部署前端 app（static 跳过 install/build，直接上传）
-tcb app deploy pay-stripe-demo-01 -e <envId>
+tcb app deploy pay-stripe-demo -e <envId>
 ```
 
 部署完成后控制台会输出访问地址，用输出的那个域名打开（`webapps.tcloudbase.com` 或

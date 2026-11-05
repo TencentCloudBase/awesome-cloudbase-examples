@@ -114,7 +114,9 @@ app.use((req, res, next) => {
 
     if (actionName) {
         if (!ALLOWED_ACTIONS.has('stripe_' + actionName)) {
-            return res.status(400).json({ code: -1, msg: '不支持的操作: ' + actionName });
+            // 同样不回显原始输入：actionName 来自请求体，回显会让接口变成输入探针
+            console.warn('[云API适配] 拒绝不支持的操作:', String(actionName).slice(0, 64));
+            return res.status(400).json({ code: -1, msg: '不支持的操作' });
         }
         console.info('[云API适配] 路由分发:', '/' + actionName);
         req.url = '/' + actionName;

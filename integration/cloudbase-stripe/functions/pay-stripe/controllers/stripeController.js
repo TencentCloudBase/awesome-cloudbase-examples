@@ -60,6 +60,8 @@ function pickSessionParams(body) {
 // ========== 白名单字段的取值校验 ==========
 
 const CLIENT_REF_RE = /^[A-Za-z0-9_-]{1,64}$/;
+/** Stripe Checkout Session ID 形态：cs_ 前缀 + 字母数字下划线 */
+const SESSION_ID_RE = /^cs_[A-Za-z0-9_]{8,200}$/;
 const CURRENCY_RE = /^[A-Za-z]{3}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 与 utils/cloudbaseAuth.normalizeEmail 同口径：RFC 5321 长度上限
@@ -321,8 +323,12 @@ exports.createSession = async (req, res) => {
         const result = await stripeService.createSession(params);
         success(res, result);
     } catch (err) {
+        // 对外只给固定文案：Stripe 原始错误会带账户状态 / API 版本 / 参数细节，
+        // 完整信息只写服务端日志（日志里的 requestId 可用于对齐）。
+        // 本地参数校验类错误（非 Stripe SDK 抛出）仍然透传，否则调用方拿不到可用提示。
         console.error('[Controller] createSession error:', err);
-        fail(res, err.message || '创建 Session 失败');
+        const isStripeError = typeof err?.type === 'string' && err.type.startsWith('Stripe');
+        fail(res, isStripeError ? '创建 Session 失败，请稍后重试' : (err.message || '创建 Session 失败'));
     }
 };
 
@@ -333,6 +339,10 @@ exports.retrieveSession = async (req, res) => {
     try {
         const sessionId = req.body?.session_id || req.body?.sessionId || req.query?.session_id;
         if (!sessionId) return fail(res, '缺少 session_id');
+        // 形态白名单：避免把任意字符串直接当路径参数打给 Stripe API
+        if (typeof sessionId !== 'string' || !SESSION_ID_RE.test(sessionId)) {
+            return fail(res, 'session_id 格式不合法（应为 cs_ 开头的 Stripe Session ID）');
+        }
 
         const result = await stripeService.retrieveSession(sessionId);
 
@@ -352,7 +362,8 @@ exports.retrieveSession = async (req, res) => {
         success(res, business);
     } catch (err) {
         console.error('[Controller] retrieveSession error:', err);
-        fail(res, err.message || '查询 Session 失败');
+        const isStripeError = typeof err?.type === 'string' && err.type.startsWith('Stripe');
+        fail(res, isStripeError ? '查询 Session 失败，请稍后重试' : (err.message || '查询 Session 失败'));
     }
 };
 
