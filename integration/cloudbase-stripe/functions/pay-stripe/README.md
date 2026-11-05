@@ -42,7 +42,7 @@ pay-stripe/
 | 路由 | 鉴权 | 说明 |
 |---|---|---|
 | `POST /stripe/create_session` | 是 | 创建 Session，返回 `{ sessionId, url }` |
-| `POST|GET /stripe/retrieve_session` | 是 | 查询 Session 状态 |
+| `POST /stripe/retrieve_session`<br>`GET /stripe/retrieve_session` | 是 | 查询 Session 状态 |
 | `POST /stripe/webhook` | 否（靠签名） | 所有 Stripe 事件统一入口 |
 
 ## 鉴权
