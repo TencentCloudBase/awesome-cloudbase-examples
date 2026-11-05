@@ -454,3 +454,62 @@ test('✅ payment_status=paid 仍映射为 PAID（不回归）', async () => {
     });
     assert.strictEqual(result.state, 'PAID');
 });
+
+// ========== 业务字段校验：按事件类型分别约束（不再默认放行）==========
+
+test('⛔ payment_intent.payment_failed + 非失败态（processing）：拒绝', async () => {
+    const svc = loadService();
+    svc.strategy = { verifyWebhook: (rawBody) => JSON.parse(rawBody) };
+
+    const event = makeEvent({
+        id: 'evt_pf_01',
+        type: 'payment_intent.payment_failed',
+        data: { object: { id: 'pi_pf_01', status: 'processing' } },
+    });
+    const result = await svc.handleWebhook({
+        body: event, rawBody: JSON.stringify(event), signature: 'v1=good',
+    });
+
+    assert.strictEqual(result, null, '未终态不能被当成终态 FAILED');
+});
+
+test('⛔ charge.refunded 缺退款证据（refunded / amount_refunded）：拒绝', async () => {
+    const svc = loadService();
+    svc.strategy = { verifyWebhook: (rawBody) => JSON.parse(rawBody) };
+
+    const event = makeEvent({
+        id: 'evt_refund_01',
+        type: 'charge.refunded',
+        data: { object: { id: 'ch_01', payment_intent: 'pi_01' } },
+    });
+    const result = await svc.handleWebhook({
+        body: event, rawBody: JSON.stringify(event), signature: 'v1=good',
+    });
+
+    assert.strictEqual(result, null);
+});
+
+test('⛔ charge.dispute.created 缺金额或状态：拒绝', async () => {
+    const svc = loadService();
+    svc.strategy = { verifyWebhook: (rawBody) => JSON.parse(rawBody) };
+
+    const noAmount = makeEvent({
+        id: 'evt_dispute_01',
+        type: 'charge.dispute.created',
+        data: { object: { id: 'dp_01', charge: 'ch_01', status: 'needs_response' } },
+    });
+    const r1 = await svc.handleWebhook({
+        body: noAmount, rawBody: JSON.stringify(noAmount), signature: 'v1=good',
+    });
+    assert.strictEqual(r1, null);
+
+    const noStatus = makeEvent({
+        id: 'evt_dispute_02',
+        type: 'charge.dispute.created',
+        data: { object: { id: 'dp_02', charge: 'ch_01', amount: 1000 } },
+    });
+    const r2 = await svc.handleWebhook({
+        body: noStatus, rawBody: JSON.stringify(noStatus), signature: 'v1=good',
+    });
+    assert.strictEqual(r2, null);
+});

@@ -76,6 +76,20 @@ const STATE_PENDING_PAYMENT = 'PENDING';
 /** 明文通道（未验签）允许的 Checkout Session payment_status 取值 */
 const CHECKOUT_PAYMENT_STATUS_WHITELIST = ['paid', 'unpaid', 'no_payment_required', 'processing'];
 
+/**
+ * payment_intent.payment_failed 允许的 PaymentIntent 状态
+ *
+ * 只排除 'succeeded' 不够：requires_action / requires_capture 等未终态也会被判成
+ * 终态 FAILED 并写入去重键，后续真实状态变化无法再进入。
+ */
+const PAYMENT_FAILED_STATUSES = [
+    'requires_payment_method',
+    'requires_confirmation',
+    'requires_action',
+    'requires_capture',
+    'canceled',
+];
+
 class StripeService {
     constructor() {
         this.strategy = new StripeStrategy(stripeConfig);
@@ -328,22 +342,36 @@ class StripeService {
             // PaymentIntent 对象没有 client_reference_id，靠自身 id 关联订单
             if (!isNonEmptyString(obj.status)) return false;
 
-            // 🚨 event.type 与 object.status 必须自洽：否则
-            //    type=payment_intent.succeeded + status=requires_payment_method 也会被打标 PAID，
-            //    事件名的字面量完全盖过对象真实状态。这里按两者一致性 fail closed。
+            // 🚨 event.type 与 object.status 必须双向自洽：
+            //    - succeeded 要求 status=succeeded（挡住「成功事件 + 失败状态」）
+            //    - payment_failed 要求 status 落在失败态集合（只排除 succeeded 不够，
+            //      requires_action 这类未终态会被误打成终态 FAILED）
             const intentStatus = obj.status.trim().toLowerCase();
-            if (eventType === 'payment_intent.succeeded' && intentStatus !== 'succeeded') return false;
-            if (eventType === 'payment_intent.payment_failed' && intentStatus === 'succeeded') return false;
-            return true;
+            if (eventType === 'payment_intent.succeeded') return intentStatus === 'succeeded';
+            if (eventType === 'payment_intent.payment_failed') {
+                return PAYMENT_FAILED_STATUSES.includes(intentStatus);
+            }
+            return false;
         }
 
-        // refund / dispute 类：必须能关联回原支付（payment_intent / charge）
-        if (semantic.biz === 'refund' || semantic.biz === 'dispute') {
-            if (!isNonEmptyString(obj.payment_intent) && !isNonEmptyString(obj.charge)) {
-                return false;
-            }
+        // refund / dispute 的对象结构不同（Charge vs Dispute），必须分别校验
+        if (eventType === 'charge.refunded') {
+            // Charge 对象：能关联回原支付，且确实发生过退款
+            const linked = isNonEmptyString(obj.payment_intent) || isNonEmptyString(obj.charge);
+            const refunded = obj.refunded === true
+                || (typeof obj.amount_refunded === 'number' && obj.amount_refunded > 0);
+            return linked && refunded;
         }
-        return true;
+
+        if (eventType === 'charge.dispute.created') {
+            // Dispute 对象：必须有争议金额、争议状态与关联支付，缺一不可
+            const linked = isNonEmptyString(obj.charge) || isNonEmptyString(obj.payment_intent);
+            const hasAmount = typeof obj.amount === 'number' && obj.amount > 0;
+            return linked && hasAmount && isNonEmptyString(obj.status);
+        }
+
+        // 未覆盖的事件类型一律 fail closed：新增订阅事件必须同时补上校验分支
+        return false;
     }
 
     /**
@@ -428,7 +456,7 @@ class StripeService {
         // 业务字段校验（fail closed）：缺业务主键的报文既不能被打标 PAID，
         // 也不能占用去重键，否则「校验通过却没有可用业务主键」的状态会一路
         // 透传到业务落库环节。
-        if (!this._isValidBizObject(event, semantic, verified)) {
+        if (!this._isValidBizObject(event, verified)) {
             console.error(
                 '[StripeService] 回调事件缺少必要业务字段（data.object.id / 反查主键 / 状态），拒绝（fail closed）'
             );

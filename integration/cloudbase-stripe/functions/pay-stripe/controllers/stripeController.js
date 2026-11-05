@@ -62,6 +62,8 @@ function pickSessionParams(body) {
 const CLIENT_REF_RE = /^[A-Za-z0-9_-]{1,64}$/;
 const CURRENCY_RE = /^[A-Za-z]{3}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// 与 utils/cloudbaseAuth.normalizeEmail 同口径：RFC 5321 长度上限
+const MAX_EMAIL_LEN = 254;
 const RETURN_URL_KEYS = ['success_url', 'cancel_url'];
 const MAX_METADATA_KEYS = 20;
 const MAX_METADATA_VALUE_LEN = 500;
@@ -183,10 +185,13 @@ function validateSessionParams(params) {
 
     // 🚨 不能先 String(x) 再匹配：String(['a@b.co']) === 'a@b.co'，
     //    数组 / 自定义 toString 的对象会被隐式转成合法邮箱，放行后原样透传给 Stripe 导致 400
+    // 与登录态回填路径（normalizeEmail：trim + 格式 + 254 长度）保持同一口径，
+    // 否则同一字段在「客户端传入」和「回填」两条路径上标准不同
     if (params.customer_email !== undefined
         && (typeof params.customer_email !== 'string'
+            || params.customer_email.length > MAX_EMAIL_LEN
             || !EMAIL_RE.test(params.customer_email))) {
-        return 'customer_email 格式不合法';
+        return `customer_email 格式不合法（或超过 ${MAX_EMAIL_LEN} 字符）`;
     }
 
     if (params.mode !== undefined && !ALLOWED_MODES.includes(params.mode)) {
