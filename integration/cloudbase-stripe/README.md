@@ -144,6 +144,7 @@ tcb app deploy pay-stripe-demo -e lowcode-0gwpl9v4125156ef
 |---|---|---|
 | `stripeSecretKey` | 是 | `sk_test_` / `sk_live_`，建议用受限密钥 `rk_` |
 | `stripeWebhookSecret` | 是 | `whsec_`，创建 endpoint 时只返回一次；回调由本函数自验签 |
+| `stripeApiVersion` | 强烈建议 | 如 `2026-09-30.endive`，锁定后避免 Stripe 升级导致字段路径变化、模板静默失效 |
 
 ## 范围
 
