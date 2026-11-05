@@ -14,7 +14,6 @@ cloudbase-stripe/
 │   ├── controllers/         鉴权中间件 + 回调处理 + 统一应答
 │   ├── services/            策略入口 + 事件分发 + 幂等
 │   ├── .env.example         环境变量模板（复制为 .env）
-│   ├── cloudbaserc.json     单函数部署声明
 │   └── Dockerfile           云托管部署
 └── examples/web/            Checkout 前端示例（单文件，零依赖）
 ```
@@ -22,7 +21,7 @@ cloudbase-stripe/
 ## 快速开始
 
 ```bash
-# 1. 装依赖 + 跑单测（107 个用例，不需要网络与真实密钥）
+# 1. 装依赖 + 跑单测（109 个用例，不需要网络与真实密钥）
 cd functions/pay-stripe
 npm install && npm test
 
@@ -63,44 +62,25 @@ cd ../../examples/web && npx serve .
 
 ### 云 API 入口
 
-```bash
-curl -X POST 'https://<envId>.api.tcloudbasegateway.com/v1/functions/pay-stripe' \
-  -H 'content-type: application/json' \
-  -H 'authorization: Bearer <accessToken>' \
-  -d '{"_action":"create_session","amount":990,"currency":"usd","client_reference_id":"ORDER_1"}'
-```
-
 - 业务动作放在 body 的 `_action`：`create_session` / `retrieve_session`
 - **不要把 `/stripe/xxx` 拼到地址后面**：这个入口只认根路径，拼了会 400
 - token 无效 / 过期时网关直接返回 `401 INVALID_CREDENTIALS`，请求不会进函数
+- 请求示例见 [函数 README「下单示例」](./functions/pay-stripe/README.md#下单示例)
 
 ### HTTP 访问服务入口
 
-如果通过自定义域名访问，路由是 path 级别的，一条路由一个 path。**关键：必须开启身份认证。**
+路由是 path 级别的，一条路由一个 path。**关键：必须在路由上开启身份认证。**
 
 ```bash
-# 路由列表里看「身份认证」这一列，必须是「开启」
-tcb routes list -e <envId>
+tcb routes list -e <envId>   # 「身份认证」这一列必须是「开启」
 ```
 
-不开身份认证时：网关不会注入用户身份 → 函数收到的是
-`x-authmethod: UNAUTHORIZED`、`x-userid: 空` → `payMiddleware` 一律 401。
+不开身份认证时网关不注入身份 → 函数收到 `x-authmethod: UNAUTHORIZED`、`x-userid` 为空 → 一律 401。
 
-> 集成中心绑定回调时用的那条域名是**关闭**身份认证的（否则 Stripe 回调进不来），
+> 集成中心绑定回调的那条域名是**关闭**身份认证的（否则 Stripe 回调进不来），
 > 所以它天然不能承载业务接口。业务必须另走云 API 或另建一条开启认证的路由。
 
-### 函数侧怎么判断身份
-
-函数**不解析 JWT**（拿不到 CloudBase Auth 的验签公钥，只解码 payload 等于假鉴权），
-只读网关注入的两个头：
-
-| header | 含义 |
-|---|---|
-| `x-userid` | 已认证用户标识 |
-| `x-authmethod` | 鉴权方式；未通过时为 `UNAUTHORIZED` |
-
-两者同时满足（`x-userid` 非空且 `x-authmethod !== 'UNAUTHORIZED'`）才放行。
-客户端伪造这两个头无效——实测网关会覆盖成未认证值。
+身份判定的实现细节见 [函数 README「鉴权」](./functions/pay-stripe/README.md#鉴权)。
 
 ## 部署前端示例
 
@@ -108,7 +88,7 @@ tcb routes list -e <envId>
 
 ```json
 "app": {
-  "serviceName": "pay-stripe-demo",
+  "serviceName": "pay-stripe-demo-01",
   "root": "./examples/web",
   "framework": "static",
   "installCommand": "",
@@ -119,7 +99,7 @@ tcb routes list -e <envId>
 
 ```bash
 # 云端构建并部署前端 app（static 跳过 install/build，直接上传）
-tcb app deploy pay-stripe-demo -e lowcode-0gwpl9v4125156ef
+tcb app deploy pay-stripe-demo-01 -e <envId>
 ```
 
 部署完成后控制台会输出访问地址，用输出的那个域名打开（`webapps.tcloudbase.com` 或
@@ -138,13 +118,10 @@ tcb app deploy pay-stripe-demo -e lowcode-0gwpl9v4125156ef
 
 ## 环境变量
 
-见 `functions/pay-stripe/.env.example`，核心 3 个：
+完整清单与必填说明见 [`functions/pay-stripe/README.md`「环境变量」](./functions/pay-stripe/README.md#环境变量)，
+模板文件为 [`functions/pay-stripe/.env.example`](./functions/pay-stripe/.env.example)。
 
-| 变量 | 必填 | 说明 |
-|---|---|---|
-| `stripeSecretKey` | 是 | `sk_test_` / `sk_live_`，建议用受限密钥 `rk_` |
-| `stripeWebhookSecret` | 是 | `whsec_`，创建 endpoint 时只返回一次；回调由本函数自验签 |
-| `stripeApiVersion` | 强烈建议 | 如 `2026-09-30.endive`，锁定后避免 Stripe 升级导致字段路径变化、模板静默失效 |
+最少需要两个：`stripeSecretKey` 与 `stripeWebhookSecret`（回调由函数自验签，缺一不可）。
 
 ## 范围
 
@@ -153,5 +130,6 @@ tcb app deploy pay-stripe-demo -e lowcode-0gwpl9v4125156ef
 
 ## 已知待办
 
-- `stripe-pay` 集成的网关代验签能力待平台确认：2026-11-05 实测无签名请求也会被转发到函数，因此当前只能由函数自验签。
+- `stripe-pay` 集成的网关代验签能力待平台确认；当前只能由函数自验签，
+  实测细节见 [`functions/pay-stripe/README.md`「回调验签」](./functions/pay-stripe/README.md#回调验签一律由云函数自验签)。
 - 业务侧需把 `TODO(业务侧)` 处对接自己的订单表（当前只有内存 Map）。
