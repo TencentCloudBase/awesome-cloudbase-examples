@@ -40,7 +40,8 @@ const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArr
  *    adjustable_quantity 允许客户在收银台自行改数量，dynamic_tax_rates 引入模板未预期税率。
  *    这里既要裁剪，也要把 Stripe 合法的常用字段显式收录（否则会被静默剥离）。
  */
-const LINE_ITEM_KEYS = ['price_data', 'quantity'];
+const LINE_ITEM_KEYS = ['price', 'price_data', 'quantity'];
+const PRICE_ID_RE = /^price_[A-Za-z0-9]{1,64}$/;
 const PRICE_DATA_KEYS = ['unit_amount', 'currency', 'product_data', 'recurring', 'tax_behavior'];
 // 注：不要再放 'product'。Checkout 的 price_data 里没有这个字段（引用已有价格要用
 // line_items[].price），加进来只会产生「能通过白名单但永远校验不过」的不可达分支。
@@ -65,6 +66,28 @@ const pickKeys = (obj, keys) => {
  */
 function validateLineItem(item) {
     if (!isPlainObject(item)) return 'line_items 每一项必须是对象';
+
+    // Stripe 支持两种形态：price_data（现造价格）或 price（引用已有 Price ID）。
+    // 只认 price_data 会把合法的 price 形态整条拒掉。
+    const hasPriceRef = item.price !== undefined;
+    const hasPriceData = item.price_data !== undefined;
+    if (hasPriceRef && hasPriceData) return 'line_items[].price 与 price_data 只能二选一';
+    if (!hasPriceRef && !hasPriceData) {
+        return 'line_items[] 必须提供 price（已有 Price ID）或 price_data';
+    }
+
+    if (hasPriceRef) {
+        if (typeof item.price !== 'string' || !PRICE_ID_RE.test(item.price)) {
+            return 'line_items[].price 必须是 Stripe Price ID（price_ 开头）';
+        }
+        // 引用已有 Price 时金额与币种由 Price 决定，这里只校验数量
+        const refQty = item.quantity;
+        if (typeof refQty !== 'number' || !Number.isInteger(refQty) || refQty <= 0) {
+            return 'line_items[].quantity 必须是正整数';
+        }
+        if (refQty > MAX_QUANTITY) return `line_items[].quantity 不能超过 ${MAX_QUANTITY}`;
+        return null;
+    }
 
     const price = item.price_data;
     if (!isPlainObject(price)) return 'line_items[].price_data 必须是对象';
@@ -181,6 +204,10 @@ function validateLineItems(items, opts = {}) {
  */
 function sanitizeLineItems(items) {
     return items.map((item) => {
+        // 引用已有 Price 的形态：只保留 price + quantity，不构造 price_data
+        if (item.price !== undefined) {
+            return pickKeys(item, ['price', 'quantity']);
+        }
         const price = pickKeys(item.price_data, PRICE_DATA_KEYS);
 
         if (price.currency !== undefined) {
