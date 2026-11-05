@@ -27,8 +27,7 @@
         "stripeApiVersion": "{{env.stripeApiVersion}}",
         "stripeSuccessUrl": "{{env.stripeSuccessUrl}}",
         "stripeCancelUrl": "{{env.stripeCancelUrl}}",
-        "stripeAllowedReturnDomains": "{{env.stripeAllowedReturnDomains}}",
-        "notifyUrl": "https://stripe-test-03.integration-callback.tcloudbase.com/stripe/webhook"
+        "stripeAllowedReturnDomains": "{{env.stripeAllowedReturnDomains}}"
       },
       "ignore": [
         "node_modules",
@@ -41,8 +40,8 @@
   ],
   "integrations": [
     {
-      "keyId": "stripe-test-03",
-      "name": "stripe-test-03",
+      "keyId": "stripe-test",
+      "name": "stripe-test",
       "authTypeCode": "stripe-pay",
       "description": "请填写集成描述",
       "demoCodeFunctionName": "pay-stripe",
@@ -50,7 +49,7 @@
         "stripeSecretKey": "{{env.stripeSecretKey}}",
         "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
         "stripeApiVersion": "{{env.stripeApiVersion}}",
-        "notifyUrl": "https://stripe-test-03.integration-callback.tcloudbase.com/stripe/webhook"
+        "notifyUrl": "https://stripe-test.integration-callback.tcloudbase.com/stripe/webhook"
       }
     }
   ]
