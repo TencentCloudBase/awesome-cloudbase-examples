@@ -8,7 +8,6 @@ Stripe 支付集成示例。面向国际业务：Checkout Session 收款 + Webho
 cloudbase-stripe/
 ├── cloudbaserc.json         集成级声明：云函数 + 前端 app（pay-stripe-demo）
 ├── functions/pay-stripe/    云函数（Express + Stripe SDK）
-│   ├── cloudbaserc.json     单函数部署声明（只部署函数时用这个目录）
 │   ├── config/              凭证读取与启动校验
 │   ├── routes/              /stripe/create_session | retrieve_session | webhook
 │   ├── controllers/         鉴权中间件 + 回调处理 + 统一应答
@@ -21,7 +20,7 @@ cloudbase-stripe/
 ## 快速开始
 
 ```bash
-# 1. 装依赖 + 跑单测（109 个用例，不需要网络与真实密钥）
+# 1. 装依赖 + 跑单测（125 个用例，不需要网络与真实密钥）
 cd functions/pay-stripe
 npm install && npm test
 
@@ -41,12 +40,15 @@ cd ../../examples/web && npx serve .
 
 ## 部署
 
-两份配置，按需要选：
+只有一份配置：本目录 `cloudbaserc.json`（云函数 + 前端 app 都在里面）：
 
-| 配置 | 部署范围 | 命令 |
-|---|---|---|
-| `functions/pay-stripe/cloudbaserc.json` | 只部署云函数 | `cd functions/pay-stripe && tcb fn deploy pay-stripe --httpFn --force` |
-| 根目录 `cloudbaserc.json` | 云函数 + 前端 app | `tcb deploy --only functions` 或 `tcb app deploy pay-stripe-demo` |
+| 目标 | 命令 |
+|---|---|
+| 只部署云函数 | `tcb fn deploy pay-stripe --httpFn --force` |
+| 云函数 + 前端 app | `tcb deploy --only functions` 或 `tcb app deploy pay-stripe-demo` |
+
+> `functions/pay-stripe/` 下曾有一份单函数 `cloudbaserc.json`，环境变量与集成段跟这里完全重复，
+> 改一处容易漏另一处，已删除。所有部署命令都在本目录执行。
 
 云托管部署则用 `functions/pay-stripe/Dockerfile`。
 
@@ -110,6 +112,11 @@ tcb app deploy pay-stripe-demo -e <envId>
 - **API Base** 填云 API 地址：`https://<envId>.api.tcloudbasegateway.com/v1/functions/pay-stripe`
   （页面识别到 `/v1/functions/` 会自动改用 `_action`，不再拼 `/stripe/xxx` 路径）
 - **accessToken** 填登录后拿到的 token（页面会把 `Bearer` 前缀补上）
+
+> 🚨 接口地址**只从同源 localStorage 恢复**（下单时记住），不再接受 `?apiBase=`。
+> 否则别人发一条 `?apiBase=https://evil.example&envId=xxx` 的链接，页面会在静默登录后
+> 把 accessToken 发到那个域名。回跳地址因此只带 `session_id`。
+> 需要自动登录时用 `?envId=<环境ID>` 进入一次，之后 envId 也会被记住。
 
 记得把云函数的 `corsAllowOrigin` 配成这个站点的 origin，否则浏览器调用会被 CORS 拦掉。
 

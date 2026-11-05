@@ -1,0 +1,31 @@
+# 🚨 本文件防止 `COPY . /app` 把密钥打进镜像：
+#    README 让开发者先 cp .env.example .env 再填密钥，没有本文件时 .env 会一起 COPY 进去，
+#    镜像推送到仓库后密钥就等于公开了。
+
+# 密钥只通过运行时环境变量注入（云托管控制台 / 集成中心）
+.env
+.env.*
+!.env.example
+
+# 依赖目录：镜像内用 npm install 重新安装
+node_modules
+
+# 测试与本地产物
+tests
+coverage
+*.log
+logs
+
+# 版本控制 / 编辑器
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+
+# 部署声明不参与运行时
+cloudbaserc.json
+
+# 私钥 / 证书
+*.pem
+*.key

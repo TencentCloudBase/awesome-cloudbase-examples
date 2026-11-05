@@ -10,6 +10,16 @@
  */
 const Stripe = require('stripe');
 
+/**
+ * 主动请求超时（毫秒）
+ *
+ * 🚨 Stripe SDK 默认超时 80 秒，而云函数配置的是 30 秒：Stripe 侧慢响应时
+ *    函数先被平台掐断，调用方看到「函数超时」，但订单/Session 已在 Stripe 建好，
+ *    重试就会产生重复单据。给客户端设一个明显小于函数超时的值（10 秒），
+ *    让失败发生在可解释的一侧，并留下 Stripe 的 requestId 便于对账。
+ */
+const STRIPE_TIMEOUT_MS = 10000;
+
 class StripeStrategy {
     constructor(stripeConfig) {
         this.stripeConfig = stripeConfig;
@@ -35,6 +45,8 @@ class StripeStrategy {
             // apiVersion 为空时不锁版本（由账户默认版本决定），但生产环境强烈建议锁定
             this._stripe = Stripe(secretKey, {
                 apiVersion: apiVersion || undefined,
+                // 10 秒 < 云函数 30 秒：把超时暴露在本侧，而不是函数被平台掐断
+                timeout: STRIPE_TIMEOUT_MS,
             });
             console.log(
                 `[StripeStrategy] 客户端已初始化 | apiVersion: ${apiVersion || '(账户默认)'}`
@@ -102,7 +114,11 @@ class StripeStrategy {
                 'stripeWebhookSecret 未配置，无法验签（回调由本函数自验签，此项必填）'
             );
         }
-        return this.stripe.webhooks.constructEvent(
+        // 🚨 用静态 constructEvent，而不是 this.stripe.webhooks.constructEvent：
+        //    this.stripe 的 getter 要求 stripeSecretKey，只配了 whsec 时会抛
+        //    「stripeSecretKey 未配置」，把排障方向带到错误的地方。
+        //    验签本身只依赖 whsec，与 sk 无关。
+        return Stripe.webhooks.constructEvent(
             rawBody,
             signature,
             this.stripeConfig.webhookSecret

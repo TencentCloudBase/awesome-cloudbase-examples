@@ -173,6 +173,18 @@ function validateLineItems(items, opts = {}) {
         return `mode 只支持 ${ALLOWED_MODES.join(' / ')}`;
     }
 
+    // setup 只收集支付方式、不产生扣款：line_items 必须【不存在】。
+    // 显式区分 items 存在 / 缺失，不用无条件 return 表达「该字段不适用」：
+    // 无条件放行会让任意非法载荷（非数组 / 字符串 / 超上限数组）穿过校验层，
+    // 无条件拒绝则会误杀合法的 setup 直连调用（items 本来就不该传）。
+    // 上面的 mode 白名单属于 config 校验，不能替代这里的 payload 存在性判断。
+    if (opts.mode === 'setup') {
+        if (items !== undefined && items !== null) {
+            return 'mode=setup 不能传 line_items（setup 只收集支付方式，不扣款）';
+        }
+        return null;
+    }
+
     if (!Array.isArray(items)) return 'line_items 必须是数组';
     if (items.length === 0) return 'line_items 不能是空数组';
     if (items.length > MAX_LINE_ITEMS) return `line_items 最多 ${MAX_LINE_ITEMS} 项`;

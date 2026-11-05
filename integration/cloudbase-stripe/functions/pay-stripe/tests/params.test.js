@@ -16,7 +16,7 @@ const {
     validateSessionParams,
     SESSION_PARAM_WHITELIST,
 } = require('../controllers/stripeController');
-const { sanitizeLineItems } = require('../utils/lineItems');
+const { sanitizeLineItems, validateLineItems } = require('../utils/lineItems');
 
 test('白名单：只保留模板支持的字段', () => {
     const picked = pickSessionParams({
@@ -287,6 +287,31 @@ test('⛔ line_items 与 amount / amount_major / quantity 只能二选一', () =
     assert.strictEqual(validateSessionParams({ line_items: [validItem()] }), null, '单传 line_items 仍通过');
 });
 
+// ========== 回归：mode=setup 的互斥字段与 line_items 分支同口径 ==========
+// setup 不产生扣款：service 的 _buildSessionParams 解构掉 currency / quantity 后
+// items = null，body 既不含币种也不含数量 —— 调用方声明值被静默吞掉，接口仍返回 200。
+// 与 line_items 分支的 currency 互斥保持一致，命中即 400。
+test('⛔ mode=setup 不能传 currency / quantity（声明值不得被静默丢弃）', () => {
+    assert.match(validateSessionParams({ mode: 'setup', currency: 'jpy' }), /setup/);
+    assert.match(validateSessionParams({ mode: 'setup', quantity: 5 }), /setup/);
+    assert.match(
+        validateSessionParams({ mode: 'setup', currency: 'jpy', quantity: 5, client_reference_id: 'ORDER_1' }),
+        /setup/,
+        '问题描述的原始触发参数'
+    );
+    assert.strictEqual(
+        validateSessionParams({ mode: 'setup', client_reference_id: 'ORDER_1' }),
+        null,
+        '不带金额 / 币种 / 数量的 setup 仍通过'
+    );
+});
+
+test('⛔ mode=setup 原有互斥字段仍拒绝（amount / amount_major / line_items）', () => {
+    assert.match(validateSessionParams({ mode: 'setup', amount: 990 }), /setup/);
+    assert.match(validateSessionParams({ mode: 'setup', amount_major: 9.9 }), /setup/);
+    assert.match(validateSessionParams({ mode: 'setup', line_items: [validItem()] }), /setup/);
+});
+
 // ========== 回归：line_items 深层字段按白名单裁剪 ==========
 // 顶层 SESSION_PARAM_WHITELIST 只挡字段名，挡不住深层对象：price_data.recurring
 // 把一次性 payment 变成订阅语义，adjustable_quantity 允许客户在收银台改数量，
@@ -325,4 +350,41 @@ test('⛔ line_items 深层非白名单字段被剥离，且校验层不改写�
     assert.strictEqual(item.dynamic_tax_rates, undefined);
     // 币种统一小写：line_items 路径不会经过 _buildSessionParams 的 toLowerCase
     assert.strictEqual(sanitizeLineItems([{ ...validItem(), price_data: { ...validItem().price_data, currency: 'USD' } }])[0].price_data.currency, 'usd');
+});
+
+// ========== 回归：validateLineItems 直连（service 可单独调用，controller 挡不住） ==========
+// setup 分支必须显式表达「items 必须不存在」，而不是提前无条件 return：
+// 无条件放行会让非法载荷穿过校验层，无条件拒绝会误杀合法的 setup 直连调用。
+
+test('✅ mode=setup 且 items 缺失：校验通过（合法 setup 不传 line_items）', () => {
+    assert.strictEqual(validateLineItems(undefined, { mode: 'setup' }), null);
+    assert.strictEqual(validateLineItems(null, { mode: 'setup' }), null);
+});
+
+test('⛔ mode=setup 带任意 items：一律拒绝，非法载荷不得穿过校验层', () => {
+    for (const bad of [
+        'not array',
+        { price: 'price_evil' },
+        [],
+        [validItem()],
+        Array(51).fill(validItem()),
+    ]) {
+        assert.match(
+            validateLineItems(bad, { mode: 'setup' }),
+            /setup/,
+            `非法载荷 ${String(bad)} 必须返回 setup 约束错误`
+        );
+    }
+});
+
+test('⛔ 非法 mode 仍先被白名单挡住，不受 setup 分支影响', () => {
+    assert.match(validateLineItems(undefined, { mode: 'foo' }), /mode 只支持/);
+    assert.match(validateLineItems('evil', { mode: 'PAYMENT' }), /mode 只支持/);
+});
+
+test('⛔ 非 setup 模式仍走完整形态校验（setup 分支不得提前 return）', () => {
+    assert.match(validateLineItems('not array', { mode: 'payment' }), /line_items 必须是数组/);
+    assert.match(validateLineItems([], { mode: 'payment' }), /不能是空数组/);
+    assert.match(validateLineItems(Array(51).fill(validItem()), { mode: 'payment' }), /最多 50 项/);
+    assert.strictEqual(validateLineItems([validItem()], { mode: 'payment' }), null);
 });

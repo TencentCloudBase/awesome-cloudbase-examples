@@ -200,6 +200,20 @@ function validateSessionParams(params) {
         return `mode 只支持 ${ALLOWED_MODES.join(' / ')}`;
     }
 
+    // setup 只收集支付方式、不产生扣款：Stripe 不接受金额与 line_items。
+    // 在入口就给出明确提示，而不是让请求走到 service 才抛错。
+    // 🚨 与下面 line_items 分支的互斥保持同一口径：currency / quantity 也要互斥。
+    //    service 的 _buildSessionParams 会把两者解构掉并令 items = null，
+    //    body 既不含币种也不含数量 —— 声明值被静默丢弃，接口却仍返回 200。
+    if (params.mode === 'setup'
+        && (params.amount !== undefined
+            || params.amount_major !== undefined
+            || params.line_items !== undefined
+            || params.currency !== undefined
+            || params.quantity !== undefined)) {
+        return 'mode=setup 不能传 amount / amount_major / line_items / currency / quantity（setup 只收集支付方式，不扣款）';
+    }
+
     // 🚨 line_items 与顶层金额 / 数量口径互斥：service 的
     //    `let items = lineItems; if (!items) {...}` 在 line_items 存在时会跳过
     //    整个金额构造分支，调用方声明的 amount / quantity 被静默丢弃，实际扣款
@@ -438,6 +452,19 @@ exports.webhook = async (req, res) => {
  *
  * ⚠️ 回调路由（/stripe/webhook）不挂此中间件，改由签名保证可信。
  */
+/**
+ * 是否运行在云端运行时（云函数 / 云托管容器）
+ *
+ * 🚨 ALLOW_ANONYMOUS_DEV 只允许本地开发使用：靠 README 写「生产不要开」不是防护，
+ *    配置写错带到线上就会放行未登录调用。云端一律直接忽略该开关。
+ */
+const isCloudRuntime = () => Boolean(
+    process.env.TENCENTCLOUD_RUNENV
+    || process.env.SCF_RUNTIME
+    || process.env.CFC_RUNTIME
+    || process.env.KUBERNETES_SERVICE_HOST
+);
+
 exports.payMiddleware = (req, res, next) => {
     const identity = resolveAuthIdentity(req);
 
@@ -450,8 +477,12 @@ exports.payMiddleware = (req, res, next) => {
         return next();
     }
 
-    // 显式本地联调开关：默认关闭
-    if ((process.env.ALLOW_ANONYMOUS_DEV || '').trim().toLowerCase() === 'true') {
+    // 显式本地联调开关：默认关闭，且云端运行时直接忽略
+    const allowAnonymousDev = (process.env.ALLOW_ANONYMOUS_DEV || '').trim().toLowerCase() === 'true';
+    if (allowAnonymousDev && isCloudRuntime()) {
+        console.warn('[鉴权] ALLOW_ANONYMOUS_DEV=true 在云端运行时被忽略（该开关仅本地开发有效）');
+    }
+    if (allowAnonymousDev && !isCloudRuntime()) {
         console.warn('[鉴权] ⚠️ ALLOW_ANONYMOUS_DEV=true，放行未登录请求（仅限本地，生产严禁开启）');
         req.user = { uid: null, source: 'anonymous-dev' };
         return next();

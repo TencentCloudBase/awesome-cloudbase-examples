@@ -13,6 +13,11 @@ const assert = require('node:assert');
 // 拼接构造：完整形态的 sk_test_ 字面量会被 GitHub Push Protection 判成真实密钥
 process.env.stripeSecretKey = 'sk_' + 'test_' + 'x'.repeat(24);
 process.env.ALLOW_ANONYMOUS_DEV = 'true'; // 跳过 Bearer 鉴权，专注校验逻辑
+// 云端运行时开关会被忽略：CI 里若残留这些变量，本文件的匿名放行用例会误判
+delete process.env.TENCENTCLOUD_RUNENV;
+delete process.env.SCF_RUNTIME;
+delete process.env.CFC_RUNTIME;
+delete process.env.KUBERNETES_SERVICE_HOST;
 delete process.env.notifyURLCallbackType;
 delete process.env.notifyUrlCallbackType;
 

@@ -125,9 +125,10 @@ class StripeService {
             clientSecret: session.client_secret || null,
             status: session.status,
             paymentStatus: session.payment_status,
-            // 原样返回，业务侧可拿 expires_at 做倒计时
+            // 业务侧可拿 expires_at 做倒计时
             expiresAt: session.expires_at,
-            raw: session,
+            // 🚨 不回传 raw：与 retrieveSession 同口径。整包 Stripe 对象会把
+            //    customer_details / payment_method 等客户信息一并带给前端。
         };
     }
 
@@ -162,8 +163,19 @@ class StripeService {
             throw new Error('currency 必须是 3 位字母币种代码（如 usd）');
         }
 
+        // setup 模式只收集支付方式、不产生扣款：Stripe 不接受金额与 line_items。
+        // 模式白名单里有 setup，但原实现会走到下面的金额分支必然抛「缺少金额」，
+        // 等于每条 setup 请求都失败在中途。
+        if (mode === 'setup') {
+            if (lineItems !== undefined || amount !== undefined || amountMajor !== undefined) {
+                throw new Error('mode=setup 不能传 line_items / amount / amount_major（setup 只收集支付方式，不扣款）');
+            }
+        }
+
         let items = lineItems;
-        if (!items) {
+        if (mode === 'setup') {
+            items = null;
+        } else if (!items) {
             const hasAmount = amount !== undefined && amount !== null;
             const hasMajor = amountMajor !== undefined && amountMajor !== null;
             if (hasAmount && hasMajor) {
@@ -216,13 +228,24 @@ class StripeService {
         const finalSuccessUrl = successUrl || stripeConfig.successUrl;
         const finalCancelUrl = cancelUrl || stripeConfig.cancelUrl;
 
-        if (mode === 'payment' && !finalSuccessUrl) {
-            throw new Error('缺少 success_url：hosted_page 模式必填（可由环境变量 stripeSuccessUrl 兜底）');
+        // hosted 收银台的三种 mode 都需要 success_url：payment 支付完成、
+        // subscription 首次订阅完成、setup 保存支付方式完成都要回跳。
+        // 只在 payment 校验时，subscription / setup 会一路打到 Stripe 才拿到上游 400。
+        if (!finalSuccessUrl) {
+            throw new Error(`缺少 success_url：mode=${mode} 的托管收银台必填（可由环境变量 stripeSuccessUrl 兜底）`);
+        }
+
+        // service 公开导出，可被脚本 / 二期入口单独调用，不能假设一定先过了
+        // controller 的 typeof 校验。非字符串真值（1 / {} / ['x']）会让下面的
+        // includes 抛 TypeError，controller 又会把该 message 原样透给调用方。
+        if (typeof finalSuccessUrl !== 'string') {
+            throw new Error('success_url 必须是字符串');
         }
 
         // 回跳拿不到 session_id 的原因 90% 在这里：Stripe 只有见到 success_url 里的
         // {CHECKOUT_SESSION_ID} 占位符，才会把它替换成 ?session_id=cs_xxx 回跳。
         // 这里只告警不阻断 —— 占位符不是 Stripe API 的必填项。
+        // 保留真值短路：告警分支无论如何都不能让请求因类型问题崩溃。
         if (finalSuccessUrl && !finalSuccessUrl.includes('{CHECKOUT_SESSION_ID}')) {
             console.warn(
                 '[StripeService] ⚠️ success_url 缺少 {CHECKOUT_SESSION_ID} 占位符，'
@@ -232,11 +255,13 @@ class StripeService {
 
         const body = {
             mode,
-            line_items: items,
             client_reference_id: clientRefId,
             metadata,
             ...rest,
         };
+
+        // setup 模式没有 line_items，且不能传空数组（Stripe 会判非法参数）
+        if (items && items.length > 0) body.line_items = items;
 
         if (finalSuccessUrl) body.success_url = finalSuccessUrl;
         if (finalCancelUrl) body.cancel_url = finalCancelUrl;

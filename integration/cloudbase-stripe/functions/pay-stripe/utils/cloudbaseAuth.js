@@ -230,7 +230,12 @@ function getUserEmail(req) {
     //    payload 里的 email 进入下单参数（身份是不可信的，取值也不该可用）
     if (!getUserId(req)) return null;
 
-    const authInfo = req.cloudbaseAuth || parseCloudBaseAuth(req);
+    // 🚨 只认中间件挂载的 req.cloudbaseAuth：它的主体已被 resolveAuthIdentity
+    //    校验过「与网关 x-userid 一致」。
+    //    绝不能再回退 parseCloudBaseAuth(req) —— 那会在这里自己解一次 JWT，
+    //    绕过「令牌主体与网关身份必须一致」的检查：网关给的是 alice，
+    //    header 里塞一个 bob 的 payload，订单就会被填成 bob 的邮箱。
+    const authInfo = req && req.cloudbaseAuth;
     // 两个候选值都要归一化：非字符串 / 超长 / 格式非法一律返回 null
     return normalizeEmail(authInfo?.email) || normalizeEmail(authInfo?.provider_email) || null;
 }

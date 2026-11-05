@@ -11,6 +11,11 @@ const assert = require('node:assert');
 // config 在模块加载时读 env：先给一份格式合法的假 sk，避免启动校验噪音
 process.env.stripeSecretKey = 'sk_' + 'test_' + 'x'.repeat(24);
 process.env.notifyURLCallbackType = 'system';
+// 云端运行时开关会被忽略：CI 里若残留这些变量，下面的匿名放行用例会误判
+delete process.env.TENCENTCLOUD_RUNENV;
+delete process.env.SCF_RUNTIME;
+delete process.env.CFC_RUNTIME;
+delete process.env.KUBERNETES_SERVICE_HOST;
 
 const { payMiddleware } = require('../controllers/stripeController');
 const { getUserEmail, normalizeEmail, isValidAuthPayload, pickSubject } = require('../utils/cloudbaseAuth');
@@ -193,6 +198,18 @@ test('ALLOW_ANONYMOUS_DEV 取其它值（如 1）不等于 true：仍 401', () =
     assert.strictEqual(passed, false);
 });
 
+test('⛔ 云端运行时 ALLOW_ANONYMOUS_DEV=true 被忽略：仍 401', () => {
+    const req = mockReq();
+    const { passed, res } = withEnv(
+        { ALLOW_ANONYMOUS_DEV: 'true', SCF_RUNTIME: '1' },
+        () => run(payMiddleware, req)
+    );
+
+    assert.strictEqual(passed, false, '云端不能因为配置写错就放行未登录调用');
+    assert.strictEqual(res.statusCode, 401);
+    assert.strictEqual(req.user, undefined);
+});
+
 // ========== exp 是强制字段 ==========
 // 🚨 曾用 `if (payload.exp !== undefined)`，缺 exp 的 payload 跳过全部过期判断，
 //    等于接受一张永不过期的身份凭证
@@ -247,6 +264,26 @@ test('⛔ 未通过网关鉴权时 getUserEmail 返回 null（自拼 Bearer 也�
         getUserEmail({ headers: { authorization: bearer({ sub: 'attacker', exp: future(), iss: 'x' }) } }),
         null
     );
+});
+
+test('⛔ 网关给了 uid 但未挂 cloudbaseAuth：不从 Authorization 自行解码取邮箱', () => {
+    // 修复前的实现会 fallback 到 parseCloudBaseAuth，绕过
+    // 「token 主体必须等于网关 uid」的检查，把 alice 的订单填成 bob 的邮箱
+    const req = {
+        user: { uid: 'uid_alice' },
+        headers: {
+            authorization: bearer({ sub: 'uid_bob', email: 'bob@example.com', exp: future(), iss: 'x' }),
+        },
+    };
+    assert.strictEqual(getUserEmail(req), null);
+});
+
+test('✅ 中间件挂载的 cloudbaseAuth（主体已校验）：邮箱正常回填', () => {
+    const req = {
+        user: { uid: 'uid_alice' },
+        cloudbaseAuth: { sub: 'uid_alice', email: 'alice@example.com' },
+    };
+    assert.strictEqual(getUserEmail(req), 'alice@example.com');
 });
 
 // ========== payload 形态：类型守卫必须挡住隐式转换 ==========

@@ -22,8 +22,8 @@ pay-stripe/
 │   ├── lineItems.js            line_items 白名单校验与净化（controller / service 共用）
 │   └── cloudbaseAuth.js        网关身份解析（x-userid / x-authmethod）
 ├── tests/                      单元测试
-├── Dockerfile / scf_bootstrap  云托管 / 云函数部署
-└── cloudbaserc.json            部署声明
+├── Dockerfile / .dockerignore  云托管镜像（.dockerignore 挡住 .env，密钥不进镜像）
+└── scf_bootstrap               云函数启动脚本
 ```
 
 ## 环境变量
@@ -38,7 +38,7 @@ pay-stripe/
 | `stripeAllowedReturnDomains` | 否 | 回跳域名白名单（逗号分隔，只写域名如 `example.com`）。**不配 = 只校验 http/https**，回跳地址以调用方为准；配了才强制命中 |
 | `corsAllowOrigin` | 否 | 跨域白名单，多个逗号分隔（`app.js` 读取，缺失时浏览器侧被 CORS 拦掉） |
 | `AUTH_EXPECTED_ISSUER` | 否 | 期望的 JWT 签发方。仅影响 `email` 回填校验，**不参与鉴权** |
-| `ALLOW_ANONYMOUS_DEV` | 否 | 仅本地联调，`true` 时放行未认证调用并打 warn，**生产严禁开启** |
+| `ALLOW_ANONYMOUS_DEV` | 否 | 仅本地联调。`true` 时放行未认证调用并打 warn；**云函数 / 云托管运行时该开关被直接忽略**（配置写错带到线上也不会放行） |
 
 > 本地调试专用变量（`PORT` / `ALLOW_ANONYMOUS_DEV`）不会被部署到云端。
 
@@ -84,6 +84,8 @@ pay-stripe/
 `x-wx-openid`（只有格式校验，没有来源证明，`curl -H` 即可伪造）。
 
 本地联调要放开匿名调用，显式设 `ALLOW_ANONYMOUS_DEV=true`（默认关闭，放行时会打 warn，`source` 标记为 `anonymous-dev`）。
+检测到云端运行时（`TENCENTCLOUD_RUNENV` / `SCF_RUNTIME` / `KUBERNETES_SERVICE_HOST`）时，
+该开关会被直接忽略并打日志 —— 不依赖「生产别开」这句文档约定。
 回调 `/stripe/webhook` 不挂鉴权中间件，由 `stripe-signature` 保证可信。
 
 ## 回调验签：一律由云函数自验签
@@ -174,6 +176,7 @@ curl -X POST https://<你的域名>/stripe/create_session \
      - `price_data`（现造价格）：`unit_amount` 正整数且 ≤ `999999999`、`currency` 三位字母、`quantity` 正整数、`product_data.name` 不超 200 字符、`product_data.description` 不超 500 字符、`product_data.images` ≤8 个 https 地址；`recurring.interval` 仅 `day/week/month/year`；`tax_behavior` 仅 `inclusive/exclusive`。
      - `price`（引用已有 Price ID）：必须是 `price_` 开头的字符串。
    - `mode=subscription` 时 `line_items[].price_data.recurring` 必填；非 subscription 模式带 `recurring` 直接 400。
+   - `mode=setup` 只收集支付方式、不扣款：**不能传** `amount` / `amount_major` / `line_items` / `currency` / `quantity`，带了直接 400（`currency` / `quantity` 会被下游静默丢弃，声明值不生效）；三种托管模式的 `success_url` 都必填。
    - `line_items` 与 `amount` / `amount_major` / `quantity` / `currency` **互斥**（币种写在每项 `price_data.currency`，顶层 `currency` 会被静默丢弃，所以直接拒绝）。
    - `metadata` 必须是对象，值只支持字符串/数字且每个值 ≤500 字符（Stripe 限制）；登录态 `cloudbaseUid` 在**校验前**注入，确保也过一遍校验。
    - 校验通过后按白名单重建 `line_items`（剥离 `adjustable_quantity` / `dynamic_tax_rates` 等未预期字段），并把币种统一小写；净化在 service 组装请求时执行，controller 的校验函数只读不写。
