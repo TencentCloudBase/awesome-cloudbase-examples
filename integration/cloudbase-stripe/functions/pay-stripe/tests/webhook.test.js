@@ -43,6 +43,9 @@ function makeEvent(overrides = {}) {
             object: {
                 id: 'cs_test_0001',
                 object: 'checkout.session',
+                // Stripe 正常投递的 checkout.session 对象都带 status；夹具必须贴近真实报文，
+                // 否则「缺 status 被拒」的回归用例无法与正常事件区分
+                status: 'complete',
                 payment_status: 'paid',
                 client_reference_id: 'ORDER_123',
             },
@@ -343,11 +346,64 @@ test('⛔ 明文 checkout.session 事件缺 client_reference_id：拒绝且不�
         body: { ParsedContent: {
             id: 'evt_biz_01',
             type: 'checkout.session.completed',
-            data: { object: { id: 'cs_biz_01', payment_status: 'paid' } },
+            data: { object: { id: 'cs_biz_01', status: 'complete', payment_status: 'paid' } },
         } },
     });
     assert.strictEqual(result, null);
     assert.strictEqual(svc.processedEvents.has('evt_biz_01:checkout.session.completed'), false);
+});
+
+// status 与 payment_status 是两条结构相同的相邻校验，必须同为 fail closed：
+// 曾写成 `obj.status !== undefined && !isNonEmptyString(obj.status)`，字段缺失时
+// 条件短路直接放行 → 事件被映射成 PAID、写入去重键并回 200，Stripe 不再重试。
+test('⛔ checkout.session 事件缺 status / status 为空：拒绝且不占用去重键', async () => {
+    const variants = [
+        ['字段缺失', {}],
+        ['status=null', { status: null }],
+        ['status 为空白串', { status: '   ' }],
+    ];
+
+    for (const [i, [label, patch]] of variants.entries()) {
+        const svc = loadService();
+        svc.strategy = { verifyWebhook: (rawBody) => JSON.parse(rawBody) };
+
+        const event = makeEvent({
+            id: `evt_no_status_0${i}`,
+            data: { object: {
+                id: `cs_no_status_0${i}`,
+                object: 'checkout.session',
+                client_reference_id: `ORDER_NO_STATUS_0${i}`,
+                payment_status: 'paid',
+                ...patch,
+            } },
+        });
+        const dedupeKey = `evt_no_status_0${i}:checkout.session.completed`;
+        const result = await svc.handleWebhook({
+            body: event, rawBody: JSON.stringify(event), signature: 'v1=good',
+        });
+
+        assert.strictEqual(result, null, `${label} 必须被拒绝，不能放行到 PAID`);
+        assert.strictEqual(svc.processedEvents.has(dedupeKey), false, `${label} 不能占用去重键`);
+    }
+
+    // 明文通道同样不能靠缺 status 蒙混过业务校验
+    const plainSvc = loadService('system');
+    const plainResult = await plainSvc.handleWebhook({
+        body: { ParsedContent: {
+            id: 'evt_no_status_plain_01',
+            type: 'checkout.session.completed',
+            data: { object: {
+                id: 'cs_no_status_plain_01',
+                client_reference_id: 'ORDER_NO_STATUS_PLAIN',
+                payment_status: 'paid',
+            } },
+        } },
+    });
+    assert.strictEqual(plainResult, null);
+    assert.strictEqual(
+        plainSvc.processedEvents.has('evt_no_status_plain_01:checkout.session.completed'),
+        false
+    );
 });
 
 test('⛔ 明文 payment_intent 事件缺 status：拒绝且不占用去重键', async () => {
@@ -430,7 +486,13 @@ test('⛔ 明文通道：缺 payment_status 时不能靠会话 status=complete �
     const mk = (obj) => ({
         id: 'evt_nostatus_01',
         type: 'checkout.session.completed',
-        data: { object: { id: 'cs_nostatus_01', client_reference_id: 'ORDER_NOSTATUS', ...obj } },
+        // 默认补齐 status，保证两个子用例精确只缺 payment_status / payment_status 为空白
+        data: { object: {
+            id: 'cs_nostatus_01',
+            status: 'complete',
+            client_reference_id: 'ORDER_NOSTATUS',
+            ...obj,
+        } },
     });
 
     const noPaymentStatus = await svc.handleWebhook({

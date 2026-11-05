@@ -322,7 +322,10 @@ class StripeService {
             //    绝不能拿它当「资金到账」依据。异步支付方式下 status=complete 与
             //    payment_status=unpaid 会同时出现，曾用 `payment_status ?? status`
             //    合并取值把 unpaid 当成有效状态放行，最终把未收款事件打标 PAID。
-            if (obj.status !== undefined && !isNonEmptyString(obj.status)) return false;
+            //    与下方 payment_status 同为无条件非空（fail closed）：不能写
+            //    `obj.status !== undefined && ...`，否则字段缺失时短路放行，
+            //    事件会被打标 PAID、占用去重键并回 200，Stripe 不再重试。
+            if (!isNonEmptyString(obj.status)) return false;
 
             // payment_status 必须存在且非空：资金是否到账由它决定
             if (!isNonEmptyString(obj.payment_status)) return false;
