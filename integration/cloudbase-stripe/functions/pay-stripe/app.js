@@ -55,6 +55,29 @@ const ALLOWED_ACTIONS = new Set([
     'stripe_webhook',
 ]);
 
+/**
+ * Stripe 事件类型的基本形态校验（不是「已订阅」白名单）
+ *
+ * 🚨 只判「是不是含点号的字符串」不够：body 里塞一个 {"type":"x.y"} 就能顶着
+ *    stripe_webhook 的身份进入「无鉴权、靠签名保证可信」的回调通道，
+ *    等于把 ALLOWED_ACTIONS 对 webhook 的白名单完全旁路。
+ *
+ * ⚠️ 但这里**不能**用 EVENT_SEMANTICS 的键做准入白名单：那份语义表只描述
+ *    「本模板关心哪 6 个事件」，而 endpoint 实际订阅哪些事件是在 Stripe 后台
+ *    独立配置的。拿语义表当路由白名单，会把 Stripe 合法投递的未订阅事件
+ *    （payment_intent.created / invoice.paid …）打成 400，Stripe 按指数退避
+ *    重试最长 3 天，甚至停用整个 endpoint，已订阅事件也一起中断。
+ *
+ * 因此路由层只做「形态合法性」校验，把「是否订阅」的语义判断交回
+ * stripeService.handleWebhook —— 未订阅事件返回 { ignored: true }，控制器回 200，
+ * Stripe 正常停止重试。真正的可信性由签名 / 网关来源证明保证（见 stripeService）。
+ */
+// Stripe 事件类型的实际形态：<object>.<action>[.<sub>]，各段只含小写字母 / 数字 / 下划线
+// （如 checkout.session.completed、payment_intent.created、invoice.paid）
+const EVENT_TYPE_RE = /^[a-z0-9_]+(?:\.[a-z0-9_]+)+$/;
+/** 事件类型长度上限：Stripe 最长的已知类型也远小于此，超出即视为畸形输入 */
+const MAX_EVENT_TYPE_LEN = 128;
+
 app.use((req, res, next) => {
     // 从 body 中提取路由（三种方式兼容）
     const action = req.body?._action;           // 方式1: { _action: 'stripe_create_session' }
@@ -76,6 +99,15 @@ app.use((req, res, next) => {
         delete req.body.method;
     } else if (eventType && typeof eventType === 'string' && eventType.includes('.')) {
         // Stripe 所有事件统一投递到 /webhook，由 stripeService 内部按 event.type 分发
+        // ⚠️ 形态校验前置：只有「长得像 Stripe 事件类型」的串才进回调通道，其余直接 400。
+        //    形态合法但未订阅 ≠ 攻击，交给 handleWebhook 优雅忽略（回 200，避免 Stripe 重试）
+        if (eventType.length > MAX_EVENT_TYPE_LEN || !EVENT_TYPE_RE.test(eventType)) {
+            // 🚨 不回显原始输入：该分支在鉴权之前、全域可达，回显等于开放反射面，
+            //    还会让「是否命中」变得可判定。原始值只截断后写服务端日志。
+            console.warn('[Stripe] 事件类型形态非法，拒绝路由到 webhook:',
+                String(eventType).slice(0, 64));
+            return res.status(400).json({ code: -1, msg: '事件类型格式非法' });
+        }
         actionName = 'webhook';
         console.info('[Stripe] 事件路由映射:', eventType, '→ webhook');
     }

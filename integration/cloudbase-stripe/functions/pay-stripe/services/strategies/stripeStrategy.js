@@ -2,7 +2,7 @@
  * Stripe SDK 策略
  *
  * 主动请求（下单/查单/退款）走 sk 直连 Stripe
- * 回调验签在 signMode='sdk' 时由 constructEvent() 完成
+ * 回调验签：一律由 constructEvent() 完成（stripe-pay 不做网关代验签）
  *
  * 与微信支付的差异：
  * - 微信需要自己管私钥/PEM/证书序列号做请求签名
@@ -99,7 +99,7 @@ class StripeStrategy {
     verifyWebhook(rawBody, signature) {
         if (!this.stripeConfig.webhookSecret) {
             throw new Error(
-                'stripeWebhookSecret 未配置，无法验签（signMode=sdk 时必填）'
+                'stripeWebhookSecret 未配置，无法验签（回调由本函数自验签，此项必填）'
             );
         }
         return this.stripe.webhooks.constructEvent(

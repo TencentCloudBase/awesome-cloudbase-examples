@@ -1,0 +1,67 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "version": "2.1",
+  "envId": "{{env.TCB_ENV_ID}}",
+  "functionRoot": "./functions",
+  "app": {
+    "serviceName": "pay-stripe-demo-01",
+    "root": "./examples/web",
+    "framework": "static",
+    "installCommand": "",
+    "buildCommand": "",
+    "outputDir": "."
+  },
+  "functions": [
+    {
+      "name": "pay-stripe",
+      "type": "HTTP",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "memorySize": 256,
+      "installDependency": true,
+      "envVariables": {
+        "corsAllowOrigin": "{{env.corsAllowOrigin}}",
+        "stripeSecretKey": "{{env.stripeSecretKey}}",
+        "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
+        "stripeApiVersion": "{{env.stripeApiVersion}}",
+        "stripeSuccessUrl": "{{env.stripeSuccessUrl}}",
+        "stripeCancelUrl": "{{env.stripeCancelUrl}}",
+        "stripeAllowedReturnDomains": "{{env.stripeAllowedReturnDomains}}",
+        "notifyUrl": "https://stripe-test-03.integration-callback.tcloudbase.com/stripe/webhook"
+      },
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".env",
+        "tests",
+        "*.pem"
+      ]
+    }
+  ],
+  "integrations": [
+    {
+      "keyId": "stripe-test-03",
+      "name": "stripe-test-03",
+      "authTypeCode": "stripe-pay",
+      "description": "请填写集成描述",
+      "demoCodeFunctionName": "pay-stripe",
+      "envVariables": {
+        "stripeSecretKey": "{{env.stripeSecretKey}}",
+        "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
+        "stripeApiVersion": "{{env.stripeApiVersion}}",
+        "notifyUrl": "https://stripe-test-03.integration-callback.tcloudbase.com/stripe/webhook"
+      }
+    },
+    {
+      "keyId": "stripe-test-04",
+      "name": "stripe-test-04",
+      "authTypeCode": "stripe-pay",
+      "description": "stripe-pay",
+      "demoCodeFunctionName": "# 绑定的云函数名称（选填，须先 tcb fn deploy 部署）",
+      "envVariables": {
+        "notifyUrl": "https://stripe-test-04.integration-callback.tcloudbase.com/stripe/webhook"
+      }
+    }
+  ]
+}

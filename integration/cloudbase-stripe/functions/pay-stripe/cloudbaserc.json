@@ -13,13 +13,13 @@
       "memorySize": 256,
       "installDependency": true,
       "envVariables": {
-        "signMode": "{{env.SIGN_MODE}}",
-        "corsAllowOrigin": "{{env.CORS_ALLOW_ORIGIN}}",
-        "stripeSecretKey": "{{env.STRIPE_SECRET_KEY}}",
-        "stripeWebhookSecret": "{{env.STRIPE_WEBHOOK_SECRET}}",
-        "stripeApiVersion": "{{env.STRIPE_API_VERSION}}",
-        "stripeSuccessUrl": "{{env.STRIPE_SUCCESS_URL}}",
-        "stripeCancelUrl": "{{env.STRIPE_CANCEL_URL}}"
+        "corsAllowOrigin": "{{env.corsAllowOrigin}}",
+        "stripeSecretKey": "{{env.stripeSecretKey}}",
+        "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
+        "stripeApiVersion": "{{env.stripeApiVersion}}",
+        "stripeSuccessUrl": "{{env.stripeSuccessUrl}}",
+        "stripeCancelUrl": "{{env.stripeCancelUrl}}",
+        "stripeAllowedReturnDomains": "{{env.stripeAllowedReturnDomains}}"
       },
       "ignore": [
         "node_modules",
@@ -28,6 +28,21 @@
         "tests",
         "*.pem"
       ]
+    }
+  ],
+  "integrations": [
+    {
+      "keyId": "stripe-test",
+      "name": "stripe-test",
+      "authTypeCode": "stripe-pay",
+      "description": "请填写集成描述",
+      "demoCodeFunctionName": "pay-stripe",
+      "envVariables": {
+        "stripeSecretKey": "{{env.stripeSecretKey}}",
+        "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
+        "stripeApiVersion": "{{env.stripeApiVersion}}",
+        "notifyURLCallbackType": "system"
+      }
     }
   ]
 }
