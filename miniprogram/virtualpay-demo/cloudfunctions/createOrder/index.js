@@ -98,7 +98,20 @@ exports.main = async (event) => {
     return { ok: false, error: '商品不存在' }
   }
   const goodsPrice = product.price // 单位：分，全程不分换算
-  const quantity = Math.max(1, parseInt(buyQuantity, 10) || 1)
+
+  // 2.1 数量与金额校验：buyQuantity 来自前端 event，属于不可信输入，必须限制上下限，
+  //     防止超大数量写入订单表并进入 signData 发起异常支付请求
+  const MAX_QTY = 99
+  const MAX_TOTAL_AMOUNT = 100000 // 单笔订单金额上限（分）
+  const q = parseInt(buyQuantity, 10)
+  if (!Number.isInteger(q) || q < 1 || q > MAX_QTY) {
+    return { ok: false, error: '购买数量不合法' }
+  }
+  const quantity = q
+  const totalAmount = goodsPrice * quantity
+  if (!Number.isSafeInteger(totalAmount) || totalAmount <= 0 || totalAmount > MAX_TOTAL_AMOUNT) {
+    return { ok: false, error: '订单金额超出限制' }
+  }
 
   // 3. 生成唯一业务单号（8-32 位，不以 _ 开头，不能复用）
   const outTradeNo = 'T' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)

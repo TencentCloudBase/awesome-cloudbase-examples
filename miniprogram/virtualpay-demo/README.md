@@ -1,6 +1,6 @@
 # 个人小程序虚拟支付 Demo
 
-一个可跑通的**个人主体小程序虚拟支付（道具直购）**示例：
+一个**个人主体小程序虚拟支付（道具直购）**参考示例：
 
 > 选商品 → 服务端下单签名 → `wx.requestVirtualPayment` 拉起支付 → 平台推送发货 → 幂等发货 → 查单兜底
 
@@ -9,6 +9,10 @@
 ---
 
 ## ⚠️ 先读这一段
+
+> 🚨 **仅供阅读参考，不能直接上线。**
+> 为了突出主流程，回调 `payNotify` 没有验签，`queryOrder` / `refundOrder` 也没有校验订单归属。
+> 用于真实业务前必须补齐这几处，见文末「已知缺口」。
 
 本仓库为**脱敏版**，密钥已被替换为占位符，**直接运行会失败**。使用前请先填好 3 个值：
 
@@ -306,6 +310,17 @@ wechatide -c CodeBuddy cloud_manage_msg_push --appid <appid> --env <envId> \
 | `268490003` | `pay_sig` 签名错误 | 检查待签串 `uri + '&' + body` 与 AppKey/环境是否匹配 |
 
 ---
+
+## 已知缺口（上线前必须补齐）
+
+| 缺口 | 位置 | 风险 |
+| --- | --- | --- |
+| 回调未验签 | `cloudfunctions/payNotify/index.js` | 任何人可伪造发货 / 退款事件 |
+| 查单未校验订单归属 | `cloudfunctions/queryOrder/index.js:110` 的 `where({ outTradeNo })` | 凭他人单号可触发他人订单发货 |
+| 退款未校验订单归属 | `cloudfunctions/refundOrder/index.js` | 可按单号退他人订单 |
+
+补齐方向：回调增加签名 / 来源校验；查单与退款统一改为
+`where({ outTradeNo, openid })`，并校验平台返回的 `openid` 与当前用户一致。
 
 ## 安全提示
 
