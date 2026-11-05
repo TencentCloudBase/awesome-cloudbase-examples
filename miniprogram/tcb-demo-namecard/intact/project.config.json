@@ -16,7 +16,7 @@
 	},
 	"compileType": "miniprogram",
 	"libVersion": "2.6.5",
-	"appid": "wx8c3f58d2c74ac742",
+	"appid": "",
 	"projectname": "ai-workshop",
 	"isGameTourist": false,
 	"miniprogramRoot": "client/",

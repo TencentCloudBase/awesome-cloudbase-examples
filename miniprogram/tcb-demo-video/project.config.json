@@ -9,7 +9,7 @@
 		"newFeature": true,
 		"nodeModules": true
 	},
-	"appid": "wx5a9f6a2c25353607",
+	"appid": "",
 	"projectname": "tcb-demo-video",
 	"libVersion": "2.5.0",
 	"compileType": "miniprogram",
