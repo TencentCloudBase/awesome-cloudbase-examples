@@ -33,7 +33,7 @@
   ],
   "integrations": [
     {
-      "keyId": "wxvirtualpay000",
+      "keyId": "wxvirtualpay",
       "name": "小程序虚拟支付",
       "authTypeCode": "wxvirtualpay",
       "description": "小程序虚拟支付（道具直购 / 代币支付）",
