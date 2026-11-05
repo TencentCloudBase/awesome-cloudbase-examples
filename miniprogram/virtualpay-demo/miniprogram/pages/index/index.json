@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "商品购买",
+  "usingComponents": {
+    "custom-tab-bar": "/custom-tab-bar/index"
+  }
+}

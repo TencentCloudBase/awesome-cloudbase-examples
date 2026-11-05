@@ -1,0 +1,8 @@
+# 敏感配置：含 AppSecret / AppKey，禁止提交
+config/keys.js
+
+# 云函数本地依赖与部署产物
+cloudfunctions/*/node_modules/
+cloudfunctions/*/package-lock.json
+.DS_Store
+miniprogram_npm/

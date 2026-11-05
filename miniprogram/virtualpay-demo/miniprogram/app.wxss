@@ -1,0 +1,64 @@
+page {
+  background: #f6f7f9;
+  font-size: 28rpx;
+  color: #1a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
+}
+
+.container {
+  padding: 24rpx;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.btn-primary {
+  background: #07c160;
+  color: #ffffff;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  line-height: 2.4;
+  text-align: center;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-primary[disabled] {
+  background: #a9e5c3;
+  color: #ffffff;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  background: #e8f7ee;
+  color: #07c160;
+}
+
+.tag-pending {
+  background: #fff7e6;
+  color: #d48806;
+}
+
+.tag-refunded {
+  background: #fff1f0;
+  color: #cf1322;
+}
+
+.status-bar {
+  margin-top: 24rpx;
+  padding: 20rpx 24rpx;
+  background: #f0f5ff;
+  border-radius: 12rpx;
+  color: #2f54eb;
+  font-size: 24rpx;
+}

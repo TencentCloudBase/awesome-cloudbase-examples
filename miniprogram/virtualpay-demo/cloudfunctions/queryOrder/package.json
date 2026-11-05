@@ -1,0 +1,9 @@
+{
+  "name": "queryOrder",
+  "version": "1.0.0",
+  "description": "查单兜底：调 xpay/query_order 补发货；以及我的订单/道具列表",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

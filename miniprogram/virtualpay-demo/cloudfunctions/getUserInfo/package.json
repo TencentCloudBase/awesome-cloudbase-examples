@@ -1,0 +1,9 @@
+{
+  "name": "getUserInfo",
+  "version": "1.0.0",
+  "description": "获取当前用户 openid",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
