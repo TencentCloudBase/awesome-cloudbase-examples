@@ -9,7 +9,7 @@
 		"newFeature": true,
 		"nodeModules": true
 	},
-	"appid": "wx9cf12b17b64cc203",
+	"appid": "",
 	"projectname": "tcb-demo-sms",
 	"libVersion": "2.5.0",
 	"compileType": "miniprogram",

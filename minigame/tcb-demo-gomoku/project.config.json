@@ -22,7 +22,7 @@
 	},
 	"compileType": "game",
 	"libVersion": "2.8.0",
-	"appid": "wxbe0b9924eb56ca7a",
+	"appid": "",
 	"projectname": "tcb-xiaoyouxi-wuziqi",
 	"miniprogramRoot": "miniprogram/",
 	"cloudfunctionRoot": "cloudfunction/",
