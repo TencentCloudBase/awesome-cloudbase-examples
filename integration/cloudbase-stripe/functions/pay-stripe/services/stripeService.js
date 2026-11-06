@@ -346,6 +346,19 @@ class StripeService {
             throw err;
         }
 
+        // 🚨 amount 类型守卫必须在 service 再做一次：公开导出可被脚本/二期入口直连，
+        //    '990' / 0 / -1 / 9.9 / true / [990] 与 number 比较时要么恒 false（穿过超额检查），
+        //    要么被隐式转成合法金额（true → 1），最终原样下发给 Stripe 只能拿到模糊的 400。
+        if (amount !== undefined
+            && (typeof amount !== 'number'
+                || !Number.isInteger(amount)
+                || amount <= 0
+                || amount > MAX_AMOUNT_MINOR)) {
+            const err = new Error(`amount 必须是正整数（最小货币单位），且不超过 ${MAX_AMOUNT_MINOR}`);
+            err.status = 400;
+            throw err;
+        }
+
         // amount 不传时交给 Stripe 退剩余全部；传了就先本地挡住明显超额，
         // 让调用方拿到明确提示，而不是 Stripe 的 400
         if (amount !== undefined && amount > session.amount_total) {

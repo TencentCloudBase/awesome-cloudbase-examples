@@ -20,7 +20,7 @@ cloudbase-stripe/
 ## 快速开始
 
 ```bash
-# 1. 装依赖 + 跑单测（148 个用例，不需要网络与真实密钥）
+# 1. 装依赖 + 跑单测（149 个用例，不需要网络与真实密钥）
 cd functions/pay-stripe
 npm install && npm test
 

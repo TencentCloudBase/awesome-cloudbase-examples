@@ -137,3 +137,21 @@ test('✅ payment_intent 是对象形态时取 id', async () => {
 
     assert.strictEqual(calls.refunds[0].params.payment_intent, 'pi_test_obj');
 });
+
+test('⛔ amount 非正整数（字符串 / 0 / 负数 / 小数 / 布尔 / 数组）：400，不打到 Stripe', async () => {
+    // service 是公开导出的，不能只依赖 controller 的 amount 守卫：
+    // 直连 service 时 '990' / 0 / -1 / 9.9 都会被原样下发给 Stripe（NaN 比较恒为 false）
+    for (const amount of ['990', 0, -1, 9.9, true, [990], {}]) {
+        const { svc, calls } = makeService(paidSession());
+        await assert.rejects(
+            () => svc.createRefund({
+                sessionId: 'cs_test_abc12345',
+                ownerUid: 'uid_alice',
+                amount,
+            }),
+            (err) => err.status === 400 && /amount/.test(err.message),
+            `amount=${JSON.stringify(amount)} 必须本地拒绝`
+        );
+        assert.strictEqual(calls.refunds.length, 0, `amount=${JSON.stringify(amount)} 不能透传给 Stripe`);
+    }
+});

@@ -51,7 +51,8 @@ npx serve .          # 或 python3 -m http.server 5173
 - 接口返回 `succeeded` 仅代表 Stripe 已受理；**最终状态以 Webhook `charge.refunded` 为准**。
 - 需要在 Stripe Dashboard → Developers → Webhooks 勾选 `charge.refunded`，否则收不到退款回调，
   只能靠主动查单对账。
-- 支持多次部分退款，每次都按当前剩余可退金额计算；可传 `idempotency_key` 避免网络重试重复退。
+- 支持多次部分退款：本地只校验「不超过原支付金额」，**实际剩余可退金额由 Stripe 校验**
+  （已退过一部分后再退超额，会收到 Stripe 的 400）；可传 `idempotency_key` 避免网络重试重复退。
 
 ## URL 参数：只用于自动登录
 
