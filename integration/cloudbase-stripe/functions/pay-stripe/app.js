@@ -47,12 +47,18 @@ app.use(express.urlencoded({ extended: false }));
 const stripeRouter = require('./routes/stripe');
 app.use('/stripe', stripeRouter);
 
+// 集成中心 stripe-pay 模板的回调 path 固定为 `/notify`（无 `/stripe` 前缀），
+// 回调域名直连时命中的就是根路径，必须单独挂载；否则 Stripe 后台填的 URL 会 404。
+const stripeController = require('./controllers/stripeController');
+app.post('/notify', stripeController.webhook);
+
 // ========== 云 API 网关适配 ==========
 // 云 API 调用 HTTP 云函数时，Express 收到的 path 为 /，业务路由通过 body._action 传递
 // 参考：https://docs.cloudbase.net/cloud-function/function-calls/
 const ALLOWED_ACTIONS = new Set([
     'stripe_create_session', 'stripe_retrieve_session', 'stripe_create_refund',
-    'stripe_webhook',
+    // notify = 集成中心模板 path；webhook = 兼容旧配置
+    'stripe_notify', 'stripe_webhook',
 ]);
 
 /**
@@ -112,8 +118,9 @@ app.use((req, res, next) => {
                 String(eventType).slice(0, 64));
             return res.status(400).json({ code: -1, msg: '事件类型格式非法' });
         }
-        actionName = 'webhook';
-        console.info('[Stripe] 事件路由映射:', eventType, '→ webhook');
+        // 集成中心 stripe-pay 模板的回调 path 是 /notify
+        actionName = 'notify';
+        console.info('[Stripe] 事件路由映射:', eventType, '→ notify');
     }
 
     if (actionName) {

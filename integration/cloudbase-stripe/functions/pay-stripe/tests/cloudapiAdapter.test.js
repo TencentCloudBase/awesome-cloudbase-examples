@@ -87,3 +87,27 @@ test('已知事件类型放行到 webhook（未声明托管 → 走验签，无�
     assert.strictEqual(status, 400);
     assert.strictEqual(data.message, '验签失败或事件不可信');
 });
+
+test('✅ 集成中心模板 path /notify 可达（根路径直连）', async () => {
+    await listening;
+    const res = await fetch('http://127.0.0.1:' + server.address().port + '/notify', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ type: 'checkout.session.completed' }),
+    });
+    const data = await res.json().catch(() => ({}));
+
+    // 能走到验签说明根路径已挂载；404 则是集成中心 URL 配错
+    assert.strictEqual(res.status, 400);
+    assert.strictEqual(data.message, '验签失败或事件不可信');
+});
+
+test('✅ 云 API _action=notify 可达（与模板 path 同名）', async () => {
+    const { status, data } = await postRoot({
+        _action: 'notify',
+        type: 'checkout.session.completed',
+    });
+
+    assert.strictEqual(status, 400);
+    assert.strictEqual(data.message, '验签失败或事件不可信');
+});

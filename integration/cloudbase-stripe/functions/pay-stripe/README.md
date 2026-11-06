@@ -49,7 +49,8 @@ pay-stripe/
 | `POST /stripe/create_session` | 是 | 创建 Session，返回 `{ sessionId, url }` |
 | `POST /stripe/retrieve_session`<br>`GET /stripe/retrieve_session` | 是 | 查询 Session 状态 |
 | `POST /stripe/create_refund` | 是 | 发起退款：`{ session_id, amount?, reason?, idempotency_key? }` |
-| `POST /stripe/webhook` | 否（靠签名） | 所有 Stripe 事件统一入口 |
+| `POST /notify` | 否（靠签名） | **集成中心模板回调 path**（根路径），所有 Stripe 事件统一入口 |
+| `POST /stripe/webhook` | 否（靠签名） | 兼容别名（本地调试 / 已部署的旧配置） |
 
 > `retrieve_session` / `create_refund` 都校验资源归属：比对 Session 的 `metadata.cloudbaseUid` 与当前登录 uid，不一致返回 **404**（不是 403，避免被当成 session_id 探测通道），且不回传 Stripe 原始 `raw` 对象。
 
@@ -99,7 +100,7 @@ pay-stripe/
 本地联调要放开匿名调用，显式设 `ALLOW_ANONYMOUS_DEV=true`（默认关闭，放行时会打 warn，`source` 标记为 `anonymous-dev`）。
 检测到云端运行时（`TENCENTCLOUD_RUNENV` / `SCF_RUNTIME` / `KUBERNETES_SERVICE_HOST`）时，
 该开关会被直接忽略并打日志 —— 不依赖「生产别开」这句文档约定。
-回调 `/stripe/webhook` 不挂鉴权中间件，由 `stripe-signature` 保证可信。
+回调 `/notify` 不挂鉴权中间件，由 `stripe-signature` 保证可信。
 
 ## 回调验签：一律由云函数自验签
 
@@ -193,7 +194,7 @@ curl -X POST https://<你的域名>/stripe/create_session \
    - `line_items` 与 `amount` / `amount_major` / `quantity` / `currency` **互斥**（币种写在每项 `price_data.currency`，顶层 `currency` 会被静默丢弃，所以直接拒绝）。
    - `metadata` 必须是对象，值只支持字符串/数字且每个值 ≤500 字符（Stripe 限制）；登录态 `cloudbaseUid` 在**校验前**注入，确保也过一遍校验。
    - 校验通过后按白名单重建 `line_items`（剥离 `adjustable_quantity` / `dynamic_tax_rates` 等未预期字段），并把币种统一小写；净化在 service 组装请求时执行，controller 的校验函数只读不写。
-10. **退款回调需要在 Stripe 后台订阅 `charge.refunded`**。本模板已把它映射为 `{ biz: 'refund', state: 'REFUNDED' }`，走同一个 `/stripe/webhook` 自动验签；没订阅就收不到，退款单只能靠主动查单对账。异步退款方式（银行转账等）的到账状态变化用 `refund.updated`，模板未订阅，需要时自行加进 `EVENT_SEMANTICS` 与后台订阅列表。
+10. **退款回调需要在 Stripe 后台订阅 `charge.refunded`**。本模板已把它映射为 `{ biz: 'refund', state: 'REFUNDED' }`，走同一个 `/notify` 自动验签；没订阅就收不到，退款单只能靠主动查单对账。异步退款方式（银行转账等）的到账状态变化用 `refund.updated`，模板未订阅，需要时自行加进 `EVENT_SEMANTICS` 与后台订阅列表。
 
 ## 本地开发
 

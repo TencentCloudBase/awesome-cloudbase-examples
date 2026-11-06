@@ -515,7 +515,7 @@ exports.webhook = async (req, res) => {
  * 本地联调要放开匿名调用，必须显式设 `ALLOW_ANONYMOUS_DEV=true`（默认关闭），
  * 且每次放行都会打 warn —— 不允许「静默放行」。
  *
- * ⚠️ 回调路由（/stripe/webhook）不挂此中间件，改由签名保证可信。
+ * ⚠️ 回调路由（/notify）不挂此中间件，改由签名保证可信。
  */
 /**
  * 是否运行在云端运行时（云函数 / 云托管容器）
