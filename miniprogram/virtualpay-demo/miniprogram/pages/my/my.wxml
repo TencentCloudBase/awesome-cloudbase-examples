@@ -1,0 +1,30 @@
+<view class="container">
+  <!-- 用户信息 -->
+  <view class="card">
+    <view class="info-row"><text class="info-label">OpenID</text><text class="info-value">{{openid || '获取中...'}}</text></view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="card">
+    <view class="section-title">我的订单</view>
+    <view wx:if="{{orders.length === 0}}" class="empty">暂无订单</view>
+    <view class="order-item" wx:for="{{orders}}" wx:key="outTradeNo">
+      <view class="order-head">
+        <text class="order-name">{{item.productName}}</text>
+        <text class="tag {{statusClass(item.status)}}">{{statusText(item.status)}}</text>
+      </view>
+      <view class="order-sub">单号 {{item.outTradeNo}}</view>
+      <view class="order-sub">金额 ¥{{formatPrice(item.goodsPrice)}} × {{item.buyQuantity}}</view>
+      <view class="order-sub" wx:if="{{item.wxOrderId}}">平台单号 {{item.wxOrderId}}</view>
+      <button
+        wx:if="{{item.status === 'delivered'}}"
+        class="refund-btn"
+        size="mini"
+        data-out-trade-no="{{item.outTradeNo}}"
+        bindtap="onRefund"
+      >申请退款</button>
+    </view>
+  </view>
+</view>
+
+<custom-tab-bar selected="{{1}}" />

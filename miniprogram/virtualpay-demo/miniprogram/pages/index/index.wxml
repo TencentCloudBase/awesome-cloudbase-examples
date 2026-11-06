@@ -1,0 +1,19 @@
+<view class="container">
+  <view class="card" wx:for="{{goods}}" wx:key="productId" wx:for-index="idx">
+    <view class="goods-head">
+      <text class="goods-name">{{item.name}}</text>
+      <text class="tag">道具</text>
+    </view>
+    <view class="goods-desc">{{item.desc}}</view>
+    <view class="goods-foot">
+      <text class="goods-price">¥{{item.priceYuan}}</text>
+      <button class="btn-primary buy-btn" size="mini" disabled="{{buyingMap[idx]}}" bindtap="onBuy" data-index="{{idx}}">
+        {{buyingMap[idx] ? '购买中...' : '购买'}}
+      </button>
+    </view>
+  </view>
+
+  <view class="status-bar">提示：支付成功后请前往「我的」页面查看订单状态，发货以服务端推送为准。</view>
+</view>
+
+<custom-tab-bar selected="{{0}}" />

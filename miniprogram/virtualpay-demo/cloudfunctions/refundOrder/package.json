@@ -1,0 +1,9 @@
+{
+  "name": "refundOrder",
+  "version": "1.0.0",
+  "description": "虚拟支付退款：调 xpay/refund_order 发起退款，等待 xpay_refund_notify 推送完成后续处理",
+  "main":": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

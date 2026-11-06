@@ -1,0 +1,9 @@
+{
+  "name": "payNotify",
+  "version": "1.0.0",
+  "description": "虚拟支付回调：发货/退款等事件分发处理",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

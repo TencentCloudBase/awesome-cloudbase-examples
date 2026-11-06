@@ -1,0 +1,38 @@
+.goods-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.goods-name {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.goods-desc {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.goods-foot {
+  margin-top: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.goods-price {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #fa2c19;
+}
+
+.buy-btn {
+  min-width: 160rpx;
+}
+
+.container {
+  padding: 24rpx;
+  padding-bottom: 160rpx;
+}

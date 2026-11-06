@@ -1,0 +1,55 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "version": "2.1",
+  "envId": "{{env.TCB_ENV_ID}}",
+  "functionRoot": "./functions",
+  "app": {
+    "serviceName": "pay-stripe-demo",
+    "root": "./examples/web",
+    "framework": "static",
+    "installCommand": "",
+    "buildCommand": "",
+    "outputDir": "."
+  },
+  "functions": [
+    {
+      "name": "pay-stripe",
+      "type": "HTTP",
+      "timeout": 30,
+      "runtime": "Nodejs18.15",
+      "handler": "index.main",
+      "memorySize": 256,
+      "installDependency": true,
+      "envVariables": {
+        "corsAllowOrigin": "{{env.corsAllowOrigin}}",
+        "stripeSecretKey": "{{env.stripeSecretKey}}",
+        "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
+        "stripeApiVersion": "{{env.stripeApiVersion}}",
+        "stripeSuccessUrl": "{{env.stripeSuccessUrl}}",
+        "stripeCancelUrl": "{{env.stripeCancelUrl}}",
+        "stripeAllowedReturnDomains": "{{env.stripeAllowedReturnDomains}}"
+      },
+      "ignore": [
+        "node_modules",
+        ".git",
+        ".env",
+        "tests",
+        "*.pem"
+      ]
+    }
+  ],
+  "integrations": [
+    {
+      "keyId": "stripe-test",
+      "name": "stripe-test",
+      "authTypeCode": "stripe-pay",
+      "description": "Stripe支付",
+      "demoCodeFunctionName": "pay-stripe",
+      "envVariables": {
+        "stripeSecretKey": "{{env.stripeSecretKey}}",
+        "stripeWebhookSecret": "{{env.stripeWebhookSecret}}",
+        "stripeApiVersion": "{{env.stripeApiVersion}}"
+      }
+    }
+  ]
+}

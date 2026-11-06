@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>pay-stripe 示例 — Checkout 下单</title>
+<style>
+  body { font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1f2328; }
+  h1 { font-size: 20px; }
+  fieldset { border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  legend { padding: 0 6px; color: #57606a; }
+  label { display: block; margin: 10px 0 4px; font-weight: 600; }
+  input { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #d0d7de; border-radius: 6px; font: inherit; }
+  button { margin-top: 16px; padding: 10px 18px; border: 0; border-radius: 6px; background: #1f883d; color: #fff; font: inherit; cursor: pointer; }
+  button:disabled { background: #94d3a2; cursor: not-allowed; }
+  pre { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 12px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+  .hint { color: #57606a; font-size: 12px; }
+  .err { color: #cf222e; }
+</style>
+</head>
+<body>
+<h1>pay-stripe 示例 — Checkout 下单</h1>
+<p class="hint">流程：create_session 拿到 url → 跳转 Stripe 托管收银台 → 支付完成回跳到本页并带 session_id → 自动查状态。</p>
+
+<fieldset>
+  <legend>云函数地址与登录态</legend>
+  <label>API Base（云函数访问地址，不带结尾斜杠）</label>
+  <input id="base" placeholder="https://<envId>.service.tcloudbase.com/pay-stripe" />
+  <label>Authorization Bearer Token（CloudBase Auth accessToken）</label>
+  <input id="token" placeholder="eyJhbGciOi..." />
+  <p class="hint">云 API 入口由网关验签 AccessToken，函数只认网关注入的身份（x-userid + x-authmethod）；未登录会返回 401。</p>
+  <p class="hint" id="loginHint"></p>
+  <button id="anonLogin" type="button" hidden>匿名登录（需控制台已开启匿名登录）</button>
+</fieldset>
+
+<fieldset>
+  <legend>订单参数</legend>
+  <label>金额（最小货币单位整数，如 990 = $9.90；JPY 直接填日元）</label>
+  <input id="amount" type="number" step="1" min="1" value="990" />
+  <label>币种（ISO 4217，小写）</label>
+  <input id="currency" value="usd" />
+  <label>商品名</label>
+  <input id="product" value="示例商品" />
+  <label>业务订单号 client_reference_id（必填，回调按它反查订单）</label>
+  <input id="ref" required placeholder="order_20261102_001" />
+  <button id="pay">创建 Session 并跳转支付</button>
+</fieldset>
+
+<fieldset>
+  <legend>结果</legend>
+  <pre id="out">（尚无请求）</pre>
+</fieldset>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const out = (v) => { $('out').textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2); };
+
+// 接口地址 / envId 的本地持久化键。都只存在同源 localStorage：
+// 外部链接无法写入这些键，所以回跳时恢复地址不会被第三方控制。
+const API_BASE_STORAGE_KEY = 'payStripeApiBase';
+const ENV_ID_STORAGE_KEY = 'payStripeEnvId';
+
+function headers() {
+  const h = { 'content-type': 'application/json' };
+  const t = $('token').value.trim();
+  if (t) h.authorization = t.startsWith('Bearer ') ? t : 'Bearer ' + t;
+  return h;
+}
+
+async function call(path, body) {
+  const base = $('base').value.trim().replace(/\/$/, '');
+  if (!base) throw new Error('请先填 API Base');
+  // 两种入口都要支持：
+  //  - 云 API 网关地址（.../v1/functions/<name>）：业务动作放在 body._action 里
+  //  - 自定义域名 + /stripe/* 路由：直接用请求路径
+  const useAction = /\/v1\/functions\//.test(base);
+  const url = useAction ? base : base + path;
+  const payload = useAction ? { _action: path.replace(/^\/stripe\//, ''), ...body } : body;
+  const res = await fetch(url, { method: 'POST', headers: headers(), body: JSON.stringify(payload) });
+  const data = await res.json().catch(() => ({ code: -1, msg: 'HTTP ' + res.status }));
+  if (!res.ok || data.code !== 0) {
+    // 网关错误用的是 message / requestId，函数错误用的是 msg，两边都带上便于排障
+    const detail = data.msg || data.message || data.error || '请求失败';
+    const rid = data.requestId || res.headers.get('x-cloudbase-request-id') || '';
+    throw new Error(detail + '（HTTP ' + res.status + (rid ? '，requestId ' + rid : '') + '）');
+  }
+  return data.data;
+}
+
+// 页面级会话标识：同一标签页内生成一次，混入兜底订单号以区分不同用户 / 会话。
+// 🚨 webhook 只按 client_reference_id 反查订单，兜底值必须全局唯一且不受客户端
+//    时钟影响：'order_' + Date.now() 只有毫秒精度，多标签页 / 多端并发下单或用户
+//    改系统时间都会撞键，命中他人 / 前一笔订单，导致订单归属与支付状态错乱。
+const sessionTag = (() => {
+  const c = window.crypto;
+  if (c && typeof c.randomUUID === 'function') return c.randomUUID().replace(/-/g, '').slice(0, 12);
+  return Math.random().toString(36).slice(2, 14);
+})();
+
+function makeOrderRef() {
+  const c = window.crypto;
+  const rand = (c && typeof c.randomUUID === 'function')
+    ? c.randomUUID().replace(/-/g, '')
+    : (Date.now().toString(36) + Math.random().toString(36).slice(2, 14));
+  // 'order_' + sessionTag + '_' + rand ≤ 64 位，且只含 [A-Za-z0-9_-]，符合服务端 CLIENT_REF_RE
+  return 'order_' + sessionTag + '_' + rand;
+}
+
+$('pay').addEventListener('click', async () => {
+  const btn = $('pay');
+  btn.disabled = true;
+  try {
+    // 🚨 回跳地址只带 session_id，不再把接口地址 / envId 写进 URL：
+    //    原实现回跳时从 ?apiBase= 恢复地址并自动静默登录，别人发一条
+    //    ?apiBase=https://evil.example&envId=xxx 的链接，就能让页面把 accessToken
+    //    发到第三方域名。地址改由 localStorage（同源、外部不可写）恢复。
+    // ⚠️ {CHECKOUT_SESSION_ID} 是 Stripe 字面量占位符，必须原样拼进 URL（不能 encode），
+    //    回跳时会被替换成 cs_xxx；它只在 success_url 中被替换，cancel_url 里照抄会
+    //    拿到字面量并触发一次必然失败的查单，故 cancel_url 不拼 session_id。
+    const apiBase = $('base').value.trim().replace(/\/$/, '');
+    if (apiBase) localStorage.setItem(API_BASE_STORAGE_KEY, apiBase);
+    const returnBase = location.origin + location.pathname;
+
+    // input 的 step/min 只有放进 <form> 并由 checkValidity() 触发才生效，
+    // 这里手动校验，避免 9.9 / 0 / -5 被原样发给服务端再吃一个 400
+    const rawAmount = $('amount').value.trim();
+    // 同时限制位数与上限：20 位数字会超过 Number.MAX_SAFE_INTEGER，精度丢失后仍能过
+    // Number.isInteger 判断，服务端也挡不住，直接下发 Stripe
+    if (!/^\d{1,9}$/.test(rawAmount) || Number(rawAmount) <= 0) {
+      out({ error: '金额必须是 1-9 位的最小货币单位正整数（990 = $9.90，最大 999999999）' });
+      return;
+    }
+
+    const payload = {
+      // 最小货币单位整数（990 = $9.90）。要传主单位请改用 amount_major
+      amount: Number(rawAmount),
+      currency: $('currency').value.trim().toLowerCase(),
+      productName: $('product').value.trim() || '示例商品',
+      success_url: returnBase + '?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: returnBase,
+      // 🚨 必填：回调按它反查订单。不传的话下单可以被 Stripe 接受，但
+      //    webhook 会因「缺业务主键」被拒，订单永远停在未支付态
+      client_reference_id: $('ref').value.trim() || makeOrderRef(),
+    };
+
+    out('正在创建 Session...');
+    const data = await call('/stripe/create_session', payload);
+    out(data);
+    if (data.url) location.href = data.url;
+  } catch (err) {
+    out({ error: err.message });
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ---------- URL 参数预填 + CloudBase 静默登录 ----------
+// 用法：?envId=<环境ID>
+//   envId    → 加载 CloudBase SDK，尝试静默登录并自动填入 accessToken
+//   接口地址 → 从同源 localStorage 恢复（首次手动填，下单时记住；不接受 URL 参数）
+//   SDK 脚本是动态加载的：不带 envId 时不会发出额外请求，页面仍可离线使用
+const SDK_URL = 'https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js';
+
+function setHint(text, isErr) {
+  const el = $('loginHint');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle('err', !!isErr);
+}
+
+function loadSdk() {
+  if (window.cloudbase) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = SDK_URL;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('CloudBase SDK 加载失败（检查网络或改用本地 token）'));
+    document.head.appendChild(s);
+  });
+}
+
+async function initFromQuery() {
+  const q = new URLSearchParams(location.search);
+
+  // 🚨 接口地址只从 localStorage 恢复，**不接受 URL 参数**：
+  //    ?apiBase= 完全由链接构造者控制，而页面随后会带着登录态请求它。
+  const storedBase = (localStorage.getItem(API_BASE_STORAGE_KEY) || '').trim();
+  if (storedBase) $('base').value = storedBase;
+
+  // envId 只决定「去哪拿 token」，不决定「把 token 发给谁」；仍做形态校验
+  const rawEnvId = (q.get('envId') || localStorage.getItem(ENV_ID_STORAGE_KEY) || '').trim();
+  const envId = /^[a-z0-9][a-z0-9-]{2,}$/i.test(rawEnvId) ? rawEnvId : '';
+  if (!envId) {
+    setHint('未带 envId：跳过自动登录，请手动填 token（地址后加 &envId=<环境ID> 可自动登录）');
+    return;
+  }
+  localStorage.setItem(ENV_ID_STORAGE_KEY, envId);
+
+  setHint('正在加载 CloudBase SDK...');
+  await loadSdk();
+
+  const app = cloudbase.init({ env: envId });
+  const auth = app.auth({ persistence: 'local' });
+
+  // 优先 getAccessToken（会按需刷新）；失败再回退到 getLoginState 里已有的 token
+  let token = '';
+  try { token = await auth.getAccessToken(); } catch (e) { /* 无登录态属正常 */ }
+  if (!token) {
+    const state = await auth.getLoginState().catch(() => null);
+    token = state?.accessToken || state?.credential?.accessToken || '';
+  }
+
+  if (token) {
+    $('token').value = token;
+    setHint('已静默登录（envId=' + envId + '），accessToken 已自动填入');
+    return;
+  }
+
+  setHint('未检测到登录态：先在同环境完成登录，或点下方匿名登录');
+  const btn = $('anonLogin');
+  if (!btn) return;
+  btn.hidden = false;
+  btn.onclick = async () => {
+    btn.disabled = true;
+    setHint('正在匿名登录...');
+    try {
+      // signInAnonymously() 返回 LoginState，token 在 credential 里（不是顶层 accessToken）；
+      // 统一用 getAccessToken() 取值，避免依赖「恰好回退成功」
+      const state = await auth.signInAnonymously();
+      const t = state?.credential?.accessToken || (await auth.getAccessToken());
+      if (!t) throw new Error('未拿到 accessToken');
+      $('token').value = t;
+      setHint('匿名登录成功，accessToken 已填入');
+      btn.hidden = true;
+    } catch (err) {
+      setHint('匿名登录失败：' + err.message + '（需在 CloudBase 控制台开启匿名登录）', true);
+    } finally {
+      btn.disabled = false;
+    }
+  };
+}
+
+// 回跳自动查单要带 token，所以先等登录流程结束再跑
+const authReady = initFromQuery().catch(err => {
+  setHint(err.message, true);
+  return null;
+});
+
+// 从 Stripe 回跳：拿到 session_id 就查一次真实状态（前端 success 回调不可全信，服务端以 webhook 为准）
+(async () => {
+  await authReady;
+  const sid = new URLSearchParams(location.search).get('session_id');
+  // 兜底：session_id 必须是 Stripe 生成的 cs_xxx，否则（如未替换的 {CHECKOUT_SESSION_ID}
+  // 占位符字面量）不要拿去查单 —— 查了必然是 no such checkout session
+  if (!sid || !/^cs_[A-Za-z0-9_]+$/.test(sid)) return;
+  try {
+    out('回跳检测到 session_id，正在查询状态...');
+    out(await call('/stripe/retrieve_session', { session_id: sid }));
+  } catch (err) {
+    out({ error: err.message });
+  }
+})();
+</script>
+</body>
+</html>
