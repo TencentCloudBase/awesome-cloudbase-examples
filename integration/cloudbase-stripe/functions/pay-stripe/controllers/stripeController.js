@@ -62,6 +62,10 @@ function pickSessionParams(body) {
 const CLIENT_REF_RE = /^[A-Za-z0-9_-]{1,64}$/;
 /** Stripe Checkout Session ID 形态：cs_ 前缀 + 字母数字下划线 */
 const SESSION_ID_RE = /^cs_[A-Za-z0-9_]{8,200}$/;
+/** Stripe 退款 reason 白名单（SDK 只接受这三个值） */
+const ALLOWED_REFUND_REASONS = ['duplicate', 'fraudulent', 'requested_by_customer'];
+/** 幂等键形态：与 Stripe 的限制对齐（≤255），这里收紧到 8-64 位安全字符 */
+const IDEMPOTENCY_KEY_RE = /^[A-Za-z0-9_-]{8,64}$/;
 const CURRENCY_RE = /^[A-Za-z]{3}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 与 utils/cloudbaseAuth.normalizeEmail 同口径：RFC 5321 长度上限
@@ -378,6 +382,67 @@ exports.retrieveSession = async (req, res) => {
         console.error('[Controller] retrieveSession error:', err);
         const isStripeError = typeof err?.type === 'string' && err.type.startsWith('Stripe');
         fail(res, isStripeError ? '查询 Session 失败，请稍后重试' : (err.message || '查询 Session 失败'));
+    }
+};
+
+/**
+ * 发起退款
+ *
+ * 只支持按 session_id 退款：Session 上带着服务端写入的 metadata.cloudbaseUid，
+ * 是唯一能证明「这单属于当前用户」的凭据。直接按 payment_intent / charge 退，
+ * 就没有归属校验的锚点，等于允许任何登录用户退别人的单。
+ */
+exports.createRefund = async (req, res) => {
+    try {
+        const uid = getUserId(req);
+        // payMiddleware 已挡住未登录；匿名联调开关下 uid=null，退款仍必须 fail closed
+        if (!uid) return fail(res, '未登录，无法发起退款', 401);
+
+        const body = isPlainObject(req.body) ? req.body : {};
+
+        const sessionId = body.session_id || body.sessionId;
+        if (!sessionId) return fail(res, '缺少 session_id');
+        if (typeof sessionId !== 'string' || !SESSION_ID_RE.test(sessionId)) {
+            return fail(res, 'session_id 格式不合法（应为 cs_ 开头的 Stripe Session ID）');
+        }
+
+        // 不传 = 全额；传了必须是 number 正整数（与 amount 口径一致，不接受字符串 / 布尔 / 数组）
+        const amount = body.amount;
+        if (amount !== undefined
+            && (typeof amount !== 'number'
+                || !Number.isInteger(amount)
+                || amount <= 0
+                || amount > MAX_AMOUNT_MINOR)) {
+            return fail(res, `amount 必须是正整数（最小货币单位，如 990），且不超过 ${MAX_AMOUNT_MINOR}`);
+        }
+
+        const reason = body.reason;
+        if (reason !== undefined && !ALLOWED_REFUND_REASONS.includes(reason)) {
+            return fail(res, `reason 只支持 ${ALLOWED_REFUND_REASONS.join(' / ')}`);
+        }
+
+        // 幂等键由调用方给（如同一订单号），重试时 Stripe 返回同一笔退款
+        const idempotencyKey = body.idempotency_key;
+        if (idempotencyKey !== undefined
+            && (typeof idempotencyKey !== 'string' || !IDEMPOTENCY_KEY_RE.test(idempotencyKey))) {
+            return fail(res, 'idempotency_key 必须是 8-64 位字母、数字、下划线或连字符');
+        }
+
+        const result = await stripeService.createRefund({
+            sessionId,
+            amount,
+            reason,
+            idempotencyKey,
+            // 归属只取网关注入的身份，绝不接受请求体里的 uid
+            ownerUid: uid,
+        });
+        success(res, result);
+    } catch (err) {
+        console.error('[Controller] createRefund error:', err);
+        // Stripe 原始错误会带账户 / 参数细节，对外只给固定文案
+        const isStripeError = typeof err?.type === 'string' && err.type.startsWith('Stripe');
+        if (isStripeError) return fail(res, '退款失败，请稍后重试');
+        fail(res, err.message || '退款失败', err.status || 400);
     }
 };
 

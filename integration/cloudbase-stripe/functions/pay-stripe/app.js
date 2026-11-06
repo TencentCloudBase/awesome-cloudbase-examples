@@ -91,7 +91,11 @@ app.use((req, res, next) => {
     let actionName = null;
 
     if (action) {
-        actionName = action.includes('/stripe/') ? action.split('/stripe/').pop() : action;
+        const raw = action.includes('/stripe/') ? action.split('/stripe/').pop() : action;
+        // 兼容两种写法：`create_refund`（前端/README 约定）与 `stripe_create_refund`
+        // （历史注释示例）。下面统一拼 `stripe_` 前缀查白名单，不先剥掉会拼成
+        // `stripe_stripe_create_refund` → 400。
+        actionName = raw.startsWith('stripe_') ? raw.slice('stripe_'.length) : raw;
         delete req.body._action;
     } else if (bodyPath && bodyPath.includes('/stripe/')) {
         actionName = bodyPath.split('/stripe/').pop();
