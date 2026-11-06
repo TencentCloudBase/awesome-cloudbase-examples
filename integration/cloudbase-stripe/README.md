@@ -9,7 +9,7 @@ cloudbase-stripe/
 ├── cloudbaserc.json         集成级声明：云函数 + 前端 app（pay-stripe-demo）
 ├── functions/pay-stripe/    云函数（Express + Stripe SDK）
 │   ├── config/              凭证读取与启动校验
-│   ├── routes/              /stripe/create_session | retrieve_session | webhook
+│   ├── routes/              /stripe/create_session | retrieve_session | create_refund | webhook
 │   ├── controllers/         鉴权中间件 + 回调处理 + 统一应答
 │   ├── services/            策略入口 + 事件分发 + 幂等
 │   ├── .env.example         环境变量模板（复制为 .env）
@@ -20,7 +20,7 @@ cloudbase-stripe/
 ## 快速开始
 
 ```bash
-# 1. 装依赖 + 跑单测（133 个用例，不需要网络与真实密钥）
+# 1. 装依赖 + 跑单测（148 个用例，不需要网络与真实密钥）
 cd functions/pay-stripe
 npm install && npm test
 
@@ -132,8 +132,8 @@ tcb app deploy pay-stripe-demo -e <envId>
 
 ## 范围
 
-一期：Checkout Session 下单、单 Webhook 回调、验签、幂等。
-二期：退款、订阅、Elements 嵌入式收银台。
+一期：Checkout Session 下单、查单、退款、单 Webhook 回调、验签、幂等。
+二期：订阅、Elements 嵌入式收银台。
 
 ## 已知待办
 

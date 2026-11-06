@@ -291,6 +291,91 @@ class StripeService {
         };
     }
 
+    /**
+     * 发起退款
+     *
+     * 归属与支付状态都在这里校验：service 是公开导出的，不能假设一定先过了 controller。
+     * 不传 amount = 退剩余全部（Stripe 的默认语义），传了则必须是正整数且不超过原支付金额。
+     *
+     * ⚠️ 退款结果以 Webhook `charge.refunded` 为最终凭据：接口返回 succeeded 只代表
+     *    Stripe 已受理，异步退款方式（银行转账等）到账前状态仍可能变化。
+     *
+     * @param {Object} params
+     * @param {string} params.sessionId
+     * @param {number} [params.amount] - 最小货币单位；不传 = 全额
+     * @param {string} [params.reason] - duplicate / fraudulent / requested_by_customer
+     * @param {string} [params.idempotencyKey]
+     * @param {string} params.ownerUid - 当前登录 uid（来自网关注入的身份）
+     * @returns {Object} 精简后的退款结果（不回传 raw）
+     */
+    async createRefund({ sessionId, amount, reason, idempotencyKey, ownerUid }) {
+        if (!sessionId) throw new Error('缺少 sessionId');
+
+        const session = await this.strategy.retrieveSession(sessionId);
+
+        // 资源级鉴权：session_id 会出现在回跳地址 / 浏览器历史 / 日志里，
+        // 只判「已登录」等于允许任何人拿别人的 id 发起退款。
+        // 归属以服务端下单时写入的 metadata.cloudbaseUid 为准（客户端改不了），
+        // 不一致统一 404，避免把接口当成 session_id 存在性探测通道。
+        const owner = session?.metadata?.cloudbaseUid;
+        if (!ownerUid || typeof owner !== 'string' || owner !== ownerUid) {
+            const err = new Error('未找到该 Session');
+            err.status = 404;
+            throw err;
+        }
+
+        // 未收款不能退：unpaid / processing 一律拒绝，避免对「钱还没到」的单发起退款
+        if (session.payment_status !== 'paid') {
+            const err = new Error('该 Session 尚未支付，无法退款');
+            err.status = 400;
+            throw err;
+        }
+
+        const paymentIntentId = typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : session.payment_intent?.id;
+        if (!paymentIntentId) {
+            const err = new Error('该 Session 缺少 payment_intent，无法退款');
+            err.status = 400;
+            throw err;
+        }
+
+        if (!Number.isInteger(session.amount_total) || session.amount_total <= 0) {
+            const err = new Error('该 Session 没有可退金额');
+            err.status = 400;
+            throw err;
+        }
+
+        // amount 不传时交给 Stripe 退剩余全部；传了就先本地挡住明显超额，
+        // 让调用方拿到明确提示，而不是 Stripe 的 400
+        if (amount !== undefined && amount > session.amount_total) {
+            const err = new Error(`退款金额不能超过原支付金额 ${session.amount_total}（最小货币单位）`);
+            err.status = 400;
+            throw err;
+        }
+
+        const refund = await this.strategy.createRefund({
+            payment_intent: paymentIntentId,
+            // 不传 amount = 全额（含多次部分退款后的剩余）
+            ...(amount !== undefined ? { amount } : {}),
+            ...(reason ? { reason } : {}),
+            // 回调与对账都按这两个字段回到用户与订单维度
+            metadata: { cloudbaseUid: ownerUid, sessionId },
+        }, idempotencyKey);
+
+        console.info('[StripeService] 退款已受理:', refund.id, 'session:', sessionId);
+
+        return {
+            refundId: refund.id,
+            status: refund.status,
+            amount: refund.amount,
+            currency: refund.currency,
+            paymentIntentId,
+            sessionId,
+            // 🚨 不回传 raw：与 createSession / retrieveSession 同口径
+        };
+    }
+
     // ========== 异步回调 ==========
 
     /**

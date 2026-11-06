@@ -48,9 +48,18 @@ pay-stripe/
 |---|---|---|
 | `POST /stripe/create_session` | 是 | 创建 Session，返回 `{ sessionId, url }` |
 | `POST /stripe/retrieve_session`<br>`GET /stripe/retrieve_session` | 是 | 查询 Session 状态 |
+| `POST /stripe/create_refund` | 是 | 发起退款：`{ session_id, amount?, reason?, idempotency_key? }` |
 | `POST /stripe/webhook` | 否（靠签名） | 所有 Stripe 事件统一入口 |
 
-> `retrieve_session` 校验资源归属：比对 Session 的 `metadata.cloudbaseUid` 与当前登录 uid，不一致返回 **404**（不是 403，避免被当成 session_id 探测通道），且不回传 Stripe 原始 `raw` 对象。
+> `retrieve_session` / `create_refund` 都校验资源归属：比对 Session 的 `metadata.cloudbaseUid` 与当前登录 uid，不一致返回 **404**（不是 403，避免被当成 session_id 探测通道），且不回传 Stripe 原始 `raw` 对象。
+
+退款只支持按 `session_id` 发起（Session 上带服务端写入的归属，才能证明「这单是你的」）：
+
+- `amount` 不传 = 退剩余全部；传了必须是正整数（最小货币单位），且不能超过原支付金额。
+- `reason` 仅 `duplicate` / `fraudulent` / `requested_by_customer`。
+- `idempotency_key` 可选，网络重试时 Stripe 返回同一笔退款，不会重复退。
+- 只对 `payment_status=paid` 的 Session 生效；接口返回 `succeeded` 仅代表 Stripe 已受理，
+  **最终以 Webhook `charge.refunded` 为准**（异步退款到账前状态仍可能变化）。
 
 ## 鉴权
 
@@ -180,6 +189,7 @@ curl -X POST https://<你的域名>/stripe/create_session \
    - `line_items` 与 `amount` / `amount_major` / `quantity` / `currency` **互斥**（币种写在每项 `price_data.currency`，顶层 `currency` 会被静默丢弃，所以直接拒绝）。
    - `metadata` 必须是对象，值只支持字符串/数字且每个值 ≤500 字符（Stripe 限制）；登录态 `cloudbaseUid` 在**校验前**注入，确保也过一遍校验。
    - 校验通过后按白名单重建 `line_items`（剥离 `adjustable_quantity` / `dynamic_tax_rates` 等未预期字段），并把币种统一小写；净化在 service 组装请求时执行，controller 的校验函数只读不写。
+10. **退款回调需要在 Stripe 后台订阅 `charge.refunded`**。本模板已把它映射为 `{ biz: 'refund', state: 'REFUNDED' }`，走同一个 `/stripe/webhook` 自动验签；没订阅就收不到，退款单只能靠主动查单对账。异步退款方式（银行转账等）的到账状态变化用 `refund.updated`，模板未订阅，需要时自行加进 `EVENT_SEMANTICS` 与后台订阅列表。
 
 ## 本地开发
 
