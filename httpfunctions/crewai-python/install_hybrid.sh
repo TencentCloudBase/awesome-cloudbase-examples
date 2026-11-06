@@ -15,10 +15,16 @@ fi
 
 echo ""
 echo "步骤 1: 安装所有依赖（本地平台，包含传递依赖）..."
+# pysqlite3-binary 只发布 manylinux x86_64 的 wheel，本地平台（macOS / Windows /
+# ARM）装不上，会以 "from versions: none" 结束。这里先过滤掉，留到步骤 3
+# 用 --platform manylinux 单独安装。
+LOCAL_REQ=$(mktemp)
+grep -v '^pysqlite3-binary' requirements.txt > "$LOCAL_REQ"
 python3 -m pip install \
-    -r requirements.txt \
+    -r "$LOCAL_REQ" \
     --target ./env \
     --upgrade
+rm -f "$LOCAL_REQ"
 
 echo ""
 echo "步骤 2: 检测所有包含非 Linux 二进制的包..."
@@ -81,6 +87,12 @@ fi
 
 echo ""
 echo "步骤 3: 强制重装这些包为 Linux 版本..."
+# pysqlite3-binary 在步骤 1 被跳过，不会出现在上面的检测结果里，
+# 但部署目标是 Linux，这里按 requirements.txt 里的版本显式补上。
+PYSSQLITE_SPEC=$(grep '^pysqlite3-binary' requirements.txt 2>/dev/null | head -1 | tr -d '[:space:]' || true)
+if [ -n "$PYSSQLITE_SPEC" ]; then
+    NON_LINUX_PACKAGES="$NON_LINUX_PACKAGES $PYSSQLITE_SPEC"
+fi
 if [ -n "$NON_LINUX_PACKAGES" ]; then
     python3 -m pip install \
         $NON_LINUX_PACKAGES \
