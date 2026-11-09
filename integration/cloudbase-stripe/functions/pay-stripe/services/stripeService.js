@@ -72,6 +72,11 @@ const EVENT_SEMANTICS = {
  */
 const CHECKOUT_PAID_PAYMENT_STATUS = 'paid';
 const STATE_PENDING_PAYMENT = 'PENDING';
+/**
+ * charge.refunded 的部分退款态：amount_refunded < amount 时使用。
+ * 全额退完仍用 EVENT_SEMANTICS 里的 REFUNDED。
+ */
+const STATE_PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED';
 
 
 
@@ -291,6 +296,106 @@ class StripeService {
         };
     }
 
+    /**
+     * 发起退款
+     *
+     * 归属与支付状态都在这里校验：service 是公开导出的，不能假设一定先过了 controller。
+     * 不传 amount = 退剩余全部（Stripe 的默认语义），传了则必须是正整数且不超过原支付金额。
+     *
+     * ⚠️ 接口返回 succeeded 即退款成功；账务落库仍以 Webhook `charge.refunded` 为准。
+     *    异步退款方式（银行转账等）可能先返回 pending，由 `refund.updated` 推进到终态。
+     *
+     * @param {Object} params
+     * @param {string} params.sessionId
+     * @param {number} [params.amount] - 最小货币单位；不传 = 全额
+     * @param {string} [params.reason] - duplicate / fraudulent / requested_by_customer
+     * @param {string} [params.idempotencyKey]
+     * @param {string} params.ownerUid - 当前登录 uid（来自网关注入的身份）
+     * @returns {Object} 精简后的退款结果（不回传 raw）
+     */
+    async createRefund({ sessionId, amount, reason, idempotencyKey, ownerUid }) {
+        if (!sessionId) throw new Error('缺少 sessionId');
+
+        const session = await this.strategy.retrieveSession(sessionId);
+
+        // 资源级鉴权：session_id 会出现在回跳地址 / 浏览器历史 / 日志里，
+        // 只判「已登录」等于允许任何人拿别人的 id 发起退款。
+        // 归属以服务端下单时写入的 metadata.cloudbaseUid 为准（客户端改不了），
+        // 不一致统一 404，避免把接口当成 session_id 存在性探测通道。
+        const owner = session?.metadata?.cloudbaseUid;
+        if (!ownerUid || typeof owner !== 'string' || owner !== ownerUid) {
+            const err = new Error('未找到该 Session');
+            err.status = 404;
+            throw err;
+        }
+
+        // 未收款不能退：unpaid / processing 一律拒绝，避免对「钱还没到」的单发起退款
+        if (session.payment_status !== 'paid') {
+            const err = new Error('该 Session 尚未支付，无法退款');
+            err.status = 400;
+            throw err;
+        }
+
+        const paymentIntentId = typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : session.payment_intent?.id;
+        if (!paymentIntentId) {
+            const err = new Error('该 Session 缺少 payment_intent，无法退款');
+            err.status = 400;
+            throw err;
+        }
+
+        if (!Number.isInteger(session.amount_total) || session.amount_total <= 0) {
+            const err = new Error('该 Session 没有可退金额');
+            err.status = 400;
+            throw err;
+        }
+
+        // 🚨 amount 类型守卫必须在 service 再做一次：公开导出可被脚本/二期入口直连，
+        //    '990' / 0 / -1 / 9.9 / true / [990] 与 number 比较时要么恒 false（穿过超额检查），
+        //    要么被隐式转成合法金额（true → 1），最终原样下发给 Stripe 只能拿到模糊的 400。
+        if (amount !== undefined
+            && (typeof amount !== 'number'
+                || !Number.isInteger(amount)
+                || amount <= 0
+                || amount > MAX_AMOUNT_MINOR)) {
+            const err = new Error(`amount 必须是正整数（最小货币单位），且不超过 ${MAX_AMOUNT_MINOR}`);
+            err.status = 400;
+            throw err;
+        }
+
+        // amount 不传时交给 Stripe 退剩余全部；传了就先本地挡住明显超额，
+        // 让调用方拿到明确提示，而不是 Stripe 的 400
+        if (amount !== undefined && amount > session.amount_total) {
+            const err = new Error(`退款金额不能超过原支付金额 ${session.amount_total}（最小货币单位）`);
+            err.status = 400;
+            throw err;
+        }
+
+        const refund = await this.strategy.createRefund({
+            payment_intent: paymentIntentId,
+            // 不传 amount = 全额（含多次部分退款后的剩余）
+            ...(amount !== undefined ? { amount } : {}),
+            ...(reason ? { reason } : {}),
+            // ⚠️ Refund 的 metadata 只在 refund.created 事件里可见；本模板订阅的
+            //    charge.refunded 返回的是 Charge 对象，对账锚点应取 charge.payment_intent。
+            //    这里写入的字段只用于 Stripe 后台排查，不作为回调反查依据。
+            metadata: { cloudbaseUid: ownerUid, sessionId },
+        }, idempotencyKey);
+
+        console.info('[StripeService] 退款已提交:', refund.id, 'status:', refund.status, 'session:', sessionId);
+
+        return {
+            refundId: refund.id,
+            status: refund.status,
+            amount: refund.amount,
+            currency: refund.currency,
+            paymentIntentId,
+            sessionId,
+            // 🚨 不回传 raw：与 createSession / retrieveSession 同口径
+        };
+    }
+
     // ========== 异步回调 ==========
 
     /**
@@ -507,6 +612,24 @@ class StripeService {
             }
         }
 
+        // 🚨 charge.refunded 语义包含部分退款（Stripe 文档："including partial refunds"），
+        //    EVENT_SEMANTICS 只给事件级默认 REFUNDED。这里按累计退款额二次判定：
+        //    amount_refunded >= amount → 全额退完，保留 REFUNDED；否则 PARTIALLY_REFUNDED。
+        //    否则第一次部分退款就会把订单写成全额退款终态，后续部分退款无处落。
+        if (event.type === 'charge.refunded' && state === 'REFUNDED') {
+            const chargeAmount = event.data.object.amount;
+            const refundedAmount = event.data.object.amount_refunded;
+            if (typeof chargeAmount === 'number' && chargeAmount > 0
+                && typeof refundedAmount === 'number'
+                && refundedAmount < chargeAmount) {
+                state = STATE_PARTIALLY_REFUNDED;
+                console.info(
+                    '[StripeService] 部分退款: ' + refundedAmount + '/' + chargeAmount
+                    + '，状态记为 ' + state
+                );
+            }
+        }
+
         // 显式给出「是否可交付」：调用方不必自己拿 state 字符串和 PAID 比对，
         // 也避免 PENDING 被当成失败态静默丢弃（资金已到账但订单不推进）
         const deliverable = state === 'PAID';
@@ -548,3 +671,4 @@ module.exports = StripeService;
 module.exports.EVENT_SEMANTICS = EVENT_SEMANTICS;
 // PENDING 是运行时可能返回的状态，必须随模块导出，避免调用方拿到未声明的魔法字符串
 module.exports.STATE_PENDING_PAYMENT = STATE_PENDING_PAYMENT;
+module.exports.STATE_PARTIALLY_REFUNDED = STATE_PARTIALLY_REFUNDED;

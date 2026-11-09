@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>pay-stripe 示例 — Checkout 下单</title>
+<title>pay-stripe 示例 — Checkout 下单与退款</title>
 <style>
   body { font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1f2328; }
   h1 { font-size: 20px; }
   fieldset { border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
   legend { padding: 0 6px; color: #57606a; }
   label { display: block; margin: 10px 0 4px; font-weight: 600; }
-  input { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #d0d7de; border-radius: 6px; font: inherit; }
+  input, select { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #d0d7de; border-radius: 6px; font: inherit; background: #fff; }
   button { margin-top: 16px; padding: 10px 18px; border: 0; border-radius: 6px; background: #1f883d; color: #fff; font: inherit; cursor: pointer; }
   button:disabled { background: #94d3a2; cursor: not-allowed; }
   pre { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 12px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
@@ -19,13 +19,13 @@
 </style>
 </head>
 <body>
-<h1>pay-stripe 示例 — Checkout 下单</h1>
+<h1>pay-stripe 示例 — Checkout 下单与退款</h1>
 <p class="hint">流程：create_session 拿到 url → 跳转 Stripe 托管收银台 → 支付完成回跳到本页并带 session_id → 自动查状态。</p>
 
 <fieldset>
   <legend>云函数地址与登录态</legend>
   <label>API Base（云函数访问地址，不带结尾斜杠）</label>
-  <input id="base" placeholder="https://<envId>.service.tcloudbase.com/pay-stripe" />
+  <input id="base" placeholder="https://<envId>.api.tcloudbasegateway.com/v1/functions/pay-stripe" />
   <label>Authorization Bearer Token（CloudBase Auth accessToken）</label>
   <input id="token" placeholder="eyJhbGciOi..." />
   <p class="hint">云 API 入口由网关验签 AccessToken，函数只认网关注入的身份（x-userid + x-authmethod）；未登录会返回 401。</p>
@@ -44,6 +44,24 @@
   <label>业务订单号 client_reference_id（必填，回调按它反查订单）</label>
   <input id="ref" required placeholder="order_20261102_001" />
   <button id="pay">创建 Session 并跳转支付</button>
+</fieldset>
+
+<fieldset>
+  <legend>退款（可选）</legend>
+  <label>Session ID（支付回跳后自动填入；退款按它校验归属）</label>
+  <input id="refundSid" placeholder="cs_test_..." />
+  <label>退款金额（最小货币单位整数，留空 = 退剩余全部）</label>
+  <input id="refundAmount" type="number" step="1" min="1" placeholder="留空退剩余全部" />
+  <label>退款原因</label>
+  <select id="refundReason">
+    <option value="requested_by_customer">requested_by_customer（客户申请）</option>
+    <option value="duplicate">duplicate（重复支付）</option>
+    <option value="fraudulent">fraudulent（欺诈）</option>
+  </select>
+  <button id="refund">发起退款</button>
+  <p class="hint">只对 payment_status=paid 的 Session 生效，且只能退自己的单（服务端比对 metadata.cloudbaseUid）。
+    返回 succeeded 即退款成功；账务状态以 Webhook charge.refunded 落库为准（需在 Stripe 后台订阅该事件）。
+    异步退款方式可能先返回 pending，由 refund.updated 推进到终态。</p>
 </fieldset>
 
 <fieldset>
@@ -154,6 +172,47 @@ $('pay').addEventListener('click', async () => {
   }
 });
 
+$('refund').addEventListener('click', async () => {
+  const btn = $('refund');
+  const sid = $('refundSid').value.trim();
+
+  // 与服务端同口径：session_id 必须是 Stripe 生成的 cs_xxx，避免拿任意字符串去打 Stripe
+  if (!/^cs_[A-Za-z0-9_]{8,200}$/.test(sid)) {
+    out({ error: 'Session ID 形态不合法（应为 cs_ 开头的 Stripe Session ID）' });
+    return;
+  }
+
+  // 留空 = 退剩余全部；填了必须是 1-9 位正整数（与服务端 amount 口径一致）
+  const rawAmount = $('refundAmount').value.trim();
+  let amount;
+  if (rawAmount) {
+    if (!/^\d{1,9}$/.test(rawAmount) || Number(rawAmount) <= 0) {
+      out({ error: '退款金额必须是 1-9 位正整数（最小货币单位，990 = $9.90）' });
+      return;
+    }
+    amount = Number(rawAmount);
+  }
+
+  btn.disabled = true;
+  try {
+    const payload = { session_id: sid };
+    if (amount !== undefined) payload.amount = amount;
+    const reason = $('refundReason').value;
+    if (reason) payload.reason = reason;
+
+    out('正在发起退款...');
+    const data = await call('/stripe/create_refund', payload);
+    out({
+      ...data,
+      note: '接口返回 succeeded 即退款成功；账务状态以 Webhook charge.refunded 落库为准',
+    });
+  } catch (err) {
+    out({ error: err.message });
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 // ---------- URL 参数预填 + CloudBase 静默登录 ----------
 // 用法：?envId=<环境ID>
 //   envId    → 加载 CloudBase SDK，尝试静默登录并自动填入 accessToken
@@ -253,6 +312,8 @@ const authReady = initFromQuery().catch(err => {
   // 兜底：session_id 必须是 Stripe 生成的 cs_xxx，否则（如未替换的 {CHECKOUT_SESSION_ID}
   // 占位符字面量）不要拿去查单 —— 查了必然是 no such checkout session
   if (!sid || !/^cs_[A-Za-z0-9_]+$/.test(sid)) return;
+  // 回跳后把 session_id 填进退款区块，省去手工复制；退款仍会走服务端归属校验
+  $('refundSid').value = sid;
   try {
     out('回跳检测到 session_id，正在查询状态...');
     out(await call('/stripe/retrieve_session', { session_id: sid }));

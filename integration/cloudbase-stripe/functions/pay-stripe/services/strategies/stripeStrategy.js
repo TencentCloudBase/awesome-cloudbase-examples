@@ -74,11 +74,14 @@ class StripeStrategy {
     }
 
     /**
-     * 发起退款（二期）
-     * @param {Object} params - stripe.refunds.create 参数
+     * 发起退款
+     *
+     * @param {Object} params - stripe.refunds.create 参数（payment_intent / amount / reason / metadata）
+     * @param {string} [idempotencyKey] - 幂等键：网络重试时 Stripe 返回同一笔退款，不会重复退
      */
-    async createRefund(params) {
-        return this.stripe.refunds.create(params);
+    async createRefund(params, idempotencyKey) {
+        const options = idempotencyKey ? { idempotencyKey } : undefined;
+        return this.stripe.refunds.create(params, options);
     }
 
     /**
