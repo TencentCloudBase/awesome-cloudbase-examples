@@ -52,16 +52,16 @@ app.use('/stripe', stripeRouter);
 // 参考：https://docs.cloudbase.net/cloud-function/function-calls/
 const ALLOWED_ACTIONS = new Set([
     'stripe_create_session', 'stripe_retrieve_session', 'stripe_create_refund',
-    // notify = 集成中心模板 path；webhook = 兼容旧配置
-    'stripe_notify', 'stripe_webhook',
+    // notify = 集成中心模板回调 path
+    'stripe_notify',
 ]);
 
 /**
  * Stripe 事件类型的基本形态校验（不是「已订阅」白名单）
  *
  * 🚨 只判「是不是含点号的字符串」不够：body 里塞一个 {"type":"x.y"} 就能顶着
- *    stripe_webhook 的身份进入「无鉴权、靠签名保证可信」的回调通道，
- *    等于把 ALLOWED_ACTIONS 对 webhook 的白名单完全旁路。
+ *    回调通道的身份进入「无鉴权、靠签名保证可信」的路径，
+ *    等于把 ALLOWED_ACTIONS 的白名单完全旁路。
  *
  * ⚠️ 但这里**不能**用 EVENT_SEMANTICS 的键做准入白名单：那份语义表只描述
  *    「本模板关心哪 6 个事件」，而 endpoint 实际订阅哪些事件是在 Stripe 后台

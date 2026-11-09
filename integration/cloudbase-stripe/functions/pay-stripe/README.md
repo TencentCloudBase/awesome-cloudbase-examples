@@ -50,7 +50,6 @@ pay-stripe/
 | `POST /stripe/retrieve_session`<br>`GET /stripe/retrieve_session` | 是 | 查询 Session 状态 |
 | `POST /stripe/create_refund` | 是 | 发起退款：`{ session_id, amount?, reason?, idempotency_key? }` |
 | `POST /notify` | 否（靠签名） | **集成中心模板回调 path**（根路径），所有 Stripe 事件统一入口 |
-| `POST /stripe/webhook` | 否（靠签名） | 兼容别名（本地调试 / 已部署的旧配置） |
 
 > `retrieve_session` / `create_refund` 都校验资源归属：比对 Session 的 `metadata.cloudbaseUid` 与当前登录 uid，不一致返回 **404**（不是 403，避免被当成 session_id 探测通道），且不回传 Stripe 原始 `raw` 对象。
 

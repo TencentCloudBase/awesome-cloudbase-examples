@@ -4,9 +4,8 @@ const assert = require('node:assert');
 /**
  * 云 API 网关适配层（app.js）的事件路由
  *
- * 🚨 body 顶层只要有个含点号的字符串 type 就会被映射成 webhook 动作，
- *    而 'stripe_webhook' 又在 ALLOWED_ACTIONS 里 —— 等于把白名单旁路，
- *    任意请求都能进入「无鉴权、靠签名保证可信」的回调通道。
+ * 🚨 body 顶层只要有个含点号的字符串 type 就会被映射成 notify 动作，
+ *    若不做形态校验，任意请求都能进入「无鉴权、靠签名保证可信」的回调通道。
  *
  * ⚠️ 但路由层只做「形态合法性」校验（EVENT_TYPE_RE），不能用
  *    EVENT_SEMANTICS 的键当准入白名单：endpoint 订阅哪些事件是在 Stripe 后台
