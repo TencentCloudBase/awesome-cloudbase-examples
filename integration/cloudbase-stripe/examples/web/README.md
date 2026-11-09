@@ -1,6 +1,7 @@
-# Web 示例（Checkout Session）
+# Web 示例（Checkout Session 下单与退款）
 
-单文件示例，零依赖：打开页面 → 填金额 → 跳 Stripe 托管收银台 → 支付后回跳并自动查询状态。
+单文件示例，零依赖：打开页面 → 填金额 → 跳 Stripe 托管收银台 → 支付后回跳并自动查询状态 →
+在页面下方可选发起退款。
 
 链路：
 
@@ -10,6 +11,7 @@
 ③ 浏览器 location.href = url，在 Stripe 收银台支付
 ④ 支付成功 → Stripe webhook → 云函数（以服务端为准）
 ⑤ 浏览器回跳本页（?session_id=cs_xxx）→ POST /stripe/retrieve_session 查真实状态
+⑥ 可选：页面 POST /stripe/create_refund（session_id + 可选 amount/reason）
 ```
 
 ## 前置条件
@@ -32,6 +34,25 @@ npx serve .          # 或 python3 -m http.server 5173
 # 2. 浏览器打开打印出的地址（如 http://localhost:5173）
 # 3. 填 API Base + Bearer token + 金额，点「创建 Session 并跳转支付」
 ```
+
+## 发起退款
+
+支付回跳后 `session_id` 会自动填进退款区块，也可以手工粘贴：
+
+| 字段 | 说明 |
+|---|---|
+| Session ID | 必填；服务端按 `metadata.cloudbaseUid` 校验归属，只能退自己的单，不一致返回 404 |
+| 退款金额 | 留空 = 退剩余全部；填了必须是最小货币单位正整数且不超过原支付金额 |
+| 退款原因 | `requested_by_customer` / `duplicate` / `fraudulent` |
+
+约束：
+
+- 只对 `payment_status=paid` 的 Session 生效，未支付 / 已全额退款的单会被本地拦截。
+- 接口返回 `succeeded` 即退款成功；**账务状态以 Webhook `charge.refunded` 落库为准**（异步退款方式可能先 `pending`）。
+- 需要在 Stripe Dashboard → Developers → Webhooks 勾选 `charge.refunded`，否则收不到退款回调，
+  只能靠主动查单对账。
+- 支持多次部分退款：本地只校验「不超过原支付金额」，**实际剩余可退金额由 Stripe 校验**
+  （已退过一部分后再退超额，会收到 Stripe 的 400）；可传 `idempotency_key` 避免网络重试重复退。
 
 ## URL 参数：只用于自动登录
 

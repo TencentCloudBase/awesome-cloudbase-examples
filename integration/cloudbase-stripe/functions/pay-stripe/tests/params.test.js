@@ -388,3 +388,48 @@ test('⛔ 非 setup 模式仍走完整形态校验（setup 分支不得提前 re
     assert.match(validateLineItems(Array(51).fill(validItem()), { mode: 'payment' }), /最多 50 项/);
     assert.strictEqual(validateLineItems([validItem()], { mode: 'payment' }), null);
 });
+
+// 🚨 subscription 走顶层金额路径时 validateLineItems 整个被跳过，
+//    「订阅必须带 price_data.recurring」的约束没有任何校验 → Stripe 侧 400，
+//    调用方只拿到上游原始报错。必须在 controller 层 fail closed。
+test('⛔ mode=subscription 走顶层 amount / amount_major：拒绝（必须用 line_items 带 recurring）', () => {
+    const base = {
+        mode: 'subscription',
+        currency: 'usd',
+        productName: 'Plan',
+        client_reference_id: 'ORDER_SUB_1',
+        success_url: 'https://example.com/ok?session_id={CHECKOUT_SESSION_ID}',
+    };
+
+    assert.match(
+        validateSessionParams({ ...base, amount: 990 }),
+        /subscription/,
+        '顶层 amount 路径不产 recurring，必须拒绝'
+    );
+    assert.match(
+        validateSessionParams({ ...base, amount_major: 9.9 }),
+        /subscription/,
+        '顶层 amount_major 路径同样必须拒绝'
+    );
+    assert.match(
+        validateSessionParams({ mode: 'subscription' }),
+        /subscription/,
+        '不传 line_items 的订阅一律拒绝'
+    );
+
+    // 带 recurring 的 line_items 仍是合法路径
+    assert.strictEqual(validateSessionParams({
+        mode: 'subscription',
+        client_reference_id: 'ORDER_SUB_2',
+        success_url: 'https://example.com/ok?session_id={CHECKOUT_SESSION_ID}',
+        line_items: [{
+            price_data: {
+                currency: 'usd',
+                unit_amount: 990,
+                product_data: { name: 'Plan' },
+                recurring: { interval: 'month' },
+            },
+            quantity: 1,
+        }],
+    }), null);
+});

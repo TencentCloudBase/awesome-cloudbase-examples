@@ -9,7 +9,7 @@ cloudbase-stripe/
 ├── cloudbaserc.json         集成级声明：云函数 + 前端 app（pay-stripe-demo）
 ├── functions/pay-stripe/    云函数（Express + Stripe SDK）
 │   ├── config/              凭证读取与启动校验
-│   ├── routes/              /stripe/create_session | retrieve_session | webhook
+│   ├── routes/              /stripe/create_session | retrieve_session | create_refund | webhook
 │   ├── controllers/         鉴权中间件 + 回调处理 + 统一应答
 │   ├── services/            策略入口 + 事件分发 + 幂等
 │   ├── .env.example         环境变量模板（复制为 .env）
@@ -20,7 +20,7 @@ cloudbase-stripe/
 ## 快速开始
 
 ```bash
-# 1. 装依赖 + 跑单测（133 个用例，不需要网络与真实密钥）
+# 1. 装依赖 + 跑单测（151 个用例，不需要网络与真实密钥）
 cd functions/pay-stripe
 npm install && npm test
 
@@ -32,7 +32,7 @@ export PORT=3000
 
 # 3. 本地起服务 + 转发 webhook（另开终端）
 node ./bin/www
-stripe listen --forward-to localhost:3000/stripe/webhook
+stripe listen --forward-to localhost:3000/notify
 
 # 4. 跑前端示例
 cd ../../examples/web && npx serve .
@@ -60,7 +60,7 @@ cd ../../examples/web && npx serve .
 |---|---|---|---|
 | 云 API | `https://<envId>.api.tcloudbasegateway.com/v1/functions/pay-stripe` | **网关**验 `Authorization: Bearer <accessToken>` | 前端先登录拿 accessToken；body 里带 `_action` |
 | HTTP 访问服务（自定义域名） | `https://<你的域名>/stripe/*` | **看路由配置** | 必须给这条路由**开启身份认证**，否则业务接口一律 401 |
-| 集成中心回调域名 | `https://<实例>.integration-callback.tcloudbase.com/stripe/webhook` | 无（只验证 Stripe 签名） | 只给 Stripe 后台填，**不要**当业务入口 |
+| 集成中心回调域名 | `https://<实例>.integration-callback.tcloudbase.com/notify` | 无（只验证 Stripe 签名） | 只给 Stripe 后台填，**不要**当业务入口 |
 
 ### 云 API 入口
 
@@ -132,8 +132,8 @@ tcb app deploy pay-stripe-demo -e <envId>
 
 ## 范围
 
-一期：Checkout Session 下单、单 Webhook 回调、验签、幂等。
-二期：退款、订阅、Elements 嵌入式收银台。
+一期：Checkout Session 下单、查单、退款、单 Webhook 回调、验签、幂等。
+二期：订阅、Elements 嵌入式收银台。
 
 ## 已知待办
 
