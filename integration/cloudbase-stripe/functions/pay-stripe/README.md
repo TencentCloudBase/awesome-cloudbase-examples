@@ -2,7 +2,9 @@
 
 Stripe Checkout 支付云函数模板。回调**一律由云函数用 `stripe-signature` 自验签**（`stripe-pay` 集成的 `system` 声明不生效）。
 
-一期范围：Checkout Session 下单 + 单一 Webhook 回调 + 验签 + 幂等。退款 / 订阅 / Elements 嵌入收银台为二期。
+已支持：Checkout Session 下单、查单、退款（含部分退款状态区分）、单一 Webhook 回调、验签、幂等。
+
+订阅模式（`mode=subscription`）已放行参数校验，但退款只按 `payment` 模式的 `session.payment_intent` 处理，订阅单退款需业务侧评估；Elements 嵌入式收银台未覆盖。
 
 ## 目录结构
 
@@ -193,7 +195,9 @@ curl -X POST https://<你的域名>/stripe/create_session \
    - `line_items` 与 `amount` / `amount_major` / `quantity` / `currency` **互斥**（币种写在每项 `price_data.currency`，顶层 `currency` 会被静默丢弃，所以直接拒绝）。
    - `metadata` 必须是对象，值只支持字符串/数字且每个值 ≤500 字符（Stripe 限制）；登录态 `cloudbaseUid` 在**校验前**注入，确保也过一遍校验。
    - 校验通过后按白名单重建 `line_items`（剥离 `adjustable_quantity` / `dynamic_tax_rates` 等未预期字段），并把币种统一小写；净化在 service 组装请求时执行，controller 的校验函数只读不写。
-10. **退款回调需要在 Stripe 后台订阅 `charge.refunded`**。本模板已把它映射为 `{ biz: 'refund', state: 'REFUNDED' }`，走同一个 `/notify` 自动验签；没订阅就收不到，退款单只能靠主动查单对账。异步退款方式（银行转账等）的到账状态变化用 `refund.updated`，模板未订阅，需要时自行加进 `EVENT_SEMANTICS` 与后台订阅列表。
+10. **退款回调需要在 Stripe 后台订阅 `charge.refunded`**。本模板按事件级语义映射为 `{ biz: 'refund', state: REFUNDED | PARTIALLY_REFUNDED }`：`amount_refunded < amount` 时返回 `PARTIALLY_REFUNDED`，全额退完才是 `REFUNDED`，走同一个 `/notify` 自动验签；没订阅就收不到，退款单只能靠主动查单对账。
+    - `charge.refunded` 的 `data.object` 是 **Charge**（含 `payment_intent` / `amount` / `amount_refunded`），**不含 Refund 的 metadata**。对账请按 `data.object.payment_intent` 反查订单；需要 Refund 级 `metadata.sessionId` 时，自行订阅 `refund.created` 并加进 `EVENT_SEMANTICS` 与后台订阅列表。
+    - 异步退款方式（银行转账等）的到账状态变化用 `refund.updated`，模板未订阅。
 
 ## 本地开发
 

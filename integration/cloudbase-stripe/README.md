@@ -20,7 +20,7 @@ cloudbase-stripe/
 ## 快速开始
 
 ```bash
-# 1. 装依赖 + 跑单测（151 个用例，不需要网络与真实密钥）
+# 1. 装依赖 + 跑单测（npm test，不需要网络与真实密钥）
 cd functions/pay-stripe
 npm install && npm test
 
@@ -132,8 +132,10 @@ tcb app deploy pay-stripe-demo -e <envId>
 
 ## 范围
 
-一期：Checkout Session 下单、查单、退款、单 Webhook 回调、验签、幂等。
-二期：订阅、Elements 嵌入式收银台。
+已支持：Checkout Session 下单、查单、退款（含部分退款状态区分）、单 Webhook 回调、验签、幂等。
+
+订阅：`mode=subscription` 已放行参数校验，但退款只按 `payment` 模式的 `session.payment_intent` 处理，订阅单退款需业务侧评估。
+未覆盖：Elements 嵌入式收银台。
 
 ## 已知待办
 

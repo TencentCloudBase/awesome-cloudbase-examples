@@ -208,3 +208,25 @@ test('⛔ next() 兜底路径：畸形事件不触达 handleWebhook', async () =
         StripeService.prototype.handleWebhook = original;
     }
 });
+
+// 第三条入口：直连 /stripe/notify（不经过云 API 适配层）。
+// 守卫下沉到 controller 之前，这条路径会绕过形态校验；现在必须与另外两条同口径。
+test('⛔ 直连 /stripe/notify 也过同一守卫：畸形事件被 400 早筛', async () => {
+    await listening;
+    for (const payload of [
+        { type: 'evilpwned' },
+        { type: { a: 1 } },
+        {},
+    ]) {
+        const res = await fetch('http://127.0.0.1:' + server.address().port + '/stripe/notify', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        assert.strictEqual(res.status, 400, JSON.stringify(payload));
+        assert.match(data.msg || '', /事件类型格式非法/, JSON.stringify(payload));
+        assert.strictEqual(data.message, undefined, '出现控制器文案 = 未经过守卫');
+    }
+});

@@ -2,6 +2,11 @@ const createError = require('http-errors');
 const express = require('express');
 const logger = require('morgan');
 const { validateConfig } = require('./config/config');
+const {
+    extractEventType,
+    validateEventTypeShape,
+    stripRoutingFields,
+} = require('./utils/webhookGuard');
 
 const app = express();
 
@@ -73,62 +78,8 @@ const ALLOWED_ACTIONS = new Set([
  * stripeService.handleWebhook —— 未订阅事件返回 { ignored: true }，控制器回 200，
  * Stripe 正常停止重试。真正的可信性由签名 / 网关来源证明保证（见 stripeService）。
  */
-// Stripe 事件类型的实际形态：<object>.<action>[.<sub>]，各段只含小写字母 / 数字 / 下划线
-// （如 checkout.session.completed、payment_intent.created、invoice.paid）
-const EVENT_TYPE_RE = /^[a-z0-9_]+(?:\.[a-z0-9_]+)+$/;
-/** 事件类型长度上限：Stripe 最长的已知类型也远小于此，超出即视为畸形输入 */
-const MAX_EVENT_TYPE_LEN = 128;
-
-/**
- * 从请求体提取事件类型（与云 API 适配层完全一致的取值口径：|| 短路）。
- * 抽成公共函数供「适配中间件」与「根路径 /notify 兜底入口」复用，避免口径漂移。
- */
-function extractEventType(body) {
-    return body?.type
-        || body?.ParsedNotify?.event_type
-        || body?.rawData?.event_type;
-}
-
-/**
- * 事件类型形态校验的唯一口径。
- * 非字符串 / 不含点号 / 含非法字符 / 超长一律判非法（EVENT_TYPE_RE 已要求至少一个点号）。
- * @returns {string|null} 错误文案；null = 形态合法
- */
-function validateEventTypeShape(eventType) {
-    if (typeof eventType !== 'string'
-        || eventType.length > MAX_EVENT_TYPE_LEN
-        || !EVENT_TYPE_RE.test(eventType)) {
-        return '事件类型格式非法';
-    }
-    return null;
-}
-
-/** 剥离云 API / 网关注入的路由控制字段，绝不让它们透传给 handleWebhook */
-function stripRoutingFields(req) {
-    if (req.body && typeof req.body === 'object') {
-        delete req.body._action;
-        delete req.body.path;
-        delete req.body.method;
-    }
-}
-
-/**
- * 回调入口守卫：任何抵达控制器的回调请求都必须先过形态校验与字段剥离。
- * 适配中间件未命中 actionName 而走 next() 时，根路径 /notify 兜底挂载复用本守卫，
- * 杜绝「next() 直达控制器」这条绕过路由层早筛的旁路。
- */
-function webhookEntryGuard(req, res, next) {
-    stripRoutingFields(req);
-    const eventType = extractEventType(req.body);
-    const shapeError = validateEventTypeShape(eventType);
-    if (shapeError) {
-        // 🚨 不回显原始输入：入口全域可达，回显等于开放反射面
-        console.warn('[Stripe] 事件类型形态非法，拒绝路由到 webhook:',
-            String(eventType).slice(0, 64));
-        return res.status(400).json({ code: -1, msg: shapeError });
-    }
-    next();
-}
+// 守卫实现见 utils/webhookGuard.js：三条回调路径（根路径 /notify、适配层分发、
+// 直连 /stripe/notify）统一由 controller 入口调用，这里不再重复挂载。
 
 app.use((req, res, next) => {
     // 从 body 中提取路由（三种方式兼容）
@@ -195,11 +146,11 @@ app.use((req, res, next) => {
 //    _action/path/method 路由控制字段、action 白名单分发。挂在它之前会让
 //    根路径请求直接进控制器，绕过路由层早筛。
 //    适配层命中 actionName 时自行分发到 stripeRouter（其中含 /notify 路由）；
-//    未命中时 next() 落到这里的兜底挂载 —— 兜底同样挂 webhookEntryGuard，
-//    复用 EVENT_TYPE_RE / MAX_EVENT_TYPE_LEN 校验与路由字段剥离，
-//    不允许任何回调请求绕过适配层的校验口径直达控制器。
+//    未命中时 next() 落到这里的兜底挂载。
+//    形态校验与字段剥离统一由 stripeController.webhook 入口执行
+//    （见 utils/webhookGuard），三条回调路径共用同一口径，这里不再单独挂中间件。
 const stripeController = require('./controllers/stripeController');
-app.post('/notify', webhookEntryGuard, stripeController.webhook);
+app.post('/notify', stripeController.webhook);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

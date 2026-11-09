@@ -575,3 +575,53 @@ test('⛔ charge.dispute.created 缺金额或状态：拒绝', async () => {
     });
     assert.strictEqual(r2, null);
 });
+
+// ========== 部分退款：charge.refunded 不等于全额退完 ==========
+// Stripe 文档：charge.refunded 在部分退款时也会触发（including partial refunds）。
+// EVENT_SEMANTICS 只给事件级默认 REFUNDED，必须按 amount_refunded vs amount 二次判定，
+// 否则第一次部分退款就把订单写成全额退款终态，后续部分退款无处落。
+
+test('✅ charge.refunded 部分退款：state 为 PARTIALLY_REFUNDED', async () => {
+    const svc = loadService();
+    svc.strategy = { verifyWebhook: (rawBody) => JSON.parse(rawBody) };
+
+    const event = makeEvent({
+        id: 'evt_partial_refund_01',
+        type: 'charge.refunded',
+        data: { object: {
+            id: 'ch_partial_01',
+            payment_intent: 'pi_partial_01',
+            amount: 990,
+            amount_refunded: 400,
+            refunded: false,
+        } },
+    });
+    const result = await svc.handleWebhook({
+        body: event, rawBody: JSON.stringify(event), signature: 'v1=good',
+    });
+
+    assert.strictEqual(result.biz, 'refund');
+    assert.strictEqual(result.state, 'PARTIALLY_REFUNDED');
+});
+
+test('✅ charge.refunded 全额退款：state 仍为 REFUNDED', async () => {
+    const svc = loadService();
+    svc.strategy = { verifyWebhook: (rawBody) => JSON.parse(rawBody) };
+
+    const event = makeEvent({
+        id: 'evt_full_refund_01',
+        type: 'charge.refunded',
+        data: { object: {
+            id: 'ch_full_01',
+            payment_intent: 'pi_full_01',
+            amount: 990,
+            amount_refunded: 990,
+            refunded: true,
+        } },
+    });
+    const result = await svc.handleWebhook({
+        body: event, rawBody: JSON.stringify(event), signature: 'v1=good',
+    });
+
+    assert.strictEqual(result.state, 'REFUNDED');
+});

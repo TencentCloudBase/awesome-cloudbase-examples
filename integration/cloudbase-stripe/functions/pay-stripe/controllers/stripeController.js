@@ -13,6 +13,7 @@ const {
     validateLineItems,
 } = require('../utils/lineItems');
 const { resolveAuthIdentity, getUserId, getUserEmail } = require('../utils/cloudbaseAuth');
+const { guardWebhookRequest } = require('../utils/webhookGuard');
 const stripeService = new StripeService();
 
 // ========== 统一响应格式 ==========
@@ -468,6 +469,11 @@ exports.createRefund = async (req, res) => {
  *    耗时业务逻辑请改为异步（消息队列 / 延迟处理）后再落库
  */
 exports.webhook = async (req, res) => {
+    // 🚨 三条回调路径（根路径 /notify、适配层分发、直连 /stripe/notify）都从这里进入：
+    //    事件类型形态校验 + 路由字段剥离统一在此执行，任一不合法直接 400，
+    //    不再依赖调用方是否挂了中间件。
+    if (guardWebhookRequest(req, res)) return;
+
     try {
         // 回调日志脱敏：只打印事件类型与顶层键名，不打印签名与完整报文
         console.log('[Controller] webhook 回调:', {

@@ -72,6 +72,11 @@ const EVENT_SEMANTICS = {
  */
 const CHECKOUT_PAID_PAYMENT_STATUS = 'paid';
 const STATE_PENDING_PAYMENT = 'PENDING';
+/**
+ * charge.refunded 的部分退款态：amount_refunded < amount 时使用。
+ * 全额退完仍用 EVENT_SEMANTICS 里的 REFUNDED。
+ */
+const STATE_PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED';
 
 
 
@@ -372,7 +377,9 @@ class StripeService {
             // 不传 amount = 全额（含多次部分退款后的剩余）
             ...(amount !== undefined ? { amount } : {}),
             ...(reason ? { reason } : {}),
-            // 回调与对账都按这两个字段回到用户与订单维度
+            // ⚠️ Refund 的 metadata 只在 refund.created 事件里可见；本模板订阅的
+            //    charge.refunded 返回的是 Charge 对象，对账锚点应取 charge.payment_intent。
+            //    这里写入的字段只用于 Stripe 后台排查，不作为回调反查依据。
             metadata: { cloudbaseUid: ownerUid, sessionId },
         }, idempotencyKey);
 
@@ -605,6 +612,24 @@ class StripeService {
             }
         }
 
+        // 🚨 charge.refunded 语义包含部分退款（Stripe 文档："including partial refunds"），
+        //    EVENT_SEMANTICS 只给事件级默认 REFUNDED。这里按累计退款额二次判定：
+        //    amount_refunded >= amount → 全额退完，保留 REFUNDED；否则 PARTIALLY_REFUNDED。
+        //    否则第一次部分退款就会把订单写成全额退款终态，后续部分退款无处落。
+        if (event.type === 'charge.refunded' && state === 'REFUNDED') {
+            const chargeAmount = event.data.object.amount;
+            const refundedAmount = event.data.object.amount_refunded;
+            if (typeof chargeAmount === 'number' && chargeAmount > 0
+                && typeof refundedAmount === 'number'
+                && refundedAmount < chargeAmount) {
+                state = STATE_PARTIALLY_REFUNDED;
+                console.info(
+                    '[StripeService] 部分退款: ' + refundedAmount + '/' + chargeAmount
+                    + '，状态记为 ' + state
+                );
+            }
+        }
+
         // 显式给出「是否可交付」：调用方不必自己拿 state 字符串和 PAID 比对，
         // 也避免 PENDING 被当成失败态静默丢弃（资金已到账但订单不推进）
         const deliverable = state === 'PAID';
@@ -646,3 +671,4 @@ module.exports = StripeService;
 module.exports.EVENT_SEMANTICS = EVENT_SEMANTICS;
 // PENDING 是运行时可能返回的状态，必须随模块导出，避免调用方拿到未声明的魔法字符串
 module.exports.STATE_PENDING_PAYMENT = STATE_PENDING_PAYMENT;
+module.exports.STATE_PARTIALLY_REFUNDED = STATE_PARTIALLY_REFUNDED;
