@@ -297,8 +297,8 @@ class StripeService {
      * 归属与支付状态都在这里校验：service 是公开导出的，不能假设一定先过了 controller。
      * 不传 amount = 退剩余全部（Stripe 的默认语义），传了则必须是正整数且不超过原支付金额。
      *
-     * ⚠️ 退款结果以 Webhook `charge.refunded` 为最终凭据：接口返回 succeeded 只代表
-     *    Stripe 已受理，异步退款方式（银行转账等）到账前状态仍可能变化。
+     * ⚠️ 接口返回 succeeded 即退款成功；账务落库仍以 Webhook `charge.refunded` 为准。
+     *    异步退款方式（银行转账等）可能先返回 pending，由 `refund.updated` 推进到终态。
      *
      * @param {Object} params
      * @param {string} params.sessionId
@@ -376,7 +376,7 @@ class StripeService {
             metadata: { cloudbaseUid: ownerUid, sessionId },
         }, idempotencyKey);
 
-        console.info('[StripeService] 退款已受理:', refund.id, 'session:', sessionId);
+        console.info('[StripeService] 退款已提交:', refund.id, 'status:', refund.status, 'session:', sessionId);
 
         return {
             refundId: refund.id,

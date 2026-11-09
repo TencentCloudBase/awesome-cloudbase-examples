@@ -59,8 +59,8 @@ pay-stripe/
 - `amount` 不传 = 退剩余全部；传了必须是正整数（最小货币单位），且不能超过原支付金额。
 - `reason` 仅 `duplicate` / `fraudulent` / `requested_by_customer`。
 - `idempotency_key` 可选，网络重试时 Stripe 返回同一笔退款，不会重复退。
-- 只对 `payment_status=paid` 的 Session 生效；接口返回 `succeeded` 仅代表 Stripe 已受理，
-  **最终以 Webhook `charge.refunded` 为准**（异步退款到账前状态仍可能变化）。
+- 只对 `payment_status=paid` 的 Session 生效；接口返回 `succeeded` 即退款成功，
+  **账务状态以 Webhook `charge.refunded` 落库为准**（异步退款方式可能先返回 `pending`，由 `refund.updated` 推进到终态）。
 
 > **退款回调前置条件**：Stripe Dashboard → Developers → Webhooks → 选中 endpoint →
 > 勾选 `charge.refunded`（`charge.dispute.created` 同理）。不订阅就收不到回调，

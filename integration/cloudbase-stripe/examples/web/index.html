@@ -25,7 +25,7 @@
 <fieldset>
   <legend>云函数地址与登录态</legend>
   <label>API Base（云函数访问地址，不带结尾斜杠）</label>
-  <input id="base" placeholder="https://<envId>.service.tcloudbase.com/pay-stripe" />
+  <input id="base" placeholder="https://<envId>.api.tcloudbasegateway.com/v1/functions/pay-stripe" />
   <label>Authorization Bearer Token（CloudBase Auth accessToken）</label>
   <input id="token" placeholder="eyJhbGciOi..." />
   <p class="hint">云 API 入口由网关验签 AccessToken，函数只认网关注入的身份（x-userid + x-authmethod）；未登录会返回 401。</p>
@@ -60,7 +60,8 @@
   </select>
   <button id="refund">发起退款</button>
   <p class="hint">只对 payment_status=paid 的 Session 生效，且只能退自己的单（服务端比对 metadata.cloudbaseUid）。
-    返回 succeeded 仅代表 Stripe 已受理，最终以 Webhook charge.refunded 为准（需在 Stripe 后台订阅该事件）。</p>
+    返回 succeeded 即退款成功；账务状态以 Webhook charge.refunded 落库为准（需在 Stripe 后台订阅该事件）。
+    异步退款方式可能先返回 pending，由 refund.updated 推进到终态。</p>
 </fieldset>
 
 <fieldset>
@@ -203,7 +204,7 @@ $('refund').addEventListener('click', async () => {
     const data = await call('/stripe/create_refund', payload);
     out({
       ...data,
-      note: '接口返回 succeeded 仅代表 Stripe 已受理；最终状态以 Webhook charge.refunded 为准',
+      note: '接口返回 succeeded 即退款成功；账务状态以 Webhook charge.refunded 落库为准',
     });
   } catch (err) {
     out({ error: err.message });

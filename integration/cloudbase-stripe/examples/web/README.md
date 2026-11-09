@@ -48,7 +48,7 @@ npx serve .          # 或 python3 -m http.server 5173
 约束：
 
 - 只对 `payment_status=paid` 的 Session 生效，未支付 / 已全额退款的单会被本地拦截。
-- 接口返回 `succeeded` 仅代表 Stripe 已受理；**最终状态以 Webhook `charge.refunded` 为准**。
+- 接口返回 `succeeded` 即退款成功；**账务状态以 Webhook `charge.refunded` 落库为准**（异步退款方式可能先 `pending`）。
 - 需要在 Stripe Dashboard → Developers → Webhooks 勾选 `charge.refunded`，否则收不到退款回调，
   只能靠主动查单对账。
 - 支持多次部分退款：本地只校验「不超过原支付金额」，**实际剩余可退金额由 Stripe 校验**
