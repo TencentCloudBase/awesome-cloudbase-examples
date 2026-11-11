@@ -39,5 +39,26 @@ log_errors = On
 display_errors = Off
 EOF
 
+# 定位 PHP 可执行文件（Laravel 10 需要 PHP 8.1+）
+PHP_BIN="$(command -v php || true)"
+if [ -z "$PHP_BIN" ]; then
+  for candidate in /var/lang/php82/bin/php /var/lang/php81/bin/php /usr/local/bin/php /usr/bin/php; do
+    if [ -x "$candidate" ]; then
+      PHP_BIN="$candidate"
+      break
+    fi
+  done
+fi
+
+if [ -z "$PHP_BIN" ]; then
+  echo "PHP 8.1+ runtime not found" >&2
+  exit 1
+fi
+
+if ! "$PHP_BIN" -r 'exit(PHP_VERSION_ID >= 80100 ? 0 : 1);' 2>/dev/null; then
+  echo "Laravel 10 requires PHP 8.1+, found $("$PHP_BIN" -r 'echo PHP_VERSION;')" >&2
+  exit 1
+fi
+
 # Web 函数要求监听端口为 9000，地址为 0.0.0.0
-/var/lang/php74/bin/php -c /tmp/php.ini artisan serve --host 0.0.0.0 --port 9000
+exec "$PHP_BIN" -c /tmp/php.ini artisan serve --host 0.0.0.0 --port 9000

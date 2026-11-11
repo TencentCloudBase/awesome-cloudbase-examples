@@ -2,9 +2,17 @@
 
 这是一个简洁的 Laravel HelloWorld 示例，专为腾讯云函数环境优化，展示如何在云函数中运行 Laravel 应用。
 
+## 依赖版本
+
+- 运行环境：PHP 8.1 或更高
+- `laravel/framework`：`^10.50.4`，该分支含安全修复的最低版本，请勿下调
+- CORS：使用框架内置 `HandleCors`，不再引入第三方 CORS 包
+
+仓库不提交 `composer.lock` 和预构建的部署 zip。请先在本地执行 `composer install`，再按下面步骤生成部署包后上传。下文响应示例里的版本号仅为示意，实际值由本地安装结果决定。
+
 ## 🚀 快速开始
 
-### 一键部署到腾讯云开发
+### 部署到腾讯云开发
 
 1. **准备部署包**
    
@@ -42,7 +50,7 @@
 
 3. **创建HTTP云函数**
    - 函数名：`laravel-helloworld`
-   - 运行环境：`PHP 7.4`
+   - 运行环境：`PHP 8.1 或更高`
    - 上传：`laravel-helloworld-final.zip`
    - 执行方法：`scf_bootstrap`
 
@@ -63,8 +71,8 @@
 {
   "message": "Hello World!",
   "framework": "Laravel",
-  "version": "8.83.29",
-  "php_version": "7.4.33",
+  "version": "10.50.4",
+  "php_version": "8.1.0",
   "timestamp": "2026-02-05T06:06:09.557076Z",
   "environment": "production"
 }
@@ -75,7 +83,7 @@
 - ✅ **简洁的HelloWorld实现** - 最小化的Laravel应用
 - ✅ **云函数环境优化** - 针对腾讯云函数SCF环境优化
 - ✅ **JSON响应保证** - 所有响应均为JSON格式，无HTML错误页面
-- ✅ **PHP 7.4兼容** - 完全兼容云函数PHP 7.4运行环境
+- ✅ **PHP 8.1+** - 运行环境需 PHP 8.1 或更高版本
 - ✅ **多层错误处理** - 从PHP底层到Laravel应用层的全方位JSON响应保护
 
 ## 📋 API端点
@@ -98,8 +106,8 @@
 {
   "message": "Hello World!",
   "framework": "Laravel",
-  "version": "8.83.29",
-  "php_version": "7.4.33",
+  "version": "10.50.4",
+  "php_version": "8.1.0",
   "timestamp": "2026-02-05T06:06:09.557076Z",
   "environment": "production"
 }
@@ -120,13 +128,13 @@
   "application": {
     "name": "Laravel HelloWorld",
     "framework": "Laravel",
-    "version": "8.83.29",
+    "version": "10.50.4",
     "environment": "production",
     "timezone": "UTC",
     "locale": "en"
   },
   "system": {
-    "php_version": "7.4.33",
+    "php_version": "8.1.0",
     "memory_usage": "6 MB",
     "memory_peak": "6 MB"
   },
@@ -199,7 +207,7 @@
 2. **新建云函数**
    - 点击"新建云函数"
    - 函数名称：`laravel-helloworld`
-   - 运行环境：选择 `PHP 7.4`
+   - 运行环境：选择 `PHP 8.1 或更高`
    - 函数类型：选择 `HTTP函数`
 
 3. **上传代码**
@@ -313,7 +321,7 @@
 3. **PHP语法错误**
    ```
    问题：函数执行时出现PHP语法错误
-   解决：确保代码兼容PHP 7.4，检查是否使用了PHP 8.x特有语法
+   解决：确认运行环境为 PHP 8.1+，且 vendor 由同版本 PHP 安装
    ```
 
 4. **内存不足**
@@ -346,7 +354,7 @@
 2. **本地测试**
    ```bash
    # 使用Docker模拟云函数环境
-   docker run --rm -v "$(pwd)":/app -w /app -p 9000:9000 php:7.4-cli bash -c "
+   docker run --rm -v "$(pwd)":/app -w /app -p 9000:9000 php:8.1-cli bash -c "
    export SERVERLESS=1
    php -S 0.0.0.0:9000 -t public/
    "
@@ -360,7 +368,7 @@
 
 #### 部署检查清单
 
-- [ ] 确认使用PHP 7.4运行环境
+- [ ] 确认使用 PHP 8.1+ 运行环境
 - [ ] 检查scf_bootstrap文件存在且有执行权限
 - [ ] 验证环境变量SERVERLESS=1已设置
 - [ ] 确认zip包大小在限制范围内
@@ -383,9 +391,9 @@
 4. **错误处理** - 多层次错误捕获和JSON化
 
 ### PHP版本兼容性
-- **兼容PHP 7.4** - 使用`strpos()`替代`str_contains()`
-- **语法检查** - 通过Docker PHP 7.4环境验证
-- **依赖管理** - 仅保留必要的Composer包
+- **运行环境** - PHP 8.1 或更高，`scf_bootstrap` 启动时校验版本
+- **依赖解析** - `composer.json` 将 PHP 平台版本固定在 8.1，避免装到不支持的依赖
+- **语法检查** - 通过 Docker `php:8.1-cli` 验证
 
 ## 📁 项目结构
 
@@ -427,8 +435,8 @@ laravel-helloworld/
 
 ### 本地测试
 ```bash
-# 使用PHP 7.4 Docker环境测试
-   docker run --rm -v "$(pwd)":/app -w /app -p 9000:9000 php:7.4-cli bash -c "
+# 使用PHP 8.1 Docker环境测试
+   docker run --rm -v "$(pwd)":/app -w /app -p 9000:9000 php:8.1-cli bash -c "
    export SERVERLESS=1
    php -S 0.0.0.0:9000 -t public/
    "
@@ -465,7 +473,7 @@ curl http://localhost:9000/api/health
 
 | 配置项 | 推荐值 | 说明 |
 |--------|--------|------|
-| 运行环境 | PHP 7.4 | 兼容版本 |
+| 运行环境 | PHP 8.1+ | 最低版本 |
 | 内存 | 128MB | 基础配置 |
 | 超时 | 30秒 | 响应超时 |
 | 执行方法 | scf_bootstrap | 启动脚本 |
@@ -492,8 +500,8 @@ php artisan route:list
 php artisan cache:clear
 php artisan config:clear
 
-# 检查语法（PHP 7.4）
-docker run --rm -v "$(pwd)":/app php:7.4-cli php -l /app/public/index.php
+# 检查语法（PHP 8.1）
+docker run --rm -v "$(pwd)":/app php:8.1-cli php -l /app/public/index.php
 ```
 
 ### 技术支持
@@ -506,5 +514,5 @@ docker run --rm -v "$(pwd)":/app php:7.4-cli php -l /app/public/index.php
 ---
 
 **开发者**: Laravel + 腾讯云函数团队  
-**更新时间**: 2026年2月5日  
+**更新时间**: 2026年11月11日  
 **版本**: 1.0.0
